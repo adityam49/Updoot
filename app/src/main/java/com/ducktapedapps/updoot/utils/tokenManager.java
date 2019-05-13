@@ -13,6 +13,9 @@ public class tokenManager {
 
     public static void saveToken(Token token, Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        if (sharedPreferences.getString(USERLESS_TOKEN_KEY, "").equals(token.getAccess_token())) {
+            return;
+        }
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(constants.USERLESS_TOKEN_KEY, token.getAccess_token());
         editor.putLong(constants.USERLESS_TOKEN_EXPIRY_KEY, System.currentTimeMillis() / 1000 + token.getExpires_in());
