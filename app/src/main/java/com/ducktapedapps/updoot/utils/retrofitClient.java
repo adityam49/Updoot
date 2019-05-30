@@ -1,12 +1,14 @@
 package com.ducktapedapps.updoot.utils;
 
-import com.ducktapedapps.updoot.BuildConfig;
+import android.app.Application;
+
 import com.ducktapedapps.updoot.model.Token;
+import com.ducktapedapps.updoot.model.thing;
+import com.google.gson.GsonBuilder;
 
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -47,7 +49,6 @@ public class retrofitClientGenerator {
 
     }
 
-
     public static Retrofit createForEndPoints(Token token) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
@@ -68,12 +69,16 @@ public class retrofitClientGenerator {
             return chain.proceed(request);
         });
 
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .registerTypeAdapter(thing.class, new thingDeserializer());
 
         return new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
                 .client(builder.build())
                 .build();
     }
+
+    
 }

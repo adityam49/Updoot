@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.ducktapedapps.updoot.api.endPoint;
 import com.ducktapedapps.updoot.model.Token;
 import com.ducktapedapps.updoot.model.tempModel;
@@ -11,7 +13,6 @@ import com.ducktapedapps.updoot.utils.auth;
 import com.ducktapedapps.updoot.utils.retrofitClientGenerator;
 import com.ducktapedapps.updoot.utils.tokenManager;
 
-import androidx.appcompat.app.AppCompatActivity;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
