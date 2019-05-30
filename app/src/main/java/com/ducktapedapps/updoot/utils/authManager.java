@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -9,37 +10,36 @@ import com.ducktapedapps.updoot.model.Token;
 
 import java.util.Random;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-import retrofit2.Retrofit;
 
 import static com.ducktapedapps.updoot.utils.constants.DEVICE_ID_KEY;
 import static com.ducktapedapps.updoot.utils.constants.TOKEN_SHARED_PREFS_KEY;
 import static com.ducktapedapps.updoot.utils.constants.userLess_grantType;
 
 
-public class auth {
+public class authManager {
 
-    private static final String TAG = "authClass";
+    private static final String TAG = "authManager";
 
-
-    public static Single<Token> userLess(Context context) {
-        final SharedPreferences sharedPreferences = context.getSharedPreferences(TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
-        String token = tokenManager.getToken(context);
+    public static Single<Token> authenticate(Application application) {
+        Token token = tokenManager.getToken(application);
         if (token != null) {
-            Log.i(TAG, "userLess: token stored was " + token);
-            long token_expiry = tokenManager.getExpiry(context);
-            if (token_expiry - 300 > System.currentTimeMillis() / 1000) {
+            if (token.getAbsolute_expiry() - 300 > System.currentTimeMillis() / 1000) {
                 Log.i(TAG, "userLess: stored token is not expired");
-                return Single.just(new Token(token, token_expiry));
+                return Single.just(token);
             } else {
                 Log.i(TAG, "userLess: token expired");
             }
         }
+        return authManager.userLess(application);
+    }
 
-        Retrofit retrofit = retrofitClientGenerator.create();
-        login login = retrofit.create(login.class);
+
+    private static Single<Token> userLess(Context context) {
+        Log.i(TAG, "userLess: fetching new token");
+        final SharedPreferences sharedPreferences = context.getSharedPreferences(TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+
+        login login = retrofitClient.createLoginService();
 
         String device_id = sharedPreferences.getString(DEVICE_ID_KEY, null);
 
@@ -52,9 +52,10 @@ public class auth {
 
         return login
                 .getUserLessToken(userLess_grantType, device_id)
-                .subscribeOn(Schedulers.io());
+                .doOnSuccess(token -> tokenManager.saveToken(token, context));
 
     }
+
 
     //25 char long random string
     private static String randomString() {

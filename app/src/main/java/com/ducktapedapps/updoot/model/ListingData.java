@@ -6,7 +6,23 @@ public class ListingData {
     String after;
     String before;
     String modhash;
-    List<Link> children;
+    List<thing> children;
+
+    public String getAfter() {
+        return after;
+    }
+
+    public String getBefore() {
+        return before;
+    }
+
+    public String getModhash() {
+        return modhash;
+    }
+
+    public List<thing> getChildren() {
+        return children;
+    }
 
     @Override
     public String toString() {

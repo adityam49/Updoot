@@ -1,32 +1,39 @@
 package com.ducktapedapps.updoot.utils;
 
-import android.app.Application;
-
+import com.ducktapedapps.updoot.BuildConfig;
+import com.ducktapedapps.updoot.api.endPoint;
+import com.ducktapedapps.updoot.api.login;
 import com.ducktapedapps.updoot.model.Token;
 import com.ducktapedapps.updoot.model.thing;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.GsonBuilder;
 
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class retrofitClientGenerator {
-    private static final String baseUrl = "https://oauth.reddit.com/";
-    private static final String token_access_base_url = "https://www.reddit.com/api/v1/";
-    private static final String client_id = "9M6Bbt1AAfnoSg";
+import static com.ducktapedapps.updoot.utils.constants.baseUrl;
+import static com.ducktapedapps.updoot.utils.constants.client_id;
+import static com.ducktapedapps.updoot.utils.constants.token_access_base_url;
 
-    static Retrofit create() {
+public class retrofitClient {
+
+    private static final String TAG = "retrofitClient";
+    private static Retrofit create() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
+        builder.addNetworkInterceptor(new StethoInterceptor());
+
         //for logging requests
-//        if (BuildConfig.DEBUG) {
-//            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-//            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-//            builder.addInterceptor(httpLoggingInterceptor);
-//        }
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addInterceptor(httpLoggingInterceptor);
+        }
 
         builder.addInterceptor(chain -> {
 
@@ -49,15 +56,18 @@ public class retrofitClientGenerator {
 
     }
 
-    public static Retrofit createForEndPoints(Token token) {
+    private static Retrofit createForEndPoints(Token token) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
+        builder.addNetworkInterceptor(new StethoInterceptor());
+
+
         //for logging requests
-//        if (BuildConfig.DEBUG) {
-//            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-//            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-//            builder.addInterceptor(httpLoggingInterceptor);
-//        }
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addInterceptor(httpLoggingInterceptor);
+        }
 
         builder.addInterceptor(chain -> {
 
@@ -80,5 +90,15 @@ public class retrofitClientGenerator {
                 .build();
     }
 
-    
+    public static endPoint createEndPointService(Token token) {
+        return retrofitClient
+                .createForEndPoints(token)
+                .create(endPoint.class);
+    }
+
+    public static login createLoginService() {
+        return retrofitClient
+                .create()
+                .create(login.class);
+    }
 }

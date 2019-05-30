@@ -1,12 +1,16 @@
 package com.ducktapedapps.updoot.api;
 
-import com.ducktapedapps.updoot.model.tempModel;
+import com.ducktapedapps.updoot.model.thing;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public interface endPoint {
     @GET("top")
-    Single<tempModel> getFrontPage();
+    Single<thing> getFrontPage(
+            @Query("after") String after
+    );
+
+
 }
