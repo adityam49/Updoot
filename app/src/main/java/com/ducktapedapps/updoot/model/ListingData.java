@@ -2,11 +2,11 @@ package com.ducktapedapps.updoot.model;
 
 import java.util.List;
 
-public class ListingData {
-    String after;
-    String before;
-    String modhash;
-    List<thing> children;
+public class ListingData implements data {
+    private String after;
+    private String before;
+    private String modhash;
+    private List<thing> children;
 
     public String getAfter() {
         return after;

@@ -11,6 +11,7 @@ import com.ducktapedapps.updoot.model.thing;
 import com.ducktapedapps.updoot.repository.submissionsRepo;
 import com.ducktapedapps.updoot.utils.constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -21,39 +22,63 @@ public class submissionsVM extends AndroidViewModel {
     private CompositeDisposable disposable = new CompositeDisposable();
     private static final String TAG = "submissionsVM";
     private submissionsRepo frontPageRepo;
+
+    private MutableLiveData<String> sorting = new MutableLiveData<>();
     private MutableLiveData<List<thing>> allSubmissions = new MutableLiveData<>();
-    private MutableLiveData<constants.state> state = new MutableLiveData<>();
+    private MutableLiveData<String> state = new MutableLiveData<>();
+
+    public MutableLiveData<String> getSorting() {
+        return sorting;
+    }
 
     public MutableLiveData<List<thing>> getAllSubmissions() {
         return allSubmissions;
     }
 
-    public MutableLiveData<constants.state> getState() {
+    public MutableLiveData<String> getState() {
         return state;
     }
+
 
     public submissionsVM(Application application) {
         super(application);
         frontPageRepo = new submissionsRepo(application);
 
-        disposable.add(frontPageRepo.fetchFrontPage(null)
-                .map(thing -> {
-                    if (thing.getData() instanceof ListingData) {
-                        return ((ListingData) thing.getData()).getChildren();
-                    } else throw new Exception("unsupported response");
-                })
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe(__ -> state.postValue(constants.state.LOADING))
-                .subscribe(submissions -> {
-                            Log.i(TAG, "submissionsVM: " + submissions);
-                            allSubmissions.postValue(submissions);
-                            state.postValue(constants.state.SUCCESS);
-                        }
-                        , throwable -> {
-                            Log.e(TAG, "submissionsVM: " + throwable.getMessage());
-                            state.postValue(constants.state.ERROR);
-                        }
-                ));
+        sorting.setValue(constants.TOP);
+        loadNextPage();
+    }
+
+    public void loadNextPage() {
+        disposable.add(
+                frontPageRepo.loadNextPage(getSorting().getValue())
+                        .map(thing -> {
+                                    if (thing.getData() instanceof ListingData) {
+                                        return ((ListingData) thing.getData()).getChildren();
+                                    } else {
+                                        throw new Exception("unsupported response");
+                                    }
+                                }
+                        )
+                        .subscribeOn(Schedulers.io())
+                        .doOnSubscribe(__ -> state.postValue(constants.LOADING_STATE))
+                        .subscribe(submissions -> {
+                                    List<thing> newList = allSubmissions.getValue();
+                                    if (newList == null) {
+                                        newList = new ArrayList<>();
+                                    }
+                                    newList.addAll(submissions);
+                                    allSubmissions.postValue(newList);
+                                    state.postValue(constants.SUCCESS_STATE);
+                                }, throwable -> state.postValue(throwable.getMessage())
+                        )
+        );
+    }
+
+    public void reload(String sort) {
+        allSubmissions.setValue(null);
+        sorting.setValue(sort);
+        loadNextPage();
+
     }
 
     @Override

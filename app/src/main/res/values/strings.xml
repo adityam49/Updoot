@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Updoot</string>
+
+    <!--submissions sorting by -->
+    <string name="Hot">Hot</string>
+    <string name="Top">Top</string>
+    <string name="New">New</string>
+    <string name="Rising">Rising</string>
+    <string name="Controversial">Controversial</string>
+    <string name="Best">Best</string>
+    <!--<string name="Gilded">Gilded</string>-->
+
 </resources>

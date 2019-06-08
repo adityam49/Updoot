@@ -19,17 +19,15 @@ public class thingDeserializer implements JsonDeserializer<thing> {
     public thing deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
         String kind = jsonObject.get("kind").getAsString();
-        thing thing = null;
+        thing thing = new thing();
         if (kind != null) {
             JsonElement element = jsonObject.get("data");
             switch (kind) {
                 case "Listing":
-                    thing = new thing<ListingData>();
                     thing.setData(context.deserialize(element, ListingData.class));
                     thing.setKind("Listing");
                     break;
                 case "t3":
-                    thing = new thing<LinkData>();
                     thing.setData(context.deserialize(element, LinkData.class));
                     thing.setKind("t3");
                     break;

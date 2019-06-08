@@ -1,8 +1,8 @@
 package com.ducktapedapps.updoot.model;
 
-public class thing<T> {
+public class thing {
     private String kind;
-    private T data;
+    private data data;
 
     public String getKind() {
         return kind;
@@ -12,11 +12,11 @@ public class thing<T> {
         this.kind = kind;
     }
 
-    public T getData() {
+    public data getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(data data) {
         this.data = data;
     }
 

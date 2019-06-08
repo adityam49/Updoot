@@ -15,7 +15,7 @@ import io.reactivex.Single;
 public class submissionsRepo {
     private static final String TAG = "submissionsRepo";
     private Application context;
-    private String after;
+    private String after = null;
     private endPoint api;
 
     public submissionsRepo(Application application) {
@@ -29,19 +29,25 @@ public class submissionsRepo {
                 .doOnSuccess(endPoint -> api = endPoint);
     }
 
-    public Single<thing> fetchFrontPage(String nextPage) {
+    private Single<thing> fetchFrontPage(String sort, String nextPage) {
         if (tokenManager.checkTokenValidity(context) && api != null) {
             return api
-                    .getFrontPage(nextPage)
+                    .getFrontPage(sort, nextPage)
                     .doOnError(throwable -> Log.i(TAG, "fetchFrontPage: " + throwable.getMessage()));
         } else {
             return refreshAPI()
-                    .flatMap(endPoint -> endPoint.getFrontPage(nextPage))
+                    .flatMap(endPoint -> endPoint.getFrontPage(sort, nextPage))
                     .doOnSuccess(thing -> {
                         if (thing.getData() instanceof ListingData) {
                             after = ((ListingData) thing.getData()).getAfter();
+                        } else {
+                            Log.e(TAG, "fetchFrontPage: unrecognized json response format");
                         }
                     });
         }
+    }
+
+    public Single<thing> loadNextPage(String sort) {
+        return fetchFrontPage(sort,after);
     }
 }

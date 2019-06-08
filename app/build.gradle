@@ -50,10 +50,12 @@ dependencies {
     //Json
     implementation 'com.google.code.gson:gson:2.8.5'
 
+    //image loading
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     //testing
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0-beta01'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-beta01'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
 }

@@ -12,7 +12,21 @@ public class constants {
 
     public static final String userLess_grantType = "https://oauth.reddit.com/grants/installed_client";
 
-    public enum state {
-        SUCCESS, ERROR, LOADING
-    }
+    //states
+    public static final String SUCCESS_STATE = "success_state";
+    public static final String LOADING_STATE = "loading_state";
+
+    //submissions sorts
+    public static final String HOT = "hot";
+    public static final String TOP = "top";
+    public static final String NEW = "new";
+    public static final String RISING = "rising";
+    public static final String BEST = "best";
+    public static final String CONTROVERSIAL = "controversial";
+
+
+
+
+
+
 }
