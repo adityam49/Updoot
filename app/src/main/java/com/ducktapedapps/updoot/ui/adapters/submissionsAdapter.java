@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +13,22 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.model.thing;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.submissionHolder> {
     private static final String TAG = "submissionsAdapter";
+    private Context mContext;
 
-    public submissionsAdapter() {
+    public submissionsAdapter(Context context) {
         super(callback);
+        mContext = context;
     }
 
     //    https://stackoverflow.com/questions/49726385/listadapter-not-updating-item-in-reyclerview/50062174#50062174
@@ -36,7 +40,7 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
     @NonNull
     @Override
     public submissionsAdapter.submissionHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.linear_submission, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.linear_submissions, parent, false);
         return new submissionHolder(view);
     }
 
@@ -51,7 +55,8 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
         @Override
         public boolean areItemsTheSame(@NonNull thing oldItem, @NonNull thing newItem) {
             if (oldItem.getData() instanceof LinkData && newItem.getData() instanceof LinkData) {
-                return ((LinkData) oldItem.getData()).getId().equals(((LinkData) newItem.getData()).getId());
+                return ((LinkData) oldItem.getData()).getId().equals(((LinkData) newItem.getData()).getId())
+                        && ((LinkData) oldItem.getData()).getUps().equals(((LinkData) newItem.getData()).getUps());
             }
             return false;
         }
@@ -59,7 +64,7 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
         @Override
         public boolean areContentsTheSame(@NonNull thing oldItem, @NonNull thing newItem) {
             if (oldItem.getData() instanceof LinkData && newItem.getData() instanceof LinkData) {
-                return ((LinkData) oldItem.getData()).getUps() == ((LinkData) newItem.getData()).getUps();
+                return ((LinkData) oldItem.getData()).getUps().equals(((LinkData) newItem.getData()).getUps());
             }
             return false;
         }
@@ -71,21 +76,34 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
         private TextView scoreTv;
         private ImageView thumbnail;
 
-        submissionHolder(View view) {
+        public submissionHolder(View view) {
             super(view);
             thumbnail = view.findViewById(R.id.thumbnail);
-            scoreTv = view.findViewById(R.id.scoreTv);
+            scoreTv = view.findViewById(R.id.score_tv);
             titleTv = view.findViewById(R.id.title_tv);
             authorTv = view.findViewById(R.id.author_tv);
         }
 
         void bind(LinkData data) {
-            Picasso.get().load(data.getThumbnail()).placeholder(R.drawable.ic_android_black_24dp).into(thumbnail);
-            scoreTv.setText(String.valueOf(data.getUps()));
+            switch (data.getThumbnail()) {
+                case "self":
+                    thumbnail.setImageResource(R.drawable.ic_selftext);
+                    break;
+                case "default":  //reddit api has "default" value for a link submission
+                    thumbnail.setImageResource(R.drawable.ic_link);
+                    break;
+                default:
+                    Glide
+                            .with(mContext)
+                            .load(data.getThumbnail())
+                            .apply(RequestOptions.circleCropTransform())
+                            .error(R.drawable.ic_image_error)
+                            .into(thumbnail);
+            }
+            scoreTv.setText(data.getUps());
             titleTv.setText(data.getTitle());
             authorTv.setText(data.getAuthor());
         }
     }
-
 }
 

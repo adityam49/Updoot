@@ -1,5 +1,7 @@
 package com.ducktapedapps.updoot.model;
 
+import androidx.annotation.NonNull;
+
 public class LinkData implements data {
     private String title;
     private String author;
@@ -8,20 +10,11 @@ public class LinkData implements data {
     private String permalink;
     private long created;
     private String thumbnail;
-    private Integer thumbnail_height;
-    private Integer thumbnail_width;
 
     public String getThumbnail() {
         return thumbnail;
     }
 
-    public Integer getThumbnail_height() {
-        return thumbnail_height;
-    }
-
-    public Integer getThumbnail_width() {
-        return thumbnail_width;
-    }
 
     public String getId() {
         return id;
@@ -40,11 +33,18 @@ public class LinkData implements data {
     }
 
     public String getAuthor() {
-        return author;
+        return "u/" + author;
     }
 
-    public int getUps() {
-        return ups;
+    public void upVote(){
+        this.ups++;
+    }
+    public String getUps() {
+        if (this.ups > 999) {
+            return this.ups / 1000 + "k";
+        } else {
+            return String.valueOf(ups);
+        }
     }
 
     @Override
@@ -57,8 +57,6 @@ public class LinkData implements data {
                 ", permalink='" + permalink + '\'' +
                 ", created=" + created +
                 ", thumbnail=" + thumbnail +
-                ", thumbnail_height=" + thumbnail_height +
-                ", thumbnail_width=" + thumbnail_width +
                 '}';
     }
 }

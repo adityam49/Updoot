@@ -23,7 +23,7 @@ public class submissionsRepo {
     }
 
     private Single<endPoint> refreshAPI() {
-        Log.i(TAG, "getting api with valid access token");
+        Log.i(TAG, "refreshAPI: getting api with a valid access token");
         return authManager.authenticate(context)
                 .flatMap(token -> Single.just(retrofitClient.createEndPointService(token)))
                 .doOnSuccess(endPoint -> api = endPoint);
@@ -31,8 +31,16 @@ public class submissionsRepo {
 
     private Single<thing> fetchFrontPage(String sort, String nextPage) {
         if (tokenManager.checkTokenValidity(context) && api != null) {
+            Log.i(TAG, "fetchFrontPage: reusing old api ");
             return api
                     .getFrontPage(sort, nextPage)
+                    .doOnSuccess(thing -> {
+                        if (thing.getData() instanceof ListingData) {
+                            after = ((ListingData) thing.getData()).getAfter();
+                        } else {
+                            Log.e(TAG, "fetchFrontPage: unrecognized json response format");
+                        }
+                    })
                     .doOnError(throwable -> Log.i(TAG, "fetchFrontPage: " + throwable.getMessage()));
         } else {
             return refreshAPI()
@@ -44,10 +52,15 @@ public class submissionsRepo {
                             Log.e(TAG, "fetchFrontPage: unrecognized json response format");
                         }
                     });
+
         }
     }
 
+    public void setAfter(String after) {
+        this.after = after;
+    }
+
     public Single<thing> loadNextPage(String sort) {
-        return fetchFrontPage(sort,after);
+        return fetchFrontPage(sort, after);
     }
 }

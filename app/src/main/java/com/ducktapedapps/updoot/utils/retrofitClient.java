@@ -23,6 +23,7 @@ import static com.ducktapedapps.updoot.utils.constants.token_access_base_url;
 public class retrofitClient {
 
     private static final String TAG = "retrofitClient";
+
     private static Retrofit createForAuth() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
@@ -62,12 +63,12 @@ public class retrofitClient {
         builder.addNetworkInterceptor(new StethoInterceptor());
 
 
-        //for logging requests
-//        if (BuildConfig.DEBUG) {
-//            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-//            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-//            builder.addInterceptor(httpLoggingInterceptor);
-//        }
+//        for logging requests
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            builder.addInterceptor(httpLoggingInterceptor);
+        }
 
         builder.addInterceptor(chain -> {
 

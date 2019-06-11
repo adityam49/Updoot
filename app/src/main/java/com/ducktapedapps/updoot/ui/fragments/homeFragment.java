@@ -20,11 +20,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ducktapedapps.updoot.R;
+import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.viewModels.submissionsVM;
 
-public class homeFragment extends Fragment {
+public class homeFragment extends Fragment{
 
     private static final String TAG = "homeFragment";
     private submissionsAdapter adapter;
@@ -59,7 +60,7 @@ public class homeFragment extends Fragment {
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new submissionsAdapter();
+        adapter = new submissionsAdapter(getActivity());
         recyclerView.setAdapter(adapter);
 
 
@@ -71,7 +72,11 @@ public class homeFragment extends Fragment {
                     int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
                     int totalItems = linearLayoutManager.getItemCount();
                     // 5 is next page prefetch threshold
-                    if (lastVisiblePosition == totalItems - 5 && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) {
+                    if (totalItems <= 10) {
+                        //condition for no more pages
+                        return;
+                    }
+                    if (lastVisiblePosition == totalItems - 10 && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) {
                         viewModel.loadNextPage();
                     }
                 }
@@ -79,7 +84,6 @@ public class homeFragment extends Fragment {
         });
 
         viewModel = ViewModelProviders.of(this).get(submissionsVM.class);
-
         viewModel.getState().observe(this, state -> {
             switch (state) {
                 case constants.LOADING_STATE:
@@ -97,7 +101,10 @@ public class homeFragment extends Fragment {
         });
         viewModel.getAllSubmissions().observe(this, things -> {
             Log.i(TAG, "onChanged: ");
-            adapter.submitList(things);
+            if (things != null) {
+                Log.i(TAG, "submitting " + things.size() + " posts ");
+                adapter.submitList(things);
+            }
         });
         return view;
     }
@@ -138,4 +145,6 @@ public class homeFragment extends Fragment {
         }
         return true;
     }
+
 }
+

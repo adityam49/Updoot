@@ -24,7 +24,7 @@ public class authManager {
     public static Single<Token> authenticate(Application application) {
         Token token = tokenManager.getToken(application);
         if (token != null) {
-            if (token.getAbsolute_expiry() - 300 > System.currentTimeMillis() / 1000) {
+            if (token.getAbsolute_expiry() > System.currentTimeMillis()) {
                 Log.i(TAG, "userLess: stored token is not expired");
                 return Single.just(token);
             } else {
