@@ -19,13 +19,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ducktapedapps.updoot.BuildConfig;
 import com.ducktapedapps.updoot.R;
-import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.viewModels.submissionsVM;
 
-public class homeFragment extends Fragment{
+public class homeFragment extends Fragment {
 
     private static final String TAG = "homeFragment";
     private submissionsAdapter adapter;
@@ -76,7 +76,9 @@ public class homeFragment extends Fragment{
                         //condition for no more pages
                         return;
                     }
-                    if (lastVisiblePosition == totalItems - 10 && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) {
+                    if (lastVisiblePosition == totalItems - 10
+                            && !viewModel.getState().getValue().equals(constants.LOADING_STATE)
+                            && viewModel.getHasNextPage().getValue()) {
                         viewModel.loadNextPage();
                     }
                 }
@@ -95,7 +97,11 @@ public class homeFragment extends Fragment{
                 default:
                     progressBar.setVisibility(View.GONE);
                     Log.i(TAG, "error " + state);
-                    Toast.makeText(getActivity(), state, Toast.LENGTH_LONG).show();
+                    if (BuildConfig.DEBUG) {
+                        Toast.makeText(getActivity(), state, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG).show();
+                    }
                     break;
             }
         });
@@ -107,6 +113,10 @@ public class homeFragment extends Fragment{
             }
         });
         return view;
+    }
+
+    public void reload() {
+        viewModel.reload(null);
     }
 
     @Override
@@ -136,7 +146,7 @@ public class homeFragment extends Fragment{
                 break;
             case R.id.controversial:
                 viewModel.reload(constants.CONTROVERSIAL);
-                Log.i(TAG, "onOptionsItemSelected: contro");
+                Log.i(TAG, "onOptionsItemSelected: controversial");
                 break;
             case R.id.top:
                 viewModel.reload(constants.TOP);

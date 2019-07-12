@@ -8,10 +8,9 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface endPoint {
-//    @GET("top")
-//    Single<thing> getFrontPage(
-//            @Query("after") String after
-//    );
+
+    @GET("/api/v1/me")
+    Single<String> getUserIdentity();
 
     @GET("{sort}")
     Single<thing> getFrontPage(

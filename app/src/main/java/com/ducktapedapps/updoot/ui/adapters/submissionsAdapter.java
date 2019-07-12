@@ -17,12 +17,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.model.thing;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.submissionHolder> {
+public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter.submissionHolder> {
     private static final String TAG = "submissionsAdapter";
     private Context mContext;
 
@@ -31,11 +30,19 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
         mContext = context;
     }
 
-    //    https://stackoverflow.com/questions/49726385/listadapter-not-updating-item-in-reyclerview/50062174#50062174
-    @Override
-    public void submitList(@Nullable List<thing> list) {
-        super.submitList(list != null ? new ArrayList<>(list) : null);
-    }
+    private static final DiffUtil.ItemCallback<LinkData> callback = new DiffUtil.ItemCallback<LinkData>() {
+
+        @Override
+        public boolean areItemsTheSame(@NonNull LinkData oldItem, @NonNull LinkData newItem) {
+            return oldItem.getId().equals(newItem.getId())
+                    && oldItem.getUps().equals(newItem.getUps());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull LinkData oldItem, @NonNull LinkData newItem) {
+            return oldItem.getUps().equals(newItem.getUps());
+        }
+    };
 
     @NonNull
     @Override
@@ -44,37 +51,23 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
         return new submissionHolder(view);
     }
 
+    //    https://stackoverflow.com/questions/49726385/listadapter-not-updating-item-in-reyclerview/50062174#50062174
     @Override
-    public void onBindViewHolder(@NonNull submissionsAdapter.submissionHolder holder, int position) {
-        if (getItem(position).getData() instanceof LinkData) {
-            holder.bind((LinkData) getItem(position).getData());
-        }
+    public void submitList(@Nullable List<LinkData> list) {
+        super.submitList(list != null ? new ArrayList<>(list) : null);
     }
 
-    private static final DiffUtil.ItemCallback<thing> callback = new DiffUtil.ItemCallback<thing>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull thing oldItem, @NonNull thing newItem) {
-            if (oldItem.getData() instanceof LinkData && newItem.getData() instanceof LinkData) {
-                return ((LinkData) oldItem.getData()).getId().equals(((LinkData) newItem.getData()).getId())
-                        && ((LinkData) oldItem.getData()).getUps().equals(((LinkData) newItem.getData()).getUps());
-            }
-            return false;
-        }
-
-        @Override
-        public boolean areContentsTheSame(@NonNull thing oldItem, @NonNull thing newItem) {
-            if (oldItem.getData() instanceof LinkData && newItem.getData() instanceof LinkData) {
-                return ((LinkData) oldItem.getData()).getUps().equals(((LinkData) newItem.getData()).getUps());
-            }
-            return false;
-        }
-    };
+    @Override
+    public void onBindViewHolder(@NonNull submissionsAdapter.submissionHolder holder, int position) {
+        holder.bind(getItem(position));
+    }
 
     class submissionHolder extends RecyclerView.ViewHolder {
         private TextView titleTv;
         private TextView authorTv;
         private TextView scoreTv;
         private ImageView thumbnail;
+        private TextView subredditTv;
 
         public submissionHolder(View view) {
             super(view);
@@ -82,10 +75,13 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
             scoreTv = view.findViewById(R.id.score_tv);
             titleTv = view.findViewById(R.id.title_tv);
             authorTv = view.findViewById(R.id.author_tv);
+            subredditTv = view.findViewById(R.id.subredditTv);
         }
 
         void bind(LinkData data) {
             switch (data.getThumbnail()) {
+                case "":
+                case "nsfw":
                 case "self":
                     thumbnail.setImageResource(R.drawable.ic_selftext);
                     break;
@@ -103,6 +99,7 @@ public class submissionsAdapter extends ListAdapter<thing, submissionsAdapter.su
             scoreTv.setText(data.getUps());
             titleTv.setText(data.getTitle());
             authorTv.setText(data.getAuthor());
+            subredditTv.setText(data.getSubreddit());
         }
     }
 }

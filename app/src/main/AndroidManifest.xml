@@ -4,8 +4,9 @@
     package="com.ducktapedapps.updoot">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
-        android:name=".Updoot"
+        android:name=".UpdootApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -13,6 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".ui.LoginActivity"
+            android:configChanges="orientation|screenSize" />
+
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

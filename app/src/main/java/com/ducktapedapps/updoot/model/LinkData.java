@@ -1,15 +1,20 @@
 package com.ducktapedapps.updoot.model;
 
-import androidx.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class LinkData implements data {
     private String title;
     private String author;
     private int ups;
+    private String subreddit_name_prefixed;
     private String id;
     private String permalink;
     private long created;
     private String thumbnail;
+
+    public String getSubreddit() {
+        return this.subreddit_name_prefixed;
+    }
 
     public String getThumbnail() {
         return thumbnail;
@@ -36,9 +41,10 @@ public class LinkData implements data {
         return "u/" + author;
     }
 
-    public void upVote(){
+    public void upVote() {
         this.ups++;
     }
+
     public String getUps() {
         if (this.ups > 999) {
             return this.ups / 1000 + "k";
@@ -47,16 +53,18 @@ public class LinkData implements data {
         }
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "LinkData{" +
                 "title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", ups=" + ups +
+                ", subreddit='" + subreddit_name_prefixed + '\'' +
                 ", id='" + id + '\'' +
                 ", permalink='" + permalink + '\'' +
                 ", created=" + created +
-                ", thumbnail=" + thumbnail +
+                ", thumbnail='" + thumbnail + '\'' +
                 '}';
     }
 }

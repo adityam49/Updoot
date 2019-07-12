@@ -32,7 +32,7 @@ public class retrofitClient {
         //for logging requests
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(httpLoggingInterceptor);
         }
 
@@ -66,7 +66,7 @@ public class retrofitClient {
 //        for logging requests
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.BASIC);
             builder.addInterceptor(httpLoggingInterceptor);
         }
 

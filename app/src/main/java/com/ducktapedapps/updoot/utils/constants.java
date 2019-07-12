@@ -4,13 +4,21 @@ public class constants {
     public static final String USERLESS_TOKEN_EXPIRY_KEY = "userLessTokenExpiryKey";
     public static final String USERLESS_TOKEN_KEY = "userLessTokenKey";
     public static final String TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey";
+
+    public static final String USER_TOKEN_KEY = "userTokenKey";
+    public static final String USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey";
+    public static final String USER_TOKEN_EXPIRY_KEY = "userTokenExpiryKey";
+
     public static final String DEVICE_ID_KEY = "deviceIdKey";
 
+    public static final String client_id = "jW0kYyiXq1hJyQ";
+    public static final String redirect_uri = "https://github.com/am-2x49/UpdootApplication";
     public static final String baseUrl = "https://oauth.reddit.com/";
-    public static final String token_access_base_url = "https://www.reddit.com/api/v1/";
-    public static final String client_id = "9M6Bbt1AAfnoSg";
-
+    public static final String token_access_base_url = "https://www.reddit.com/api/v1/access_token";
+    public static final String scopes = "identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread";
     public static final String userLess_grantType = "https://oauth.reddit.com/grants/installed_client";
+    public static final String user_grantType = "authorization_code";
+    public static final String user_refresh_grantType = "refresh_token";
 
     //states
     public static final String SUCCESS_STATE = "success_state";
@@ -24,9 +32,7 @@ public class constants {
     public static final String BEST = "best";
     public static final String CONTROVERSIAL = "controversial";
 
-
-
-
+    public static final int ACCOUNT_LOGIN_REQUEST_CODE = 99;
 
 
 }
