@@ -15,4 +15,19 @@ public interface login {
             @Field("device_id") String device_id
     );
 
+    @FormUrlEncoded
+    @POST("access_token")
+    Single<Token> getUserToken(
+            @Field("grant_type") String grant_type,
+            @Field("code") String code,
+            @Field("redirect_uri") String redirect_uri
+    );
+
+    @FormUrlEncoded
+    @POST("access_token")
+    Single<Token> getRefreshedToken(
+            @Field("grant_type") String grant_type,
+            @Field("refresh_token") String token
+    );
+
 }

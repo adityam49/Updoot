@@ -7,10 +7,10 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface endPoint {
+public interface redditAPI {
 
-    @GET("/api/v1/me")
-    Single<String> getUserIdentity();
+    @GET("r/{subreddit}")
+    Single<thing> getSubreddit(@Path("subreddit") String subreddit);
 
     @GET("{sort}")
     Single<thing> getFrontPage(
@@ -18,5 +18,5 @@ public interface endPoint {
             @Query("after") String after
     );
 
-
 }
+

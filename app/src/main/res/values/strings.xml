@@ -8,6 +8,9 @@
     <string name="Rising">Rising</string>
     <string name="Controversial">Controversial</string>
     <string name="Best">Best</string>
+    <string name="home">Home</string>
+    <string name="accounts">Accounts</string>
+    <string name="login">Login</string>
     <!--<string name="Gilded">Gilded</string>-->
 
 </resources>

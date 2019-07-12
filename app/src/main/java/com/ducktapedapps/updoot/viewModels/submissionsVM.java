@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.model.ListingData;
 import com.ducktapedapps.updoot.model.thing;
-import com.ducktapedapps.updoot.repository.submissionsRepo;
+import com.ducktapedapps.updoot.repository.submissionRepo;
 import com.ducktapedapps.updoot.utils.constants;
 
 import java.util.ArrayList;
@@ -22,56 +22,78 @@ public class submissionsVM extends AndroidViewModel {
 
     private CompositeDisposable disposable = new CompositeDisposable();
     private static final String TAG = "submissionsVM";
-    private submissionsRepo frontPageRepo;
+    private submissionRepo frontPageRepo;
 
+    private MutableLiveData<String> after = new MutableLiveData<>();
     private MutableLiveData<String> sorting = new MutableLiveData<>();
-    private MutableLiveData<List<thing>> allSubmissions = new MutableLiveData<>();
+    private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>();
     private MutableLiveData<String> state = new MutableLiveData<>();
+    private MutableLiveData<Boolean> hasNextPage = new MutableLiveData<>();
+
+    public submissionsVM(Application application) {
+        super(application);
+        frontPageRepo = new submissionRepo(application);
+        hasNextPage.setValue(true);
+        after.setValue(null);
+        sorting.setValue(constants.TOP);
+        loadNextPage();
+    }
 
     public MutableLiveData<String> getSorting() {
         return sorting;
     }
 
-    public MutableLiveData<List<thing>> getAllSubmissions() {
-        return allSubmissions;
+    public MutableLiveData<Boolean> getHasNextPage() {
+        return hasNextPage;
     }
 
     public MutableLiveData<String> getState() {
         return state;
     }
 
-    public submissionsVM(Application application) {
-        super(application);
-        frontPageRepo = new submissionsRepo(application);
+    public MutableLiveData<List<LinkData>> getAllSubmissions() {
+        return allSubmissions;
+    }
 
-        sorting.setValue(constants.TOP);
-        loadNextPage();
+    private String getAfter() {
+        return this.after.getValue();
     }
 
     public void loadNextPage() {
         disposable.add(
                 frontPageRepo
-                        .loadNextPage(getSorting().getValue())
+                        .loadNextPage(getSorting().getValue(), getAfter())
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
+                                after.postValue(((ListingData) thing.getData()).getAfter());
+                                Log.i(TAG, "loadNextPage:  " + ((ListingData) thing.getData()).getAfter());
                                 return ((ListingData) thing.getData()).getChildren();
                             } else {
                                 throw new Exception("unsupported response");
                             }
                         })
-                        .subscribeOn(Schedulers.io())
-                        .doOnSubscribe(__ -> {
-                            Log.i(TAG, "onSubscribe: ");
-                            state.postValue(constants.LOADING_STATE);
+                        .map(things -> {
+                            List<LinkData> linkDataList = new ArrayList<>();
+                            for (thing thing : things) {
+                                linkDataList.add(((LinkData) thing.getData()));
+                            }
+                            return linkDataList;
                         })
+                        .map(linkDataList -> {
+                            List<LinkData> submissions = allSubmissions.getValue();
+                            if (submissions == null) {
+                                submissions = linkDataList;
+                            } else {
+                                submissions.addAll(linkDataList);
+                            }
+                            return submissions;
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .doOnSubscribe(__ -> state.postValue(constants.LOADING_STATE))
                         .subscribe(submissions -> {
                             Log.i(TAG, "onSuccess: " + submissions.size());
-                            List<thing> newList = allSubmissions.getValue();
-                            if (newList == null) {
-                                newList = new ArrayList<>();
-                            }
-                            newList.addAll(submissions);
-                            allSubmissions.postValue(newList);
+                            allSubmissions.postValue(submissions);
+                            hasNextPage.postValue(after.getValue() != null);
                             state.postValue(constants.SUCCESS_STATE);
                         }, throwable -> {
                             Log.e(TAG, "onError: ", throwable.getCause());
@@ -80,9 +102,14 @@ public class submissionsVM extends AndroidViewModel {
     }
 
     public void reload(String sort) {
-        frontPageRepo.setAfter(null);
+        if (sort == null) {
+            sorting.setValue(constants.HOT);
+        } else {
+            sorting.setValue(sort);
+            after.setValue(null);
+        }
+        after.setValue(null);
         allSubmissions.setValue(null);
-        sorting.setValue(sort);
         loadNextPage();
 
     }
