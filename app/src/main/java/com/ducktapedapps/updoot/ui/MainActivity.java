@@ -3,10 +3,8 @@ package com.ducktapedapps.updoot.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -34,20 +32,17 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
 
         //bottom bar setup
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.home:
-                        //??
-                        break;
-                    case R.id.accounts:
-                        accountsBottomSheet bottomSheet = new accountsBottomSheet();
-                        bottomSheet.show(getSupportFragmentManager(), "accountsBottomSheet");
-                        break;
-                }
-                return false;
+        bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.home:
+                    //??
+                    break;
+                case R.id.accounts:
+                    accountsBottomSheet bottomSheet = new accountsBottomSheet();
+                    bottomSheet.show(getSupportFragmentManager(), "accountsBottomSheet");
+                    break;
             }
+            return false;
         });
 
         FragmentManager fragmentManager = getSupportFragmentManager();

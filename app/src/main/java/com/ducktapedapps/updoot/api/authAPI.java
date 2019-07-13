@@ -19,4 +19,22 @@ public interface authAPI {
             @Field("device_id") String device_id
     );
 
+    @FormUrlEncoded
+    @POST
+    Single<Token> getUserToken(
+            @Url String auth_url,
+            @Header("Authorization") String credentials,
+            @Field("grant_type") String grant_type,
+            @Field("code") String code,
+            @Field("redirect_uri") String redirect_uri
+    );
+
+    @FormUrlEncoded
+    @POST()
+    Single<Token> getRefreshedToken(
+            @Url String auth_url,
+            @Header("Authorization") String credentials,
+            @Field("grant_type") String grant_type,
+            @Field("refresh_token") String token
+    );
 }

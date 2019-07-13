@@ -19,7 +19,19 @@ public class UpdootApplication extends Application {
         super.onCreate();
         Stetho.initializeWithDefaults(this);
         getUpdootComponent().inject(this);
+        setUpLoginState();
         createDeviceId();
+    }
+
+    private void setUpLoginState() {
+        SharedPreferences sharedPreferences = getUpdootComponent().getSharedPreferences();
+        String login_state = sharedPreferences.getString(constants.LOGIN_STATE, null);
+        if (login_state == null) {
+            sharedPreferences
+                    .edit()
+                    .putString(constants.LOGIN_STATE, constants.LOGGED_OUT_STATE)
+                    .apply();
+        }
     }
 
     private void createDeviceId() {
