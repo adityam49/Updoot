@@ -1,8 +1,6 @@
 package com.ducktapedapps.updoot.di;
 
 import com.ducktapedapps.updoot.BuildConfig;
-import com.ducktapedapps.updoot.api.authAPI;
-import com.ducktapedapps.updoot.api.redditAPI;
 import com.ducktapedapps.updoot.model.Token;
 import com.ducktapedapps.updoot.model.thing;
 import com.ducktapedapps.updoot.utils.TokenDeserializer;
@@ -42,7 +40,7 @@ class NetworkModule {
         //for logging requests
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-            httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.BODY);
+            httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.HEADERS);
             okHttpClient.addInterceptor(httpLoggingInterceptor);
         }
         return okHttpClient.build();
@@ -61,7 +59,7 @@ class NetworkModule {
     @Provides
     static Retrofit provideRetrofit(OkHttpClient client, Gson gson) {
         return new Retrofit.Builder()
-                .baseUrl(constants.baseUrl)
+                .baseUrl(constants.API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)
