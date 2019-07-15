@@ -35,6 +35,6 @@ public interface authAPI {
             @Url String auth_url,
             @Header("Authorization") String credentials,
             @Field("grant_type") String grant_type,
-            @Field("refresh_token") String token
+            @Field("refresh_token") String refresh_token
     );
 }

@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,20 +13,30 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.ducktapedapps.updoot.R;
+import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
 import com.ducktapedapps.updoot.ui.fragments.homeFragment;
+import com.ducktapedapps.updoot.utils.TokenInterceptor;
 import com.ducktapedapps.updoot.utils.constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity implements accountsBottomSheet.BottomSheetListener {
+import javax.inject.Inject;
 
+public class MainActivity extends AppCompatActivity implements accountsBottomSheet.BottomSheetListener {
     private static final String TAG = "MainActivity";
+
+    @Inject
+    SharedPreferences sharedPreferences;
+    @Inject
+    TokenInterceptor interceptor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        ((UpdootApplication) getApplication()).getUpdootComponent().inject(this);
         //toolbar setup
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,11 +74,15 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
     @Override
     public void onButtonClicked(String text) {
         switch (text) {
-            case "Add new account":
+            case "Add account":
                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivityForResult(intent, constants.ACCOUNT_LOGIN_REQUEST_CODE);
                 break;
+            default:
+                sharedPreferences.edit().putString(constants.LOGIN_STATE, text).apply();
+                interceptor.setAccountChanged();
+                reloadContent();
         }
     }
 
@@ -78,11 +93,15 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
             case constants.ACCOUNT_LOGIN_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     Log.i(TAG, "onActivityResult: new Login");
-                    Fragment fragment = getSupportFragmentManager().findFragmentByTag("home_fragment");
-                    if (fragment instanceof homeFragment) {
-                        ((homeFragment) fragment).reload();
-                    }
+                    reloadContent();
                 }
+        }
+    }
+
+    private void reloadContent() {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("home_fragment");
+        if (fragment instanceof homeFragment) {
+            ((homeFragment) fragment).reload();
         }
     }
 }
