@@ -1,5 +1,8 @@
 package com.ducktapedapps.updoot.di;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.Application;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -16,7 +19,9 @@ import io.reactivex.Single;
 import okhttp3.Credentials;
 import retrofit2.Retrofit;
 
-@Module(includes = {ApplicationModule.class, NetworkModule.class})
+@Module(includes = {
+        ApplicationModule.class, NetworkModule.class}
+)
 public class ApiModule {
     private static final String TAG = "ApiModule";
 
@@ -33,64 +38,74 @@ public class ApiModule {
         return retrofit.create(redditAPI.class);
     }
 
+    @Provides
+    static AccountManager provideAccountManager(Application application) {
+        return AccountManager.get(application);
+    }
+
     //basically token refresh check for every api call
     @Provides
-    static Single<redditAPI> providesRedditAPI(SharedPreferences sharedPreferences, TokenInterceptor interceptor, Retrofit retrofit) {
-        String access_token;
-        long token_expiry;
+    static Single<redditAPI> provideRedditAPI(AccountManager accountManager, SharedPreferences sharedPreferences, authAPI authAPI, redditAPI redditAPI, TokenInterceptor interceptor) {
         String state = sharedPreferences.getString(constants.LOGIN_STATE, null);
         assert state != null;
-        if (state.equals(constants.LOGGED_OUT_STATE)) {
-            access_token = sharedPreferences.getString(constants.USERLESS_TOKEN_KEY, null);
-            token_expiry = sharedPreferences.getLong(constants.USERLESS_TOKEN_EXPIRY_KEY, 0);
-
-            if (access_token != null && token_expiry > System.currentTimeMillis() / 1000) {
-//            using cached token
-                interceptor.setSessionToken(access_token);
-                return Single.just(provideRedditAPIService(retrofit));
-            } else {
-                //fetching new token and saving to shared prefs
-                return provideAuthAPI(retrofit)
-                        .getUserLessToken(
-                                constants.TOKEN_ACCESS_URL,
-                                Credentials.basic(constants.client_id, ""),
-                                constants.userLess_grantType,
-                                sharedPreferences.getString(constants.DEVICE_ID_KEY, null)
-                        ).doOnSuccess(token -> {
-                            interceptor.setSessionToken(token.getAccess_token());
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putLong(constants.USERLESS_TOKEN_EXPIRY_KEY, token.getAbsolute_expiry());
-                            editor.putString(constants.USERLESS_TOKEN_KEY, token.getAccess_token());
-                            editor.apply();
+        Account account;
+        if (state.equals(constants.ANON_USER)) {
+            account = new Account(constants.ANON_USER, constants.ACCOUNT_TYPE);
+            if (accountManager.getAccounts().length == 0) {
+                //for first time app launch
+                Log.i(TAG, "providesRedditAPI: for first time app launch");
+                return authAPI
+                        .getUserLessToken(constants.TOKEN_ACCESS_URL, Credentials.basic(constants.client_id, ""), constants.userLess_grantType, sharedPreferences.getString(constants.DEVICE_ID_KEY, null))
+                        .doOnSuccess(token -> {
+                            token.setAbsolute_expiry();
+                            accountManager.addAccountExplicitly(account, "", null);
+                            accountManager.setAuthToken(account, "limited", token.getAccess_token());
+                            interceptor.setSessionToken(token, constants.ANON_USER);
                         })
-                        .doOnError(throwable -> Log.e(TAG, "getUserLessToken: ", throwable))
-                        .map(__ -> provideRedditAPIService(retrofit));
+                        .doOnError(throwable -> Log.e(TAG, "newRedditApi: ", throwable))
+                        .map(token -> redditAPI);
+            } else if (interceptor.isAccountChanged() || interceptor.getTokenExpiry() == null || (interceptor.getTokenExpiry() != null && interceptor.getTokenExpiry() < System.currentTimeMillis())) {
+                // userless token refreshing or fresh app launch
+                Log.i(TAG, "providesRedditAPI: userless token refreshing or fresh app launch");
+                return authAPI
+                        .getUserLessToken(constants.TOKEN_ACCESS_URL, Credentials.basic(constants.client_id, ""), constants.userLess_grantType, sharedPreferences.getString(constants.DEVICE_ID_KEY, null))
+                        .doOnSuccess(token -> {
+                            token.setAbsolute_expiry();
+                            accountManager.setAuthToken(account, "limited", token.getAccess_token());
+                            interceptor.setSessionToken(token, constants.ANON_USER);
+                        }).doOnError(throwable -> Log.e(TAG, "providesRedditAPI: ", throwable))
+                        .map(__ -> redditAPI);
+            } else {
+                //valid userless token
+                Log.i(TAG, "providesRedditAPI: valid userless token");
+                return Single.just(redditAPI);
             }
         } else {
-            access_token = sharedPreferences.getString(constants.USER_TOKEN_KEY, null);
-            token_expiry = sharedPreferences.getLong(constants.USER_TOKEN_EXPIRY_KEY, 0);
-            String refresh_token = sharedPreferences.getString(constants.USER_TOKEN_REFRESH_KEY, null);
-
-            if (token_expiry > System.currentTimeMillis() / 1000) {
-                //using cached token
-                interceptor.setSessionToken(access_token);
-                return Single.just(provideRedditAPIService(retrofit));
-            } else {
-                return provideAuthAPI(retrofit)
-                        .getRefreshedToken(constants.TOKEN_ACCESS_URL, Credentials.basic(constants.client_id, ""), constants.user_refresh_grantType, refresh_token)
+            //user token
+            if (interceptor.isAccountChanged() || interceptor.getTokenExpiry() == null || (interceptor.getTokenExpiry() != null && interceptor.getTokenExpiry() < System.currentTimeMillis())) {
+                // user token refreshing or fresh app launch
+                Log.i(TAG, "providesRedditAPI: user token refreshing or fresh app launch");
+                account = new Account(state, constants.ACCOUNT_TYPE);
+                return authAPI
+                        .getRefreshedToken(constants.TOKEN_ACCESS_URL,
+                                Credentials.basic(constants.client_id, ""),
+                                constants.user_refresh_grantType,
+                                accountManager.getUserData(account, constants.USER_TOKEN_REFRESH_KEY))
                         .doOnSuccess(token -> {
-                            interceptor.setSessionToken(token.getAccess_token());
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString(constants.USER_TOKEN_KEY, token.getAccess_token());
-                            editor.putLong(constants.USER_TOKEN_EXPIRY_KEY, token.getAbsolute_expiry());
-                            editor.apply();
+                            Log.i(TAG, "providesRedditAPI: " + token);
+                            token.setAbsolute_expiry();
+                            accountManager.setAuthToken(account, "full_access", token.getAccess_token());
+                            interceptor.setSessionToken(token, state);
                         })
-                        .doOnError(throwable -> Log.e(TAG, "providesAPI: ", throwable))
-                        .map(__ -> provideRedditAPIService(retrofit));
+                        .doOnError(throwable -> Log.e(TAG, "providesRedditAPI: ", throwable))
+                        .map(__ -> redditAPI);
+            } else {
+                Log.i(TAG, "providesRedditAPI: user token valid");
+                //valid user token
+                return Single.just(redditAPI);
             }
         }
         // returned redditAPI object is the same in both cases but is wrapped around in new Single observable for every call
         // only difference is the token manipulation done in token interceptor object which is a singleton
     }
-
 }

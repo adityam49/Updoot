@@ -29,7 +29,7 @@ public class UpdootApplication extends Application {
         if (login_state == null) {
             sharedPreferences
                     .edit()
-                    .putString(constants.LOGIN_STATE, constants.LOGGED_OUT_STATE)
+                    .putString(constants.LOGIN_STATE, constants.ANON_USER)
                     .apply();
         }
     }

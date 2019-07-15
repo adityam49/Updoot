@@ -25,24 +25,12 @@ public class LinkData implements data {
         return id;
     }
 
-    public long getCreated() {
-        return created;
-    }
-
-    public String getPermalink() {
-        return permalink;
-    }
-
     public String getTitle() {
         return title;
     }
 
     public String getAuthor() {
         return "u/" + author;
-    }
-
-    public void upVote() {
-        this.ups++;
     }
 
     public String getUps() {

@@ -25,10 +25,6 @@ public class constants {
     public static final String SUCCESS_STATE = "success_state";
     public static final String LOADING_STATE = "loading_state";
 
-    //login states
-    public static final String LOGGED_OUT_STATE = "logged_out_state";
-    public static final String LOGGED_IN_STATE = "logged_in_state";
-
     //submissions sorts
     public static final String HOT = "hot";
     public static final String TOP = "top";
@@ -39,5 +35,6 @@ public class constants {
 
     public static final int ACCOUNT_LOGIN_REQUEST_CODE = 99;
 
-
+    public static final String ACCOUNT_TYPE = "updoot_account";
+    public static final String ANON_USER = "Anonymous";
 }

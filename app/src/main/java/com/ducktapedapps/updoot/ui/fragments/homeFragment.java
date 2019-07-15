@@ -15,11 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ducktapedapps.updoot.BuildConfig;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
@@ -27,10 +25,12 @@ import com.ducktapedapps.updoot.viewModels.submissionsVM;
 
 public class homeFragment extends Fragment {
 
+
     private static final String TAG = "homeFragment";
     private submissionsAdapter adapter;
     private LinearLayoutManager linearLayoutManager;
     private submissionsVM viewModel;
+    private RecyclerView recyclerView;
 
     public static homeFragment newInstance() {
 
@@ -54,8 +54,7 @@ public class homeFragment extends Fragment {
 
         ProgressBar progressBar = view.findViewById(R.id.progress_circular);
 
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        recyclerView = view.findViewById(R.id.recyclerView);
 
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -85,6 +84,7 @@ public class homeFragment extends Fragment {
             }
         });
 
+        //todo : use dagger to inject viewmodel
         viewModel = ViewModelProviders.of(this).get(submissionsVM.class);
         viewModel.getState().observe(this, state -> {
             switch (state) {
@@ -97,18 +97,13 @@ public class homeFragment extends Fragment {
                 default:
                     progressBar.setVisibility(View.GONE);
                     Log.i(TAG, "error " + state);
-                    if (BuildConfig.DEBUG) {
-                        Toast.makeText(getActivity(), state, Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG).show();
-                    }
+                    Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG).show();
                     break;
             }
         });
         viewModel.getAllSubmissions().observe(this, things -> {
             Log.i(TAG, "onChanged: ");
             if (things != null) {
-                Log.i(TAG, "submitting " + things.size() + " posts ");
                 adapter.submitList(things);
             }
         });
