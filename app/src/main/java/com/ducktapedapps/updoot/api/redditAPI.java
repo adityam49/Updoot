@@ -13,8 +13,8 @@ public interface redditAPI {
     @GET("/api/v1/me")
     Single<account> getUserIdentity();
 
-    @GET("r/{subreddit}")
-    Single<thing> getSubreddit(@Path("subreddit") String subreddit);
+    @GET("r/{subreddit}/{sort}")
+    Single<thing> getSubreddit(@Path("subreddit") String subreddit, @Path("sort") String sort, @Query("after") String after);
 
     @GET("{sort}")
     Single<thing> getFrontPage(

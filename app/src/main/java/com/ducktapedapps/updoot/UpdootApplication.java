@@ -17,31 +17,21 @@ public class UpdootApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Stetho.initializeWithDefaults(this);
+        if (BuildConfig.DEBUG) {
+            Stetho.initializeWithDefaults(this);
+        }
         getUpdootComponent().inject(this);
-        setUpLoginState();
         createDeviceId();
     }
 
-    private void setUpLoginState() {
-        SharedPreferences sharedPreferences = getUpdootComponent().getSharedPreferences();
-        String login_state = sharedPreferences.getString(constants.LOGIN_STATE, null);
-        if (login_state == null) {
-            sharedPreferences
-                    .edit()
-                    .putString(constants.LOGIN_STATE, constants.ANON_USER)
-                    .apply();
-        }
-    }
 
     private void createDeviceId() {
         SharedPreferences sharedPreferences = getUpdootComponent().getSharedPreferences();
-        String device_id = sharedPreferences.getString(constants.DEVICE_ID_KEY, null);
-        if (device_id == null) {
-            device_id = UUID.randomUUID().toString();
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(constants.DEVICE_ID_KEY, device_id);
-            editor.apply();
+        if (sharedPreferences.getString(constants.DEVICE_ID_KEY, null) == null) {
+            sharedPreferences
+                    .edit()
+                    .putString(constants.DEVICE_ID_KEY, UUID.randomUUID().toString())
+                    .apply();
         }
     }
 

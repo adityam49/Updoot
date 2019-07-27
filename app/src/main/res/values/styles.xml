@@ -12,18 +12,20 @@
     <style name="altAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="colorPrimary">@color/LT_primaryColor</item>
-        <item name="colorPrimaryDark">@color/LT_primaryDarkColor</item>
+        <item name="colorPrimaryDark">@color/LT_primaryColor</item>
+        <item name="colorSecondary">@android:color/white</item>
+        <item name="colorAccent">@color/secondaryColor</item>
         <item name="android:textColorPrimary">@color/LT_primaryTextColor</item>
         <item name="android:textColorSecondary">@color/LT_secondaryTextColor</item>
-        <item name="colorAccent">@color/secondaryColor</item>
     </style>
 
     <style name="altDarkTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/DT_primaryDarkColor</item>
         <item name="android:windowBackground">@color/DT_primaryDarkColor</item>
+        <item name="colorPrimary">@color/DT_primaryDarkColor</item>
         <item name="colorPrimaryDark">@color/DT_primaryDarkColor</item>
-        <!--<item name="android:textColorPrimary">@color/DT_primaryTextColor</item>-->
-        <!--<item name="android:textColorSecondary">@color/DT_secondaryTextColor</item>-->
+        <item name="colorSecondary">@color/DT_primaryLightColor</item>
         <item name="colorAccent">@color/secondaryColor</item>
+        <item name="android:textColorPrimary">@color/DT_primaryTextColor</item>
+        <item name="android:textColorSecondary">@color/DT_secondaryTextColor</item>
     </style>
 </resources>

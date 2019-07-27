@@ -33,13 +33,13 @@ public class submissionsVM extends AndroidViewModel {
     public submissionsVM(Application application) {
         super(application);
         frontPageRepo = new submissionRepo(application);
-        hasNextPage.setValue(true);
+        hasNextPage.setValue(null);
         after.setValue(null);
         sorting.setValue(constants.TOP);
         loadNextPage();
     }
 
-    public MutableLiveData<String> getSorting() {
+    private MutableLiveData<String> getSorting() {
         return sorting;
     }
 
@@ -62,11 +62,15 @@ public class submissionsVM extends AndroidViewModel {
     public void loadNextPage() {
         disposable.add(
                 frontPageRepo
-                        .loadNextPage(getSorting().getValue(), getAfter())
+                        .loadNextPage("all", getSorting().getValue(), getAfter())
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
                                 after.postValue(((ListingData) thing.getData()).getAfter());
-                                Log.i(TAG, "loadNextPage:  " + ((ListingData) thing.getData()).getAfter());
+                                if (((ListingData) thing.getData()).getAfter() != null) {
+                                    hasNextPage.postValue(true);
+                                } else {
+                                    hasNextPage.postValue(false);
+                                }
                                 return ((ListingData) thing.getData()).getChildren();
                             } else {
                                 throw new Exception("unsupported response");
@@ -91,9 +95,7 @@ public class submissionsVM extends AndroidViewModel {
                         .subscribeOn(Schedulers.io())
                         .doOnSubscribe(__ -> state.postValue(constants.LOADING_STATE))
                         .subscribe(submissions -> {
-                            Log.i(TAG, "onSuccess: " + submissions.size());
                             allSubmissions.postValue(submissions);
-                            hasNextPage.postValue(after.getValue() != null);
                             state.postValue(constants.SUCCESS_STATE);
                         }, throwable -> {
                             Log.e(TAG, "onError: ", throwable.getCause());
@@ -103,10 +105,9 @@ public class submissionsVM extends AndroidViewModel {
 
     public void reload(String sort) {
         if (sort == null) {
-            sorting.setValue(constants.HOT);
+            sorting.setValue(constants.TOP);
         } else {
             sorting.setValue(sort);
-            after.setValue(null);
         }
         after.setValue(null);
         allSubmissions.setValue(null);

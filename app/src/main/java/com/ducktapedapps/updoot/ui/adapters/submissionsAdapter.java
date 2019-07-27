@@ -18,8 +18,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.model.LinkData;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter.submissionHolder> {
     private static final String TAG = "submissionsAdapter";
@@ -54,7 +57,7 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
     //    https://stackoverflow.com/questions/49726385/listadapter-not-updating-item-in-reyclerview/50062174#50062174
     @Override
     public void submitList(@Nullable List<LinkData> list) {
-        super.submitList(list != null ? new ArrayList<>(list) : null);
+        super.submitList(new LinkedList<>(list));
     }
 
     @Override
@@ -63,19 +66,20 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
     }
 
     class submissionHolder extends RecyclerView.ViewHolder {
-        private TextView titleTv;
-        private TextView authorTv;
-        private TextView scoreTv;
-        private ImageView thumbnail;
-        private TextView subredditTv;
+        @BindView(R.id.title_tv)
+        TextView titleTv;
+        @BindView(R.id.author_tv)
+        TextView authorTv;
+        @BindView(R.id.score_tv)
+        TextView scoreTv;
+        @BindView(R.id.thumbnail)
+        ImageView thumbnail;
+        @BindView(R.id.subredditTv)
+        TextView subredditTv;
 
-        public submissionHolder(View view) {
+        submissionHolder(View view) {
             super(view);
-            thumbnail = view.findViewById(R.id.thumbnail);
-            scoreTv = view.findViewById(R.id.score_tv);
-            titleTv = view.findViewById(R.id.title_tv);
-            authorTv = view.findViewById(R.id.author_tv);
-            subredditTv = view.findViewById(R.id.subredditTv);
+            ButterKnife.bind(this, view);
         }
 
         void bind(LinkData data) {

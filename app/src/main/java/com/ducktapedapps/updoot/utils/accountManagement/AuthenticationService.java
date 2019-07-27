@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.utils;
+package com.ducktapedapps.updoot.utils.accountManagement;
 
 import android.app.Service;
 import android.content.Intent;
