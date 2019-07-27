@@ -20,7 +20,7 @@
 
 
         <service
-            android:name=".utils.AuthenticationService"
+            android:name=".utils.accountManagement.AuthenticationService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

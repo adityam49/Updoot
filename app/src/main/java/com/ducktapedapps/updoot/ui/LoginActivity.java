@@ -21,8 +21,9 @@ import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.api.authAPI;
 import com.ducktapedapps.updoot.api.redditAPI;
-import com.ducktapedapps.updoot.di.UpdootComponent;
 import com.ducktapedapps.updoot.model.Token;
+import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
+import com.ducktapedapps.updoot.utils.accountManagement.userManager;
 import com.ducktapedapps.updoot.utils.constants;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,18 +32,36 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import dagger.Lazy;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Credentials;
 
 public class LoginActivity extends AppCompatActivity {
 
-    @Inject
-    authAPI authAPI;
-    @Inject
-    SharedPreferences sharedPreferences;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.login_progress)
+    ProgressBar progressBar;
+    @BindView(R.id.webView)
+    WebView webView;
 
-    private String state;
+    @Inject
+    Lazy<redditAPI> redditAPILazy;
+    @Inject
+    Lazy<TokenInterceptor> interceptor;
+    @Inject
+    Lazy<AccountManager> accountManager;
+    @Inject
+    Lazy<userManager> userManager;
+    @Inject
+    Lazy<authAPI> authAPI;
+    @Inject
+    Lazy<SharedPreferences> sharedPreferences;
+
+
     private Token mToken;
 
     private static final String TAG = "LoginActivity";
@@ -52,64 +71,60 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_actvity);
+        ButterKnife.bind(this);
 
-        UpdootComponent component = ((UpdootApplication) getApplication()).getUpdootComponent();
-        component.inject(this);
+        ((UpdootApplication) getApplication()).getUpdootComponent().inject(this);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Log.i(TAG, "onCreate: ");
 
-
-        ProgressBar progressBar = findViewById(R.id.login_progress);
-        WebView webView = findViewById(R.id.webView);
-
         CookieManager.getInstance().removeAllCookies(null);
         CookieManager.getInstance().flush();
 
-        String url = getAuthUrl();
-
-        webView.loadUrl(url);
-
+        webView.loadUrl(getAuthUrl());
         webView.setWebViewClient(new WebViewClient() {
-
-
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 Log.i(TAG, "onPageStarted: login " + url);
                 Uri uri = Uri.parse(url);
                 if (uri.getHost() != null && uri.getHost().equals(Uri.parse(constants.redirect_uri).getHost())) {
-                    webView.stopLoading();
-                    webView.setVisibility(View.GONE);
-                    progressBar.setVisibility(View.VISIBLE);
-                    final String code = uri.getQueryParameter("code");
-                    disposable.add(authAPI
-                            .getUserToken(constants.TOKEN_ACCESS_URL, Credentials.basic(constants.client_id, ""), constants.user_grantType, code, constants.redirect_uri)
-                            .doOnSuccess(token -> {
-                                mToken = token;
-                                token.setAbsolute_expiry();
-                                component.getTokenInterceptor().setSessionToken(token, "temp");
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString(constants.LOGIN_STATE, "temp");
-                                editor.apply();
-                            })
-                            .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
-                            .flatMap(__ -> component.getRedditAPI())
-                            .flatMap(redditAPI::getUserIdentity)
-                            .doOnSuccess(account -> {
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString(constants.LOGIN_STATE, account.getName());
-                                editor.apply();
-                                component.getTokenInterceptor().setSessionToken(mToken, account.getName());
-                                createAccount(account.getName(), mToken);
-                                setResult(RESULT_OK);
-                                finish();
-                            })
-                            .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
-                            .subscribeOn(Schedulers.io())
-                            .subscribe()
-                    );
+                    if (uri.getQueryParameter("error") == null) {
+                        webView.stopLoading();
+                        webView.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.VISIBLE);
+                        final String code = uri.getQueryParameter("code");
+                        disposable.add(authAPI.get()
+                                        .getUserToken(
+                                                constants.TOKEN_ACCESS_URL,
+                                                Credentials.basic(constants.client_id, ""),
+                                                constants.user_grantType,
+                                                code,
+                                                constants.redirect_uri
+                                        )
+                                        .doOnSuccess(token -> {
+                                            mToken = token;
+                                            token.setAbsolute_expiry();
+                                            interceptor.get().setSessionToken(token);
+                                        })
+                                        .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
+                                        .map(__ -> redditAPILazy.get())
+                                        .flatMap(redditAPI::getUserIdentity)
+                                        .doOnSuccess(account -> {
+                                            sharedPreferences.get().edit().putString(constants.LOGIN_STATE, account.getName()).apply();
+//                                    component.getTokenInterceptor().setSessionToken(mToken);
+                                            createAccount(account.getName(), mToken);
+                                            setResult(RESULT_OK);
+                                            finish();
+                                        })
+                                        .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
+                                        .subscribeOn(Schedulers.io())
+                                        .subscribe()
+                        );
+                    } else {
+                        Log.i(TAG, "onPageStarted: ");
+                        finish();
+                    }
                 }
             }
         });
@@ -120,17 +135,8 @@ public class LoginActivity extends AppCompatActivity {
         Account user_account = new Account(username, constants.ACCOUNT_TYPE);
         Bundle bundle = new Bundle();
         bundle.putString(constants.USER_TOKEN_REFRESH_KEY, token.getRefresh_token());
-        AccountManager am = AccountManager.get(this);
-        am.addAccountExplicitly(user_account, null, bundle);
-        am.setAuthToken(user_account, "full_access", token.getAccess_token());
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (!disposable.isDisposed()) {
-            disposable.dispose();
-        }
+        accountManager.get().addAccountExplicitly(user_account, null, bundle);
+        accountManager.get().setAuthToken(user_account, "full_access", token.getAccess_token());
     }
 
     // for not reloading on config change
@@ -140,7 +146,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public String getAuthUrl() {
-        state = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
         return new Uri.Builder()
                 .scheme("https")
                 .authority("www.reddit.com")
@@ -156,5 +162,14 @@ public class LoginActivity extends AppCompatActivity {
                 .build()
                 .toString();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!disposable.isDisposed()) {
+            disposable.dispose();
+        }
+    }
+
 
 }

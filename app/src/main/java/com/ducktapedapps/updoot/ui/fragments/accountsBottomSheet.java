@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 public class accountsBottomSheet extends BottomSheetDialogFragment {
 
+    private static final String TAG = "accountsBottomSheet";
     @Inject
     AccountManager accountManager;
 
@@ -52,6 +53,7 @@ public class accountsBottomSheet extends BottomSheetDialogFragment {
         });
         return view;
     }
+
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog) {

@@ -1,9 +1,10 @@
-package com.ducktapedapps.updoot.utils;
+package com.ducktapedapps.updoot.utils.accountManagement;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import com.ducktapedapps.updoot.api.authAPI;
 import com.ducktapedapps.updoot.ui.LoginActivity;
+import com.ducktapedapps.updoot.utils.constants;
 
 import javax.inject.Inject;
 
@@ -25,7 +27,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     authAPI authAPI;
     private Context mContext;
 
-    public Authenticator(Context context) {
+    Authenticator(Context context) {
         super(context);
         this.mContext = context;
     }
@@ -89,6 +91,18 @@ public class Authenticator extends AbstractAccountAuthenticator {
         Bundle retBundle = new Bundle();
         retBundle.putParcelable(AccountManager.KEY_INTENT, intent);
         return retBundle;
+    }
+
+    @Override
+    public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response, Account account) throws NetworkErrorException {
+        if (account.name.equals(constants.ANON_USER)) {
+            Bundle result = new Bundle();
+            //restrict anon account removal from settings
+            //https://stackoverflow.com/questions/9841525/is-it-possible-to-override-the-accounts-sync-remove-account-functionality
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+            return result;
+        }
+        return super.getAccountRemovalAllowed(response, account);
     }
 
     @Override

@@ -23,14 +23,22 @@ import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.viewModels.submissionsVM;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 public class homeFragment extends Fragment {
-
-
     private static final String TAG = "homeFragment";
+
+    @BindView(R.id.recyclerView)
+    RecyclerView recyclerView;
+    @BindView(R.id.progress_circular)
+    ProgressBar progressBar;
+    private Unbinder unbinder;
+
     private submissionsAdapter adapter;
     private LinearLayoutManager linearLayoutManager;
     private submissionsVM viewModel;
-    private RecyclerView recyclerView;
 
     public static homeFragment newInstance() {
 
@@ -50,18 +58,13 @@ public class homeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.home_fragment, container, false);
-
-        ProgressBar progressBar = view.findViewById(R.id.progress_circular);
-
-        recyclerView = view.findViewById(R.id.recyclerView);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        unbinder = ButterKnife.bind(this, view);
 
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-
         adapter = new submissionsAdapter(getActivity());
         recyclerView.setAdapter(adapter);
-
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -70,7 +73,7 @@ public class homeFragment extends Fragment {
                 if (dy > 0) {
                     int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
                     int totalItems = linearLayoutManager.getItemCount();
-                    // 5 is next page prefetch threshold
+                    // 10 is next page prefetch threshold
                     if (totalItems <= 10) {
                         //condition for no more pages
                         return;
@@ -84,7 +87,7 @@ public class homeFragment extends Fragment {
             }
         });
 
-        //todo : use dagger to inject viewmodel
+        //todo : use dagger to inject viewModel
         viewModel = ViewModelProviders.of(this).get(submissionsVM.class);
         viewModel.getState().observe(this, state -> {
             switch (state) {
@@ -110,6 +113,12 @@ public class homeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
     public void reload() {
         viewModel.reload(null);
     }
@@ -124,32 +133,27 @@ public class homeFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.best:
-                Log.i(TAG, "onOptionsItemSelected: best");
                 viewModel.reload(constants.BEST);
                 break;
             case R.id.hot:
-                Log.i(TAG, "onOptionsItemSelected: hot");
                 viewModel.reload(constants.HOT);
                 break;
             case R.id.New:
                 viewModel.reload(constants.NEW);
-                Log.i(TAG, "onOptionsItemSelected: new");
                 break;
             case R.id.rising:
                 viewModel.reload(constants.RISING);
-                Log.i(TAG, "onOptionsItemSelected: rising");
                 break;
             case R.id.controversial:
                 viewModel.reload(constants.CONTROVERSIAL);
-                Log.i(TAG, "onOptionsItemSelected: controversial");
                 break;
             case R.id.top:
                 viewModel.reload(constants.TOP);
-                Log.i(TAG, "onOptionsItemSelected: top");
                 break;
         }
         return true;
     }
+
 
 }
 
