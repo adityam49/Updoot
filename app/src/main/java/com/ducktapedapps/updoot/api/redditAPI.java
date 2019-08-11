@@ -3,8 +3,12 @@ package com.ducktapedapps.updoot.api;
 import com.ducktapedapps.updoot.model.account;
 import com.ducktapedapps.updoot.model.thing;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -14,7 +18,17 @@ public interface redditAPI {
     Single<account> getUserIdentity();
 
     @GET("r/{subreddit}/{sort}")
-    Single<thing> getSubreddit(@Path("subreddit") String subreddit, @Path("sort") String sort, @Query("after") String after);
+    Single<thing> getSubreddit(
+            @Path("subreddit") String subreddit,
+            @Path("sort") String sort,
+            @Query("after") String after);
+
+    @FormUrlEncoded
+    @POST("/api/vote")
+    Completable castVote(
+            @Field("id") String thing_id,
+            @Field("dir") int vote_direction
+    );
 
     @GET("{sort}")
     Single<thing> getFrontPage(
