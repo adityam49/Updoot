@@ -15,13 +15,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.swipeUtils;
 import com.ducktapedapps.updoot.viewModels.submissionsVM;
+
+import org.jetbrains.annotations.NotNull;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,29 +70,30 @@ public class homeFragment extends Fragment {
         adapter = new submissionsAdapter(getActivity());
         recyclerView.setAdapter(adapter);
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                //check for scroll down
-                if (dy > 0) {
-                    int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
-                    int totalItems = linearLayoutManager.getItemCount();
-                    // 10 is next page prefetch threshold
-                    if (totalItems <= 10) {
-                        //condition for no more pages
-                        return;
-                    }
-                    if (lastVisiblePosition == totalItems - 10
-                            && !viewModel.getState().getValue().equals(constants.LOADING_STATE)
-                            && viewModel.getHasNextPage().getValue()) {
-                        viewModel.loadNextPage();
-                    }
-                }
-            }
-        });
-
-        //todo : use dagger to inject viewModel
         viewModel = ViewModelProviders.of(this).get(submissionsVM.class);
+
+        new ItemTouchHelper(new swipeUtils(getActivity(), new swipeUtils.swipeActionCallback() {
+            @Override
+            public void performSlightLeftSwipeAction(int adapterPosition) {
+                viewModel.castVote(adapterPosition, -1);
+            }
+
+            @Override
+            public void performSlightRightSwipeAction(int adapterPosition) {
+                viewModel.castVote(adapterPosition, 1);
+            }
+
+            @Override
+            public void performLeftSwipeAction(int adapterPosition) {
+
+            }
+
+            @Override
+            public void performRightSwipeAction(int adapterPosition) {
+
+            }
+        })).attachToRecyclerView(recyclerView);
+
         viewModel.getState().observe(this, state -> {
             switch (state) {
                 case constants.LOADING_STATE:
@@ -98,25 +103,40 @@ public class homeFragment extends Fragment {
                     progressBar.setVisibility(View.GONE);
                     break;
                 default:
+                    Toast.makeText(getActivity(), state, Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
-                    Log.i(TAG, "error " + state);
-                    Toast.makeText(getActivity(), "Something went wrong!", Toast.LENGTH_LONG).show();
                     break;
             }
         });
         viewModel.getAllSubmissions().observe(this, things -> {
-            Log.i(TAG, "onChanged: ");
-            if (things != null) {
-                adapter.submitList(things);
+            if (things != null) adapter.submitList(things);
+        });
+
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NotNull RecyclerView recyclerView, int dx, int dy) {
+                //check for scroll down
+                if (dy > 0) {
+                    int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
+                    int totalItems = linearLayoutManager.getItemCount();
+
+                    // 10 is next page prefetch threshold
+                    if (totalItems <= 10) return; //condition for no more pages
+
+                    if (lastVisiblePosition == totalItems - 10) {
+                        if ((viewModel.getState().getValue() != null && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) &&
+                                (viewModel.getHasNextPage().getValue() != null && viewModel.getHasNextPage().getValue())) {
+                            viewModel.loadNextPage();
+                        }
+                    }
+                }
             }
         });
-        return view;
-    }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unbinder.unbind();
+        adapter.setOnItemClickListener(data -> Log.i(TAG, "onItemClick: " + data));
+
+        return view;
     }
 
     public void reload() {
@@ -154,6 +174,10 @@ public class homeFragment extends Fragment {
         return true;
     }
 
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
 }
 

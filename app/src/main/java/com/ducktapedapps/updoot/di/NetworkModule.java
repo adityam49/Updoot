@@ -5,7 +5,6 @@ import com.ducktapedapps.updoot.model.thing;
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.utils.thingDeserializer;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -15,6 +14,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -36,9 +36,15 @@ class NetworkModule {
         OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
         okHttpClient.addNetworkInterceptor(tokenInterceptor);
 
-        //for logging requests and stetho
+
+        okHttpClient.addNetworkInterceptor(chain -> {
+            //as per reddit api guidelines to include proper user agent
+            String userAgent = "android:com.ducktapedapps.updoot:" + BuildConfig.VERSION_NAME + " (by /u/nothoneypot)";
+            Request request = chain.request().newBuilder().addHeader("User-Agent", userAgent).build();
+            return chain.proceed(request);
+        });
+
         if (BuildConfig.DEBUG) {
-            okHttpClient.addNetworkInterceptor(new StethoInterceptor());
             HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
             httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.BASIC);
             okHttpClient.addInterceptor(httpLoggingInterceptor);

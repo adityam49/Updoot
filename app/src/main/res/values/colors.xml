@@ -23,6 +23,10 @@
     <color name="secondaryLightColor">#83b9ff</color>
     <color name="secondaryDarkColor">#005ecb</color>
 
-
+    <!--reddit colors-->
+    <color name="upVoteColor">#FF8B60</color>
+    <color name="downVoteColor">#9494FF</color>
+    <color name="saveContentColor">#FFB100</color>
+    <color name="neutralColor">#C6C6C6</color>
 </resources>
 

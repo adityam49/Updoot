@@ -7,7 +7,6 @@ import com.ducktapedapps.updoot.di.ApplicationModule;
 import com.ducktapedapps.updoot.di.DaggerUpdootComponent;
 import com.ducktapedapps.updoot.di.UpdootComponent;
 import com.ducktapedapps.updoot.utils.constants;
-import com.facebook.stetho.Stetho;
 
 import java.util.UUID;
 
@@ -17,9 +16,6 @@ public class UpdootApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (BuildConfig.DEBUG) {
-            Stetho.initializeWithDefaults(this);
-        }
         getUpdootComponent().inject(this);
         createDeviceId();
     }

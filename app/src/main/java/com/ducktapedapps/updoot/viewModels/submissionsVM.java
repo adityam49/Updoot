@@ -15,7 +15,9 @@ import com.ducktapedapps.updoot.utils.constants;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class submissionsVM extends AndroidViewModel {
@@ -62,7 +64,7 @@ public class submissionsVM extends AndroidViewModel {
     public void loadNextPage() {
         disposable.add(
                 frontPageRepo
-                        .loadNextPage("all", getSorting().getValue(), getAfter())
+                        .loadNextPage(getSorting().getValue(), getAfter())
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
                                 after.postValue(((ListingData) thing.getData()).getAfter());
@@ -103,6 +105,43 @@ public class submissionsVM extends AndroidViewModel {
                         }));
     }
 
+
+    public void castVote(int index, int direction) {
+        if (allSubmissions.getValue() != null) {
+            LinkData data = allSubmissions.getValue().get(index);
+            if (data != null) {
+                final List<LinkData> currentSubmissions = allSubmissions.getValue();
+                frontPageRepo
+                        .castVote(data, direction)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new CompletableObserver() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                LinkData updateData = currentSubmissions.get(index);
+                                updateData = updateData.vote(direction);
+                                currentSubmissions.set(index, updateData);
+                                allSubmissions.postValue(currentSubmissions);
+                                disposable.add(d);
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable throwable) {
+                                LinkData originalData = currentSubmissions.get(index);
+                                originalData = originalData.vote(direction);
+                                currentSubmissions.set(index, originalData);
+                                allSubmissions.postValue(currentSubmissions);
+                                Log.e(TAG, "castVote: ", throwable);
+                            }
+                        });
+            }
+        }
+    }
+
     public void reload(String sort) {
         if (sort == null) {
             sorting.setValue(constants.TOP);
@@ -112,7 +151,6 @@ public class submissionsVM extends AndroidViewModel {
         after.setValue(null);
         allSubmissions.setValue(null);
         loadNextPage();
-
     }
 
     @Override
