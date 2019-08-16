@@ -12,5 +12,6 @@
     <string name="accounts">Accounts</string>
     <string name="login">Login</string>
 
-    <string name="upVoteSuffix">%dk</string>
+    <string name="thousandSuffix">%dk</string>
+    <string name="thumbnailDescription">Submission Thumbnail</string>
 </resources>

@@ -28,4 +28,8 @@
         <item name="android:textColorPrimary">@color/DT_primaryTextColor</item>
         <item name="android:textColorSecondary">@color/DT_secondaryTextColor</item>
     </style>
+
+    <style name="altDarkTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="altDarkTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -27,8 +26,9 @@ import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
 public class swipeUtils extends ItemTouchHelper.Callback {
     private static final String TAG = "swipeUtils";
     private boolean swipeBack = false;
-
     private swipeActionCallback swipeActionCallback;
+    private int performActionIndex = 0; // left = -2 ,slightLeft = -1 ,slightRight = 1 , right = 2
+
 
     private Paint paint;
     private int upVoteColor;
@@ -37,6 +37,7 @@ public class swipeUtils extends ItemTouchHelper.Callback {
     private int optionsColor;
     private Bitmap upVoteIcon;
     private Bitmap downVoteIcon;
+    private Bitmap saveIcon;
 
     public swipeUtils(Context context, swipeActionCallback callback) {
         super();
@@ -58,8 +59,9 @@ public class swipeUtils extends ItemTouchHelper.Callback {
 
     private void init(Context context) {
         paint = new Paint();
-        upVoteIcon = getBitmap(context, R.drawable.ic_upvote);
-        downVoteIcon = getBitmap(context, R.drawable.ic_downvote);
+        upVoteIcon = getBitmap(context, R.drawable.ic_upvote_24dp);
+        downVoteIcon = getBitmap(context, R.drawable.ic_downvote_24dp);
+        saveIcon = getBitmap(context, R.drawable.ic_star_black_24dp);
         upVoteColor = ContextCompat.getColor(context, R.color.upVoteColor);
         downVoteColor = ContextCompat.getColor(context, R.color.downVoteColor);
         saveContentColor = ContextCompat.getColor(context, R.color.saveContentColor);
@@ -85,48 +87,67 @@ public class swipeUtils extends ItemTouchHelper.Callback {
             float secondThreshold = itemViewWidth * 0.6f;
 
             if (dX > 0) {
-
                 // right swipe
                 paint.setColor(upVoteColor);
                 if (dX < firstThreshold) {
                     paint.setAlpha((int) (255 * (dX / firstThreshold))); //right swipe cancel threshold of 20%
-                    c.drawRoundRect(itemViewLeft, itemViewTop, dX, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewLeft, itemViewTop, dX, itemViewBottom, paint);
                 } else if (dX > firstThreshold && dX <= secondThreshold) {
-                    c.drawRoundRect(itemViewLeft, itemViewTop, dX, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewLeft, itemViewTop, dX, itemViewBottom, paint);
                     c.drawBitmap(upVoteIcon,
                             itemViewLeft + itemViewWidth * 0.1f,
                             itemViewTop + (itemViewBottom - itemViewTop - upVoteIcon.getHeight()) / 2,
                             null);
                 } else if (dX >= secondThreshold) {
                     paint.setColor(saveContentColor); // swiped right more than 60%
-                    c.drawRoundRect(itemViewLeft, itemViewTop, dX, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewLeft, itemViewTop, dX, itemViewBottom, paint);
+                    c.drawBitmap(saveIcon,
+                            itemViewLeft + itemViewWidth * 0.1f,
+                            itemViewTop + (itemViewBottom - itemViewTop - upVoteIcon.getHeight()) / 2,
+                            null);
                 }
-            } else {
-
+            } else if (dX < 0) {
                 // left swipe
                 paint.setColor(downVoteColor);
                 if (dX > -firstThreshold) {
                     paint.setAlpha((int) (255 * (-dX / firstThreshold))); // left swipe cancel threshold of 20%
-                    c.drawRoundRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, paint);
                 } else if (dX < -firstThreshold && dX > -secondThreshold) {
-                    c.drawRoundRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, paint);
                     c.drawBitmap(downVoteIcon,
                             itemViewRight - itemViewWidth * 0.1f - downVoteIcon.getWidth(),
                             itemViewTop + (itemViewBottom - itemViewTop - downVoteIcon.getHeight()) / 2,
                             null);
-                    Log.i(TAG, "onChildDraw: left is " + itemViewRight + " padding is " + (itemViewRight - itemViewWidth * 0.1f));
                 } else if (dX <= -secondThreshold) {
                     paint.setColor(optionsColor); // swiped left more than 60%
-                    c.drawRoundRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, 16, 16, paint);
+                    c.drawRect(itemViewRight + dX, itemViewTop, itemViewRight, itemViewBottom, paint);
+                }
+            } else {// when view is back to og position
+                switch (performActionIndex) {
+                    case -2:
+                        swipeActionCallback.performLeftSwipeAction(viewHolder.getAdapterPosition());
+                        break;
+                    case -1:
+                        swipeActionCallback.performSlightLeftSwipeAction(viewHolder.getAdapterPosition());
+                        break;
+                    case 1:
+                        swipeActionCallback.performSlightRightSwipeAction(viewHolder.getAdapterPosition());
+                        break;
+                    case 2:
+                        swipeActionCallback.performRightSwipeAction(viewHolder.getAdapterPosition());
+                        break;
+                }
+                if (performActionIndex != 0) {
+                    performActionIndex = 0;
                 }
             }
-            setTouchListener(c, recyclerView, dX, viewHolder);
+            setTouchListener(c, recyclerView, dX);
         }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void setTouchListener(@NotNull Canvas c, @NotNull RecyclerView recyclerView, float dX, RecyclerView.ViewHolder viewHolder) {
+    private void setTouchListener(@NotNull Canvas c, @NotNull RecyclerView recyclerView, float dX) {
         recyclerView.setOnTouchListener((v, event) -> {
             swipeBack = event.getAction() == MotionEvent.ACTION_UP;
             if (swipeBack) {
@@ -136,25 +157,25 @@ public class swipeUtils extends ItemTouchHelper.Callback {
                 if (dX < 0) { // swipe left
                     if (dX > -firstThreshold)
                         return false; // left swipe action cancel threshold is 20%
-
                     if (dX > -secondThreshold) { // left swipe less than 60%
-                        swipeActionCallback.performSlightLeftSwipeAction(viewHolder.getAdapterPosition());
+                        performActionIndex = -1;
                     } else { // left swipe more than 50%
-                        swipeActionCallback.performLeftSwipeAction(viewHolder.getAdapterPosition());
+                        performActionIndex = -2;
                     }
                 } else { // swipe right
                     if (dX < firstThreshold)
                         return false; // right swipe action cancel threshold is 20%
                     if (dX > firstThreshold && dX < secondThreshold) { // right swipe less than 60%
-                        swipeActionCallback.performSlightRightSwipeAction(viewHolder.getAdapterPosition());
+                        performActionIndex = 1;
                     } else { // right swipe more than 60%
-                        swipeActionCallback.performRightSwipeAction(viewHolder.getAdapterPosition());
+                        performActionIndex = 2;
                     }
                 }
             }
             return false;
         });
     }
+
 
     @Override
     public int convertToAbsoluteDirection(int flags, int layoutDirection) {

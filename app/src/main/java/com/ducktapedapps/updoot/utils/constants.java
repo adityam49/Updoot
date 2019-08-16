@@ -37,4 +37,6 @@ public class constants {
 
     public static final String ACCOUNT_TYPE = "updoot_account";
     public static final String ANON_USER = "Anonymous";
+
+    public static final String DIFF_VOTE_KEY = "diff_vote_key";
 }

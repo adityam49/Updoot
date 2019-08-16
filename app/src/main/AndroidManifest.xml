@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-
     <application
         android:name=".UpdootApplication"
         android:allowBackup="false"
@@ -18,14 +17,14 @@
         android:theme="@style/altDarkTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-
         <service
             android:name=".utils.accountManagement.AuthenticationService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
@@ -34,7 +33,6 @@
         <activity
             android:name=".ui.LoginActivity"
             android:configChanges="orientation|screenSize" />
-
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
