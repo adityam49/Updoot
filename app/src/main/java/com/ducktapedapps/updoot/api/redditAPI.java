@@ -21,7 +21,15 @@ public interface redditAPI {
     Single<thing> getSubreddit(
             @Path("subreddit") String subreddit,
             @Path("sort") String sort,
+            @Query("t") String time,
             @Query("after") String after);
+
+    @GET("{sort}")
+    Single<thing> getFrontPage(
+            @Path("sort") String userId,
+            @Query("t") String time,
+            @Query("after") String after
+    );
 
     @FormUrlEncoded
     @POST("/api/vote")
@@ -30,10 +38,16 @@ public interface redditAPI {
             @Field("dir") int vote_direction
     );
 
-    @GET("{sort}")
-    Single<thing> getFrontPage(
-            @Path("sort") String userId,
-            @Query("after") String after
+    @FormUrlEncoded
+    @POST("/api/save")
+    Completable save(
+            @Field("id") String id
+    );
+
+    @FormUrlEncoded
+    @POST("/api/unsave")
+    Completable unsave(
+            @Field("id") String id
     );
 
 }

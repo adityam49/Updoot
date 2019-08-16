@@ -36,7 +36,7 @@ public class accountsBottomSheet extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.accounts_modal_bottom_sheet, container, false);
 
-        ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
+        ((UpdootApplication) inflater.getContext().getApplicationContext()).getUpdootComponent().inject(this);
         List<String> allAccounts = new ArrayList<>();
         for (Account account : accountManager.getAccounts()) {
             allAccounts.add(account.name);
@@ -53,7 +53,6 @@ public class accountsBottomSheet extends BottomSheetDialogFragment {
         });
         return view;
     }
-
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog) {

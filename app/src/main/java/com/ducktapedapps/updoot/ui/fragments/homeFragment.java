@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.ui.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,11 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ducktapedapps.updoot.R;
+import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.utils.swipeUtils;
@@ -33,10 +34,11 @@ import butterknife.Unbinder;
 
 public class homeFragment extends Fragment {
     private static final String TAG = "homeFragment";
+    public static final String SUBREDDIT_KEY = "subreddit_key";
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
-    @BindView(R.id.progress_circular)
+    @BindView(R.id.progressBar)
     ProgressBar progressBar;
     private Unbinder unbinder;
 
@@ -45,9 +47,7 @@ public class homeFragment extends Fragment {
     private submissionsVM viewModel;
 
     public static homeFragment newInstance() {
-
         Bundle args = new Bundle();
-
         homeFragment fragment = new homeFragment();
         fragment.setArguments(args);
         return fragment;
@@ -67,6 +67,7 @@ public class homeFragment extends Fragment {
 
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), RecyclerView.VERTICAL));
         adapter = new submissionsAdapter(getActivity());
         recyclerView.setAdapter(adapter);
 
@@ -85,12 +86,11 @@ public class homeFragment extends Fragment {
 
             @Override
             public void performLeftSwipeAction(int adapterPosition) {
-
             }
 
             @Override
             public void performRightSwipeAction(int adapterPosition) {
-
+                viewModel.save(adapterPosition);
             }
         })).attachToRecyclerView(recyclerView);
 
@@ -108,10 +108,7 @@ public class homeFragment extends Fragment {
                     break;
             }
         });
-        viewModel.getAllSubmissions().observe(this, things -> {
-            if (things != null) adapter.submitList(things);
-        });
-
+        viewModel.getAllSubmissions().observe(this, things -> adapter.submitList(things));
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -125,8 +122,7 @@ public class homeFragment extends Fragment {
                     if (totalItems <= 10) return; //condition for no more pages
 
                     if (lastVisiblePosition == totalItems - 10) {
-                        if ((viewModel.getState().getValue() != null && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) &&
-                                (viewModel.getHasNextPage().getValue() != null && viewModel.getHasNextPage().getValue())) {
+                        if ((viewModel.getState().getValue() != null && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) && viewModel.getAfter() != null) {
                             viewModel.loadNextPage();
                         }
                     }
@@ -134,7 +130,17 @@ public class homeFragment extends Fragment {
             }
         });
 
-        adapter.setOnItemClickListener(data -> Log.i(TAG, "onItemClick: " + data));
+        viewModel.getToastMessage().observe(this, message -> Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show());
+
+        adapter.setOnItemClickListener(new submissionsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(LinkData data) {
+            }
+
+            @Override
+            public void onSubredditClick(LinkData data) {
+            }
+        });
 
         return view;
     }

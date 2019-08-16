@@ -26,27 +26,28 @@ public class submissionsVM extends AndroidViewModel {
     private static final String TAG = "submissionsVM";
     private submissionRepo frontPageRepo;
 
-    private MutableLiveData<String> after = new MutableLiveData<>();
-    private MutableLiveData<String> sorting = new MutableLiveData<>();
-    private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>();
+    //    private MutableLiveData<String> after = new MutableLiveData<>();
+    private String after;
+    private String sorting;
+    private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<String> state = new MutableLiveData<>();
-    private MutableLiveData<Boolean> hasNextPage = new MutableLiveData<>();
+    private MutableLiveData<String> toastMessage = new MutableLiveData<>();
 
     public submissionsVM(Application application) {
         super(application);
         frontPageRepo = new submissionRepo(application);
-        hasNextPage.setValue(null);
-        after.setValue(null);
-        sorting.setValue(constants.TOP);
+//        after.setValue(null);
+        after = null;
+        sorting = constants.TOP;
         loadNextPage();
     }
 
-    private MutableLiveData<String> getSorting() {
-        return sorting;
+    public MutableLiveData<String> getToastMessage() {
+        return toastMessage;
     }
 
-    public MutableLiveData<Boolean> getHasNextPage() {
-        return hasNextPage;
+    private String getSorting() {
+        return sorting;
     }
 
     public MutableLiveData<String> getState() {
@@ -57,22 +58,17 @@ public class submissionsVM extends AndroidViewModel {
         return allSubmissions;
     }
 
-    private String getAfter() {
-        return this.after.getValue();
+    public String getAfter() {
+        return this.after;
     }
 
     public void loadNextPage() {
         disposable.add(
                 frontPageRepo
-                        .loadNextPage(getSorting().getValue(), getAfter())
+                        .loadNextPage(sorting, after)
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
-                                after.postValue(((ListingData) thing.getData()).getAfter());
-                                if (((ListingData) thing.getData()).getAfter() != null) {
-                                    hasNextPage.postValue(true);
-                                } else {
-                                    hasNextPage.postValue(false);
-                                }
+                                after = ((ListingData) thing.getData()).getAfter();
                                 return ((ListingData) thing.getData()).getChildren();
                             } else {
                                 throw new Exception("unsupported response");
@@ -142,13 +138,54 @@ public class submissionsVM extends AndroidViewModel {
         }
     }
 
+    public void save(int index) {
+        if (allSubmissions.getValue() != null) {
+            LinkData data = allSubmissions.getValue().get(index);
+            if (data != null) {
+                final List<LinkData> currentSubmissions = getAllSubmissions().getValue();
+                frontPageRepo
+                        .save(data)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new CompletableObserver() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                disposable.add(d);
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                LinkData updatedData = allSubmissions.getValue().get(index);
+                                updatedData = updatedData.save();
+                                currentSubmissions.set(index, updatedData);
+                                allSubmissions.postValue(currentSubmissions);
+                                if (updatedData.getSaved()) {
+                                    toastMessage.postValue("Submission saved!");
+                                } else {
+                                    toastMessage.postValue("Submission unsaved!");
+                                }
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                LinkData updatedData = allSubmissions.getValue().get(index);
+                                updatedData = updatedData.save();
+                                currentSubmissions.set(index, updatedData);
+                                allSubmissions.postValue(currentSubmissions);
+                                toastMessage.postValue("Error saving submission");
+                            }
+                        });
+            }
+        }
+    }
+
     public void reload(String sort) {
         if (sort == null) {
-            sorting.setValue(constants.TOP);
+            sorting = constants.TOP;
         } else {
-            sorting.setValue(sort);
+            sorting = sort;
         }
-        after.setValue(null);
+        after = null;
+//        after.setValue(null);
         allSubmissions.setValue(null);
         loadNextPage();
     }

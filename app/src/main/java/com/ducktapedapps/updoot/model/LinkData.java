@@ -9,6 +9,10 @@ public class LinkData implements data {
     private final String subreddit_name_prefixed;
     private final String name;
     private final String thumbnail;
+    private final boolean saved;
+    private final long created_utc;
+    private final int num_comments;
+    private final gildings gildings;
 
     public String getSubreddit() {
         return this.subreddit_name_prefixed;
@@ -18,7 +22,7 @@ public class LinkData implements data {
         return thumbnail;
     }
 
-    LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail) {
+    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings) {
         this.title = title;
         this.author = author;
         this.ups = ups;
@@ -26,6 +30,18 @@ public class LinkData implements data {
         this.subreddit_name_prefixed = subreddit_name_prefixed;
         this.name = name;
         this.thumbnail = thumbnail;
+        this.saved = saved;
+        this.created_utc = created;
+        this.num_comments = num_comments;
+        this.gildings = gildings;
+    }
+
+    public int getCommentsCount() {
+        return num_comments;
+    }
+
+    public long getCreated() {
+        return this.created_utc;
     }
 
     public Boolean getLikes() {
@@ -46,6 +62,40 @@ public class LinkData implements data {
 
     public int getUps() {
         return this.ups;
+    }
+
+    public boolean getSaved() {
+        return this.saved;
+    }
+
+    public gildings getGildings() {
+        return gildings;
+    }
+
+    public String getCustomRelativeTime() {
+        long currentTime = System.currentTimeMillis();
+        long created = this.created_utc * 1000;
+        if (currentTime - created >= 31556926000L) {
+            return (currentTime - created) / 31556926000L + "Y";
+        } else {
+            if (currentTime - created >= 2629743000L) {
+                return (currentTime - created) / 2629743000L + "M";
+            } else {
+                if (currentTime - created >= 604800000L) {
+                    return (currentTime - created) / 604800000L + "W";
+                } else {
+                    if (currentTime - created >= 86400000L) {
+                        return (currentTime - created) / 86400000L + "D";
+                    } else {
+                        if (currentTime - created >= 3600000L) {
+                            return (currentTime - created) / 3600000L + "H";
+                        } else {
+                            return (currentTime - created) / 60000L + "M";
+                        }
+                    }
+                }
+            }
+        }
     }
 
     //DiffUtils mutability hackaround :: https://stackoverflow.com/questions/54493764/pagedlistadapter-does-not-update-list-if-just-the-content-of-an-item-changes
@@ -84,7 +134,42 @@ public class LinkData implements data {
                 updatedLikes,
                 this.subreddit_name_prefixed,
                 this.name,
-                this.thumbnail
+                this.thumbnail,
+                this.saved,
+                this.created_utc,
+                num_comments,
+                this.gildings
+        );
+    }
+
+    public LinkData save() {
+        if (this.saved) {
+            return new LinkData(
+                    this.title,
+                    this.author,
+                    this.ups,
+                    this.likes,
+                    this.subreddit_name_prefixed,
+                    this.name,
+                    this.thumbnail,
+                    false,
+                    this.created_utc,
+                    this.num_comments,
+                    this.gildings
+            );
+        }
+        return new LinkData(
+                this.title,
+                this.author,
+                this.ups,
+                this.likes,
+                this.subreddit_name_prefixed,
+                this.name,
+                this.thumbnail,
+                true,
+                this.created_utc,
+                this.num_comments,
+                this.gildings
         );
     }
 
@@ -99,6 +184,8 @@ public class LinkData implements data {
                 ", subreddit_name_prefixed='" + subreddit_name_prefixed + '\'' +
                 ", name='" + name + '\'' +
                 ", thumbnail='" + thumbnail + '\'' +
+                ", saved=" + saved +
+                ", created=" + created_utc +
                 '}';
     }
 }

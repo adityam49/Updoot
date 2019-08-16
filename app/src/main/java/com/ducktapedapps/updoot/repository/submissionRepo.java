@@ -25,7 +25,20 @@ public class submissionRepo {
     public Single<thing> loadNextPage(String sort, String nextPage) {
         return updootComponent
                 .getRedditAPI()
-                .flatMap(redditAPI -> redditAPI.getFrontPage(sort, nextPage));
+                .flatMap(redditAPI -> redditAPI.getFrontPage(sort, "month", nextPage));
+    }
+
+    public Completable save(LinkData linkData) {
+        if (!linkData.getSaved()) {
+            return updootComponent
+                    .getRedditAPI()
+                    .flatMapCompletable(redditAPI -> redditAPI.save(linkData.getName()));
+
+        }
+        return updootComponent
+                .getRedditAPI()
+                .flatMapCompletable(redditAPI -> redditAPI.unsave(linkData.getName()));
+
     }
 
     public Completable castVote(LinkData linkData, int direction) {

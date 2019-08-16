@@ -16,7 +16,7 @@
     <color name="DT_primaryLightColor">#2d2d33</color>
     <color name="DT_primaryDarkColor">#232329</color>
     <color name="DT_primaryTextColor">#ffffff</color>
-    <color name="DT_secondaryTextColor">#ffffff</color>
+    <color name="DT_secondaryTextColor">#757575</color>
 
     <!--accent color-->
     <color name="secondaryColor">#448aff</color>
