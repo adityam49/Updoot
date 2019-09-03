@@ -20,34 +20,34 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class submissionsVM extends AndroidViewModel {
+public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM {
 
     private CompositeDisposable disposable = new CompositeDisposable();
     private static final String TAG = "submissionsVM";
     private submissionRepo frontPageRepo;
 
-    //    private MutableLiveData<String> after = new MutableLiveData<>();
+    private final String subreddit;
     private String after;
     private String sorting;
+    private String currentAccount;
+    private String time;
     private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<String> state = new MutableLiveData<>();
     private MutableLiveData<String> toastMessage = new MutableLiveData<>();
 
-    public submissionsVM(Application application) {
+    public submissionsVM(Application application, String subreddit) {
         super(application);
         frontPageRepo = new submissionRepo(application);
-//        after.setValue(null);
         after = null;
-        sorting = constants.TOP;
+        time = null;
+        currentAccount = null;
+        this.subreddit = subreddit;
+        sorting = constants.HOT;
         loadNextPage();
     }
 
     public MutableLiveData<String> getToastMessage() {
         return toastMessage;
-    }
-
-    private String getSorting() {
-        return sorting;
     }
 
     public MutableLiveData<String> getState() {
@@ -58,6 +58,15 @@ public class submissionsVM extends AndroidViewModel {
         return allSubmissions;
     }
 
+
+    public String getCurrentAccount() {
+        return currentAccount;
+    }
+
+    public void setCurrentAccount(String currentAccount) {
+        this.currentAccount = currentAccount;
+    }
+
     public String getAfter() {
         return this.after;
     }
@@ -65,7 +74,7 @@ public class submissionsVM extends AndroidViewModel {
     public void loadNextPage() {
         disposable.add(
                 frontPageRepo
-                        .loadNextPage(sorting, after)
+                        .loadNextPage(subreddit, sorting, time, after)
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
                                 after = ((ListingData) thing.getData()).getAfter();
@@ -178,11 +187,14 @@ public class submissionsVM extends AndroidViewModel {
         }
     }
 
-    public void reload(String sort) {
+    public void reload(String sort, String time) {
         if (sort == null) {
-            sorting = constants.TOP;
+            sorting = constants.HOT;
         } else {
             sorting = sort;
+            if (time != null) {
+                this.time = time;
+            }
         }
         after = null;
 //        after.setValue(null);

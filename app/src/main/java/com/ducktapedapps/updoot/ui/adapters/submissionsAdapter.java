@@ -3,10 +3,11 @@ package com.ducktapedapps.updoot.ui.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,7 +61,7 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
         mContext = context;
     }
 
-    // DiffUtils don't calculate diff if passed with same list object
+    // DiffUtils doesn't calculate diff if passed with same list object
     // https://stackoverflow.com/questions/49726385/listadapter-not-updating-item-in-reyclerview/50062174#50062174
     @Override
     public void submitList(List<LinkData> list) {
@@ -72,10 +73,9 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
     @NonNull
     @Override
     public submissionsAdapter.submissionHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.linear_submissions, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.linear_submissions_item, parent, false);
         return new submissionHolder(view);
     }
-
 
     @Override
     public void onBindViewHolder(@NonNull submissionHolder holder, int position, @NonNull List<Object> payloads) {
@@ -111,39 +111,28 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
 
     public interface OnItemClickListener {
         void onItemClick(LinkData data);
-
-        void onSubredditClick(LinkData data);
     }
 
     class submissionHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.silverGildingsView)
-        Button silverGildingsView;
+        TextView silverGildingsView;
         @BindView(R.id.goldGildingsView)
-        Button goldGildingsView;
+        TextView goldGildingsView;
         @BindView(R.id.platinumGildingsView)
-        Button platinumGildingsView;
-        @BindView(R.id.commentCountButton)
-        Button commentsCountButton;
-        @BindView(R.id.uploadTimeView)
-        Button uploadTimeView;
+        TextView platinumGildingsView;
         @BindView(R.id.title_tv)
         TextView titleTv;
         @BindView(R.id.score_tv)
         TextView scoreTv;
-        @BindView(R.id.thumbnail)
+        @BindView(R.id.mediaPreview)
         ImageView thumbnail;
-        @BindView(R.id.subredditTv)
-        TextView subredditTv;
+        @BindView(R.id.metadata)
+        TextView metadata_tv;
 
         @OnClick(R.id.submissionsView)
         void OnClick() {
             mListener.onItemClick(getItem(getAdapterPosition()));
-        }
-
-        @OnClick(R.id.subredditTv)
-        void OnSubredditClick() {
-            mListener.onSubredditClick(getItem(getAdapterPosition()));
         }
 
         submissionHolder(View view) {
@@ -152,22 +141,25 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
         }
 
         void bind(LinkData data) {
-            switch (data.getThumbnail()) {
-                case "":
-                case "nsfw":
-                case "self":
-                    thumbnail.setImageResource(R.drawable.ic_selftext);
-                    break;
-                case "default":  //reddit api has "default" value for a link submission
-                    thumbnail.setImageResource(R.drawable.ic_link);
-                    break;
-                default:
-                    Glide
-                            .with(mContext)
-                            .load(data.getThumbnail())
-                            .apply(RequestOptions.circleCropTransform())
-                            .error(R.drawable.ic_image_error)
-                            .into(thumbnail);
+            long startTime = System.currentTimeMillis();
+            if (data.getThumbnail() != null) {
+                switch (data.getThumbnail()) {
+                    case "self":
+                        thumbnail.setImageResource(R.drawable.ic_selftext);
+                        break;
+                    case "default": //links
+                        thumbnail.setImageResource(R.drawable.ic_link);
+                        break;
+                    default:
+                        Glide
+                                .with(mContext)
+                                .load(data.getThumbnail())
+                                .apply(RequestOptions.circleCropTransform())
+                                .error(R.drawable.ic_image_error)
+                                .into(thumbnail);
+                }
+            } else {
+                thumbnail.setImageResource(R.drawable.ic_image_error);
             }
             if (data.getUps() > 999) {
                 scoreTv.setText(mContext.getResources().getString(R.string.thousandSuffix, data.getUps() / 1000));
@@ -183,14 +175,19 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
                 scoreTv.setTextColor(ContextCompat.getColor(mContext, R.color.downVoteColor));
             }
 
-            if (data.getCommentsCount() > 999) {
-                commentsCountButton.setText(mContext.getResources().getString(R.string.thousandSuffix, data.getCommentsCount() / 1000));
-            } else {
-                commentsCountButton.setText(String.valueOf(data.getCommentsCount()));
-            }
             titleTv.setText(data.getTitle());
-            uploadTimeView.setText(data.getCustomRelativeTime());
-            subredditTv.setText(data.getSubreddit());
+            StringBuilder metadata = new StringBuilder().append(data.getSubreddit_name_prefixed());
+            metadata.append(" \u2022 ");
+            if (data.getCommentsCount() > 999) {
+                metadata.append(mContext.getString(R.string.comments_abrv, mContext.getString(R.string.thousandSuffix, data.getCommentsCount() / 1000)));
+            } else {
+                metadata.append(mContext.getString(R.string.comments_abrv, String.valueOf(data.getCommentsCount())));
+            }
+            metadata.append(" \u2022 ");
+
+            metadata.append(DateUtils.getRelativeTimeSpanString(data.getCreated() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)).append(" ");
+
+            metadata_tv.setText(metadata.toString());
             if (data.getGildings().getSilver() == 0) {
                 silverGildingsView.setVisibility(View.GONE);
             } else {
@@ -203,13 +200,15 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
                 goldGildingsView.setVisibility(View.VISIBLE);
                 goldGildingsView.setText(String.valueOf(data.getGildings().getGold()));
             }
-
             if (data.getGildings().getPlatinum() == 0) {
                 platinumGildingsView.setVisibility(View.GONE);
             } else {
                 platinumGildingsView.setVisibility(View.VISIBLE);
                 platinumGildingsView.setText(String.valueOf(data.getGildings().getPlatinum()));
             }
+
+            long endTime = System.currentTimeMillis();
+            Log.i(TAG, "bind: time " + (endTime - startTime));
         }
     }
 }

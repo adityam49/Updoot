@@ -10,4 +10,6 @@
 .DS_Store
 /build
 /captures
+/app/src/main/res/drawable/doggo.jpg
 .externalNativeBuild
+/app/build/output/apk/debug/app-dubug.apk

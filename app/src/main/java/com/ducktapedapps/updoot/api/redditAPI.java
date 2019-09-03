@@ -17,19 +17,12 @@ public interface redditAPI {
     @GET("/api/v1/me")
     Single<account> getUserIdentity();
 
-    @GET("r/{subreddit}/{sort}")
+    @GET("{subreddit}/{sort}")
     Single<thing> getSubreddit(
             @Path("subreddit") String subreddit,
             @Path("sort") String sort,
             @Query("t") String time,
             @Query("after") String after);
-
-    @GET("{sort}")
-    Single<thing> getFrontPage(
-            @Path("sort") String userId,
-            @Query("t") String time,
-            @Query("after") String after
-    );
 
     @FormUrlEncoded
     @POST("/api/vote")

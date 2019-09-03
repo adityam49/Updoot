@@ -22,10 +22,10 @@ public class submissionRepo {
         updootComponent = ((UpdootApplication) application).getUpdootComponent();
     }
 
-    public Single<thing> loadNextPage(String sort, String nextPage) {
+    public Single<thing> loadNextPage(String subreddit, String sort, String time, String nextPage) {
         return updootComponent
                 .getRedditAPI()
-                .flatMap(redditAPI -> redditAPI.getFrontPage(sort, "month", nextPage));
+                .flatMap(redditAPI -> redditAPI.getSubreddit(subreddit, sort, time, nextPage));
     }
 
     public Completable save(LinkData linkData) {

@@ -1,6 +1,8 @@
 package com.ducktapedapps.updoot.model;
 
-public class thing {
+import java.io.Serializable;
+
+public class thing implements Serializable {
     private String kind;
     private data data;
 

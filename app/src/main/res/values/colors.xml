@@ -9,7 +9,7 @@
     <color name="LT_primaryLightColor">#ffffff</color>
     <color name="LT_primaryDarkColor">#c2c2c2</color>
     <color name="LT_primaryTextColor">#000000</color>
-    <color name="LT_secondaryTextColor">#000000</color>
+    <color name="LT_secondaryTextColor">#757575</color>
 
     <!--alternate dark theme colors-->
     <color name="DT_primaryColor">#232329</color>
@@ -19,7 +19,7 @@
     <color name="DT_secondaryTextColor">#757575</color>
 
     <!--accent color-->
-    <color name="secondaryColor">#448aff</color>
+    <color name="secondaryColor">#2196f3</color>
     <color name="secondaryLightColor">#83b9ff</color>
     <color name="secondaryDarkColor">#005ecb</color>
 

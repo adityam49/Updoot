@@ -19,7 +19,7 @@ public class userManager {
     private final AccountManager accountManager;
     private final SharedPreferences sharedPreferences;
     private final TokenInterceptor interceptor;
-    private OnAccountListUpdated mListener;
+    private AccountChangeListener mListener;
 
     @Inject
     public userManager(AccountManager accountManager, SharedPreferences sharedPreferences, TokenInterceptor interceptor) {
@@ -28,7 +28,7 @@ public class userManager {
         this.interceptor = interceptor;
     }
 
-    public OnAccountListUpdated getmListener() {
+    public AccountChangeListener getmListener() {
         return mListener;
     }
 
@@ -59,15 +59,16 @@ public class userManager {
         accountManager.addAccountExplicitly(new Account(constants.ANON_USER, constants.ACCOUNT_TYPE), null, null);
     }
 
+
     public void updateUserSessionData(Token token) {
         interceptor.setSessionToken(token);
     }
 
     public void attachListener(Context context) {
-        mListener = (OnAccountListUpdated) context;
+        mListener = (AccountChangeListener) context;
     }
 
-    public interface OnAccountListUpdated {
-        void currentAccountRemoved();
+    public interface AccountChangeListener {
+        void onCurrentAccountRemoved();
     }
 }
