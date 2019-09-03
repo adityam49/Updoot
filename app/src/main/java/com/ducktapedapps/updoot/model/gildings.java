@@ -2,7 +2,9 @@ package com.ducktapedapps.updoot.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class gildings {
+import java.io.Serializable;
+
+public class gildings implements Serializable {
     @SerializedName("gid_1")
     private int silver;
     @SerializedName("gid_2")
@@ -20,5 +22,14 @@ public class gildings {
 
     public int getSilver() {
         return this.silver;
+    }
+
+    @Override
+    public String toString() {
+        return "gildings{" +
+                "silver=" + silver +
+                ", gold=" + gold +
+                ", platinum=" + platinum +
+                '}';
     }
 }

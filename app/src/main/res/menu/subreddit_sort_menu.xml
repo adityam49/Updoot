@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/hot"
+        android:title="@string/Hot" />
+
+    <item
+        android:id="@+id/best"
+        android:title="@string/Best" />
+
+    <item
+        android:id="@+id/New"
+        android:title="@string/New" />
+
+    <item
+        android:id="@+id/rising"
+        android:title="@string/Rising" />
+
+    <item android:title="@string/Controversial">
+        <menu>
+            <item
+                android:id="@+id/controversial_hour"
+                android:title="@string/now" />
+
+            <item
+                android:id="@+id/controversial_day"
+                android:title="@string/today" />
+
+            <item
+                android:id="@+id/controversial_week"
+                android:title="@string/this_week" />
+
+            <item
+                android:id="@+id/controversial_month"
+                android:title="@string/this_month" />
+
+            <item
+                android:id="@+id/controversial_year"
+                android:title="@string/this_year" />
+
+            <item
+                android:id="@+id/controversial_all_time"
+                android:title="@string/all_time" />
+        </menu>
+    </item>
+
+    <item android:title="@string/Top">
+        <menu>
+            <item
+                android:id="@+id/top_hour"
+                android:title="@string/now" />
+
+            <item
+                android:id="@+id/top_day"
+                android:title="@string/today" />
+
+            <item
+                android:id="@+id/top_week"
+                android:title="@string/this_week" />
+
+            <item
+                android:id="@+id/top_month"
+                android:title="@string/this_month" />
+
+            <item
+                android:id="@+id/top_year"
+                android:title="@string/this_year" />
+
+            <item
+                android:id="@+id/top_all_time"
+                android:title="@string/all_time" />
+        </menu>
+    </item>
+</menu>

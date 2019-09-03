@@ -1,12 +1,12 @@
 package com.ducktapedapps.updoot.model;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Token {
+import java.io.Serializable;
+
+public class Token implements Serializable {
     private static final String TAG = "Token";
     private String access_token;
     private String refresh_token;
@@ -26,7 +26,6 @@ public class Token {
 
     //for user token
     public Token(String access_token, String refresh_token, long absolute_expiry, String token_type) {
-        Log.i(TAG, "Token: aditya");
         this.access_token = access_token;
         this.refresh_token = refresh_token;
         this.absolute_expiry = absolute_expiry;

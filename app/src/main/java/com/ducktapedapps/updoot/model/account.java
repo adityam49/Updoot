@@ -2,7 +2,9 @@ package com.ducktapedapps.updoot.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class account {
+import java.io.Serializable;
+
+public class account implements Serializable {
     @SerializedName("name")
     private String name;
 

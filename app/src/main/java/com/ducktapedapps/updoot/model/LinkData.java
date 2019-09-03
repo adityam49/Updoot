@@ -1,8 +1,11 @@
 package com.ducktapedapps.updoot.model;
 
-public class LinkData implements data {
+import java.io.Serializable;
+
+public class LinkData implements data, Serializable {
     private static final String TAG = "LinkData";
     private final String title;
+    private final String selftext;
     private final String author;
     private final int ups;
     private final Boolean likes;
@@ -13,6 +16,8 @@ public class LinkData implements data {
     private final long created_utc;
     private final int num_comments;
     private final gildings gildings;
+    private final preview preview;
+    private final String post_hint;
 
     public String getSubreddit() {
         return this.subreddit_name_prefixed;
@@ -22,7 +27,7 @@ public class LinkData implements data {
         return thumbnail;
     }
 
-    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings) {
+    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings, String selfText, preview p, String post_hint) {
         this.title = title;
         this.author = author;
         this.ups = ups;
@@ -34,6 +39,17 @@ public class LinkData implements data {
         this.created_utc = created;
         this.num_comments = num_comments;
         this.gildings = gildings;
+        this.selftext = selfText;
+        this.preview = p;
+        this.post_hint = post_hint;
+    }
+
+    public String getSelftext() {
+        return selftext;
+    }
+
+    public String getSubreddit_name_prefixed() {
+        return subreddit_name_prefixed;
     }
 
     public int getCommentsCount() {
@@ -72,30 +88,12 @@ public class LinkData implements data {
         return gildings;
     }
 
-    public String getCustomRelativeTime() {
-        long currentTime = System.currentTimeMillis();
-        long created = this.created_utc * 1000;
-        if (currentTime - created >= 31556926000L) {
-            return (currentTime - created) / 31556926000L + "Y";
-        } else {
-            if (currentTime - created >= 2629743000L) {
-                return (currentTime - created) / 2629743000L + "M";
-            } else {
-                if (currentTime - created >= 604800000L) {
-                    return (currentTime - created) / 604800000L + "W";
-                } else {
-                    if (currentTime - created >= 86400000L) {
-                        return (currentTime - created) / 86400000L + "D";
-                    } else {
-                        if (currentTime - created >= 3600000L) {
-                            return (currentTime - created) / 3600000L + "H";
-                        } else {
-                            return (currentTime - created) / 60000L + "M";
-                        }
-                    }
-                }
-            }
-        }
+    public preview getPreview() {
+        return preview;
+    }
+
+    public String getPost_hint() {
+        return post_hint;
     }
 
     //DiffUtils mutability hackaround :: https://stackoverflow.com/questions/54493764/pagedlistadapter-does-not-update-list-if-just-the-content-of-an-item-changes
@@ -138,26 +136,14 @@ public class LinkData implements data {
                 this.saved,
                 this.created_utc,
                 num_comments,
-                this.gildings
+                this.gildings,
+                this.selftext,
+                this.preview,
+                this.post_hint
         );
     }
 
     public LinkData save() {
-        if (this.saved) {
-            return new LinkData(
-                    this.title,
-                    this.author,
-                    this.ups,
-                    this.likes,
-                    this.subreddit_name_prefixed,
-                    this.name,
-                    this.thumbnail,
-                    false,
-                    this.created_utc,
-                    this.num_comments,
-                    this.gildings
-            );
-        }
         return new LinkData(
                 this.title,
                 this.author,
@@ -166,10 +152,13 @@ public class LinkData implements data {
                 this.subreddit_name_prefixed,
                 this.name,
                 this.thumbnail,
-                true,
+                !this.saved,
                 this.created_utc,
                 this.num_comments,
-                this.gildings
+                this.gildings,
+                this.selftext,
+                this.preview,
+                this.post_hint
         );
     }
 
@@ -178,6 +167,7 @@ public class LinkData implements data {
     public String toString() {
         return "LinkData{" +
                 "title='" + title + '\'' +
+                ", selftext='" + selftext + '\'' +
                 ", author='" + author + '\'' +
                 ", ups=" + ups +
                 ", likes=" + likes +
@@ -185,7 +175,11 @@ public class LinkData implements data {
                 ", name='" + name + '\'' +
                 ", thumbnail='" + thumbnail + '\'' +
                 ", saved=" + saved +
-                ", created=" + created_utc +
+                ", created_utc=" + created_utc +
+                ", num_comments=" + num_comments +
+                ", gildings=" + gildings +
+                ", preview=" + preview +
+                ", post_hint='" + post_hint + '\'' +
                 '}';
     }
 }

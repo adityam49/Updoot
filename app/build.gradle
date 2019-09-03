@@ -12,7 +12,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -29,11 +29,12 @@ dependencies {
     def butterKnife_version = "10.1.0"
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    //android support libs
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta03'
     implementation 'com.google.android.material:material:1.1.0-alpha09'
-    implementation 'com.android.support:design:28.0.0'
 
     //android arch
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
@@ -64,6 +65,9 @@ dependencies {
     //View binding -> butterKnife
     implementation "com.jakewharton:butterknife:$butterKnife_version"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife_version"
+
+    //slidr for slide to dismiss
+    implementation 'com.r0adkll:slidableactivity:2.0.6'
 
     //testing
     testImplementation 'junit:junit:4.13-beta-3'

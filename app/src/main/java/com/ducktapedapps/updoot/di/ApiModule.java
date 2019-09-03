@@ -60,7 +60,7 @@ class ApiModule {
                     Log.i(TAG, "provideAccountManager: setting current account as an        on");
                     userManager.get().setCurrentUser(constants.ANON_USER, null);
                     if (userManager.get().getmListener() != null)
-                        userManager.get().getmListener().currentAccountRemoved();
+                        userManager.get().getmListener().onCurrentAccountRemoved();
                 }
             }
 

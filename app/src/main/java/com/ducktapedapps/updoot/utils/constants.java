@@ -33,6 +33,14 @@ public class constants {
     public static final String BEST = "best";
     public static final String CONTROVERSIAL = "controversial";
 
+    //submissions sort time
+    public static final String NOW = "hour";
+    public static final String TODAY = "day";
+    public static final String THIS_WEEK = "week";
+    public static final String THIS_MONTH = "month";
+    public static final String THIS_YEAR = "year";
+    public static final String ALL_TIME = "all";
+
     public static final int ACCOUNT_LOGIN_REQUEST_CODE = 99;
 
     public static final String ACCOUNT_TYPE = "updoot_account";

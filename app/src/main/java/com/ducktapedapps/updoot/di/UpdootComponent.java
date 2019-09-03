@@ -8,7 +8,7 @@ import com.ducktapedapps.updoot.ui.LoginActivity;
 import com.ducktapedapps.updoot.ui.MainActivity;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
-import com.ducktapedapps.updoot.ui.fragments.homeFragment;
+import com.ducktapedapps.updoot.ui.fragments.subredditFragment;
 
 import javax.inject.Singleton;
 
@@ -27,7 +27,7 @@ public interface UpdootComponent {
 
     void inject(LoginActivity loginActivity);
 
-    void inject(homeFragment homeFragment);
+    void inject(subredditFragment subredditFragment);
 
     void inject(accountsBottomSheet accountsBottomSheet);
 
@@ -38,7 +38,5 @@ public interface UpdootComponent {
     SharedPreferences getSharedPreferences();
 
     Single<redditAPI> getRedditAPI();
-
-
 }
 

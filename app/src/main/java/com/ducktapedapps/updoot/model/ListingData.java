@@ -1,8 +1,9 @@
 package com.ducktapedapps.updoot.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ListingData implements data {
+public class ListingData implements data, Serializable {
     private String after;
     private List<thing> children;
 
