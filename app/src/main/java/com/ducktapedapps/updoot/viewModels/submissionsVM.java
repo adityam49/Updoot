@@ -10,6 +10,7 @@ import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.model.ListingData;
 import com.ducktapedapps.updoot.model.thing;
 import com.ducktapedapps.updoot.repository.submissionRepo;
+import com.ducktapedapps.updoot.utils.SingleEventPublisher;
 import com.ducktapedapps.updoot.utils.constants;
 
 import java.util.ArrayList;
@@ -33,9 +34,9 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
     private String time;
     private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<String> state = new MutableLiveData<>();
-    private MutableLiveData<String> toastMessage = new MutableLiveData<>();
+    private MutableLiveData<SingleEventPublisher<String>> toastMessage = new MutableLiveData<>(new SingleEventPublisher<>(null));
 
-    public submissionsVM(Application application, String subreddit) {
+    submissionsVM(Application application, String subreddit) {
         super(application);
         frontPageRepo = new submissionRepo(application);
         after = null;
@@ -46,7 +47,7 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         loadNextPage();
     }
 
-    public MutableLiveData<String> getToastMessage() {
+    public MutableLiveData<SingleEventPublisher<String>> getToastMessage() {
         return toastMessage;
     }
 
@@ -78,17 +79,14 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                         .map(thing -> {
                             if (thing.getData() instanceof ListingData) {
                                 after = ((ListingData) thing.getData()).getAfter();
-                                return ((ListingData) thing.getData()).getChildren();
+                                List<LinkData> linkDataList = new ArrayList<>();
+                                for (thing linkThing : ((ListingData) thing.getData()).getChildren()) {
+                                    linkDataList.add(((LinkData) linkThing.getData()));
+                                }
+                                return linkDataList;
                             } else {
                                 throw new Exception("unsupported response");
                             }
-                        })
-                        .map(things -> {
-                            List<LinkData> linkDataList = new ArrayList<>();
-                            for (thing thing : things) {
-                                linkDataList.add(((LinkData) thing.getData()));
-                            }
-                            return linkDataList;
                         })
                         .map(linkDataList -> {
                             List<LinkData> submissions = allSubmissions.getValue();
@@ -108,6 +106,7 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                             Log.e(TAG, "onError: ", throwable.getCause());
                             state.postValue(throwable.getMessage());
                         }));
+
     }
 
 
@@ -115,7 +114,17 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         if (allSubmissions.getValue() != null) {
             LinkData data = allSubmissions.getValue().get(index);
             if (data != null) {
+                if (data.isArchived()) {
+                    toastMessage.setValue(new SingleEventPublisher<>("Submission is archived!"));
+                    return;
+                }
+                if (data.isLocked()) {
+                    toastMessage.setValue(new SingleEventPublisher<>("Submission is locked!"));
+                    return;
+                }
+
                 final List<LinkData> currentSubmissions = allSubmissions.getValue();
+
                 frontPageRepo
                         .castVote(data, direction)
                         .subscribeOn(Schedulers.io())
@@ -168,9 +177,9 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                                 currentSubmissions.set(index, updatedData);
                                 allSubmissions.postValue(currentSubmissions);
                                 if (updatedData.getSaved()) {
-                                    toastMessage.postValue("Submission saved!");
+                                    toastMessage.postValue(new SingleEventPublisher<>("Submission saved!"));
                                 } else {
-                                    toastMessage.postValue("Submission unsaved!");
+                                    toastMessage.postValue(new SingleEventPublisher<>("Submission unsaved!"));
                                 }
                             }
 
@@ -180,7 +189,7 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                                 updatedData = updatedData.save();
                                 currentSubmissions.set(index, updatedData);
                                 allSubmissions.postValue(currentSubmissions);
-                                toastMessage.postValue("Error saving submission");
+                                toastMessage.postValue(new SingleEventPublisher<>("Error saving submission"));
                             }
                         });
             }
@@ -197,7 +206,6 @@ public class submissionsVM extends AndroidViewModel implements InfiniteScrollVM 
             }
         }
         after = null;
-//        after.setValue(null);
         allSubmissions.setValue(null);
         loadNextPage();
     }

@@ -68,7 +68,6 @@ class ApiModule {
         return accountManager;
     }
 
-    //
     @Provides
     static Single<redditAPI> provideRedditAPI(final Lazy<redditAPI> redditAPILazy, final Lazy<authAPI> authAPILazy, TokenInterceptor interceptor, userManager userManager, SharedPreferences sharedPreferences, AccountManager accountManager) {
         Account account = userManager.getCurrentUser();

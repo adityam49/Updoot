@@ -43,5 +43,11 @@ public interface redditAPI {
             @Field("id") String id
     );
 
+    @GET("{subreddit}/comments/{id}")
+    Single<thing> getComments(
+            @Path("subreddit") String subreddit,
+            @Path("id") String submissions_id
+    );
+
 }
 

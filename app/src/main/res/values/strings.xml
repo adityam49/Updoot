@@ -29,6 +29,6 @@
     <string name="viewType">View Type</string>
     <string name="settings">Settings</string>
 
-    <string name="comments_abrv">%s Cmts</string>
+    <string name="commentsAbbreviation">%s Cmnts</string>
 
 </resources>

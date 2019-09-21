@@ -6,58 +6,37 @@
     android:id="@+id/submissionsView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
     app:cardBackgroundColor="?attr/colorSecondary">
+
+    <FrameLayout
+        android:id="@+id/revel_more_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/title_tv"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:paddingBottom="8dp"
+            android:scaleType="fitEnd"
+            android:src="@drawable/ic_expand_more_black_14dp" />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/mediaPreview"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:contentDescription="@string/thumbnailDescription"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@drawable/ic_selftext" />
-
-    <TextView
-        android:id="@+id/score_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="123k" />
-
-    <TextView
-        android:id="@+id/title_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:textColor="?android:textColorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/score_tv"
-        app:layout_constraintStart_toEndOf="@+id/mediaPreview"
-        app:layout_constraintTop_toTopOf="@+id/mediaPreview"
-        tools:text="This is an example of a long title of a submission which spans over multiple lines" />
-
-
-    <TextView
-        android:id="@+id/metadata"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:textColor="@android:color/secondary_text_dark"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/title_tv"
-        app:layout_constraintTop_toBottomOf="@id/title_tv"
-        tools:text="r/changemyview \u2022 1kCmts \u2022 1Y" />
 
 
     <TextView
@@ -67,6 +46,7 @@
         android:layout_marginStart="2dp"
         android:drawableStart="@drawable/ic_silver_gilding_14dp"
         android:textSize="12sp"
+
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/metadata"
         app:layout_constraintTop_toTopOf="@id/metadata"
@@ -84,6 +64,7 @@
         app:layout_constraintStart_toEndOf="@id/silverGildingsView"
         app:layout_constraintTop_toTopOf="@id/metadata"
         tools:text="3"
+
         tools:visibility="visible" />
 
     <TextView
@@ -92,12 +73,89 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
         android:drawableStart="@drawable/ic_platinum_gilding_14dp"
+
         android:textSize="12sp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/goldGildingsView"
         app:layout_constraintTop_toTopOf="@id/metadata"
         tools:text="3"
         tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/score_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/title_tv"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="12k" />
+
+    <TextView
+        android:id="@+id/title_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="?android:textColorPrimary"
+        app:layout_constraintEnd_toStartOf="@+id/score_tv"
+        app:layout_constraintStart_toEndOf="@+id/mediaPreview"
+        app:layout_constraintTop_toTopOf="@+id/mediaPreview"
+        tools:text="This is an example of a long title of a submission which spans over multiple lines" />
+
+    <TextView
+        android:id="@+id/metadata"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/barrier"
+        app:layout_constraintStart_toStartOf="@id/title_tv"
+        app:layout_constraintTop_toBottomOf="@id/title_tv"
+        tools:text="r/changemyview \u2022 1kCmts \u2022 1Y" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/selftext_cardView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="horizontal"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/selfText_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoLink="all"
+            android:padding="16dp"
+            android:visibility="gone"
+            tools:text="On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain."
+            tools:visibility="visible" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/selftext_cardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/metadata" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
