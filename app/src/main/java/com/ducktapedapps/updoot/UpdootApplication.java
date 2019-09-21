@@ -12,7 +12,6 @@ import java.util.UUID;
 
 public class UpdootApplication extends Application {
     private UpdootComponent mUpdootComponent;
-
     @Override
     public void onCreate() {
         super.onCreate();

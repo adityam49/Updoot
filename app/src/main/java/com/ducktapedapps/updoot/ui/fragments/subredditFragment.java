@@ -18,11 +18,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
+import com.ducktapedapps.updoot.utils.CustomItemAnimator;
 import com.ducktapedapps.updoot.utils.InfinteScrollListener;
 import com.ducktapedapps.updoot.utils.constants;
 import com.ducktapedapps.updoot.utils.swipeUtils;
@@ -48,6 +50,8 @@ public class subredditFragment extends Fragment {
     RecyclerView recyclerView;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+    @BindView(R.id.swipeToRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Inject
     Application appContext;
@@ -61,10 +65,10 @@ public class subredditFragment extends Fragment {
     private boolean isBaseFragment;
 
 
-    public static subredditFragment newInstance(String subreddit, boolean isFragmentAtBase) {
+    public static subredditFragment newInstance(String subreddit, boolean isFragmentAtStackBase) {
         Bundle args = new Bundle();
         args.putString(SUBREDDIT_KEY, subreddit);
-        args.putBoolean(IS_BASE_FRAG_KEY, isFragmentAtBase);
+        args.putBoolean(IS_BASE_FRAG_KEY, isFragmentAtStackBase);
         subredditFragment fragment = new subredditFragment();
         fragment.setArguments(args);
         return fragment;
@@ -73,7 +77,8 @@ public class subredditFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
+        if (getActivity() != null)
+            ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
         assert getArguments() != null;
         this.isBaseFragment = getArguments().getBoolean(IS_BASE_FRAG_KEY);
         if (!isBaseFragment)
@@ -86,17 +91,9 @@ public class subredditFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume: ");
-        if (slidrInterface == null && !isBaseFragment) {
+        if (slidrInterface == null && !isBaseFragment && getView() != null) {
             slidrInterface = Slidr.replace(getView().findViewById(R.id.subredditFragment), slidrConfig);
-
         }
-    }
-
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
     }
 
     @Nullable
@@ -105,15 +102,19 @@ public class subredditFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_subreddit, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        submissionsVM = new ViewModelProvider(this, new submissionsVMFactory(appContext, getArguments().getString(SUBREDDIT_KEY))).get(submissionsVM.class);
-        ActivityVM activityVM = new ViewModelProvider(this.getActivity()).get(ActivityVM.class);
-        submissionsVM.setCurrentAccount(activityVM.getCurrentAccount().getValue());
+        setUpViewModel();
 
+        setUpRecyclerView();
+
+        return view;
+    }
+
+    private void setUpRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new submissionsAdapter(getActivity());
+        adapter = new submissionsAdapter(subredditFragment.this.getContext());
         recyclerView.setAdapter(adapter);
-
+        recyclerView.setItemAnimator(new CustomItemAnimator());
         new ItemTouchHelper(new swipeUtils(getActivity(), new swipeUtils.swipeActionCallback() {
             @Override
             public void performSlightLeftSwipeAction(int adapterPosition) {
@@ -128,6 +129,7 @@ public class subredditFragment extends Fragment {
             @Override
             public void performLeftSwipeAction(int adapterPosition) {
                 LinkData data = adapter.getCurrentList().get(adapterPosition);
+                assert getArguments() != null;
                 if (!getArguments().get(SUBREDDIT_KEY).equals(data.getSubreddit_name_prefixed())) {
                     setHasOptionsMenu(false);
                     if (getFragmentManager() != null)
@@ -158,6 +160,32 @@ public class subredditFragment extends Fragment {
                         .addToBackStack(null)
                         .commit();
         });
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.DT_primaryColor,
+                R.color.secondaryColor,
+                R.color.secondaryDarkColor);
+        swipeRefreshLayout.setOnRefreshListener(this::reloadFragmentContent);
+    }
+
+    private void setUpViewModel() {
+        assert getArguments() != null; // new subreddit fragment can be created only via newInstance method call
+        submissionsVM = new ViewModelProvider(this, new submissionsVMFactory(appContext, getArguments().getString(SUBREDDIT_KEY))).get(submissionsVM.class);
+
+        if (this.getActivity() != null) {
+            ActivityVM activityVM = new ViewModelProvider(this.getActivity()).get(ActivityVM.class);
+            submissionsVM.setCurrentAccount(activityVM.getCurrentAccount().getValue());
+            activityVM.getCurrentAccount().observe(getViewLifecycleOwner(), account -> {
+                if (account != null) {
+                    if (submissionsVM.getCurrentAccount() == null || !submissionsVM.getCurrentAccount().equals(account)) {
+                        if (getFragmentManager() != null && getFragmentManager().getBackStackEntryCount() == Integer.parseInt(subredditFragment.this.getTag())) {
+                            Toast.makeText(appContext, account + " logged in!", Toast.LENGTH_SHORT).show();
+                            submissionsVM.setCurrentAccount(account);
+                            reloadFragmentContent();
+                        }
+                    }
+                }
+            });
+        }
 
         submissionsVM.getState().observe(getViewLifecycleOwner(), state -> {
             switch (state) {
@@ -165,9 +193,11 @@ public class subredditFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                     break;
                 case constants.SUCCESS_STATE:
+                    swipeRefreshLayout.setRefreshing(false);
                     progressBar.setVisibility(View.GONE);
                     break;
                 default:
+                    swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(getActivity(), state, Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     break;
@@ -175,22 +205,12 @@ public class subredditFragment extends Fragment {
         });
         submissionsVM.getAllSubmissions().observe(getViewLifecycleOwner(), things -> adapter.submitList(things));
 
-        submissionsVM.getToastMessage().observe(getViewLifecycleOwner(), message -> Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show());
-
-        activityVM.getCurrentAccount().observe(getViewLifecycleOwner(), account -> {
-            if (account != null) {
-                if (submissionsVM.getCurrentAccount() == null || !submissionsVM.getCurrentAccount().equals(account)) {
-                    if (getFragmentManager().getBackStackEntryCount() == Integer.parseInt(subredditFragment.this.getTag())) {
-                        Toast.makeText(appContext, account + " logged in!", Toast.LENGTH_SHORT).show();
-                        submissionsVM.setCurrentAccount(account);
-                        reloadFragmentContent();
-                    }
-                }
+        submissionsVM.getToastMessage().observe(getViewLifecycleOwner(), toastMessage -> {
+            String toast = toastMessage.getContentIfNotHandled();
+            if (toast != null) {
+                Toast.makeText(appContext, toast, Toast.LENGTH_SHORT).show();
             }
-
         });
-
-        return view;
     }
 
     private void reloadFragmentContent() {
@@ -198,7 +218,6 @@ public class subredditFragment extends Fragment {
     }
 
     public void inflateSortPopup(View popupSourceView) {
-        Log.i(TAG, "inflateSortPopup: " + popupSourceView);
         if (this.getContext() != null) {
             PopupMenu popup = new PopupMenu(this.getContext(), popupSourceView);
             MenuInflater inflater = popup.getMenuInflater();
@@ -285,12 +304,5 @@ public class subredditFragment extends Fragment {
         super.onDestroyView();
         unbinder.unbind();
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(TAG, "onDestroy: ");
-    }
-
 }
 

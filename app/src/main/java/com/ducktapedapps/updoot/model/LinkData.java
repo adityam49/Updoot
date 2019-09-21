@@ -1,12 +1,17 @@
 package com.ducktapedapps.updoot.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class LinkData implements data, Serializable {
     private static final String TAG = "LinkData";
     private final String title;
+    private final boolean archived;
+    @SerializedName("selftext_html")
     private final String selftext;
     private final String author;
+    private final boolean locked;
     private final int ups;
     private final Boolean likes;
     private final String subreddit_name_prefixed;
@@ -18,6 +23,8 @@ public class LinkData implements data, Serializable {
     private final gildings gildings;
     private final preview preview;
     private final String post_hint;
+    private final String id;
+    private final String url;
 
     public String getSubreddit() {
         return this.subreddit_name_prefixed;
@@ -27,7 +34,7 @@ public class LinkData implements data, Serializable {
         return thumbnail;
     }
 
-    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings, String selfText, preview p, String post_hint) {
+    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings, String selfText, preview p, String post_hint, String id, boolean archived, boolean locked, String url) {
         this.title = title;
         this.author = author;
         this.ups = ups;
@@ -42,6 +49,18 @@ public class LinkData implements data, Serializable {
         this.selftext = selfText;
         this.preview = p;
         this.post_hint = post_hint;
+        this.id = id;
+        this.archived = archived;
+        this.locked = locked;
+        this.url = url;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public boolean isLocked() {
+        return locked;
     }
 
     public String getSelftext() {
@@ -96,6 +115,14 @@ public class LinkData implements data, Serializable {
         return post_hint;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     //DiffUtils mutability hackaround :: https://stackoverflow.com/questions/54493764/pagedlistadapter-does-not-update-list-if-just-the-content-of-an-item-changes
     public LinkData vote(int direction) {
         Boolean updatedLikes = this.likes;
@@ -139,7 +166,11 @@ public class LinkData implements data, Serializable {
                 this.gildings,
                 this.selftext,
                 this.preview,
-                this.post_hint
+                this.post_hint,
+                this.id,
+                this.archived,
+                this.locked,
+                this.url
         );
     }
 
@@ -158,7 +189,12 @@ public class LinkData implements data, Serializable {
                 this.gildings,
                 this.selftext,
                 this.preview,
-                this.post_hint
+                this.post_hint,
+                this.id,
+                this.archived,
+                this.locked,
+                this.url
+
         );
     }
 
@@ -167,8 +203,10 @@ public class LinkData implements data, Serializable {
     public String toString() {
         return "LinkData{" +
                 "title='" + title + '\'' +
+                ", archived=" + archived +
                 ", selftext='" + selftext + '\'' +
                 ", author='" + author + '\'' +
+                ", locked=" + locked +
                 ", ups=" + ups +
                 ", likes=" + likes +
                 ", subreddit_name_prefixed='" + subreddit_name_prefixed + '\'' +
@@ -180,6 +218,8 @@ public class LinkData implements data, Serializable {
                 ", gildings=" + gildings +
                 ", preview=" + preview +
                 ", post_hint='" + post_hint + '\'' +
+                ", id='" + id + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

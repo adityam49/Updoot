@@ -4,14 +4,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
@@ -21,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.model.LinkData;
+import com.ducktapedapps.updoot.utils.MarkdownUtils;
 import com.ducktapedapps.updoot.utils.constants;
 
 import java.util.ArrayList;
@@ -29,6 +31,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter.submissionHolder> {
     private static final String TAG = "submissionsAdapter";
@@ -115,6 +120,8 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
 
     class submissionHolder extends RecyclerView.ViewHolder {
 
+        boolean selfTextExpanded = false;
+
         @BindView(R.id.silverGildingsView)
         TextView silverGildingsView;
         @BindView(R.id.goldGildingsView)
@@ -129,10 +136,29 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
         ImageView thumbnail;
         @BindView(R.id.metadata)
         TextView metadata_tv;
+        @BindView(R.id.revel_more_view)
+        FrameLayout revealMore;
+        @BindView(R.id.selftext_cardView)
+        CardView selfText_cardView;
+        @BindView(R.id.selfText_tv)
+        TextView selfText_Tv;
 
         @OnClick(R.id.submissionsView)
         void OnClick() {
             mListener.onItemClick(getItem(getAdapterPosition()));
+        }
+
+        @OnClick(R.id.revel_more_view)
+        void onClick() {
+            if (!selfTextExpanded) {
+                MarkdownUtils.decodeAndSet(getItem(getAdapterPosition()).getSelftext(), selfText_Tv);
+                selfText_cardView.setVisibility(VISIBLE);
+                selfText_Tv.setVisibility(VISIBLE);
+                selfTextExpanded = true;
+            } else {
+                selfText_cardView.setVisibility(GONE);
+                selfTextExpanded = false;
+            }
         }
 
         submissionHolder(View view) {
@@ -141,7 +167,6 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
         }
 
         void bind(LinkData data) {
-            long startTime = System.currentTimeMillis();
             if (data.getThumbnail() != null) {
                 switch (data.getThumbnail()) {
                     case "self":
@@ -179,9 +204,9 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
             StringBuilder metadata = new StringBuilder().append(data.getSubreddit_name_prefixed());
             metadata.append(" \u2022 ");
             if (data.getCommentsCount() > 999) {
-                metadata.append(mContext.getString(R.string.comments_abrv, mContext.getString(R.string.thousandSuffix, data.getCommentsCount() / 1000)));
+                metadata.append(mContext.getString(R.string.commentsAbbreviation, mContext.getString(R.string.thousandSuffix, data.getCommentsCount() / 1000)));
             } else {
-                metadata.append(mContext.getString(R.string.comments_abrv, String.valueOf(data.getCommentsCount())));
+                metadata.append(mContext.getString(R.string.commentsAbbreviation, String.valueOf(data.getCommentsCount())));
             }
             metadata.append(" \u2022 ");
 
@@ -189,26 +214,32 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
 
             metadata_tv.setText(metadata.toString());
             if (data.getGildings().getSilver() == 0) {
-                silverGildingsView.setVisibility(View.GONE);
+                silverGildingsView.setVisibility(GONE);
             } else {
-                silverGildingsView.setVisibility(View.VISIBLE);
+                silverGildingsView.setVisibility(VISIBLE);
                 silverGildingsView.setText(String.valueOf(data.getGildings().getSilver()));
             }
             if (data.getGildings().getGold() == 0) {
-                goldGildingsView.setVisibility(View.GONE);
+                goldGildingsView.setVisibility(GONE);
             } else {
-                goldGildingsView.setVisibility(View.VISIBLE);
+                goldGildingsView.setVisibility(VISIBLE);
                 goldGildingsView.setText(String.valueOf(data.getGildings().getGold()));
             }
             if (data.getGildings().getPlatinum() == 0) {
-                platinumGildingsView.setVisibility(View.GONE);
+                platinumGildingsView.setVisibility(GONE);
             } else {
-                platinumGildingsView.setVisibility(View.VISIBLE);
+                platinumGildingsView.setVisibility(VISIBLE);
                 platinumGildingsView.setText(String.valueOf(data.getGildings().getPlatinum()));
             }
 
-            long endTime = System.currentTimeMillis();
-            Log.i(TAG, "bind: time " + (endTime - startTime));
+            selfTextExpanded = false;
+            if (data.getSelftext() != null && !data.getSelftext().equals("")) {
+                revealMore.setVisibility(VISIBLE);
+                selfText_cardView.setVisibility(GONE);
+            } else {
+                selfText_cardView.setVisibility(GONE);
+                revealMore.setVisibility(GONE);
+            }
         }
     }
 }

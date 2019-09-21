@@ -33,7 +33,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements accountsBottomSheet.BottomSheetListener, AccountChangeListener {
     private static final String TAG = "MainActivity";
 
-    private ActivityVM viewmodel;
+    private ActivityVM viewModel;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.bottom_navigation_bar)
@@ -54,9 +54,22 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate: ");
         ((UpdootApplication) getApplication()).getUpdootComponent().inject(this);
+
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+
+        if (fragment == null) {
+            // empty string for subreddit gives frontpage as defined bu reddit api
+            fragment = subredditFragment.newInstance("", true);
+            fragmentManager
+                    .beginTransaction()
+                    .add(R.id.fragmentContainer, fragment, String.valueOf(0))
+                    .commit();
+        }
 
         bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -85,22 +98,9 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
             }
         });
 
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-
-        if (fragment == null) {
-            fragment = subredditFragment.newInstance("",
-                    true);
-            fragmentManager
-                    .beginTransaction()
-                    .add(R.id.fragmentContainer, fragment, String.valueOf(0))
-                    .commit();
-        }
-
         userManager.attachListener(this);
 
-        viewmodel = new ViewModelProvider(MainActivity.this).get(ActivityVM.class);
+        viewModel = new ViewModelProvider(this).get(ActivityVM.class);
     }
 
 
@@ -108,11 +108,11 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
     @Override
     public void onButtonClicked(String text) {
         if (text.equals("Add account")) {
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
             startActivityForResult(intent, constants.ACCOUNT_LOGIN_REQUEST_CODE);
         } else {
             userManager.setCurrentUser(text, null);
-            viewmodel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
+            viewModel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
         }
     }
 
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
     }
 
     private void reloadContent() {
-        viewmodel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
+        viewModel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
         reloadContent();
     }
 
-    Fragment getVisibleFragment() {
+    private Fragment getVisibleFragment() {
         String topFragmentTag = String.valueOf(getSupportFragmentManager().getBackStackEntryCount());
         return getSupportFragmentManager().findFragmentByTag(topFragmentTag);
     }

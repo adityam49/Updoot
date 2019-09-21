@@ -58,6 +58,7 @@
                 android:paddingStart="16dp"
                 android:paddingTop="16dp"
                 android:paddingEnd="16dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@id/selftext_cardView"
@@ -132,7 +133,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
                 android:background="?android:attr/textColorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -145,6 +145,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                android:scrollbars="horizontal"
                 android:visibility="gone"
                 app:cardCornerRadius="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -156,16 +157,32 @@
                     android:id="@+id/selfText_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoLink="all"
                     android:padding="16dp"
+                    android:visibility="gone"
                     tools:text="On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain."
-                    tools:visibility="visible" />
+                    tools:visibility="gone" />
+
+                <me.kaelaela.opengraphview.OpenGraphView
+                    android:id="@+id/richLinkPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    android:visibility="gone"
+                    app:cornerRadius="8dp"
+                    app:descTextColor="?android:attr/textColorSecondary"
+                    app:strokeColor="@android:color/transparent"
+                    app:titleColor="?android:attr/textColorPrimary"
+                    app:urlTextColor="?android:attr/textColorSecondary"
+                    tools:visibility="gone" />
             </androidx.cardview.widget.CardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                tools:listitem="@layout/comment_item"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/separator" />

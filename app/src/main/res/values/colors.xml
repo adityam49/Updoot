@@ -9,7 +9,7 @@
     <color name="LT_primaryLightColor">#ffffff</color>
     <color name="LT_primaryDarkColor">#c2c2c2</color>
     <color name="LT_primaryTextColor">#000000</color>
-    <color name="LT_secondaryTextColor">#757575</color>
+    <color name="LT_secondaryTextColor">#212121</color>
 
     <!--alternate dark theme colors-->
     <color name="DT_primaryColor">#232329</color>

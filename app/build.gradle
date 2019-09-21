@@ -7,12 +7,12 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
-        versionName "1.2"
+        versionName "1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -23,18 +23,18 @@ android {
 }
 
 dependencies {
-    def lifecycle_version = "2.2.0-alpha03"
-    def retrofit_version = "2.6.0"
-    def dagger_version = "2.23.2"
+    def lifecycle_version = "2.2.0-alpha04"
+    def retrofit_version = '2.6.1'
+    def dagger_version = '2.24'
     def butterKnife_version = "10.1.0"
-
+    def glide_version = "4.9.0"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     //android support libs
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta03'
-    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
+    implementation 'com.google.android.material:material:1.1.0-alpha10'
 
     //android arch
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
@@ -47,7 +47,7 @@ dependencies {
 
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.0.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.1'
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
 
     //Json
@@ -55,8 +55,8 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
 
     //image loading
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation "com.github.bumptech.glide:glide:$glide_version"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
 
     //dagger
     implementation "com.google.dagger:dagger:$dagger_version"
@@ -67,8 +67,10 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife_version"
 
     //slidr for slide to dismiss
-    implementation 'com.r0adkll:slidableactivity:2.0.6'
+    implementation 'com.r0adkll:slidableactivity:2.1.0'
 
+    //rich text view
+    implementation 'me.kaelaela:OpenGraphView:1.2.0@aar'
     //testing
     testImplementation 'junit:junit:4.13-beta-3'
     androidTestImplementation 'androidx.test:runner:1.3.0-alpha02'
