@@ -11,9 +11,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.ducktapedapps.updoot.api.authAPI;
+import com.ducktapedapps.updoot.api.AuthAPI;
 import com.ducktapedapps.updoot.ui.LoginActivity;
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.Constants;
 
 import javax.inject.Inject;
 
@@ -24,7 +24,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     private static final String TAG = "Authenticator";
 
     @Inject
-    authAPI authAPI;
+    AuthAPI authAPI;
     private Context mContext;
 
     Authenticator(Context context) {
@@ -59,10 +59,10 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         if (TextUtils.isEmpty(authToken)) {
             authToken = authAPI
-                    .getUserToken(constants.TOKEN_ACCESS_URL,
-                            Credentials.basic(constants.client_id, ""),
-                            constants.user_grantType,
-                            options.getString("code"), constants.redirect_uri)
+                    .getUserToken(Constants.TOKEN_ACCESS_URL,
+                            Credentials.basic(Constants.client_id, ""),
+                            Constants.user_grantType,
+                            options.getString("code"), Constants.redirect_uri)
                     .subscribeOn(Schedulers.io())
                     .doOnError(throwable -> Log.e(TAG, "getAuthToken: ", throwable))
                     .blockingGet()
@@ -85,7 +85,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
         // an intent to display our AuthenticatorActivity which is the AccountsActivity in my case.
         final Intent intent = new Intent(mContext, LoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-        intent.putExtra(constants.ACCOUNT_TYPE, account.type);
+        intent.putExtra(Constants.ACCOUNT_TYPE, account.type);
         intent.putExtra("full_access", authTokenType);
 
         Bundle retBundle = new Bundle();
@@ -95,9 +95,9 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response, Account account) throws NetworkErrorException {
-        if (account.name.equals(constants.ANON_USER)) {
+        if (account.name.equals(Constants.ANON_USER)) {
             Bundle result = new Bundle();
-            //restrict anon account removal from settings
+            //restrict anon Account removal from settings
             //https://stackoverflow.com/questions/9841525/is-it-possible-to-override-the-accounts-sync-remove-account-functionality
             result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
             return result;

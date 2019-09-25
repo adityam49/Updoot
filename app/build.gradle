@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    dataBinding {
+        enabled = true
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -26,8 +30,7 @@ dependencies {
     def lifecycle_version = "2.2.0-alpha04"
     def retrofit_version = '2.6.1'
     def dagger_version = '2.24'
-    def butterKnife_version = "10.1.0"
-    def glide_version = "4.9.0"
+    def glide_version = '4.10.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     //android support libs
@@ -47,7 +50,7 @@ dependencies {
 
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.0'
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
 
     //Json
@@ -62,15 +65,12 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
 
-    //View binding -> butterKnife
-    implementation "com.jakewharton:butterknife:$butterKnife_version"
-    annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife_version"
-
     //slidr for slide to dismiss
     implementation 'com.r0adkll:slidableactivity:2.1.0'
 
     //rich text view
     implementation 'me.kaelaela:OpenGraphView:1.2.0@aar'
+
     //testing
     testImplementation 'junit:junit:4.13-beta-3'
     androidTestImplementation 'androidx.test:runner:1.3.0-alpha02'

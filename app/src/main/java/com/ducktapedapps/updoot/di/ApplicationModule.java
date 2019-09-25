@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.Constants;
 
 import javax.inject.Singleton;
 
@@ -28,7 +28,7 @@ public class ApplicationModule {
     @Singleton
     @Provides
     SharedPreferences provideSharedPreferences() {
-        return mApplication.getSharedPreferences(constants.TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        return mApplication.getSharedPreferences(Constants.TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
     }
 
 }

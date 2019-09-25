@@ -6,11 +6,11 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.ducktapedapps.updoot.api.authAPI;
-import com.ducktapedapps.updoot.api.redditAPI;
+import com.ducktapedapps.updoot.api.AuthAPI;
+import com.ducktapedapps.updoot.api.RedditAPI;
+import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
-import com.ducktapedapps.updoot.utils.accountManagement.userManager;
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
 
 import javax.inject.Singleton;
 
@@ -30,35 +30,35 @@ class ApiModule {
 
     @Singleton
     @Provides
-    static authAPI provideAuthAPI(final Lazy<Retrofit> retrofit) {
-        return retrofit.get().create(authAPI.class);
+    static AuthAPI provideAuthAPI(final Lazy<Retrofit> retrofit) {
+        return retrofit.get().create(AuthAPI.class);
     }
 
     //only for internal module use
     @Singleton
     @Provides
-    static redditAPI provideRedditAPIService(Retrofit retrofit) {
-        return retrofit.create(redditAPI.class);
+    static RedditAPI provideRedditAPIService(Retrofit retrofit) {
+        return retrofit.create(RedditAPI.class);
     }
 
     @Reusable
     @Provides
-    static AccountManager provideAccountManager(Application application, Lazy<userManager> userManager, SharedPreferences sharedPreferences) {
+    static AccountManager provideAccountManager(Application application, Lazy<UserManager> userManager, SharedPreferences sharedPreferences) {
         AccountManager accountManager = AccountManager.get(application);
         accountManager.addOnAccountsUpdatedListener(accounts -> {
-            String currentCachedAccount = sharedPreferences.getString(constants.LOGIN_STATE, null);
+            String currentCachedAccount = sharedPreferences.getString(Constants.LOGIN_STATE, null);
             boolean currentAccountRemoved = true;
             for (Account account : accounts) {
-                Log.i(TAG, "provideAccountManager: account found " + account.name);
+                Log.i(TAG, "provideAccountManager: Account found " + account.name);
                 if (account.name.equals(currentCachedAccount)) {
                     currentAccountRemoved = false;
                     break;
                 }
             }
             if (currentAccountRemoved) {
-                if (currentCachedAccount != null && !currentCachedAccount.equals(constants.ANON_USER)) {
-                    Log.i(TAG, "provideAccountManager: setting current account as an        on");
-                    userManager.get().setCurrentUser(constants.ANON_USER, null);
+                if (currentCachedAccount != null && !currentCachedAccount.equals(Constants.ANON_USER)) {
+                    Log.i(TAG, "provideAccountManager: setting current Account as an        on");
+                    userManager.get().setCurrentUser(Constants.ANON_USER, null);
                     if (userManager.get().getmListener() != null)
                         userManager.get().getmListener().onCurrentAccountRemoved();
                 }
@@ -69,19 +69,19 @@ class ApiModule {
     }
 
     @Provides
-    static Single<redditAPI> provideRedditAPI(final Lazy<redditAPI> redditAPILazy, final Lazy<authAPI> authAPILazy, TokenInterceptor interceptor, userManager userManager, SharedPreferences sharedPreferences, AccountManager accountManager) {
+    static Single<RedditAPI> provideRedditAPI(final Lazy<RedditAPI> redditAPILazy, final Lazy<AuthAPI> authAPILazy, TokenInterceptor interceptor, UserManager userManager, SharedPreferences sharedPreferences, AccountManager accountManager) {
         Account account = userManager.getCurrentUser();
-        if (account == null || ((interceptor.getTokenExpiry() == null || interceptor.getTokenExpiry() < System.currentTimeMillis()) && account.name.equals(constants.ANON_USER))) {
-            //first app launch OR fresh app launch with anonymous account logged in or userless token expired
+        if (account == null || ((interceptor.getTokenExpiry() == null || interceptor.getTokenExpiry() < System.currentTimeMillis()) && account.name.equals(Constants.ANON_USER))) {
+            //first app launch OR fresh app launch with anonymous Account logged in or userless token expired
             return authAPILazy.get()
                     .getUserLessToken(
-                            constants.TOKEN_ACCESS_URL,
-                            Credentials.basic(constants.client_id, ""),
-                            constants.userLess_grantType,
-                            sharedPreferences.getString(constants.DEVICE_ID_KEY, null))
+                            Constants.TOKEN_ACCESS_URL,
+                            Credentials.basic(Constants.client_id, ""),
+                            Constants.userLess_grantType,
+                            sharedPreferences.getString(Constants.DEVICE_ID_KEY, null))
                     .doOnSuccess(token -> {
                         token.setAbsolute_expiry();
-                        userManager.setCurrentUser(constants.ANON_USER, token);
+                        userManager.setCurrentUser(Constants.ANON_USER, token);
                     })
                     .doOnError(throwable -> Log.e(TAG, "provideRedditAPI: ", throwable))
                     .map(__ -> redditAPILazy.get());
@@ -90,10 +90,10 @@ class ApiModule {
             if (interceptor.getTokenExpiry() == null || interceptor.getTokenExpiry() < System.currentTimeMillis()) {
                 return authAPILazy.get()
                         .getRefreshedToken(
-                                constants.TOKEN_ACCESS_URL,
-                                Credentials.basic(constants.client_id, ""),
-                                constants.user_refresh_grantType,
-                                accountManager.getUserData(account, constants.USER_TOKEN_REFRESH_KEY))
+                                Constants.TOKEN_ACCESS_URL,
+                                Credentials.basic(Constants.client_id, ""),
+                                Constants.user_refresh_grantType,
+                                accountManager.getUserData(account, Constants.USER_TOKEN_REFRESH_KEY))
                         .doOnSuccess(token -> {
                             token.setAbsolute_expiry();
                             userManager.updateUserSessionData(token);

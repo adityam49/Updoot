@@ -1,29 +1,22 @@
 package com.ducktapedapps.updoot.ui.adapters;
 
-import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ducktapedapps.updoot.R;
+import com.ducktapedapps.updoot.databinding.CommentItemBinding;
 import com.ducktapedapps.updoot.model.CommentData;
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.commentHolder> {
     private static final String TAG = "CommentsAdapter";
@@ -42,18 +35,15 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
         public Object getChangePayload(@NonNull CommentData oldItem, @NonNull CommentData newItem) {
             Bundle diffBundle = new Bundle();
             if (oldItem.getUps() != newItem.getUps()) {
-                diffBundle.putInt(constants.DIFF_VOTE_KEY, newItem.getUps());
+                diffBundle.putInt(Constants.DIFF_VOTE_KEY, newItem.getUps());
             }
             if (diffBundle.isEmpty()) return super.getChangePayload(oldItem, newItem);
             else return diffBundle;
         }
     };
-    private Context mContext;
-    private OnItemClickListener mListener;
 
-    public CommentsAdapter(Context context) {
+    public CommentsAdapter() {
         super(CALLBACK);
-        mContext = context;
     }
 
     // DiffUtils doesn't calculate diff if passed with same list object
@@ -68,88 +58,28 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
     @NonNull
     @Override
     public commentHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_item, parent, false);
-        return new commentHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull commentHolder holder, int position, @NonNull List<Object> payloads) {
-        if (payloads.isEmpty()) {
-            onBindViewHolder(holder, position);
-        } else {
-            Bundle diff = (Bundle) payloads.get(0);
-            int newUps = diff.getInt(constants.DIFF_VOTE_KEY);
-            if (newUps > 999) {
-                holder.scoreTv.setText(mContext.getResources().getString(R.string.thousandSuffix, newUps / 1000));
-            } else {
-                holder.scoreTv.setText(String.valueOf(newUps));
-            }
-            if (getItem(position).getLikes() == null) {
-                holder.scoreTv.setTextColor(Color.WHITE);
-            } else if (getItem(position).getLikes()) {
-                holder.scoreTv.setTextColor(ContextCompat.getColor(mContext, R.color.upVoteColor));
-            } else {
-                holder.scoreTv.setTextColor(ContextCompat.getColor(mContext, R.color.downVoteColor));
-            }
-        }
+        CommentItemBinding commentItemBinding = DataBindingUtil
+                .inflate(
+                        LayoutInflater.from(parent.getContext()),
+                        R.layout.comment_item,
+                        parent,
+                        false
+                );
+        return new commentHolder(commentItemBinding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull commentHolder holder, int position) {
-        holder.bind(getItem(position));
-    }
-
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        this.mListener = onItemClickListener;
-    }
-
-
-    public interface OnItemClickListener {
-        void onItemClick(CommentData data);
+        holder.binding.setCommentData(getItem(position));
+        holder.binding.executePendingBindings();
     }
 
     public class commentHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.comment_tv)
-        TextView commentBody;
-        @BindView(R.id.score_tv)
-        TextView scoreTv;
-        @BindView(R.id.username_tv)
-        TextView username;
-        @BindView(R.id.commentThreadView)
-        View view;
+        CommentItemBinding binding;
 
-        commentHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
-        }
-
-        @OnClick(R.id.commentView)
-        void OnClick() {
-            if (mListener != null)
-                mListener.onItemClick(getItem(getAdapterPosition()));
-        }
-
-        void bind(CommentData data) {
-            if (data.getUps() > 999) {
-                scoreTv.setText(mContext.getResources().getString(R.string.thousandSuffix, data.getUps() / 1000));
-            } else {
-                scoreTv.setText(String.valueOf(data.getUps()));
-            }
-            if (data.getDepth() == 0) {
-                view.setVisibility(View.GONE);
-            } else {
-                view.setVisibility(View.VISIBLE);
-            }
-            if (data.getLikes() == null) {
-                scoreTv.setTextColor(Color.WHITE);
-            } else if (data.getLikes()) {
-                scoreTv.setTextColor(ContextCompat.getColor(mContext, R.color.upVoteColor));
-            } else {
-                scoreTv.setTextColor(ContextCompat.getColor(mContext, R.color.downVoteColor));
-            }
-
-            commentBody.setText(data.getBody());
-            username.setText(data.getAuthor());
+        commentHolder(CommentItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

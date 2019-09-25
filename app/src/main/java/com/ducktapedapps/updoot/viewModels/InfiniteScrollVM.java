@@ -7,5 +7,5 @@ public interface InfiniteScrollVM {
 
     String getAfter();
 
-    MutableLiveData<String> getState();
+    MutableLiveData<Boolean> getIsLoading();
 }

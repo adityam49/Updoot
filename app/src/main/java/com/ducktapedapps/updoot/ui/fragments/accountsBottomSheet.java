@@ -41,7 +41,7 @@ public class accountsBottomSheet extends BottomSheetDialogFragment {
         for (Account account : accountManager.getAccounts()) {
             allAccounts.add(account.name);
         }
-        allAccounts.add("Add account");
+        allAccounts.add("Add Account");
 
         ListView accountLV = view.findViewById(R.id.accountsLV);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(inflater.getContext(), R.layout.modal_sheet_account_item, R.id.bottom_sheet_userName, allAccounts);
