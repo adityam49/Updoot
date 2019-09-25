@@ -5,23 +5,25 @@ import android.widget.TextView;
 
 public class MarkdownUtils {
     public static void decodeAndSet(String htmlEncodedString, TextView textView) {
-        htmlEncodedString = htmlEncodedString
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&apos;", "'")
-                .replace("&amp;", "&")
-                .replace("<li><p>", "<p>• ")
-                .replace("</li>", "<br>")
-                .replaceAll("<li.*?>", "•")
-                .replace("<p>", "<div>")
-                .replace("</p>", "</div>");
-        htmlEncodedString = htmlEncodedString.substring(0, htmlEncodedString.lastIndexOf("\n"));
-        CharSequence sequence = trim(Html.fromHtml(noTrailingwhiteLines(htmlEncodedString)));
-        textView.setText(sequence);
+        if (htmlEncodedString != null) {
+            htmlEncodedString = htmlEncodedString
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
+                    .replace("&quot;", "\"")
+                    .replace("&apos;", "'")
+                    .replace("&amp;", "&")
+                    .replace("<li><p>", "<p>• ")
+                    .replace("</li>", "<br>")
+                    .replaceAll("<li.*?>", "•")
+                    .replace("<p>", "<div>")
+                    .replace("</p>", "</div>");
+            htmlEncodedString = htmlEncodedString.substring(0, htmlEncodedString.lastIndexOf("\n"));
+            CharSequence sequence = trim(Html.fromHtml(noTrailingWhiteLines(htmlEncodedString)));
+            textView.setText(sequence);
+        }
     }
 
-    private static String noTrailingwhiteLines(String text) {
+    private static String noTrailingWhiteLines(String text) {
         while (text.charAt(text.length() - 1) == '\n') {
             text = text.substring(0, text.length() - 1);
         }

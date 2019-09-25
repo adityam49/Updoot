@@ -7,11 +7,11 @@ import com.ducktapedapps.updoot.viewModels.InfiniteScrollVM;
 
 import org.jetbrains.annotations.NotNull;
 
-public class InfinteScrollListener extends RecyclerView.OnScrollListener {
+public class InfiniteScrollListener extends RecyclerView.OnScrollListener {
     private LinearLayoutManager layoutManager;
     private InfiniteScrollVM viewModel;
 
-    public InfinteScrollListener(LinearLayoutManager layoutManager, InfiniteScrollVM viewModel) {
+    public InfiniteScrollListener(LinearLayoutManager layoutManager, InfiniteScrollVM viewModel) {
         this.layoutManager = layoutManager;
         this.viewModel = viewModel;
     }
@@ -27,7 +27,7 @@ public class InfinteScrollListener extends RecyclerView.OnScrollListener {
             if (totalItems <= 10) return; //condition for no more pages
 
             if (lastVisiblePosition == totalItems - 10) {
-                if ((viewModel.getState().getValue() != null && !viewModel.getState().getValue().equals(constants.LOADING_STATE)) && viewModel.getAfter() != null) {
+                if ((viewModel.getIsLoading().getValue() != null && !viewModel.getIsLoading().getValue() && viewModel.getAfter() != null)) {
                     viewModel.loadNextPage();
                 }
             }

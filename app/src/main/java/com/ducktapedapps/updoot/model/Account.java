@@ -4,11 +4,11 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class account implements Serializable {
+public class Account implements Serializable {
     @SerializedName("name")
     private String name;
 
-    public account(String name) {
+    public Account(String name) {
         this.name = name;
     }
 
@@ -18,7 +18,7 @@ public class account implements Serializable {
 
     @Override
     public String toString() {
-        return "account{" +
+        return "Account{" +
                 "name='" + name + '\'' +
                 '}';
     }

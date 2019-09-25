@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class gildings implements Serializable {
+public class Gildings implements Serializable {
     @SerializedName("gid_1")
     private int silver;
     @SerializedName("gid_2")
@@ -26,7 +26,7 @@ public class gildings implements Serializable {
 
     @Override
     public String toString() {
-        return "gildings{" +
+        return "Gildings{" +
                 "silver=" + silver +
                 ", gold=" + gold +
                 ", platinum=" + platinum +

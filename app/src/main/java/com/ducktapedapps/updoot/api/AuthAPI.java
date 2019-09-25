@@ -9,7 +9,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Url;
 
-public interface authAPI {
+public interface AuthAPI {
     @POST()
     @FormUrlEncoded
     Single<Token> getUserLessToken(

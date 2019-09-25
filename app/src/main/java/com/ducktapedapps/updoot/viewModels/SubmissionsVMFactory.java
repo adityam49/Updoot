@@ -6,11 +6,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-public class submissionsVMFactory extends ViewModelProvider.AndroidViewModelFactory {
+public class SubmissionsVMFactory extends ViewModelProvider.AndroidViewModelFactory {
     private final String subreddit;
     private final Application application;
 
-    public submissionsVMFactory(@NonNull Application application, String subreddit) {
+    public SubmissionsVMFactory(@NonNull Application application, String subreddit, boolean isStackBase) {
         super(application);
         this.subreddit = subreddit;
         this.application = application;
@@ -20,6 +20,6 @@ public class submissionsVMFactory extends ViewModelProvider.AndroidViewModelFact
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new submissionsVM(application, subreddit);
+        return (T) new SubmissionsVM(application, subreddit);
     }
 }

@@ -6,7 +6,7 @@ import android.util.Log;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.di.UpdootComponent;
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.model.thing;
+import com.ducktapedapps.updoot.model.Thing;
 
 import javax.inject.Singleton;
 
@@ -14,15 +14,15 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 
 @Singleton
-public class submissionRepo {
-    private static final String TAG = "submissionRepo";
+public class SubmissionRepo {
+    private static final String TAG = "SubmissionRepo";
     private UpdootComponent updootComponent;
 
-    public submissionRepo(Application application) {
+    public SubmissionRepo(Application application) {
         updootComponent = ((UpdootApplication) application).getUpdootComponent();
     }
 
-    public Single<thing> loadNextPage(String subreddit, String sort, String time, String nextPage) {
+    public Single<Thing> loadNextPage(String subreddit, String sort, String time, String nextPage) {
         return updootComponent
                 .getRedditAPI()
                 .flatMap(redditAPI -> redditAPI.getSubreddit(subreddit, sort, time, nextPage));

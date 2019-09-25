@@ -3,12 +3,12 @@ package com.ducktapedapps.updoot.di;
 import android.content.SharedPreferences;
 
 import com.ducktapedapps.updoot.UpdootApplication;
-import com.ducktapedapps.updoot.api.redditAPI;
+import com.ducktapedapps.updoot.api.RedditAPI;
 import com.ducktapedapps.updoot.ui.LoginActivity;
 import com.ducktapedapps.updoot.ui.MainActivity;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
+import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
-import com.ducktapedapps.updoot.ui.fragments.subredditFragment;
 
 import javax.inject.Singleton;
 
@@ -27,7 +27,7 @@ public interface UpdootComponent {
 
     void inject(LoginActivity loginActivity);
 
-    void inject(subredditFragment subredditFragment);
+    void inject(SubredditFragment subredditFragment);
 
     void inject(accountsBottomSheet accountsBottomSheet);
 
@@ -37,6 +37,6 @@ public interface UpdootComponent {
     //dependencies
     SharedPreferences getSharedPreferences();
 
-    Single<redditAPI> getRedditAPI();
+    Single<RedditAPI> getRedditAPI();
 }
 

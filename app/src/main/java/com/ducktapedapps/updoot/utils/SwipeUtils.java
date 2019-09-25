@@ -23,8 +23,8 @@ import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
 import static androidx.recyclerview.widget.ItemTouchHelper.LEFT;
 import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
 
-public class swipeUtils extends ItemTouchHelper.Callback {
-    private static final String TAG = "swipeUtils";
+public class SwipeUtils extends ItemTouchHelper.Callback {
+    private static final String TAG = "SwipeUtils";
     private boolean swipeBack = false;
     private swipeActionCallback swipeActionCallback;
     private int performActionIndex = 0; // left = -2 ,slightLeft = -1 ,slightRight = 1 , right = 2
@@ -39,7 +39,7 @@ public class swipeUtils extends ItemTouchHelper.Callback {
     private Bitmap downVoteIcon;
     private Bitmap saveIcon;
 
-    public swipeUtils(Context context, swipeActionCallback callback) {
+    public SwipeUtils(Context context, swipeActionCallback callback) {
         super();
         init(context);
         swipeActionCallback = callback;

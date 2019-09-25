@@ -1,22 +1,24 @@
 package com.ducktapedapps.updoot.viewModels;
 
-import android.util.Log;
-
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.ducktapedapps.updoot.utils.SingleLiveEvent;
+
+
 public class ActivityVM extends ViewModel {
-
-
     private static final String TAG = "ActivityVM";
-    private MutableLiveData<String> currentAccount = new MutableLiveData<>();
+    private MutableLiveData<SingleLiveEvent<String>> currentAccount;
 
     public ActivityVM() {
-
+        currentAccount = new MutableLiveData<>(new SingleLiveEvent<>(null));
     }
 
-    public MutableLiveData<String> getCurrentAccount() {
-        Log.i(TAG, "getCurrentAccount: " + currentAccount.getValue());
+    public MutableLiveData<SingleLiveEvent<String>> getCurrentAccount() {
         return currentAccount;
+    }
+
+    public void setCurrentAccount(String newAccount) {
+        this.currentAccount.setValue(new SingleLiveEvent<>(newAccount));
     }
 }

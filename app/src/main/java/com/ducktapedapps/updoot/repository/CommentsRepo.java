@@ -4,23 +4,23 @@ import android.app.Application;
 
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.di.UpdootComponent;
-import com.ducktapedapps.updoot.model.thing;
+import com.ducktapedapps.updoot.model.Thing;
 
 import javax.inject.Singleton;
 
 import io.reactivex.Single;
 
 @Singleton
-public class commentsRepo {
+public class CommentsRepo {
 
-    private static final String TAG = "submissionRepo";
+    private static final String TAG = "SubmissionRepo";
     private UpdootComponent updootComponent;
 
-    public commentsRepo(Application application) {
+    public CommentsRepo(Application application) {
         updootComponent = ((UpdootApplication) application).getUpdootComponent();
     }
 
-    public Single<thing> loadComments(String subreddit, String submission_id) {
+    public Single<Thing> loadComments(String subreddit, String submission_id) {
         return updootComponent
                 .getRedditAPI()
                 .flatMap(redditAPI -> redditAPI.getComments(subreddit, submission_id));

@@ -1,13 +1,17 @@
 package com.ducktapedapps.updoot.utils;
 
 //event wrapper used to consume events such as Toast messages only once, not using this will cause a Toast message on config change
-public class SingleEventPublisher<T> {
+public class SingleLiveEvent<T> {
     private T content;
     private boolean isHandled;
 
-    public SingleEventPublisher(T content) {
+    public SingleLiveEvent(T content) {
         this.content = content;
         this.isHandled = false;
+    }
+
+    public T peekContent() {
+        return this.content;
     }
 
     public T getContentIfNotHandled() {

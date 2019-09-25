@@ -7,22 +7,22 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.ducktapedapps.updoot.model.Token;
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.Constants;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 
 @Singleton
-public class userManager {
-    private static final String TAG = "userManager";
+public class UserManager {
+    private static final String TAG = "UserManager";
     private final AccountManager accountManager;
     private final SharedPreferences sharedPreferences;
     private final TokenInterceptor interceptor;
     private AccountChangeListener mListener;
 
     @Inject
-    public userManager(AccountManager accountManager, SharedPreferences sharedPreferences, TokenInterceptor interceptor) {
+    public UserManager(AccountManager accountManager, SharedPreferences sharedPreferences, TokenInterceptor interceptor) {
         this.accountManager = accountManager;
         this.sharedPreferences = sharedPreferences;
         this.interceptor = interceptor;
@@ -33,7 +33,7 @@ public class userManager {
     }
 
     public Account getCurrentUser() {
-        String currentCachedUser = sharedPreferences.getString(constants.LOGIN_STATE, null);
+        String currentCachedUser = sharedPreferences.getString(Constants.LOGIN_STATE, null);
         if (currentCachedUser != null) {
             for (Account account : accountManager.getAccounts()) {
                 if (account.name.equals(currentCachedUser)) {
@@ -46,7 +46,7 @@ public class userManager {
 
     public void setCurrentUser(String userName, Token token) {
         Log.i(TAG, "setCurrentUser: user name is " + userName + " token is " + token);
-        sharedPreferences.edit().putString(constants.LOGIN_STATE, userName).apply();
+        sharedPreferences.edit().putString(Constants.LOGIN_STATE, userName).apply();
         for (Account account : accountManager.getAccounts()) {
             if (account.name.equals(userName)) {
                 interceptor.setSessionToken(token);
@@ -56,7 +56,7 @@ public class userManager {
 
         Log.i(TAG, "setCurrentUser: after fresh install");
         interceptor.setSessionToken(token);
-        accountManager.addAccountExplicitly(new Account(constants.ANON_USER, constants.ACCOUNT_TYPE), null, null);
+        accountManager.addAccountExplicitly(new Account(Constants.ANON_USER, Constants.ACCOUNT_TYPE), null, null);
     }
 
 

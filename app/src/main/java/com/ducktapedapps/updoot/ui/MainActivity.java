@@ -1,76 +1,57 @@
 package com.ducktapedapps.updoot.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
+import com.ducktapedapps.updoot.databinding.ActivityMainBinding;
+import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
-import com.ducktapedapps.updoot.ui.fragments.subredditFragment;
-import com.ducktapedapps.updoot.utils.accountManagement.userManager;
-import com.ducktapedapps.updoot.utils.accountManagement.userManager.AccountChangeListener;
-import com.ducktapedapps.updoot.utils.constants;
+import com.ducktapedapps.updoot.utils.Constants;
+import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
+import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener;
 import com.ducktapedapps.updoot.viewModels.ActivityVM;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class MainActivity extends AppCompatActivity implements accountsBottomSheet.BottomSheetListener, AccountChangeListener {
     private static final String TAG = "MainActivity";
 
     private ActivityVM viewModel;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.bottom_navigation_bar)
-    BottomNavigationView bottomNavigationView;
 
     @Inject
-    userManager userManager;
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
-        return super.onCreateView(name, context, attrs);
-    }
+    UserManager userManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Log.i(TAG, "onCreate: ");
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((UpdootApplication) getApplication()).getUpdootComponent().inject(this);
 
-        ButterKnife.bind(this);
-
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.toolbar);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
 
         if (fragment == null) {
             // empty string for subreddit gives frontpage as defined bu reddit api
-            fragment = subredditFragment.newInstance("", true);
+            fragment = SubredditFragment.newInstance("", true);
             fragmentManager
                     .beginTransaction()
                     .add(R.id.fragmentContainer, fragment, String.valueOf(0))
                     .commit();
         }
 
+        BottomNavigationView bottomNavigationView = binding.bottomNavigationBar;
         bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.home:
@@ -89,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
 
                 case R.id.sort:
                     Fragment visibleFragment = getVisibleFragment();
-                    if (visibleFragment instanceof subredditFragment) {
-                        ((subredditFragment) visibleFragment).inflateSortPopup(findViewById(R.id.sort));
+                    if (visibleFragment instanceof SubredditFragment) {
+                        ((SubredditFragment) visibleFragment).inflateSortPopup(findViewById(R.id.sort));
                     }
                 case R.id.more:
                 default:
@@ -103,30 +84,29 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
         viewModel = new ViewModelProvider(this).get(ActivityVM.class);
     }
 
-
-    //for bottomSheet account switching
+    //for bottomSheet Account switching
     @Override
     public void onButtonClicked(String text) {
-        if (text.equals("Add account")) {
+        if (text.equals("Add Account")) {
             Intent intent = new Intent(this, LoginActivity.class);
-            startActivityForResult(intent, constants.ACCOUNT_LOGIN_REQUEST_CODE);
+            startActivityForResult(intent, Constants.ACCOUNT_LOGIN_REQUEST_CODE);
         } else {
             userManager.setCurrentUser(text, null);
-            viewModel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
+            viewModel.setCurrentAccount(userManager.getCurrentUser().name);
         }
     }
 
-    //account switching after new login
+    //Account switching after new login
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == constants.ACCOUNT_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == Constants.ACCOUNT_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
             reloadContent();
         }
     }
 
     private void reloadContent() {
-        viewModel.getCurrentAccount().setValue(userManager.getCurrentUser().name);
+        viewModel.setCurrentAccount(userManager.getCurrentUser().name);
     }
 
     @Override

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 
-public class images implements Serializable {
+public class Images implements Serializable {
 
     private source source;
 

@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -22,54 +22,45 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
+import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
+import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.CustomItemAnimator;
-import com.ducktapedapps.updoot.utils.InfinteScrollListener;
-import com.ducktapedapps.updoot.utils.constants;
-import com.ducktapedapps.updoot.utils.swipeUtils;
+import com.ducktapedapps.updoot.utils.InfiniteScrollListener;
+import com.ducktapedapps.updoot.utils.SwipeUtils;
 import com.ducktapedapps.updoot.viewModels.ActivityVM;
-import com.ducktapedapps.updoot.viewModels.submissionsVM;
-import com.ducktapedapps.updoot.viewModels.submissionsVMFactory;
+import com.ducktapedapps.updoot.viewModels.SubmissionsVM;
+import com.ducktapedapps.updoot.viewModels.SubmissionsVMFactory;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrInterface;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
-public class subredditFragment extends Fragment {
-    private static final String TAG = "subredditFragment";
+public class SubredditFragment extends Fragment {
+    private static final String TAG = "SubredditFragment";
     private static final String SUBREDDIT_KEY = "subreddit_key";
     private static final String IS_BASE_FRAG_KEY = "isBaseFragmentKey";
+    private FragmentSubredditBinding binding;
 
-    @BindView(R.id.recyclerView)
-    RecyclerView recyclerView;
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
-    @BindView(R.id.swipeToRefreshLayout)
-    SwipeRefreshLayout swipeRefreshLayout;
+    private SlidrInterface slidrInterface;
+    private SlidrConfig slidrConfig;
+
+    private boolean isFragmentAtStackBase;
 
     @Inject
     Application appContext;
 
-    private submissionsVM submissionsVM;
+    private SubmissionsVM submissionsVM;
 
-    private Unbinder unbinder;
-    private SlidrConfig slidrConfig;
-    private SlidrInterface slidrInterface;
     private submissionsAdapter adapter;
-    private boolean isBaseFragment;
 
-
-    public static subredditFragment newInstance(String subreddit, boolean isFragmentAtStackBase) {
+    public static SubredditFragment newInstance(String subreddit, boolean isFragmentAtStackBase) {
         Bundle args = new Bundle();
         args.putString(SUBREDDIT_KEY, subreddit);
         args.putBoolean(IS_BASE_FRAG_KEY, isFragmentAtStackBase);
-        subredditFragment fragment = new subredditFragment();
+        SubredditFragment fragment = new SubredditFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -80,8 +71,8 @@ public class subredditFragment extends Fragment {
         if (getActivity() != null)
             ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
         assert getArguments() != null;
-        this.isBaseFragment = getArguments().getBoolean(IS_BASE_FRAG_KEY);
-        if (!isBaseFragment)
+        this.isFragmentAtStackBase = getArguments().getBoolean(IS_BASE_FRAG_KEY);
+        if (!this.isFragmentAtStackBase)
             slidrConfig = new SlidrConfig.Builder()
                     .edge(true)
                     .edgeSize(5f)
@@ -91,7 +82,8 @@ public class subredditFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (slidrInterface == null && !isBaseFragment && getView() != null) {
+        if (slidrInterface == null && !this.isFragmentAtStackBase && getView() != null) {
+            Log.i(TAG, "onResume: slideable");
             slidrInterface = Slidr.replace(getView().findViewById(R.id.subredditFragment), slidrConfig);
         }
     }
@@ -99,23 +91,22 @@ public class subredditFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_subreddit, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_subreddit, container, false);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
         setUpViewModel();
-
         setUpRecyclerView();
-
-        return view;
+        return binding.getRoot();
     }
 
     private void setUpRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView recyclerView = binding.recyclerView;
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new submissionsAdapter(subredditFragment.this.getContext());
+        adapter = new submissionsAdapter(submissionsVM, new ClickHandler());
         recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new CustomItemAnimator());
-        new ItemTouchHelper(new swipeUtils(getActivity(), new swipeUtils.swipeActionCallback() {
+
+        new ItemTouchHelper(new SwipeUtils(getActivity(), new SwipeUtils.swipeActionCallback() {
             @Override
             public void performSlightLeftSwipeAction(int adapterPosition) {
                 submissionsVM.castVote(adapterPosition, -1);
@@ -135,8 +126,18 @@ public class subredditFragment extends Fragment {
                     if (getFragmentManager() != null)
                         getFragmentManager()
                                 .beginTransaction()
-                                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right, R.anim.enter_from_right, R.anim.exit_to_right)
-                                .add(R.id.fragmentContainer, subredditFragment.newInstance(data.getSubreddit_name_prefixed(), false), String.valueOf(getFragmentManager().getBackStackEntryCount() + 1))
+                                .setCustomAnimations(
+                                        R.anim.enter_from_right,
+                                        R.anim.exit_to_left,
+                                        R.anim.enter_from_left,
+                                        R.anim.exit_to_right
+
+                                )
+                                .replace(
+                                        R.id.fragmentContainer,
+                                        SubredditFragment.newInstance(data.getSubreddit_name_prefixed(), false),
+                                        String.valueOf(getFragmentManager().getBackStackEntryCount() + 1)
+                                )
                                 .addToBackStack(null)
                                 .commit();
                 }
@@ -148,18 +149,10 @@ public class subredditFragment extends Fragment {
             }
         })).attachToRecyclerView(recyclerView);
 
-        recyclerView.addOnScrollListener(new InfinteScrollListener(linearLayoutManager, submissionsVM));
+        recyclerView.addOnScrollListener(new InfiniteScrollListener(linearLayoutManager, submissionsVM));
 
-        adapter.setOnItemClickListener(data -> {
-            Log.i(TAG, "onItemClick: " + data);
-            if (getFragmentManager() != null)
-                getFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right, R.anim.enter_from_right, R.anim.exit_to_right)
-                        .add(R.id.fragmentContainer, commentsFragment.newInstance(data), String.valueOf(getFragmentManager().getBackStackEntryCount() + 1))
-                        .addToBackStack(null)
-                        .commit();
-        });
+
+        SwipeRefreshLayout swipeRefreshLayout = binding.swipeToRefreshLayout;
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.DT_primaryColor,
                 R.color.secondaryColor,
@@ -169,52 +162,26 @@ public class subredditFragment extends Fragment {
 
     private void setUpViewModel() {
         assert getArguments() != null; // new subreddit fragment can be created only via newInstance method call
-        submissionsVM = new ViewModelProvider(this, new submissionsVMFactory(appContext, getArguments().getString(SUBREDDIT_KEY))).get(submissionsVM.class);
+        submissionsVM = new ViewModelProvider(this, new SubmissionsVMFactory(appContext, getArguments().getString(SUBREDDIT_KEY), getArguments().getBoolean(IS_BASE_FRAG_KEY))).get(SubmissionsVM.class);
+        binding.setSubmissionViewModel(submissionsVM);
 
         if (this.getActivity() != null) {
             ActivityVM activityVM = new ViewModelProvider(this.getActivity()).get(ActivityVM.class);
-            submissionsVM.setCurrentAccount(activityVM.getCurrentAccount().getValue());
             activityVM.getCurrentAccount().observe(getViewLifecycleOwner(), account -> {
-                if (account != null) {
-                    if (submissionsVM.getCurrentAccount() == null || !submissionsVM.getCurrentAccount().equals(account)) {
-                        if (getFragmentManager() != null && getFragmentManager().getBackStackEntryCount() == Integer.parseInt(subredditFragment.this.getTag())) {
-                            Toast.makeText(appContext, account + " logged in!", Toast.LENGTH_SHORT).show();
-                            submissionsVM.setCurrentAccount(account);
-                            reloadFragmentContent();
-                        }
-                    }
+                if (account != null && account.getContentIfNotHandled() != null) {
+                    reloadFragmentContent();
+                    Toast.makeText(this.getContext(), account.peekContent() + " is logged in!", Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
-        submissionsVM.getState().observe(getViewLifecycleOwner(), state -> {
-            switch (state) {
-                case constants.LOADING_STATE:
-                    progressBar.setVisibility(View.VISIBLE);
-                    break;
-                case constants.SUCCESS_STATE:
-                    swipeRefreshLayout.setRefreshing(false);
-                    progressBar.setVisibility(View.GONE);
-                    break;
-                default:
-                    swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(getActivity(), state, Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    break;
-            }
-        });
         submissionsVM.getAllSubmissions().observe(getViewLifecycleOwner(), things -> adapter.submitList(things));
-
         submissionsVM.getToastMessage().observe(getViewLifecycleOwner(), toastMessage -> {
             String toast = toastMessage.getContentIfNotHandled();
             if (toast != null) {
-                Toast.makeText(appContext, toast, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getContext(), toast, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void reloadFragmentContent() {
-        submissionsVM.reload(null, null);
     }
 
     public void inflateSortPopup(View popupSourceView) {
@@ -228,66 +195,66 @@ public class subredditFragment extends Fragment {
                 Log.i(TAG, "inflateSortPopup: " + item.getTitle());
                 switch (item.getItemId()) {
                     case R.id.best:
-                        sortBy = constants.BEST;
+                        sortBy = Constants.BEST;
                         break;
                     case R.id.hot:
-                        sortBy = constants.HOT;
+                        sortBy = Constants.HOT;
                         break;
                     case R.id.New:
-                        sortBy = constants.NEW;
+                        sortBy = Constants.NEW;
                         break;
                     case R.id.rising:
-                        sortBy = constants.RISING;
+                        sortBy = Constants.RISING;
                         break;
                     //controversial
                     case R.id.controversial_hour:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.NOW;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.NOW;
                         break;
                     case R.id.controversial_day:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.TODAY;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.TODAY;
                         break;
                     case R.id.controversial_week:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.THIS_WEEK;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.THIS_WEEK;
                         break;
                     case R.id.controversial_month:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.THIS_MONTH;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.THIS_MONTH;
                         break;
                     case R.id.controversial_year:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.THIS_YEAR;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.THIS_YEAR;
                         break;
                     case R.id.controversial_all_time:
-                        sortBy = constants.CONTROVERSIAL;
-                        timePeriod = constants.ALL_TIME;
+                        sortBy = Constants.CONTROVERSIAL;
+                        timePeriod = Constants.ALL_TIME;
                         break;
                     //top
                     case R.id.top_hour:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.NOW;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.NOW;
                         break;
                     case R.id.top_day:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.TODAY;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.TODAY;
                         break;
                     case R.id.top_week:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.THIS_WEEK;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.THIS_WEEK;
                         break;
                     case R.id.top_month:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.THIS_MONTH;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.THIS_MONTH;
                         break;
                     case R.id.top_year:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.THIS_YEAR;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.THIS_YEAR;
                         break;
                     case R.id.top_all_time:
-                        sortBy = constants.TOP;
-                        timePeriod = constants.ALL_TIME;
+                        sortBy = Constants.TOP;
+                        timePeriod = Constants.ALL_TIME;
                         break;
                 }
                 if (sortBy == null) {
@@ -299,10 +266,30 @@ public class subredditFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unbinder.unbind();
+    private void reloadFragmentContent() {
+        submissionsVM.reload(null, null);
+    }
+
+    public class ClickHandler {
+        public void onClick(LinkData linkData) {
+
+            if (getFragmentManager() != null)
+                getFragmentManager()
+                        .beginTransaction()
+                        .setCustomAnimations(
+                                R.anim.enter_from_right,
+                                R.anim.exit_to_left,
+                                R.anim.enter_from_left,
+                                R.anim.exit_to_right
+                        )
+                        .replace(
+                                R.id.fragmentContainer,
+                                commentsFragment.newInstance(linkData),
+                                String.valueOf(getFragmentManager().getBackStackEntryCount() + 1)
+                        )
+                        .addToBackStack(null)
+                        .commit();
+        }
     }
 }
 

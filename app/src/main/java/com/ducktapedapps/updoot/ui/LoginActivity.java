@@ -15,16 +15,16 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
-import com.ducktapedapps.updoot.api.authAPI;
-import com.ducktapedapps.updoot.api.redditAPI;
+import com.ducktapedapps.updoot.api.AuthAPI;
+import com.ducktapedapps.updoot.api.RedditAPI;
+import com.ducktapedapps.updoot.databinding.ActivityLoginBinding;
 import com.ducktapedapps.updoot.model.Token;
+import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
-import com.ducktapedapps.updoot.utils.accountManagement.userManager;
-import com.ducktapedapps.updoot.utils.constants;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,8 +32,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import dagger.Lazy;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -41,26 +39,16 @@ import okhttp3.Credentials;
 
 public class LoginActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.login_progress)
-    ProgressBar progressBar;
-    @BindView(R.id.webView)
-    WebView webView;
-
     @Inject
-    Lazy<redditAPI> redditAPILazy;
+    Lazy<RedditAPI> redditAPILazy;
+    @Inject
+    Lazy<AuthAPI> authAPI;
     @Inject
     Lazy<TokenInterceptor> interceptor;
     @Inject
     Lazy<AccountManager> accountManager;
     @Inject
-    Lazy<userManager> userManager;
-    @Inject
-    Lazy<authAPI> authAPI;
-    @Inject
     Lazy<SharedPreferences> sharedPreferences;
-
 
     private Token mToken;
 
@@ -70,25 +58,26 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        ButterKnife.bind(this);
+        ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
         ((UpdootApplication) getApplication()).getUpdootComponent().inject(this);
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.toolbar);
 
         Log.i(TAG, "onCreate: ");
 
         CookieManager.getInstance().removeAllCookies(null);
         CookieManager.getInstance().flush();
 
+        WebView webView = binding.webView;
+        final ProgressBar progressBar = binding.loginProgress;
         webView.loadUrl(getAuthUrl());
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 Log.i(TAG, "onPageStarted: login " + url);
                 Uri uri = Uri.parse(url);
-                if (uri.getHost() != null && uri.getHost().equals(Uri.parse(constants.redirect_uri).getHost())) {
+                if (uri.getHost() != null && uri.getHost().equals(Uri.parse(Constants.redirect_uri).getHost())) {
                     if (uri.getQueryParameter("error") == null) {
                         webView.stopLoading();
                         webView.setVisibility(View.GONE);
@@ -96,11 +85,11 @@ public class LoginActivity extends AppCompatActivity {
                         final String code = uri.getQueryParameter("code");
                         disposable.add(authAPI.get()
                                         .getUserToken(
-                                                constants.TOKEN_ACCESS_URL,
-                                                Credentials.basic(constants.client_id, ""),
-                                                constants.user_grantType,
+                                                Constants.TOKEN_ACCESS_URL,
+                                                Credentials.basic(Constants.client_id, ""),
+                                                Constants.user_grantType,
                                                 code,
-                                                constants.redirect_uri
+                                                Constants.redirect_uri
                                         )
                                         .doOnSuccess(token -> {
                                             mToken = token;
@@ -109,9 +98,9 @@ public class LoginActivity extends AppCompatActivity {
                                         })
                                         .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
                                         .map(__ -> redditAPILazy.get())
-                                        .flatMap(redditAPI::getUserIdentity)
+                                        .flatMap(RedditAPI::getUserIdentity)
                                         .doOnSuccess(account -> {
-                                            sharedPreferences.get().edit().putString(constants.LOGIN_STATE, account.getName()).apply();
+                                            sharedPreferences.get().edit().putString(Constants.LOGIN_STATE, account.getName()).apply();
 //                                    component.getTokenInterceptor().setSessionToken(mToken);
                                             createAccount(account.getName(), mToken);
                                             setResult(RESULT_OK);
@@ -132,9 +121,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void createAccount(String username, Token token) {
-        Account user_account = new Account(username, constants.ACCOUNT_TYPE);
+        Account user_account = new Account(username, Constants.ACCOUNT_TYPE);
         Bundle bundle = new Bundle();
-        bundle.putString(constants.USER_TOKEN_REFRESH_KEY, token.getRefresh_token());
+        bundle.putString(Constants.USER_TOKEN_REFRESH_KEY, token.getRefresh_token());
         accountManager.get().addAccountExplicitly(user_account, null, bundle);
         accountManager.get().setAuthToken(user_account, "full_access", token.getAccess_token());
     }
@@ -153,12 +142,12 @@ public class LoginActivity extends AppCompatActivity {
                 .appendPath("api")
                 .appendPath("v1")
                 .appendPath("authorize.compact")
-                .appendQueryParameter("client_id", constants.client_id)
+                .appendQueryParameter("client_id", Constants.client_id)
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("state", state)
-                .appendQueryParameter("redirect_uri", constants.redirect_uri)
+                .appendQueryParameter("redirect_uri", Constants.redirect_uri)
                 .appendQueryParameter("duration", "permanent")
-                .appendQueryParameter("scope", constants.scopes)
+                .appendQueryParameter("scope", Constants.scopes)
                 .build()
                 .toString();
     }

@@ -5,10 +5,10 @@ import androidx.annotation.NonNull;
 import java.io.Serializable;
 import java.util.List;
 
-public class preview implements Serializable {
-    private List<images> images;
+public class Preview implements Serializable {
+    private List<Images> images;
 
-    public List<com.ducktapedapps.updoot.model.images> getImages() {
+    public List<Images> getImages() {
         return images;
     }
 

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class LinkData implements data, Serializable {
+public class LinkData implements Data, Serializable {
     private static final String TAG = "LinkData";
     private final String title;
     private final boolean archived;
@@ -20,21 +20,38 @@ public class LinkData implements data, Serializable {
     private final boolean saved;
     private final long created_utc;
     private final int num_comments;
-    private final gildings gildings;
-    private final preview preview;
+    private final Gildings gildings;
+    private final Preview preview;
     private final String post_hint;
     private final String id;
     private final String url;
-
-    public String getSubreddit() {
-        return this.subreddit_name_prefixed;
-    }
+    private final boolean isSelfTextExpanded;
 
     public String getThumbnail() {
         return thumbnail;
     }
 
-    private LinkData(String title, String author, int ups, Boolean likes, String subreddit_name_prefixed, String name, String thumbnail, boolean saved, long created, int num_comments, gildings gildings, String selfText, preview p, String post_hint, String id, boolean archived, boolean locked, String url) {
+    private LinkData(
+            String title,
+            String author,
+            int ups,
+            Boolean likes,
+            String subreddit_name_prefixed,
+            String name, String thumbnail,
+            boolean saved,
+            long created,
+            int num_comments,
+            Gildings gildings,
+            String selfText,
+            Preview p,
+            String post_hint,
+            String id,
+            boolean archived,
+            boolean locked,
+            String url,
+            boolean isSelfTextExpanded
+    ) {
+        this.isSelfTextExpanded = isSelfTextExpanded;
         this.title = title;
         this.author = author;
         this.ups = ups;
@@ -103,11 +120,11 @@ public class LinkData implements data, Serializable {
         return this.saved;
     }
 
-    public gildings getGildings() {
+    public Gildings getGildings() {
         return gildings;
     }
 
-    public preview getPreview() {
+    public Preview getPreview() {
         return preview;
     }
 
@@ -121,6 +138,10 @@ public class LinkData implements data, Serializable {
 
     public String getUrl() {
         return url;
+    }
+
+    public boolean isSelfTextExpanded() {
+        return isSelfTextExpanded;
     }
 
     //DiffUtils mutability hackaround :: https://stackoverflow.com/questions/54493764/pagedlistadapter-does-not-update-list-if-just-the-content-of-an-item-changes
@@ -170,7 +191,8 @@ public class LinkData implements data, Serializable {
                 this.id,
                 this.archived,
                 this.locked,
-                this.url
+                this.url,
+                this.isSelfTextExpanded
         );
     }
 
@@ -193,8 +215,32 @@ public class LinkData implements data, Serializable {
                 this.id,
                 this.archived,
                 this.locked,
-                this.url
+                this.url,
+                this.isSelfTextExpanded
+        );
+    }
 
+    public LinkData toggleSelfTextExpansion() {
+        return new LinkData(
+                this.title,
+                this.author,
+                this.ups,
+                this.likes,
+                this.subreddit_name_prefixed,
+                this.name,
+                this.thumbnail,
+                this.saved,
+                this.created_utc,
+                this.num_comments,
+                this.gildings,
+                this.selftext,
+                this.preview,
+                this.post_hint,
+                this.id,
+                this.archived,
+                this.locked,
+                this.url,
+                !this.isSelfTextExpanded
         );
     }
 
@@ -215,11 +261,12 @@ public class LinkData implements data, Serializable {
                 ", saved=" + saved +
                 ", created_utc=" + created_utc +
                 ", num_comments=" + num_comments +
-                ", gildings=" + gildings +
-                ", preview=" + preview +
+                ", Gildings=" + gildings +
+                ", Preview=" + preview +
                 ", post_hint='" + post_hint + '\'' +
                 ", id='" + id + '\'' +
                 ", url='" + url + '\'' +
+                ", isSelfTextExpanded=" + isSelfTextExpanded +
                 '}';
     }
 }

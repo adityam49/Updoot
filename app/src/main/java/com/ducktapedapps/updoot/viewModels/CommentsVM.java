@@ -9,8 +9,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.ducktapedapps.updoot.model.CommentData;
 import com.ducktapedapps.updoot.model.ListingData;
-import com.ducktapedapps.updoot.model.thing;
-import com.ducktapedapps.updoot.repository.commentsRepo;
+import com.ducktapedapps.updoot.model.Thing;
+import com.ducktapedapps.updoot.repository.CommentsRepo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +20,17 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class commentsVM extends AndroidViewModel {
+public class CommentsVM extends AndroidViewModel {
 
-    private static final String TAG = "commentsVM";
-    private commentsRepo repo;
+    private static final String TAG = "CommentsVM";
+    private CommentsRepo repo;
     private MutableLiveData<List<CommentData>> allComments = new MutableLiveData<>();
     private CompositeDisposable disposable;
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(true);
 
-
-    public commentsVM(@NonNull Application application) {
+    public CommentsVM(@NonNull Application application) {
         super(application);
-        repo = new commentsRepo(application);
+        repo = new CommentsRepo(application);
         disposable = new CompositeDisposable();
     }
 
@@ -38,28 +38,34 @@ public class commentsVM extends AndroidViewModel {
         return allComments;
     }
 
+    public MutableLiveData<Boolean> getIsLoading() {
+        return isLoading;
+    }
+
     public void loadComments(String subreddit, String submission_id) {
         repo
                 .loadComments(subreddit, submission_id)
                 .subscribeOn(Schedulers.io())
-                .subscribe(new SingleObserver<thing>() {
+                .subscribe(new SingleObserver<Thing>() {
                     @Override
                     public void onSubscribe(Disposable d) {
                         disposable.add(d);
+                        isLoading.postValue(true);
                     }
 
                     @Override
-                    public void onSuccess(thing thing) {
+                    public void onSuccess(Thing thing) {
                         if (thing.getData() != null && thing.getData() instanceof ListingData &&
                                 !((ListingData) thing.getData()).getChildren().isEmpty() &&
                                 ((ListingData) thing.getData()).getChildren().get(0).getData() instanceof CommentData) {
                             List<CommentData> fetchedComments = new ArrayList<>();
-                            for (thing comment : ((ListingData) thing.getData()).getChildren()) {
+                            for (Thing comment : ((ListingData) thing.getData()).getChildren()) {
                                 if (comment.getData() instanceof CommentData) {
                                     fetchedComments.add((CommentData) comment.getData());
                                 }
                             }
                             allComments.postValue(fetchedComments);
+                            isLoading.postValue(false);
                         }
                         Log.i(TAG, "onSuccess: ");
                     }
@@ -67,9 +73,11 @@ public class commentsVM extends AndroidViewModel {
                     @Override
                     public void onError(Throwable e) {
                         Log.e(TAG, "onError: ", e);
+                        isLoading.postValue(false);
                     }
                 });
     }
+
 
     @Override
     protected void onCleared() {

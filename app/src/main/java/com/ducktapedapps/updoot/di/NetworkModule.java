@@ -1,10 +1,10 @@
 package com.ducktapedapps.updoot.di;
 
 import com.ducktapedapps.updoot.BuildConfig;
-import com.ducktapedapps.updoot.model.thing;
+import com.ducktapedapps.updoot.model.Thing;
+import com.ducktapedapps.updoot.utils.Constants;
+import com.ducktapedapps.updoot.utils.ThingDeserializer;
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
-import com.ducktapedapps.updoot.utils.constants;
-import com.ducktapedapps.updoot.utils.thingDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -56,7 +56,7 @@ class NetworkModule {
     @Provides
     static Gson provideGson() {
         GsonBuilder gsonBuilder = new GsonBuilder()
-                .registerTypeAdapter(thing.class, new thingDeserializer());
+                .registerTypeAdapter(Thing.class, new ThingDeserializer());
         return gsonBuilder.create();
     }
 
@@ -64,7 +64,7 @@ class NetworkModule {
     @Provides
     static Retrofit provideRetrofit(OkHttpClient client, Gson gson) {
         return new Retrofit.Builder()
-                .baseUrl(constants.API_BASE_URL)
+                .baseUrl(Constants.API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)

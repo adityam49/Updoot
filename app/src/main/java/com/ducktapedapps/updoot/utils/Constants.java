@@ -1,6 +1,6 @@
 package com.ducktapedapps.updoot.utils;
 
-public class constants {
+public class Constants {
     public static final String TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey";
 
     public static final String USERLESS_TOKEN_EXPIRY_KEY = "userLessTokenExpiryKey";

@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.model;
 
 import java.io.Serializable;
 
-public class CommentData implements data, Serializable {
+public class CommentData implements Data, Serializable {
     private String author;
     private int depth;
     private String body;
@@ -10,8 +10,8 @@ public class CommentData implements data, Serializable {
     private Boolean likes;
     private boolean saved;
     private String id;
-    private thing replies;
-    private gildings gildings;
+    private Thing replies;
+    private Gildings gildings;
 
     public String getAuthor() {
         return author;
@@ -41,7 +41,7 @@ public class CommentData implements data, Serializable {
         return id;
     }
 
-    public thing getReplies() {
+    public Thing getReplies() {
         return replies;
     }
 
@@ -56,11 +56,11 @@ public class CommentData implements data, Serializable {
                 ", saved=" + saved +
                 ", id='" + id + '\'' +
                 ", replies=" + replies +
-                ", gildings=" + gildings +
+                ", Gildings=" + gildings +
                 '}';
     }
 
-    public com.ducktapedapps.updoot.model.gildings getGildings() {
+    public Gildings getGildings() {
         return gildings;
     }
 }

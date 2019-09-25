@@ -2,9 +2,9 @@ package com.ducktapedapps.updoot.model;
 
 import java.io.Serializable;
 
-public class thing implements Serializable {
+public class Thing implements Serializable {
     private String kind;
-    private data data;
+    private Data data;
 
     public String getKind() {
         return kind;
@@ -14,19 +14,19 @@ public class thing implements Serializable {
         this.kind = kind;
     }
 
-    public data getData() {
+    public Data getData() {
         return data;
     }
 
-    public void setData(data data) {
+    public void setData(Data data) {
         this.data = data;
     }
 
     @Override
     public String toString() {
-        return "thing{" +
+        return "Thing{" +
                 "kind='" + kind + '\'' +
-                ", data=" + data +
+                ", Data=" + data +
                 '}';
     }
 }
