@@ -15,6 +15,8 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,14 +58,7 @@ public class SubredditFragment extends Fragment {
 
     private submissionsAdapter adapter;
 
-    public static SubredditFragment newInstance(String subreddit, boolean isFragmentAtStackBase) {
-        Bundle args = new Bundle();
-        args.putString(SUBREDDIT_KEY, subreddit);
-        args.putBoolean(IS_BASE_FRAG_KEY, isFragmentAtStackBase);
-        SubredditFragment fragment = new SubredditFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private NavController navController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +66,7 @@ public class SubredditFragment extends Fragment {
         if (getActivity() != null)
             ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
         assert getArguments() != null;
+        navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
         this.isFragmentAtStackBase = getArguments().getBoolean(IS_BASE_FRAG_KEY);
         if (!this.isFragmentAtStackBase)
             slidrConfig = new SlidrConfig.Builder()
@@ -120,26 +116,9 @@ public class SubredditFragment extends Fragment {
             @Override
             public void performLeftSwipeAction(int adapterPosition) {
                 LinkData data = adapter.getCurrentList().get(adapterPosition);
-                assert getArguments() != null;
-                if (!getArguments().get(SUBREDDIT_KEY).equals(data.getSubreddit_name_prefixed())) {
-                    setHasOptionsMenu(false);
-                    if (getFragmentManager() != null)
-                        getFragmentManager()
-                                .beginTransaction()
-                                .setCustomAnimations(
-                                        R.anim.enter_from_right,
-                                        R.anim.exit_to_left,
-                                        R.anim.enter_from_left,
-                                        R.anim.exit_to_right
-
-                                )
-                                .replace(
-                                        R.id.fragmentContainer,
-                                        SubredditFragment.newInstance(data.getSubreddit_name_prefixed(), false),
-                                        String.valueOf(getFragmentManager().getBackStackEntryCount() + 1)
-                                )
-                                .addToBackStack(null)
-                                .commit();
+                if (!submissionsVM.getSubreddit().equals(data.getSubreddit_name_prefixed())) {
+                    SubredditFragmentDirections.ActionGoToSubreddit action = SubredditFragmentDirections.actionGoToSubreddit().setRSubreddit(data.getSubreddit_name_prefixed());
+                    navController.navigate(action);
                 }
             }
 
@@ -161,8 +140,9 @@ public class SubredditFragment extends Fragment {
     }
 
     private void setUpViewModel() {
-        assert getArguments() != null; // new subreddit fragment can be created only via newInstance method call
-        submissionsVM = new ViewModelProvider(this, new SubmissionsVMFactory(appContext, getArguments().getString(SUBREDDIT_KEY), getArguments().getBoolean(IS_BASE_FRAG_KEY))).get(SubmissionsVM.class);
+        String subreddit = SubredditFragmentArgs.fromBundle(getArguments()).getRSubreddit();
+        subreddit = subreddit == null ? "" : subreddit;
+        submissionsVM = new ViewModelProvider(this, new SubmissionsVMFactory(appContext, subreddit, getArguments().getBoolean(IS_BASE_FRAG_KEY))).get(SubmissionsVM.class);
         binding.setSubmissionViewModel(submissionsVM);
 
         if (this.getActivity() != null) {
@@ -272,23 +252,9 @@ public class SubredditFragment extends Fragment {
 
     public class ClickHandler {
         public void onClick(LinkData linkData) {
+            SubredditFragmentDirections.ActionGoToComments action = SubredditFragmentDirections.actionGoToComments(linkData);
+            navController.navigate(action);
 
-            if (getFragmentManager() != null)
-                getFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(
-                                R.anim.enter_from_right,
-                                R.anim.exit_to_left,
-                                R.anim.enter_from_left,
-                                R.anim.exit_to_right
-                        )
-                        .replace(
-                                R.id.fragmentContainer,
-                                commentsFragment.newInstance(linkData),
-                                String.valueOf(getFragmentManager().getBackStackEntryCount() + 1)
-                        )
-                        .addToBackStack(null)
-                        .commit();
         }
     }
 }

@@ -6,14 +6,13 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding;
-import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
 import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
@@ -39,40 +38,37 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
 
         setSupportActionBar(binding.toolbar);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
-        if (fragment == null) {
-            // empty string for subreddit gives frontpage as defined bu reddit api
-            fragment = SubredditFragment.newInstance("", true);
-            fragmentManager
-                    .beginTransaction()
-                    .add(R.id.fragmentContainer, fragment, String.valueOf(0))
-                    .commit();
-        }
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            switch (destination.getId()) {
+                case R.id.SubredditDestination:
+                    if (arguments != null) {
+                        String title = arguments.getString("r/subreddit");
+                        if (title != null) {
+                            binding.toolbar.setTitle(title);
+                        } else {
+                            binding.toolbar.setTitle(getString(R.string.app_name));
+                        }
+                    }
+                    break;
+                case R.id.CommentsDestination:
+                    binding.toolbar.setTitle(getString(R.string.Comments));
+                    break;
+            }
+        });
 
         BottomNavigationView bottomNavigationView = binding.bottomNavigationBar;
         bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.home:
-                    if (bottomNavigationView.getSelectedItemId() == R.id.sort) {
-                        return true;
-                    } else {
-                        getSupportFragmentManager()
-                                .popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                        return true;
-                    }
+                    navController.popBackStack(R.id.SubredditDestination, true);
+                    return true;
 
                 case R.id.accounts:
-                    accountsBottomSheet bottomSheet = new accountsBottomSheet();
-                    bottomSheet.show(getSupportFragmentManager(), "accountsBottomSheet");
+                    navController.navigate(R.id.accountsBottomSheetDialog);
                     return false;
-
                 case R.id.sort:
-                    Fragment visibleFragment = getVisibleFragment();
-                    if (visibleFragment instanceof SubredditFragment) {
-                        ((SubredditFragment) visibleFragment).inflateSortPopup(findViewById(R.id.sort));
-                    }
                 case R.id.more:
                 default:
                     return false;
@@ -112,10 +108,5 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
     @Override
     public void onCurrentAccountRemoved() {
         reloadContent();
-    }
-
-    private Fragment getVisibleFragment() {
-        String topFragmentTag = String.valueOf(getSupportFragmentManager().getBackStackEntryCount());
-        return getSupportFragmentManager().findFragmentByTag(topFragmentTag);
     }
 }

@@ -38,15 +38,6 @@ public class commentsFragment extends Fragment {
 
     private CommentsAdapter adapter;
 
-    static commentsFragment newInstance(LinkData data) {
-        Log.i(TAG, "newInstance: " + data);
-        Bundle args = new Bundle();
-        args.putSerializable(SUBMISSIONS_DATA_KEY, data);
-        commentsFragment fragment = new commentsFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,12 +63,10 @@ public class commentsFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_comments, container, false);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         if (getArguments() != null) {
-            LinkData data = (LinkData) getArguments().getSerializable(SUBMISSIONS_DATA_KEY);
-            if (data != null) {
-                binding.setVariable(linkdata, data);
-                setUpRecyclerView();
-                setUpViewModel(data);
-            }
+            LinkData data = commentsFragmentArgs.fromBundle(getArguments()).getSubmissionData();
+            binding.setVariable(linkdata, data);
+            setUpRecyclerView();
+            setUpViewModel(data);
         }
         return binding.getRoot();
     }
