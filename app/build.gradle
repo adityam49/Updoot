@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 28
@@ -31,6 +32,7 @@ dependencies {
     def retrofit_version = '2.6.1'
     def dagger_version = '2.24'
     def glide_version = '4.10.0'
+    def nav_version = "2.1.0"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     //android support libs
@@ -38,6 +40,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
     implementation 'com.google.android.material:material:1.1.0-alpha10'
+
+    //android navigation component
+    implementation "androidx.navigation:navigation-fragment:$nav_version"
+    implementation "androidx.navigation:navigation-ui:$nav_version"
 
     //android arch
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"

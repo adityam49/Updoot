@@ -62,6 +62,10 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         return this.after;
     }
 
+    public String getSubreddit() {
+        return subreddit;
+    }
+
     public void loadNextPage() {
         compositeDisposable.add(frontPageRepo
                 .loadNextPage(subreddit, sorting, time, after)
@@ -92,7 +96,7 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                     allSubmissions.postValue(submissions);
                     isLoading.postValue(false);
                 }, throwable -> {
-                    Log.e(TAG, "onError: ", throwable.getCause());
+                    Log.e(TAG, "onError: ", throwable);
                     isLoading.postValue(false);
                     toastMessage.postValue(new SingleLiveEvent<>(throwable.getMessage()));
                 }));

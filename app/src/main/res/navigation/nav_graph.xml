@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/SubredditDestination">
+
+    <action
+        android:id="@+id/action_go_to_home"
+        app:destination="@id/SubredditDestination" />
+    <dialog
+        android:id="@+id/accountsBottomSheetDialog"
+        android:name="com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet"
+        android:label="accounts_modal_bottom_sheet"
+        tools:layout="@layout/accounts_modal_bottom_sheet" />
+    <fragment
+        android:id="@+id/SubredditDestination"
+        android:name="com.ducktapedapps.updoot.ui.fragments.SubredditFragment"
+        android:label="fragment_subreddit"
+        tools:layout="@layout/fragment_subreddit">
+        <action
+            android:id="@+id/action_go_to_subreddit"
+            app:destination="@+id/SubredditDestination"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
+        <action
+            android:id="@+id/action_go_to_comments"
+            app:destination="@id/CommentsDestination"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
+        <argument
+            android:name="r/subreddit"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/CommentsDestination"
+        android:name="com.ducktapedapps.updoot.ui.fragments.commentsFragment"
+        android:label="fragment_comments"
+        tools:layout="@layout/fragment_comments">
+        <action
+            android:id="@+id/action_go_to_comments"
+            app:destination="@id/CommentsDestination" />
+        <action
+            android:id="@+id/action_go_to_subreddit"
+            app:destination="@id/SubredditDestination" />
+        <argument
+            android:name="SubmissionData"
+            app:argType="com.ducktapedapps.updoot.model.LinkData" />
+    </fragment>
+</navigation>
