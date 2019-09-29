@@ -34,22 +34,13 @@ import com.ducktapedapps.updoot.utils.SwipeUtils;
 import com.ducktapedapps.updoot.viewModels.ActivityVM;
 import com.ducktapedapps.updoot.viewModels.SubmissionsVM;
 import com.ducktapedapps.updoot.viewModels.SubmissionsVMFactory;
-import com.r0adkll.slidr.Slidr;
-import com.r0adkll.slidr.model.SlidrConfig;
-import com.r0adkll.slidr.model.SlidrInterface;
 
 import javax.inject.Inject;
 
 public class SubredditFragment extends Fragment {
     private static final String TAG = "SubredditFragment";
-    private static final String SUBREDDIT_KEY = "subreddit_key";
     private static final String IS_BASE_FRAG_KEY = "isBaseFragmentKey";
     private FragmentSubredditBinding binding;
-
-    private SlidrInterface slidrInterface;
-    private SlidrConfig slidrConfig;
-
-    private boolean isFragmentAtStackBase;
 
     @Inject
     Application appContext;
@@ -66,22 +57,12 @@ public class SubredditFragment extends Fragment {
         if (getActivity() != null)
             ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
         assert getArguments() != null;
-        navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
-        this.isFragmentAtStackBase = getArguments().getBoolean(IS_BASE_FRAG_KEY);
-        if (!this.isFragmentAtStackBase)
-            slidrConfig = new SlidrConfig.Builder()
-                    .edge(true)
-                    .edgeSize(5f)
-                    .build();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (slidrInterface == null && !this.isFragmentAtStackBase && getView() != null) {
-            Log.i(TAG, "onResume: slideable");
-            slidrInterface = Slidr.replace(getView().findViewById(R.id.subredditFragment), slidrConfig);
-        }
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        navController = Navigation.findNavController(view);
     }
 
     @Nullable

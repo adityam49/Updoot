@@ -36,7 +36,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
             android:contentDescription="@string/thumbnailDescription"
             android:scaleType="fitStart"
@@ -51,8 +51,7 @@
             android:id="@+id/gildingView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@id/metadata"
             app:layout_constraintStart_toStartOf="@+id/metadata"
@@ -97,13 +96,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/title_tv"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/title_tv"
             app:submissionVotes="@{linkdata.ups}"
             app:voteColor="@{linkdata.likes}"
             tools:text="1" />
@@ -121,11 +119,11 @@
             tools:text="This is an example of a long title " />
 
         <TextView
-
             android:id="@+id/metadata"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@id/barrier"
