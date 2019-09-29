@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.ui.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,19 +21,12 @@ import com.ducktapedapps.updoot.ui.adapters.CommentsAdapter;
 import com.ducktapedapps.updoot.utils.CustomItemAnimator;
 import com.ducktapedapps.updoot.utils.SwipeUtils;
 import com.ducktapedapps.updoot.viewModels.CommentsVM;
-import com.r0adkll.slidr.Slidr;
-import com.r0adkll.slidr.model.SlidrConfig;
-import com.r0adkll.slidr.model.SlidrInterface;
 
 import static com.ducktapedapps.updoot.BR.linkdata;
 
 public class commentsFragment extends Fragment {
     private static final String TAG = "commentsFragment";
-    private static final String SUBMISSIONS_DATA_KEY = "submissions_data_key";
     private FragmentCommentsBinding binding;
-
-    private SlidrConfig slidrConfig;
-    private SlidrInterface slidrInterface;
 
     private CommentsAdapter adapter;
 
@@ -42,19 +34,6 @@ public class commentsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        slidrConfig = new SlidrConfig.Builder()
-                .edge(true)
-                .edgeSize(5f)
-                .build();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (slidrInterface == null && getView() != null) {
-            Log.i(TAG, "onResume: is Slidable");
-            slidrInterface = Slidr.replace(getView().findViewById(R.id.commentsFragmentContent), slidrConfig);
-        }
     }
 
     @Nullable
