@@ -34,6 +34,7 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
     private MutableLiveData<List<LinkData>> allSubmissions = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(true);
     private MutableLiveData<SingleLiveEvent<String>> toastMessage = new MutableLiveData<>(new SingleLiveEvent<>(null));
+    private int expandedSubmissionIndex = -1;
 
     SubmissionsVM(Application application, String subreddit) {
         super(application);
@@ -205,13 +206,25 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
 
 
     public void expandSelfText(int index) {
-        if (allSubmissions.getValue().get(index).getSelftext() != null) {
-            LinkData data = allSubmissions.getValue().get(index);
+        List<LinkData> updatedList = allSubmissions.getValue();
+        LinkData data = updatedList.get(index);
+        if (index == expandedSubmissionIndex) {
+            if (data.getSelftext() != null) {
+                data = data.toggleSelfTextExpansion();
+                updatedList.set(index, data);
+                if (!data.isSelfTextExpanded()) expandedSubmissionIndex = -1;
+            }
+        } else {
             data = data.toggleSelfTextExpansion();
-            List<LinkData> updatedList = allSubmissions.getValue();
             updatedList.set(index, data);
-            allSubmissions.setValue(updatedList);
+            if (expandedSubmissionIndex != -1) {
+                data = updatedList.get(expandedSubmissionIndex);
+                data = data.toggleSelfTextExpansion();
+                updatedList.set(expandedSubmissionIndex, data);
+            }
+            expandedSubmissionIndex = index;
         }
+        allSubmissions.setValue(updatedList);
     }
 
     @Override
