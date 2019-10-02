@@ -59,19 +59,18 @@
             tools:visibility="visible">
 
             <TextView
-                android:id="@+id/silverGildingsView"
+                android:id="@+id/silverGildingView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_silver_gilding_14dp"
                 android:visibility="gone"
-
-                app:gildingsCount="@{linkdata.gildings.silver}"
+                app:gildingCount="@{linkdata.gildings.silver}"
                 tools:text="3"
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/goldGildingsView"
-                gildingsCount="@{linkdata.gildings.gold}"
+                android:id="@+id/goldGildingView"
+                gildingCount="@{linkdata.gildings.gold}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_gold_gilding_14dp"
@@ -80,8 +79,8 @@
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/platinumGildingsView"
-                gildingsCount="@{linkdata.gildings.platinum}"
+                android:id="@+id/platinumGildingView"
+                gildingCount="@{linkdata.gildings.platinum}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_platinum_gilding_14dp"

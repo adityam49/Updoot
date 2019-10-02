@@ -21,6 +21,8 @@ import me.kaelaela.opengraphview.OpenGraphView;
 
 public class BindingAdapters {
 
+    private static final String TAG = "BindingAdapters";
+
     @BindingAdapter("submissionThumbnailSource")
     public static void setThumbnail(ImageView thumbnailImageView, String thumbnail) {
         if (thumbnail != null) {
@@ -32,7 +34,6 @@ public class BindingAdapters {
                 case "default": //links
                     thumbnailImageView.setImageResource(R.drawable.ic_link);
                     break;
-
                 default:
                     Glide.with(thumbnailImageView.getContext())
                             .load(thumbnail)
@@ -47,9 +48,9 @@ public class BindingAdapters {
 
     @BindingAdapter("mediaPreview")
     public static void setMediaPreview(ImageView imageView, Preview mediaPreview) {
-        if (mediaPreview != null && !mediaPreview.toString().isEmpty()) {
+        if (mediaPreview != null && !mediaPreview.getImages().get(0).getSource().getUrl().isEmpty()) {
             Glide.with(imageView.getContext())
-                    .load(mediaPreview.toString())
+                    .load(mediaPreview.getImages().get(0).getSource().getUrl())
                     .transform(new FitCenter(), new RoundedCorners(16))
                     .into(imageView)
                     .getView()
@@ -66,14 +67,14 @@ public class BindingAdapters {
             upVotes = String.valueOf(linkData.getUps());
         }
         String metadata =
-                "By " + linkData.getAuthor() + " in " + linkData.getSubreddit_name_prefixed()
+                "By " + linkData.getAuthor() + " in " + linkData.getSubredditName()
                         + "\n"
                         + upVotes + " \u2191 " + DateUtils.getRelativeTimeSpanString(linkData.getCreated() * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
         textView.setText(metadata);
     }
 
-    @BindingAdapter("gildingsCount")
-    public static void setGildingsCount(TextView textView, int gildingCount) {
+    @BindingAdapter("gildingCount")
+    public static void setGildingCount(TextView textView, int gildingCount) {
         if (gildingCount != 0) {
             textView.setText(String.valueOf(gildingCount));
             textView.setVisibility(View.VISIBLE);
@@ -84,7 +85,7 @@ public class BindingAdapters {
 
     @BindingAdapter("cardViewContent")
     public static void setCardViewContent(CardView cardView, LinkData data) {
-        if ((data.getSelftext() != null && !data.getSelftext().isEmpty() || (data.getUrl() != null && !data.getUrl().isEmpty()))) {
+        if (data.getSelftext() != null && !data.getSelftext().isEmpty() || !data.getUrl().isEmpty()) {
             cardView.setVisibility(View.VISIBLE);
         } else {
             cardView.setVisibility(View.GONE);
@@ -103,7 +104,7 @@ public class BindingAdapters {
 
     @BindingAdapter("richLinkPreview")
     public static void setRichLinkPreview(OpenGraphView openGraphView, LinkData data) {
-        if (data.getUrl() != null && !data.getUrl().isEmpty() && data.getPost_hint() != null && data.getPost_hint().equals("link") && data.getSelftext() == null) {
+        if (!data.getUrl().isEmpty() && data.getPost_hint() != null && data.getPost_hint().equals("link") && data.getSelftext() == null) {
             openGraphView.loadFrom(data.getUrl());
             openGraphView.setVisibility(View.VISIBLE);
         } else {

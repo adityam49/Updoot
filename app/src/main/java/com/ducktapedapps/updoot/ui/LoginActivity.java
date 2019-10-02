@@ -83,33 +83,32 @@ public class LoginActivity extends AppCompatActivity {
                         webView.setVisibility(View.GONE);
                         progressBar.setVisibility(View.VISIBLE);
                         final String code = uri.getQueryParameter("code");
-                        disposable.add(authAPI.get()
-                                        .getUserToken(
-                                                Constants.TOKEN_ACCESS_URL,
-                                                Credentials.basic(Constants.client_id, ""),
-                                                Constants.user_grantType,
-                                                code,
-                                                Constants.redirect_uri
-                                        )
-                                        .doOnSuccess(token -> {
-                                            mToken = token;
-                                            token.setAbsolute_expiry();
-                                            interceptor.get().setSessionToken(token);
-                                        })
-                                        .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
-                                        .map(__ -> redditAPILazy.get())
-                                        .flatMap(RedditAPI::getUserIdentity)
-                                        .doOnSuccess(account -> {
-                                            sharedPreferences.get().edit().putString(Constants.LOGIN_STATE, account.getName()).apply();
-//                                    component.getTokenInterceptor().setSessionToken(mToken);
-                                            createAccount(account.getName(), mToken);
-                                            setResult(RESULT_OK);
-                                            finish();
-                                        })
-                                        .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
-                                        .subscribeOn(Schedulers.io())
-                                        .subscribe()
-                        );
+                        if (code != null)
+                            disposable.add(authAPI.get()
+                                    .getUserToken(
+                                            Constants.TOKEN_ACCESS_URL,
+                                            Credentials.basic(Constants.client_id, ""),
+                                            Constants.user_grantType,
+                                            code,
+                                            Constants.redirect_uri
+                                    )
+                                    .doOnSuccess(token -> {
+                                        mToken = token;
+                                        interceptor.get().setSessionToken(token);
+                                    })
+                                    .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
+                                    .map(__ -> redditAPILazy.get())
+                                    .flatMap(RedditAPI::getUserIdentity)
+                                    .doOnSuccess(account -> {
+                                        sharedPreferences.get().edit().putString(Constants.LOGIN_STATE, account.getName()).apply();
+                                        createAccount(account.getName(), mToken);
+                                        setResult(RESULT_OK);
+                                        finish();
+                                    })
+                                    .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe()
+                            );
                     } else {
                         Log.i(TAG, "onPageStarted: ");
                         finish();

@@ -25,27 +25,20 @@ public class ThingDeserializer implements JsonDeserializer<Thing> {
         } else if (json instanceof JsonArray) {
             jsonObject = json.getAsJsonArray().get(1).getAsJsonObject();
         }
-        Thing thing = new Thing();
         if (jsonObject != null) {
             String kind = jsonObject.get("kind").getAsString();
             if (kind != null) {
                 JsonElement element = jsonObject.get("data");
                 switch (kind) {
                     case "Listing":
-                        thing.setData(context.deserialize(element, ListingData.class));
-                        thing.setKind("Listing");
-                        break;
+                        return new Thing("Listing", context.deserialize(element, ListingData.class));
                     case "t3":
-                        thing.setData(context.deserialize(element, LinkData.class));
-                        thing.setKind("t3");
-                        break;
+                        return new Thing("t3", context.deserialize(element, LinkData.class));
                     case "t1":
-                        thing.setData(context.deserialize(element, CommentData.class));
-                        thing.setKind("t1");
-                        break;
+                        return new Thing("t1", context.deserialize(element, CommentData.class));
                 }
             }
         }
-        return thing;
+        return null;
     }
 }
