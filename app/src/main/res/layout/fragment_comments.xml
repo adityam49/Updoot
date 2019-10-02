@@ -89,7 +89,7 @@
 
                 <TextView
                     android:id="@+id/silverGildingsView"
-                    gildingsCount="@{linkdata.gildings.silver}"
+                    gildingCount="@{linkdata.gildings.silver}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="2dp"
@@ -103,7 +103,7 @@
 
                 <TextView
                     android:id="@+id/goldGildingsView"
-                    gildingsCount="@{linkdata.gildings.gold}"
+                    gildingCount="@{linkdata.gildings.gold}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="2dp"
@@ -117,7 +117,7 @@
 
                 <TextView
                     android:id="@+id/platinumGildingsView"
-                    gildingsCount="@{linkdata.gildings.platinum}"
+                    gildingCount="@{linkdata.gildings.platinum}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"

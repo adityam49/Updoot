@@ -97,8 +97,8 @@ public class SubredditFragment extends Fragment {
             @Override
             public void performLeftSwipeAction(int adapterPosition) {
                 LinkData data = adapter.getCurrentList().get(adapterPosition);
-                if (!submissionsVM.getSubreddit().equals(data.getSubreddit_name_prefixed())) {
-                    SubredditFragmentDirections.ActionGoToSubreddit action = SubredditFragmentDirections.actionGoToSubreddit().setRSubreddit(data.getSubreddit_name_prefixed());
+                if (!submissionsVM.getSubreddit().equals(data.getSubredditName())) {
+                    SubredditFragmentDirections.ActionGoToSubreddit action = SubredditFragmentDirections.actionGoToSubreddit().setRSubreddit(data.getSubredditName());
                     navController.navigate(action);
                 }
             }

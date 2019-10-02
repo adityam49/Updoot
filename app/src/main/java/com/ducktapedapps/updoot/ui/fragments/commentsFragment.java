@@ -54,7 +54,7 @@ public class commentsFragment extends Fragment {
         CommentsVM viewModel = new ViewModelProvider(this).get(CommentsVM.class);
         binding.setCommentsViewModel(viewModel);
 
-        viewModel.loadComments(data.getSubreddit_name_prefixed(), data.getId());
+        viewModel.loadComments(data.getSubredditName(), data.getId());
 
         viewModel.getAllComments().observe(this, commentDataList -> adapter.submitList(commentDataList));
     }

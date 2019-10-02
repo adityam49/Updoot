@@ -74,9 +74,10 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
                     if (thing.getData() instanceof ListingData) {
                         after = ((ListingData) thing.getData()).getAfter();
                         List<LinkData> linkDataList = new ArrayList<>();
-                        for (Thing linkThing : ((ListingData) thing.getData()).getChildren()) {
-                            linkDataList.add(((LinkData) linkThing.getData()));
-                        }
+                        if (!((ListingData) thing.getData()).getChildren().isEmpty() && ((ListingData) thing.getData()).getChildren().get(0).getData() instanceof LinkData)
+                            for (Thing linkThing : ((ListingData) thing.getData()).getChildren()) {
+                                linkDataList.add(((LinkData) linkThing.getData()));
+                            }
                         return linkDataList;
                     } else {
                         throw new Exception("unsupported response");
@@ -108,11 +109,11 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         if (allSubmissions.getValue() != null) {
             LinkData data = allSubmissions.getValue().get(index);
             if (data != null) {
-                if (data.isArchived()) {
+                if (data.getArchived()) {
                     toastMessage.setValue(new SingleLiveEvent<>("Submission is archived!"));
                     return;
                 }
-                if (data.isLocked()) {
+                if (data.getLocked()) {
                     toastMessage.setValue(new SingleLiveEvent<>("Submission is locked!"));
                     return;
                 }

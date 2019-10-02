@@ -14,7 +14,7 @@ import com.ducktapedapps.updoot.utils.MarkdownUtils;
 public class SubredditBindingAdapters {
     @BindingAdapter("metadata")
     public static void setMetadata(TextView textView, LinkData data) {
-        StringBuilder metadata = new StringBuilder().append(data.getSubreddit_name_prefixed());
+        StringBuilder metadata = new StringBuilder().append(data.getSubredditName());
         metadata.append(" \u2022 ");
         if (data.getCommentsCount() > 999) {
             metadata

@@ -55,19 +55,21 @@ public class CommentsVM extends AndroidViewModel {
 
                     @Override
                     public void onSuccess(Thing thing) {
-                        if (thing.getData() != null && thing.getData() instanceof ListingData &&
-                                !((ListingData) thing.getData()).getChildren().isEmpty() &&
-                                ((ListingData) thing.getData()).getChildren().get(0).getData() instanceof CommentData) {
-                            List<CommentData> fetchedComments = new ArrayList<>();
+                        thing.getData();
+                        List<CommentData> fetchedComments = new ArrayList<>();
+                        if (thing.getData() instanceof ListingData
+                                && !((ListingData) thing.getData()).getChildren().isEmpty()
+                                && ((ListingData) thing.getData()).getChildren().get(0).getKind().equals("t1")) {
                             for (Thing comment : ((ListingData) thing.getData()).getChildren()) {
-                                if (comment.getData() instanceof CommentData) {
+                                Log.i(TAG, "child " + comment);
+                                if (comment != null && comment.getData() instanceof CommentData) {
                                     fetchedComments.add((CommentData) comment.getData());
                                 }
                             }
                             allComments.postValue(fetchedComments);
                             isLoading.postValue(false);
+                            Log.i(TAG, "onSuccess: ");
                         }
-                        Log.i(TAG, "onSuccess: ");
                     }
 
                     @Override
