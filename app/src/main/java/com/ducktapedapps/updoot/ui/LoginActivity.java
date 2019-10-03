@@ -94,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                                     )
                                     .doOnSuccess(token -> {
                                         mToken = token;
+                                        token.setAbsoluteExpiry();
                                         interceptor.get().setSessionToken(token);
                                     })
                                     .doOnError(throwable -> Log.e(TAG, "onPageStarted: ", throwable))

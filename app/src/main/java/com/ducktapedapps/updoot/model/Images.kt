@@ -1,4 +1,6 @@
 package com.ducktapedapps.updoot.model
 
-data class Images(val source: Source)
+import java.io.Serializable
+
+data class Images(val source: Source) : Serializable
 
