@@ -35,7 +35,7 @@ public class TokenInterceptor implements Interceptor {
         Log.i(TAG, "setSessionToken: setting session token " + token);
         if (token != null) {
             this.sessionToken = token.getAccess_token();
-            this.tokenExpiry = token.getAbsolute_expiry();
+            this.tokenExpiry = token.getAbsoluteExpiry();
         } else {
             this.sessionToken = null;
             this.tokenExpiry = null;

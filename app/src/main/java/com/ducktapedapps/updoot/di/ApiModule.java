@@ -79,7 +79,10 @@ class ApiModule {
                             Credentials.basic(Constants.client_id, ""),
                             Constants.userLess_grantType,
                             sharedPreferences.getString(Constants.DEVICE_ID_KEY, null))
-                    .doOnSuccess(token -> userManager.setCurrentUser(Constants.ANON_USER, token))
+                    .doOnSuccess(token -> {
+                        token.setAbsoluteExpiry();
+                        userManager.setCurrentUser(Constants.ANON_USER, token);
+                    })
                     .doOnError(throwable -> Log.e(TAG, "provideRedditAPI: ", throwable))
                     .map(__ -> redditAPILazy.get());
         } else {
@@ -91,7 +94,10 @@ class ApiModule {
                                 Credentials.basic(Constants.client_id, ""),
                                 Constants.user_refresh_grantType,
                                 accountManager.getUserData(account, Constants.USER_TOKEN_REFRESH_KEY))
-                        .doOnSuccess(userManager::updateUserSessionData)
+                        .doOnSuccess(token -> {
+                            token.setAbsoluteExpiry();
+                            userManager.updateUserSessionData(token);
+                        })
                         .doOnError(throwable -> Log.e(TAG, "provideRedditAPI: ", throwable))
                         .map(__ -> redditAPILazy.get());
             }

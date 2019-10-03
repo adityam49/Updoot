@@ -10,7 +10,6 @@ import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.model.ListingData;
 import com.ducktapedapps.updoot.model.Thing;
 import com.ducktapedapps.updoot.repository.SubmissionRepo;
-import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.SingleLiveEvent;
 
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         after = null;
         time = null;
         this.subreddit = subreddit;
-        sorting = Constants.HOT;
+        sorting = "";
         loadNextPage();
     }
 
@@ -192,14 +191,9 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
     }
 
     public void reload(String sort, String time) {
-        if (sort == null) {
-            sorting = Constants.HOT;
-        } else {
-            sorting = sort;
-            if (time != null) {
-                this.time = time;
-            }
-        }
+        if (sort == null) sorting = "";
+        else sorting = sort;
+        this.time = time;
         after = null;
         allSubmissions.setValue(null);
         loadNextPage();

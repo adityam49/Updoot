@@ -13,10 +13,10 @@ interface RedditAPI {
 
     @GET("{subreddit}/{sort}")
     fun getSubreddit(
-            @Path("subreddit") subreddit: String,
+            @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
-            @Query("t") time: String,
-            @Query("after") after: String): Single<Thing>
+            @Query("t") time: String?,
+            @Query("after") after: String?): Single<Thing>
 
     @FormUrlEncoded
     @POST("/api/vote")
