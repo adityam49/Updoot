@@ -54,7 +54,7 @@ public class SubredditBindingAdapters {
     @BindingAdapter({"toggleSelfTextVisibility", "selfText"})
     public static void toggleSelfTextVisibility(TextView selfTextView, boolean isSelfTextExpanded, String htmlSelfText) {
         if (isSelfTextExpanded) {
-            MarkdownUtils.decodeAndSet(htmlSelfText, selfTextView);
+            MarkdownUtils.INSTANCE.decodeAndSet(htmlSelfText, selfTextView);
         } else {
             selfTextView.setText("");
         }

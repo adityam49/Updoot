@@ -96,7 +96,7 @@ public class BindingAdapters {
     public static void setMarkdownSelftext(TextView selftextTextView, String selfText) {
         if (selfText != null && !selfText.isEmpty()) {
             selftextTextView.setVisibility(View.VISIBLE);
-            MarkdownUtils.decodeAndSet(selfText, selftextTextView);
+            MarkdownUtils.INSTANCE.decodeAndSet(selfText, selftextTextView);
         } else {
             selftextTextView.setVisibility(View.GONE);
         }
