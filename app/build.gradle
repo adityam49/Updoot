@@ -16,9 +16,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField 'String', "CLIENT_ID", UPDOOT_CLIENT_ID
+            buildConfigField 'String', "REDIRECT_URI", UPDOOT_REDIRECT_URI
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', "CLIENT_ID", UPDOOT_CLIENT_ID
+            buildConfigField 'String', "REDIRECT_URI", UPDOOT_REDIRECT_URI
         }
     }
 
