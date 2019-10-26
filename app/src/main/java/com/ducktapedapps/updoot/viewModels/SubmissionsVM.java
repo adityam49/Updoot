@@ -7,8 +7,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.model.ListingData;
-import com.ducktapedapps.updoot.model.Thing;
 import com.ducktapedapps.updoot.repository.SubmissionRepo;
 import com.ducktapedapps.updoot.utils.SingleLiveEvent;
 
@@ -69,25 +67,13 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
     public void loadNextPage() {
         compositeDisposable.add(frontPageRepo
                 .loadNextPage(subreddit, sorting, time, after)
-                .map(thing -> {
-                    if (thing.getData() instanceof ListingData) {
-                        after = ((ListingData) thing.getData()).getAfter();
-                        List<LinkData> linkDataList = new ArrayList<>();
-                        if (!((ListingData) thing.getData()).getChildren().isEmpty() && ((ListingData) thing.getData()).getChildren().get(0).getData() instanceof LinkData)
-                            for (Thing linkThing : ((ListingData) thing.getData()).getChildren()) {
-                                linkDataList.add(((LinkData) linkThing.getData()));
-                            }
-                        return linkDataList;
-                    } else {
-                        throw new Exception("unsupported response");
-                    }
-                })
-                .map(linkDataList -> {
+                .map(response -> {
+                    after = response.component2();
                     List<LinkData> submissions = allSubmissions.getValue();
                     if (submissions == null) {
-                        submissions = linkDataList;
+                        submissions = response.component1();
                     } else {
-                        submissions.addAll(linkDataList);
+                        submissions.addAll(response.component1());
                     }
                     return submissions;
                 })
