@@ -18,7 +18,6 @@ import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.CommentsAdapter;
-import com.ducktapedapps.updoot.utils.CustomItemAnimator;
 import com.ducktapedapps.updoot.utils.SwipeUtils;
 import com.ducktapedapps.updoot.viewModels.CommentsVM;
 
@@ -27,7 +26,7 @@ import static com.ducktapedapps.updoot.BR.linkdata;
 public class commentsFragment extends Fragment {
     private static final String TAG = "commentsFragment";
     private FragmentCommentsBinding binding;
-
+    private CommentsVM viewModel;
     private CommentsAdapter adapter;
 
     @Override
@@ -51,7 +50,7 @@ public class commentsFragment extends Fragment {
     }
 
     private void setUpViewModel(LinkData data) {
-        CommentsVM viewModel = new ViewModelProvider(this).get(CommentsVM.class);
+        viewModel = new ViewModelProvider(this).get(CommentsVM.class);
         binding.setCommentsViewModel(viewModel);
 
         viewModel.loadComments(data.getSubredditName(), data.getId());
@@ -61,12 +60,10 @@ public class commentsFragment extends Fragment {
 
     private void setUpRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(commentsFragment.this.getContext());
-        adapter = new CommentsAdapter();
+        adapter = new CommentsAdapter(new ClickHandler());
         RecyclerView recyclerView = binding.recyclerView;
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-
-        recyclerView.setItemAnimator(new CustomItemAnimator());
 
         new ItemTouchHelper(new SwipeUtils(commentsFragment.this.getContext(), new SwipeUtils.swipeActionCallback() {
             @Override
@@ -87,5 +84,11 @@ public class commentsFragment extends Fragment {
         })).attachToRecyclerView(recyclerView);
     }
 
+    public class ClickHandler {
+        public void onClick(int index, boolean isExpanded) {
+            if (!isExpanded)
+                viewModel.toggleChildrenVisibility(index);
+        }
+    }
 
 }

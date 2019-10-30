@@ -1,7 +1,9 @@
 package com.ducktapedapps.updoot.di;
 
 import com.ducktapedapps.updoot.BuildConfig;
+import com.ducktapedapps.updoot.model.CommentData;
 import com.ducktapedapps.updoot.model.Thing;
+import com.ducktapedapps.updoot.utils.CommentDeserializer;
 import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.ThingDeserializer;
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor;
@@ -56,7 +58,8 @@ class NetworkModule {
     @Provides
     static Gson provideGson() {
         GsonBuilder gsonBuilder = new GsonBuilder()
-                .registerTypeAdapter(Thing.class, new ThingDeserializer());
+                .registerTypeAdapter(Thing.class, new ThingDeserializer())
+                .registerTypeAdapter(CommentData.class, new CommentDeserializer());
         return gsonBuilder.create();
     }
 

@@ -13,3 +13,4 @@
 /app/src/main/res/drawable/doggo.jpg
 .externalNativeBuild
 /app/build/output/apk/debug/app-dubug.apk
+/app/build/release/app-release.apk

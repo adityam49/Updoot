@@ -29,14 +29,15 @@ public class ThingDeserializer implements JsonDeserializer<Thing> {
             String kind = jsonObject.get("kind").getAsString();
             if (kind != null) {
                 JsonElement element = jsonObject.get("data");
-                switch (kind) {
-                    case "Listing":
-                        return new Thing("Listing", context.deserialize(element, ListingData.class));
-                    case "t3":
-                        return new Thing("t3", context.deserialize(element, LinkData.class));
-                    case "t1":
-                        return new Thing("t1", context.deserialize(element, CommentData.class));
-                }
+                if (element != null)
+                    switch (kind) {
+                        case "Listing":
+                            return new Thing("Listing", context.deserialize(element, ListingData.class));
+                        case "t3":
+                            return new Thing("t3", context.deserialize(element, LinkData.class));
+                        case "t1":
+                            return new Thing("t1", context.deserialize(element, CommentData.class));
+                    }
             }
         }
         return null;

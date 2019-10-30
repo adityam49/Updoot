@@ -2,16 +2,13 @@ package com.ducktapedapps.updoot.ui.fragments;
 
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,7 +24,6 @@ import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
-import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.CustomItemAnimator;
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener;
 import com.ducktapedapps.updoot.utils.SwipeUtils;
@@ -143,88 +139,6 @@ public class SubredditFragment extends Fragment {
                 Toast.makeText(this.getContext(), toast, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    public void inflateSortPopup(View popupSourceView) {
-        if (this.getContext() != null) {
-            PopupMenu popup = new PopupMenu(this.getContext(), popupSourceView);
-            MenuInflater inflater = popup.getMenuInflater();
-            inflater.inflate(R.menu.subreddit_sort_menu, popup.getMenu());
-            popup.show();
-            popup.setOnMenuItemClickListener(item -> {
-                String sortBy = null, timePeriod = null;
-                Log.i(TAG, "inflateSortPopup: " + item.getTitle());
-                switch (item.getItemId()) {
-                    case R.id.best:
-                        sortBy = Constants.BEST;
-                        break;
-                    case R.id.hot:
-                        sortBy = Constants.HOT;
-                        break;
-                    case R.id.New:
-                        sortBy = Constants.NEW;
-                        break;
-                    case R.id.rising:
-                        sortBy = Constants.RISING;
-                        break;
-                    //controversial
-                    case R.id.controversial_hour:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.NOW;
-                        break;
-                    case R.id.controversial_day:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.TODAY;
-                        break;
-                    case R.id.controversial_week:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.THIS_WEEK;
-                        break;
-                    case R.id.controversial_month:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.THIS_MONTH;
-                        break;
-                    case R.id.controversial_year:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.THIS_YEAR;
-                        break;
-                    case R.id.controversial_all_time:
-                        sortBy = Constants.CONTROVERSIAL;
-                        timePeriod = Constants.ALL_TIME;
-                        break;
-                    //top
-                    case R.id.top_hour:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.NOW;
-                        break;
-                    case R.id.top_day:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.TODAY;
-                        break;
-                    case R.id.top_week:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.THIS_WEEK;
-                        break;
-                    case R.id.top_month:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.THIS_MONTH;
-                        break;
-                    case R.id.top_year:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.THIS_YEAR;
-                        break;
-                    case R.id.top_all_time:
-                        sortBy = Constants.TOP;
-                        timePeriod = Constants.ALL_TIME;
-                        break;
-                }
-                if (sortBy == null) {
-                    return false;
-                }
-                submissionsVM.reload(sortBy, timePeriod);
-                return true;
-            });
-        }
     }
 
     private void reloadFragmentContent() {
