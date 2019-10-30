@@ -9,6 +9,7 @@ data class CommentData(
         var ups: Int,
         var likes: Boolean?,
         val id: String,
-        val replies: Thing?,
-        val gildings: Gildings
+        val replies: List<CommentData>,
+        val gildings: Gildings,
+        val childrenExpanded: Boolean = false
 ) : Data, Serializable

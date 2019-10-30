@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.binding;
 
 import android.text.format.DateUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -110,5 +111,17 @@ public class BindingAdapters {
         } else {
             openGraphView.setVisibility(View.GONE);
         }
+    }
+
+    @BindingAdapter("commentDepth")
+    public static void setCommentDepthMargin(View view, int depth) {
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        if (params instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams margins = (ViewGroup.MarginLayoutParams) params;
+            if (depth == 0) view.setVisibility(View.GONE);
+            margins.leftMargin = 8 + depth * 16;
+            view.requestLayout();
+        }
+
     }
 }

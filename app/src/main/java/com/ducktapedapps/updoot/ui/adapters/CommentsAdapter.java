@@ -10,9 +10,11 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ducktapedapps.updoot.BR;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.databinding.CommentItemBinding;
 import com.ducktapedapps.updoot.model.CommentData;
+import com.ducktapedapps.updoot.ui.fragments.commentsFragment;
 import com.ducktapedapps.updoot.utils.Constants;
 
 import java.util.ArrayList;
@@ -41,9 +43,11 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
             else return diffBundle;
         }
     };
+    private commentsFragment.ClickHandler clickHandler;
 
-    public CommentsAdapter() {
+    public CommentsAdapter(commentsFragment.ClickHandler handler) {
         super(CALLBACK);
+        clickHandler = handler;
     }
 
     // DiffUtils doesn't calculate diff if passed with same list object
@@ -71,10 +75,12 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
     @Override
     public void onBindViewHolder(@NonNull commentHolder holder, int position) {
         holder.binding.setCommentData(getItem(position));
+        holder.binding.setCommentIndex(position);
+        holder.binding.setVariable(BR.clickHandler, clickHandler);
         holder.binding.executePendingBindings();
     }
 
-    public class commentHolder extends RecyclerView.ViewHolder {
+    class commentHolder extends RecyclerView.ViewHolder {
         CommentItemBinding binding;
 
         commentHolder(CommentItemBinding binding) {

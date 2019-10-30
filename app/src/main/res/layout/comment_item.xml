@@ -7,15 +7,15 @@
         android:id="@+id/commentView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
-
+        android:layout_margin="8dp"
+        android:onClick="@{()->clickHandler.onClick(commentIndex,commentData.childrenExpanded)}">
 
         <TextView
             android:id="@+id/comment_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:text="@{commentData.body}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -30,7 +30,7 @@
             android:layout_marginStart="8dp"
             android:text="@{commentData.author}"
             android:textColor="?android:attr/colorAccent"
-            app:layout_constraintStart_toEndOf="@+id/commentThreadView"
+            app:layout_constraintStart_toEndOf="@id/commentThreadView"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="u/dumbusername" />
 
@@ -48,21 +48,31 @@
 
         <View
             android:id="@+id/commentThreadView"
+            commentDepth="@{commentData.depth}"
             android:layout_width="1dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
             android:background="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/username_tv" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <data>
 
+        <import type="android.view.View.OnClickListener" />
+
         <variable
             name="commentData"
             type="com.ducktapedapps.updoot.model.CommentData" />
+
+        <variable
+            name="commentIndex"
+            type="Integer" />
+
+        <variable
+            name="clickHandler"
+            type="com.ducktapedapps.updoot.ui.fragments.commentsFragment.ClickHandler" />
     </data>
 </layout>
