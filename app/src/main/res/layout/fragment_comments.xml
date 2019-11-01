@@ -34,7 +34,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:indeterminate="true"
-                        android:visibility="@{commentsViewModel.isLoafding ? View.VISIBLE : View.GONE}" />
+                        android:visibility="@{commentsViewModel.isLoading ? View.VISIBLE : View.GONE}" />
                 </FrameLayout>
 
                 <ImageView
