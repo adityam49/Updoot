@@ -35,6 +35,7 @@ public class ThingDeserializer implements JsonDeserializer<Thing> {
                             return new Thing("Listing", context.deserialize(element, ListingData.class));
                         case "t3":
                             return new Thing("t3", context.deserialize(element, LinkData.class));
+                        case "more":
                         case "t1":
                             return new Thing("t1", context.deserialize(element, CommentData.class));
                     }

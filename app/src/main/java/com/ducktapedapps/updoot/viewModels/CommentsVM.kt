@@ -13,11 +13,15 @@ import io.reactivex.schedulers.Schedulers
 
 const val TAG = "CommentsVM"
 
-class CommentsVM(application: Application) : AndroidViewModel(application) {
+class CommentsVM(application: Application, id: String, subreddit_name: String) : AndroidViewModel(application) {
     private val repo = CommentsRepo(application)
     private val disposable = CompositeDisposable()
     val allComments = MutableLiveData<List<CommentData>>()
     val isLoading = MutableLiveData(true)
+
+    init {
+        loadComments(subreddit_name, id)
+    }
 
     fun loadComments(subreddit: String, submission_id: String) {
         repo
@@ -43,6 +47,27 @@ class CommentsVM(application: Application) : AndroidViewModel(application) {
 
     fun toggleChildrenVisibility(index: Int) {
         //TODO comment children visibility`
+        val list = allComments.value?.toMutableList()
+        if (list != null) {
+            val parentComment = list[index]
+            if (parentComment.replies.isNotEmpty()) {
+                list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
+                if (!parentComment.repliesExpanded) {
+                    list.addAll(index + 1, parentComment.replies)
+                } else {
+                    if (parentComment.replies.isNotEmpty()) {
+                        val commentsToBeRemoved = mutableListOf<CommentData>()
+                        for (i in index + 1..list.size - 1) {
+                            if (list[i].depth > parentComment.depth) commentsToBeRemoved.add(list[i])
+                            else break
+                        }
+                        list.removeAll(commentsToBeRemoved)
+                    }
+                }
+                allComments.value = list
+            }
+        }
+
     }
 
     override fun onCleared() {

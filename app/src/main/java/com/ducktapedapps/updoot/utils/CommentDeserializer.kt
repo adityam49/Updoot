@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.utils
 
-import android.util.Log
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.Gildings
 import com.google.gson.JsonDeserializationContext
@@ -16,14 +15,17 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
 
 
         if (json != null && json is JsonObject) {
-            val author: String = json.get("author")?.asString ?: "null"
+            // parrent_id , id , depth are common to commentData and loadMoreComments type
+            val parent_id = json.get("parent_id").asString
+            val id: String = json.get("id").asString
             val depth: Int = json.get("depth").asInt
-            val body: String = json.get("body")?.asString ?: ""
-            val ups: Int = json.get("ups")?.asInt ?: 0
 
+            //only for commentData
+            val author: String = json.get("author")?.asString ?: ""
+            var body: String = json.get("body")?.asString ?: ""
+            val ups: Int = json.get("ups")?.asInt ?: 0
             //TODO fix nullable boolean assignment
             //val likes: Boolean? = json.get("likes")?.asBoolean
-            val id: String = json.get("id").asString
             val gildings: Gildings = context?.deserialize(json.get("gildings"), Gildings::class.java)
                     ?: Gildings(0, 0, 0)
 
@@ -34,24 +36,35 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
                 if (repliesData != null) {
                     for (childReply in repliesData) {
                         if (childReply?.asJsonObject?.get("data") != null) {
-                            Log.i(TAG, "reply for ${childReply.asJsonObject.get("data")}")
                             val data: CommentData? = context?.deserialize(childReply.asJsonObject.get("data"), CommentData::class.java)
                             if (data != null) replyList.add(data)
                         }
                     }
                 }
             }
+            var count: Int? = null
+            var children: List<String> = listOf()
+            if (body.isEmpty() && author.isEmpty()) {
+                //only for loadMoreComments
+                count = json.get("count")?.asInt
+                if (count != 0) body = "Load $count more replies"
+                children = listOf()
+            }
+
             return CommentData(
-                    author,
-                    depth,
-                    body,
-                    ups,
+                    author = author,
+                    depth = depth,
+                    body = body,
+                    ups = ups,
                     //TODO voted comments won't be marked
-                    null,
-                    id,
-                    replyList.toList(),
-                    gildings,
-                    false
+                    likes = null,
+                    id = id,
+                    replies = replyList.toList(),
+                    gildings = gildings,
+                    repliesExpanded = false,
+                    parent_id = parent_id,
+                    count = count,
+                    loadMoreChildren = children
             )
         }
         return null

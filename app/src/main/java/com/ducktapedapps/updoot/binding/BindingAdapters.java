@@ -2,11 +2,11 @@ package com.ducktapedapps.updoot.binding;
 
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.BindingAdapter;
 
 import com.bumptech.glide.Glide;
@@ -113,14 +113,31 @@ public class BindingAdapters {
         }
     }
 
-    @BindingAdapter("commentDepth")
-    public static void setCommentDepthMargin(View view, int depth) {
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        if (params instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams margins = (ViewGroup.MarginLayoutParams) params;
-            if (depth == 0) view.setVisibility(View.GONE);
-            margins.leftMargin = 8 + depth * 16;
-            view.requestLayout();
+    @BindingAdapter({"bind:childCommentCount", "bind:loadMoreCommentCount", "bind:isExpanded"})
+    public static void setChildCount(TextView textView, int childCount, int loadMoreCommentCount, boolean isExpanded) {
+        if (loadMoreCommentCount != 0 || childCount == 0) textView.setVisibility(View.GONE);
+        else {
+            if (!isExpanded) {
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                textView.setVisibility(View.GONE);
+            }
+        }
+        textView.setText(textView.getContext().getString(R.string.childrenCommentCount, childCount));
+
+    }
+
+    @BindingAdapter({"bind:commentDepth", "bind:loadCommentsCount"})
+    public static void setCommentDepthMargin(View view, int depth, int loadCommentsCount) {
+
+        if (depth != 0) {
+            ConstraintLayout.LayoutParams newLayoutParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+            newLayoutParams.leftMargin = 8 + depth * 16;
+            if (loadCommentsCount != 0) view.setVisibility(View.INVISIBLE);
+            view.setLayoutParams(newLayoutParams);
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.GONE);
         }
 
     }
