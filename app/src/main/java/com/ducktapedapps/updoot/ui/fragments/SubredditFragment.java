@@ -35,7 +35,6 @@ import javax.inject.Inject;
 
 public class SubredditFragment extends Fragment {
     private static final String TAG = "SubredditFragment";
-    private static final String IS_BASE_FRAG_KEY = "isBaseFragmentKey";
     private FragmentSubredditBinding binding;
 
     @Inject
@@ -117,28 +116,31 @@ public class SubredditFragment extends Fragment {
     }
 
     private void setUpViewModel() {
-        String subreddit = SubredditFragmentArgs.fromBundle(getArguments()).getRSubreddit();
-        subreddit = subreddit == null ? "" : subreddit;
-        submissionsVM = new ViewModelProvider(this, new SubmissionsVMFactory(appContext, subreddit, getArguments().getBoolean(IS_BASE_FRAG_KEY))).get(SubmissionsVM.class);
-        binding.setSubmissionViewModel(submissionsVM);
+        if (getArguments() != null) {
+            String subreddit = SubredditFragmentArgs.fromBundle(getArguments()).getRSubreddit();
+            subreddit = subreddit == null ? "" : subreddit;
+            submissionsVM = new ViewModelProvider(this, new SubmissionsVMFactory(appContext, subreddit))
+                    .get(SubmissionsVM.class);
+            binding.setSubmissionViewModel(submissionsVM);
 
-        if (this.getActivity() != null) {
-            ActivityVM activityVM = new ViewModelProvider(this.getActivity()).get(ActivityVM.class);
-            activityVM.getCurrentAccount().observe(getViewLifecycleOwner(), account -> {
-                if (account != null && account.getContentIfNotHandled() != null) {
-                    reloadFragmentContent();
-                    Toast.makeText(this.getContext(), account.peekContent() + " is logged in!", Toast.LENGTH_SHORT).show();
+            if (this.getActivity() != null) {
+                ActivityVM activityVM = new ViewModelProvider(this.getActivity()).get(ActivityVM.class);
+                activityVM.getCurrentAccount().observe(getViewLifecycleOwner(), account -> {
+                    if (account != null && account.getContentIfNotHandled() != null) {
+                        reloadFragmentContent();
+                        Toast.makeText(this.getContext(), account.peekContent() + " is logged in!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            submissionsVM.getAllSubmissions().observe(getViewLifecycleOwner(), things -> adapter.submitList(things));
+            submissionsVM.getToastMessage().observe(getViewLifecycleOwner(), toastMessage -> {
+                String toast = toastMessage.getContentIfNotHandled();
+                if (toast != null) {
+                    Toast.makeText(this.getContext(), toast, Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
-        submissionsVM.getAllSubmissions().observe(getViewLifecycleOwner(), things -> adapter.submitList(things));
-        submissionsVM.getToastMessage().observe(getViewLifecycleOwner(), toastMessage -> {
-            String toast = toastMessage.getContentIfNotHandled();
-            if (toast != null) {
-                Toast.makeText(this.getContext(), toast, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void reloadFragmentContent() {
