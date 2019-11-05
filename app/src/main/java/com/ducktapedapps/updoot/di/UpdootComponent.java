@@ -9,6 +9,7 @@ import com.ducktapedapps.updoot.ui.MainActivity;
 import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
+import com.ducktapedapps.updoot.ui.fragments.commentsFragment;
 
 import javax.inject.Singleton;
 
@@ -29,11 +30,14 @@ public interface UpdootComponent {
 
     void inject(SubredditFragment subredditFragment);
 
+    void inject(commentsFragment commentsFragment);
+
     void inject(accountsBottomSheet accountsBottomSheet);
 
     void inject(MainActivity mainActivity);
 
     void inject(submissionsAdapter adapter);
+
     //dependencies
     SharedPreferences getSharedPreferences();
 

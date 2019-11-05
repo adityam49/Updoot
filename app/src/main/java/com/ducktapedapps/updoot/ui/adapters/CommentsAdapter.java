@@ -1,7 +1,7 @@
 package com.ducktapedapps.updoot.ui.adapters;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -10,12 +10,10 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ducktapedapps.updoot.BR;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.databinding.CommentItemBinding;
 import com.ducktapedapps.updoot.model.CommentData;
 import com.ducktapedapps.updoot.ui.fragments.commentsFragment;
-import com.ducktapedapps.updoot.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +28,10 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
 
         @Override
         public boolean areContentsTheSame(@NonNull CommentData oldItem, @NonNull CommentData newItem) {
-            return oldItem.getUps() == newItem.getUps();
+            return (oldItem.getUps() == newItem.getUps())
+                    && oldItem.getRepliesExpanded() == newItem.getRepliesExpanded();
         }
 
-        @Override
-        public Object getChangePayload(@NonNull CommentData oldItem, @NonNull CommentData newItem) {
-            Bundle diffBundle = new Bundle();
-            if (oldItem.getUps() != newItem.getUps()) {
-                diffBundle.putInt(Constants.DIFF_VOTE_KEY, newItem.getUps());
-            }
-            if (diffBundle.isEmpty()) return super.getChangePayload(oldItem, newItem);
-            else return diffBundle;
-        }
     };
     private commentsFragment.ClickHandler clickHandler;
 
@@ -59,6 +49,7 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
         super.submitList(updatedList);
     }
 
+
     @NonNull
     @Override
     public commentHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -75,17 +66,21 @@ public class CommentsAdapter extends ListAdapter<CommentData, CommentsAdapter.co
     @Override
     public void onBindViewHolder(@NonNull commentHolder holder, int position) {
         holder.binding.setCommentData(getItem(position));
-        holder.binding.setCommentIndex(position);
-        holder.binding.setVariable(BR.clickHandler, clickHandler);
         holder.binding.executePendingBindings();
     }
 
-    class commentHolder extends RecyclerView.ViewHolder {
+    class commentHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         CommentItemBinding binding;
 
         commentHolder(CommentItemBinding binding) {
             super(binding.getRoot());
+            binding.getRoot().setOnClickListener(this);
             this.binding = binding;
+        }
+
+        @Override
+        public void onClick(View v) {
+            clickHandler.onClick(getAdapterPosition());
         }
     }
 }

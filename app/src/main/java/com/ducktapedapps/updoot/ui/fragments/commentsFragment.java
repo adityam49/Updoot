@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui.fragments;
 
+import android.app.Application;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,15 +16,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ducktapedapps.updoot.R;
+import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding;
 import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.adapters.CommentsAdapter;
 import com.ducktapedapps.updoot.utils.SwipeUtils;
 import com.ducktapedapps.updoot.viewModels.CommentsVM;
+import com.ducktapedapps.updoot.viewModels.CommentsVMFactory;
+
+import javax.inject.Inject;
 
 import static com.ducktapedapps.updoot.BR.linkdata;
 
 public class commentsFragment extends Fragment {
+    @Inject
+    Application appContext;
     private static final String TAG = "commentsFragment";
     private FragmentCommentsBinding binding;
     private CommentsVM viewModel;
@@ -32,7 +39,9 @@ public class commentsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        if (getActivity() != null)
+            ((UpdootApplication) getActivity().getApplication()).getUpdootComponent().inject(this);
+
     }
 
     @Nullable
@@ -50,18 +59,17 @@ public class commentsFragment extends Fragment {
     }
 
     private void setUpViewModel(LinkData data) {
-        viewModel = new ViewModelProvider(this).get(CommentsVM.class);
+        viewModel = new ViewModelProvider(commentsFragment.this,
+                new CommentsVMFactory(appContext, data.getId(), data.getSubredditName())
+        ).get(CommentsVM.class);
         binding.setCommentsViewModel(viewModel);
-
-        viewModel.loadComments(data.getSubredditName(), data.getId());
-
-        viewModel.getAllComments().observe(this, commentDataList -> adapter.submitList(commentDataList));
+        viewModel.getAllComments().observe(commentsFragment.this, commentDataList -> adapter.submitList(commentDataList));
     }
 
     private void setUpRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(commentsFragment.this.getContext());
-        adapter = new CommentsAdapter(new ClickHandler());
         RecyclerView recyclerView = binding.recyclerView;
+        adapter = new CommentsAdapter(new ClickHandler());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
@@ -85,9 +93,8 @@ public class commentsFragment extends Fragment {
     }
 
     public class ClickHandler {
-        public void onClick(int index, boolean isExpanded) {
-            if (!isExpanded)
-                viewModel.toggleChildrenVisibility(index);
+        public void onClick(int index) {
+            viewModel.toggleChildrenVisibility(index);
         }
     }
 
