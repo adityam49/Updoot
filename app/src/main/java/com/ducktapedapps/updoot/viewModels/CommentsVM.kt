@@ -53,7 +53,7 @@ class CommentsVM(application: Application, id: String, subreddit_name: String) :
             if (parentComment.replies.isNotEmpty()) {
                 list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
                 if (!parentComment.repliesExpanded) {
-                    list.addAll(index + 1, parentComment.replies)
+                    list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies))
                 } else {
                     if (parentComment.replies.isNotEmpty()) {
                         val commentsToBeRemoved = mutableListOf<CommentData>()
@@ -68,6 +68,15 @@ class CommentsVM(application: Application, id: String, subreddit_name: String) :
             }
         }
 
+    }
+
+    private fun recursiveChildrenExpansion(list: List<CommentData>): List<CommentData> {
+        val updateList = mutableListOf<CommentData>()
+        for (comment in list) {
+            updateList.add(comment.copy(repliesExpanded = !comment.repliesExpanded))
+            if (comment.replies.isNotEmpty()) updateList.addAll(recursiveChildrenExpansion(comment.replies))
+        }
+        return updateList
     }
 
     override fun onCleared() {
