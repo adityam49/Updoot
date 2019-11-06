@@ -83,7 +83,6 @@ public class submissionsAdapter extends ListAdapter<LinkData, submissionsAdapter
         holder.binding.setLinkdata(getItem(position));
         holder.binding.setItemIndex(position);
         holder.binding.setClickHandler(clickHandler);
-        holder.binding.setSubmissionVM(submissionsVM);
         holder.binding.executePendingBindings();
     }
 

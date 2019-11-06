@@ -14,7 +14,7 @@
             android:id="@+id/revel_more_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:onClick="@{()->submissionVM.expandSelfText(itemIndex)}"
+            android:onClick="@{()->clickHandler.handleExpansion(itemIndex)}"
             android:visibility="@{linkdata.selftext == null ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toTopOf="@+id/barrier"
             app:layout_constraintEnd_toEndOf="parent"
@@ -176,11 +176,6 @@
     <data>
 
         <import type="android.view.View" />
-
-        <variable
-            name="submissionVM"
-            type="com.ducktapedapps.updoot.viewModels.SubmissionsVM" />
-
         <variable
             name="itemIndex"
             type="Integer" />
