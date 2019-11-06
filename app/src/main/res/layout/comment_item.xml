@@ -29,6 +29,7 @@
             android:layout_marginStart="8dp"
             android:text="@{commentData.author}"
             android:textColor="?android:attr/colorAccent"
+            app:isAuthorOp="@{commentData.is_submitter}"
             app:layout_constraintStart_toEndOf="@id/commentThreadView"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="u/dumbusername" />
