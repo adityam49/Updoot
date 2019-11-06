@@ -151,7 +151,10 @@ public class SubredditFragment extends Fragment {
         public void onClick(LinkData linkData) {
             SubredditFragmentDirections.ActionGoToComments action = SubredditFragmentDirections.actionGoToComments(linkData);
             navController.navigate(action);
+        }
 
+        public void handleExpansion(int index) {
+            submissionsVM.expandSelfText(index);
         }
     }
 }
