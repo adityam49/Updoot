@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.binding;
 
+import android.graphics.Color;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -139,6 +140,14 @@ public class BindingAdapters {
         } else {
             view.setVisibility(View.GONE);
         }
+    }
 
+    @BindingAdapter("bind:isAuthorOp")
+    public static void setOPColor(TextView authorTV, boolean isOP) {
+        if (isOP) {
+            authorTV.setBackgroundColor(Color.WHITE);
+        } else {
+            authorTV.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 }

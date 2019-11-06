@@ -42,6 +42,7 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
                     }
                 }
             }
+            val is_submitter: Boolean = json.get("is_submitter")?.asBoolean ?: false
             var count: Int? = null
             var children: List<String> = listOf()
             if (body.isEmpty() && author.isEmpty()) {
@@ -59,6 +60,7 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
                     //TODO voted comments won't be marked
                     likes = null,
                     id = id,
+                    is_submitter = is_submitter,
                     replies = replyList.toList(),
                     gildings = gildings,
                     repliesExpanded = false,

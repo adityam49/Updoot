@@ -16,6 +16,7 @@ data class CommentData(
         val replies: List<CommentData>,
         val gildings: Gildings,
         val repliesExpanded: Boolean = false,
+        val is_submitter: Boolean,
 
         //only for load more comments
         val count: Int?,
