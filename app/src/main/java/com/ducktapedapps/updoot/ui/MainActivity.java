@@ -13,6 +13,7 @@ import androidx.navigation.Navigation;
 import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding;
+import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
 import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
@@ -53,7 +54,18 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
                     }
                     break;
                 case R.id.CommentsDestination:
-                    binding.toolbar.setTitle(getString(R.string.Comments));
+                    if (arguments != null) {
+                        LinkData data = (LinkData) arguments.getSerializable("SubmissionData");
+                        if (data != null) {
+                            if (data.getCommentsCount() != 0) {
+                                if (data.getCommentsCount() <= 999)
+                                    binding.toolbar.setTitle(data.getCommentsCount() + " comments");
+                                else
+                                    binding.toolbar.setTitle(data.getCommentsCount() / 1000 + "k comments");
+                            }
+                        }
+                    } else
+                        binding.toolbar.setTitle(getString(R.string.Comments));
                     break;
             }
         });
