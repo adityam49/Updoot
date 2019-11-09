@@ -32,6 +32,7 @@
         </FrameLayout>
 
         <ImageView
+            android:onClick="@{()->clickHandler.handleImagePreview(linkdata)}"
             android:id="@+id/mediaPreview"
             android:layout_width="48dp"
             android:layout_height="48dp"
