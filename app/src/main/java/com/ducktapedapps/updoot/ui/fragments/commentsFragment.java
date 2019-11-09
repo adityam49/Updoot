@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +37,7 @@ public class commentsFragment extends Fragment {
     private FragmentCommentsBinding binding;
     private CommentsVM viewModel;
     private CommentsAdapter adapter;
+    private NavController navController;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +53,7 @@ public class commentsFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_comments, container, false);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         if (getArguments() != null) {
+
             LinkData data = commentsFragmentArgs.fromBundle(getArguments()).getSubmissionData();
             binding.setVariable(linkdata, data);
             setUpRecyclerView();
@@ -69,7 +73,9 @@ public class commentsFragment extends Fragment {
     private void setUpRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(commentsFragment.this.getContext());
         RecyclerView recyclerView = binding.recyclerView;
-        adapter = new CommentsAdapter(new ClickHandler());
+        ClickHandler handler = new ClickHandler();
+        binding.setClickhandler(handler);
+        adapter = new CommentsAdapter(handler);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
@@ -95,6 +101,16 @@ public class commentsFragment extends Fragment {
     public class ClickHandler {
         public void onClick(int index) {
             viewModel.toggleChildrenVisibility(index);
+        }
+
+        public void onImageClick(LinkData data) {
+            navController = Navigation.findNavController(commentsFragment.this.binding.getRoot());
+            navController.navigate(
+                    MediaPreviewFragmentDirections.
+                            actionGlobalMediaPreviewFragment(
+                                    data.getPreview().getImages().get(0).getSource().getUrl()
+                            )
+            );
         }
     }
 

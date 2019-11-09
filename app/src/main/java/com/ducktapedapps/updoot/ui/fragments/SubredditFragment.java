@@ -153,6 +153,15 @@ public class SubredditFragment extends Fragment {
             navController.navigate(action);
         }
 
+        public void handleImagePreview(LinkData data) {
+            navController.navigate(
+                    MediaPreviewFragmentDirections.
+                            actionGlobalMediaPreviewFragment(
+                                    data.getPreview().getImages().get(0).getSource().getUrl()
+                            )
+            );
+        }
+
         public void handleExpansion(int index) {
             submissionsVM.expandSelfText(index);
         }
