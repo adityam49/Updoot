@@ -42,19 +42,18 @@ class SubmissionsAdapter(
     }
 
     class SubmissionHolder(val binding: LinearSubmissionsItemBinding) : RecyclerView.ViewHolder(binding.root)
-}
 
+    private object CALLBACK : DiffUtil.ItemCallback<LinkData>() {
+        override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
+            return oldItem.name == newItem.name
+        }
 
-object CALLBACK : DiffUtil.ItemCallback<LinkData>() {
-    override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
-        return oldItem.name == newItem.name
-    }
-
-    override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
-        return if (oldItem.selftext != null) {
-            (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
-                    && oldItem.ups == newItem.ups)
-        } else
-            oldItem.ups == newItem.ups
+        override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
+            return if (oldItem.selftext != null) {
+                (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
+                        && oldItem.ups == newItem.ups)
+            } else
+                oldItem.ups == newItem.ups
+        }
     }
 }
