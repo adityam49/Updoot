@@ -6,7 +6,6 @@ import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.api.RedditAPI;
 import com.ducktapedapps.updoot.ui.LoginActivity;
 import com.ducktapedapps.updoot.ui.MainActivity;
-import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
 import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
 import com.ducktapedapps.updoot.ui.fragments.commentsFragment;
@@ -35,8 +34,6 @@ public interface UpdootComponent {
     void inject(accountsBottomSheet accountsBottomSheet);
 
     void inject(MainActivity mainActivity);
-
-    void inject(submissionsAdapter adapter);
 
     //dependencies
     SharedPreferences getSharedPreferences();
