@@ -23,7 +23,7 @@ import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding;
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.ui.adapters.submissionsAdapter;
+import com.ducktapedapps.updoot.ui.adapters.SubmissionsAdapter;
 import com.ducktapedapps.updoot.utils.CustomItemAnimator;
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener;
 import com.ducktapedapps.updoot.utils.SwipeUtils;
@@ -42,7 +42,7 @@ public class SubredditFragment extends Fragment {
 
     private SubmissionsVM submissionsVM;
 
-    private submissionsAdapter adapter;
+    private SubmissionsAdapter adapter;
 
     private NavController navController;
 
@@ -74,7 +74,7 @@ public class SubredditFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         RecyclerView recyclerView = binding.recyclerView;
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new submissionsAdapter(submissionsVM, new ClickHandler());
+        adapter = new SubmissionsAdapter(new ClickHandler());
         recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new CustomItemAnimator());
 
