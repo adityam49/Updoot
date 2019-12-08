@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.ui.fragments.commentsFragment
+import com.ducktapedapps.updoot.ui.fragments.CommentsFragment
 
 class CommentsAdapter(
-        private val clickHandler: commentsFragment.ClickHandler
+        private val clickHandler: CommentsFragment.ClickHandler
 ) : ListAdapter<CommentData, CommentsAdapter.CommentHolder>(CALLBACK) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentHolder {
         return CommentHolder(
@@ -26,7 +26,7 @@ class CommentsAdapter(
         )
     }
 
-    override fun submitList(list: MutableList<CommentData>?) {
+    override fun submitList(list: List<CommentData>?) {
         val updateList: MutableList<CommentData> = mutableListOf()
         if (list != null) updateList.addAll(list)
         super.submitList(updateList)

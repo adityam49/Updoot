@@ -6,9 +6,9 @@ import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.api.RedditAPI;
 import com.ducktapedapps.updoot.ui.LoginActivity;
 import com.ducktapedapps.updoot.ui.MainActivity;
+import com.ducktapedapps.updoot.ui.fragments.CommentsFragment;
 import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
 import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
-import com.ducktapedapps.updoot.ui.fragments.commentsFragment;
 
 import javax.inject.Singleton;
 
@@ -29,7 +29,7 @@ public interface UpdootComponent {
 
     void inject(SubredditFragment subredditFragment);
 
-    void inject(commentsFragment commentsFragment);
+    void inject(CommentsFragment commentsFragment);
 
     void inject(accountsBottomSheet accountsBottomSheet);
 

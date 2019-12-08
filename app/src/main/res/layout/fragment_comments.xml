@@ -211,6 +211,6 @@
 
         <variable
             name="clickhandler"
-            type="com.ducktapedapps.updoot.ui.fragments.commentsFragment.ClickHandler" />
+            type="com.ducktapedapps.updoot.ui.fragments.CommentsFragment.ClickHandler" />
     </data>
 </layout>
