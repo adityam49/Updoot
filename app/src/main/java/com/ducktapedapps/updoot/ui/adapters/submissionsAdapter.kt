@@ -26,7 +26,7 @@ class SubmissionsAdapter(
         )
     }
 
-    override fun submitList(list: MutableList<LinkData>?) {
+    override fun submitList(list: List<LinkData>?) {
         val updatedList: MutableList<LinkData> = mutableListOf()
         if (list != null) {
             updatedList.addAll(list)
