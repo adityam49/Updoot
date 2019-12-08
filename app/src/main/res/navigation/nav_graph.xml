@@ -40,7 +40,7 @@
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
-        android:name="com.ducktapedapps.updoot.ui.fragments.commentsFragment"
+        android:name="com.ducktapedapps.updoot.ui.fragments.CommentsFragment"
         android:label="fragment_comments"
         tools:layout="@layout/fragment_comments">
         <action
