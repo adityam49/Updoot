@@ -14,7 +14,7 @@ import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding;
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet;
+import com.ducktapedapps.updoot.ui.fragments.AccountsBottomSheetDialogFragment;
 import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener;
@@ -23,7 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import javax.inject.Inject;
 
-public class MainActivity extends AppCompatActivity implements accountsBottomSheet.BottomSheetListener, AccountChangeListener {
+public class MainActivity extends AppCompatActivity implements AccountsBottomSheetDialogFragment.BottomSheetListener, AccountChangeListener {
     private static final String TAG = "MainActivity";
 
     private ActivityVM viewModel;
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements accountsBottomShe
                     return true;
 
                 case R.id.accounts:
-                    navController.navigate(R.id.accountsBottomSheetDialog);
+                    navController.navigate(R.id.AccountsBottomSheetDialog);
                     return false;
                 case R.id.sort:
                 case R.id.more:
