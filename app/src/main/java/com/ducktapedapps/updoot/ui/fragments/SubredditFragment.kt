@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
@@ -22,7 +23,6 @@ import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SwipeUtils
-import com.ducktapedapps.updoot.utils.SwipeUtils.swipeActionCallback
 import com.ducktapedapps.updoot.viewModels.ActivityVM
 import com.ducktapedapps.updoot.viewModels.SubmissionsVM
 import com.ducktapedapps.updoot.viewModels.SubmissionsVMFactory
@@ -36,6 +36,7 @@ class SubredditFragment : Fragment() {
     private lateinit var submissionsVM: SubmissionsVM
     private lateinit var adapter: SubmissionsAdapter
     private lateinit var navController: NavController
+    private val args: SubredditFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +65,7 @@ class SubredditFragment : Fragment() {
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.itemAnimator = CustomItemAnimator()
 
-        ItemTouchHelper(SwipeUtils(activity, object : swipeActionCallback {
+        ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.swipeActionCallback {
             override fun performSlightLeftSwipeAction(adapterPosition: Int) {
                 submissionsVM.castVote(adapterPosition, -1)
             }
@@ -95,31 +96,28 @@ class SubredditFragment : Fragment() {
     }
 
     private fun setUpViewModel() {
-        arguments?.let {
-            val subreddit = SubredditFragmentArgs.fromBundle(it).rSubreddit ?: ""
-            submissionsVM = ViewModelProvider(this, SubmissionsVMFactory(appContext, subreddit))
-                    .get(SubmissionsVM::class.java)
-            binding.submissionViewModel = submissionsVM
+        val subreddit = args.rSubreddit ?: ""
+        submissionsVM = ViewModelProvider(this@SubredditFragment, SubmissionsVMFactory(appContext, subreddit)).get(SubmissionsVM::class.java)
+        binding.submissionViewModel = submissionsVM
 
-            activity?.let { it2 ->
-                val activityVM = ViewModelProvider(it2).get(ActivityVM::class.java)
-                activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
-                    if (account?.contentIfNotHandled != null) {
-                        reloadFragmentContent()
-                        Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
-                    }
-                })
-            }
-            submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })
-            submissionsVM.toastMessage.observe(viewLifecycleOwner, Observer { toastMessage: SingleLiveEvent<String?> ->
-                val toast = toastMessage.contentIfNotHandled
-                if (toast != null) {
-                    Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
+        activity?.let {
+            val activityVM = ViewModelProvider(it).get(ActivityVM::class.java)
+            activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
+                if (account?.contentIfNotHandled != null) {
+                    reloadFragmentContent()
+                    Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
                 }
             })
-
-
         }
+
+        submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })
+        submissionsVM.toastMessage.observe(viewLifecycleOwner, Observer { toastMessage: SingleLiveEvent<String?> ->
+            val toast = toastMessage.contentIfNotHandled
+            if (toast != null) {
+                Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
+            }
+        })
+
     }
 
     private fun reloadFragmentContent() {

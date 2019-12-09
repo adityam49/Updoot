@@ -2,7 +2,6 @@ package com.ducktapedapps.updoot.ui.fragments
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.UpdootApplication
@@ -32,6 +32,7 @@ class CommentsFragment : Fragment() {
     private lateinit var viewModel: CommentsVM
     private lateinit var adapter: CommentsAdapter
     private lateinit var navController: NavController
+    private val args: CommentsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,13 +45,8 @@ class CommentsFragment : Fragment() {
         }
 
         setUpRecyclerView()
-
-        arguments?.let {
-            val data: LinkData = CommentsFragmentArgs.fromBundle(it).submissionData
-            Log.i("COMMENTS ", data.title)
-            binding.linkdata = data
-            setUpViewModel(data)
-        }
+        binding.linkdata = args.submissionData
+        setUpViewModel(args.submissionData)
 
         return binding.root
     }
