@@ -9,8 +9,8 @@
         android:id="@+id/action_go_to_home"
         app:destination="@id/SubredditDestination" />
     <dialog
-        android:id="@+id/accountsBottomSheetDialog"
-        android:name="com.ducktapedapps.updoot.ui.fragments.accountsBottomSheet"
+        android:id="@+id/AccountsBottomSheetDialog"
+        android:name="com.ducktapedapps.updoot.ui.fragments.AccountsBottomSheetDialogFragment"
         android:label="accounts_modal_bottom_sheet"
         tools:layout="@layout/accounts_modal_bottom_sheet" />
     <fragment
