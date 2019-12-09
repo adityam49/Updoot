@@ -65,7 +65,7 @@ class SubredditFragment : Fragment() {
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.itemAnimator = CustomItemAnimator()
 
-        ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.swipeActionCallback {
+        ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
             override fun performSlightLeftSwipeAction(adapterPosition: Int) {
                 submissionsVM.castVote(adapterPosition, -1)
             }

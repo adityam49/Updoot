@@ -19,7 +19,6 @@ import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.adapters.CommentsAdapter
 import com.ducktapedapps.updoot.utils.SwipeUtils
-import com.ducktapedapps.updoot.utils.SwipeUtils.swipeActionCallback
 import com.ducktapedapps.updoot.viewModels.CommentsVM
 import com.ducktapedapps.updoot.viewModels.CommentsVMFactory
 import javax.inject.Inject
@@ -74,7 +73,7 @@ class CommentsFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(this@CommentsFragment.context)
         recyclerView.adapter = adapter
 
-        ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : swipeActionCallback {
+        ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {
             override fun performSlightLeftSwipeAction(adapterPosition: Int) {}
             override fun performSlightRightSwipeAction(adapterPosition: Int) {}
             override fun performLeftSwipeAction(adapterPosition: Int) {}
