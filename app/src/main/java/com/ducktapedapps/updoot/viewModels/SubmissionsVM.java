@@ -10,6 +10,8 @@ import com.ducktapedapps.updoot.model.LinkData;
 import com.ducktapedapps.updoot.repository.SubmissionRepo;
 import com.ducktapedapps.updoot.utils.SingleLiveEvent;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +49,9 @@ public class SubmissionsVM extends AndroidViewModel implements InfiniteScrollVM 
         return toastMessage;
     }
 
+    @NotNull
     @Override
-    public MutableLiveData<Boolean> getIsLoading() {
+    public MutableLiveData<Boolean> isLoading() {
         return isLoading;
     }
 
