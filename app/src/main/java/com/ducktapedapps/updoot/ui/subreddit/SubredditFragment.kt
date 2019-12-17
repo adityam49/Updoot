@@ -77,7 +77,7 @@ class SubredditFragment : Fragment() {
             }
 
             override fun performRightSwipeAction(adapterPosition: Int) {
-                submissionsVM.save(adapterPosition)
+                submissionsVM.toggleSave(adapterPosition)
             }
         })).attachToRecyclerView(recyclerView)
         recyclerView.addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))

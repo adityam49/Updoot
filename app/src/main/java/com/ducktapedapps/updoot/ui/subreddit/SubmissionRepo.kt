@@ -26,7 +26,11 @@ class SubmissionRepo(application: Application) {
     }
 
     fun save(submission: LinkData): Completable {
-        return updootComponent
+        return if (submission.saved)
+            updootComponent
+                    .redditAPI
+                    .flatMapCompletable { redditAPI -> redditAPI.unsave(submission.name) }
+        else updootComponent
                 .redditAPI
                 .flatMapCompletable { redditAPI -> redditAPI.save(submission.name) }
     }
