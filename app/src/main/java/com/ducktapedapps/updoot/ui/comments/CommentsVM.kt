@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.comments
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.model.CommentData
 import io.reactivex.SingleObserver
@@ -15,8 +16,11 @@ const val TAG = "CommentsVM"
 class CommentsVM(application: Application, id: String, subreddit_name: String) : AndroidViewModel(application) {
     private val repo = CommentsRepo(application)
     private val disposable = CompositeDisposable()
-    val allComments = MutableLiveData<List<CommentData>>()
-    val isLoading = MutableLiveData(true)
+    private val _allComments = MutableLiveData<List<CommentData>>()
+    private val _isLoading = MutableLiveData(true)
+
+    val allComments: LiveData<List<CommentData>> = _allComments
+    val isLoading: LiveData<Boolean> = _isLoading
 
     init {
         loadComments(subreddit_name, id)
@@ -29,23 +33,22 @@ class CommentsVM(application: Application, id: String, subreddit_name: String) :
                 .subscribe(object : SingleObserver<List<CommentData>> {
                     override fun onSubscribe(d: Disposable) {
                         disposable.add(d)
-                        isLoading.postValue(true)
+                        _isLoading.postValue(true)
                     }
 
                     override fun onSuccess(commentDataList: List<CommentData>) {
-                        allComments.postValue(commentDataList)
-                        isLoading.postValue(false)
+                        _allComments.postValue(commentDataList)
+                        _isLoading.postValue(false)
                     }
 
                     override fun onError(e: Throwable) {
                         Log.e(TAG, "onError: ", e)
-                        isLoading.postValue(false)
+                        _isLoading.postValue(false)
                     }
                 })
     }
 
     fun toggleChildrenVisibility(index: Int) {
-        //TODO comment children visibility`
         val list = allComments.value?.toMutableList()
         if (list != null) {
             val parentComment = list[index]
@@ -63,7 +66,7 @@ class CommentsVM(application: Application, id: String, subreddit_name: String) :
                         list.removeAll(commentsToBeRemoved)
                     }
                 }
-                allComments.value = list
+                _allComments.value = list
             }
         }
 
