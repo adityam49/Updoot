@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.utils
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ducktapedapps.updoot.viewModels.InfiniteScrollVM
+import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 
 class InfiniteScrollListener(private val layoutManager: LinearLayoutManager, private val viewModel: InfiniteScrollVM) : RecyclerView.OnScrollListener() {
 

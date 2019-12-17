@@ -4,11 +4,11 @@ import android.content.SharedPreferences;
 
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.api.RedditAPI;
+import com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment;
 import com.ducktapedapps.updoot.ui.LoginActivity;
 import com.ducktapedapps.updoot.ui.MainActivity;
-import com.ducktapedapps.updoot.ui.fragments.AccountsBottomSheetDialogFragment;
-import com.ducktapedapps.updoot.ui.fragments.CommentsFragment;
-import com.ducktapedapps.updoot.ui.fragments.SubredditFragment;
+import com.ducktapedapps.updoot.ui.comments.CommentsFragment;
+import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment;
 
 import javax.inject.Singleton;
 

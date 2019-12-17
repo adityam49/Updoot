@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.fragments
+package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import android.os.Bundle
@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,14 +18,12 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.adapters.SubmissionsAdapter
+import com.ducktapedapps.updoot.ui.ActivityVM
+import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SwipeUtils
-import com.ducktapedapps.updoot.viewModels.ActivityVM
-import com.ducktapedapps.updoot.viewModels.SubmissionsVM
-import com.ducktapedapps.updoot.viewModels.SubmissionsVMFactory
 import javax.inject.Inject
 
 class SubredditFragment : Fragment() {
@@ -43,12 +41,8 @@ class SubredditFragment : Fragment() {
         (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(view)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        navController = findNavController()
         binding = FragmentSubredditBinding.inflate(inflater, container, false)
                 .apply { lifecycleOwner = viewLifecycleOwner }
         setUpViewModel()
@@ -83,7 +77,7 @@ class SubredditFragment : Fragment() {
             }
 
             override fun performRightSwipeAction(adapterPosition: Int) {
-                submissionsVM.save(adapterPosition)
+                submissionsVM.toggleSave(adapterPosition)
             }
         })).attachToRecyclerView(recyclerView)
         recyclerView.addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
@@ -113,9 +107,7 @@ class SubredditFragment : Fragment() {
         submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })
         submissionsVM.toastMessage.observe(viewLifecycleOwner, Observer { toastMessage: SingleLiveEvent<String?> ->
             val toast = toastMessage.contentIfNotHandled
-            if (toast != null) {
-                Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
-            }
+            if (toast != null) Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
         })
 
     }
@@ -125,8 +117,8 @@ class SubredditFragment : Fragment() {
     }
 
     inner class ClickHandler {
-        fun onClick(linkData: LinkData?) {
-            val action = SubredditFragmentDirections.actionGoToComments(linkData!!)
+        fun onClick(linkData: LinkData) {
+            val action = SubredditFragmentDirections.actionGoToComments(linkData)
             navController.navigate(action)
         }
 
@@ -142,5 +134,6 @@ class SubredditFragment : Fragment() {
             submissionsVM.expandSelfText(index)
         }
     }
+
 
 }

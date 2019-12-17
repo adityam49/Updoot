@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.repository
+package com.ducktapedapps.updoot.ui.comments
 
 import android.app.Application
 import com.ducktapedapps.updoot.UpdootApplication

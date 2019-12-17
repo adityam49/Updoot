@@ -58,6 +58,6 @@
 
         <variable
             name="submissionViewModel"
-            type="com.ducktapedapps.updoot.viewModels.SubmissionsVM" />
+            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsVM" />
     </data>
 </layout>

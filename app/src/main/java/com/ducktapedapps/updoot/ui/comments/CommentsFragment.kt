@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.fragments
+package com.ducktapedapps.updoot.ui.comments
 
 import android.app.Application
 import android.os.Bundle
@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,10 +17,8 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.adapters.CommentsAdapter
+import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.SwipeUtils
-import com.ducktapedapps.updoot.viewModels.CommentsVM
-import com.ducktapedapps.updoot.viewModels.CommentsVMFactory
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
@@ -39,6 +37,7 @@ class CommentsFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        navController = findNavController()
         binding = FragmentCommentsBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
@@ -87,7 +86,6 @@ class CommentsFragment : Fragment() {
         }
 
         fun onImageClick(data: LinkData) {
-            navController = Navigation.findNavController(binding.root)
 
             navController.navigate(
                     MediaPreviewFragmentDirections.actionGlobalMediaPreviewFragment(

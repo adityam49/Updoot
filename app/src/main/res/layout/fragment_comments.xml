@@ -203,7 +203,7 @@
 
         <variable
             name="commentsViewModel"
-            type="com.ducktapedapps.updoot.viewModels.CommentsVM" />
+            type="com.ducktapedapps.updoot.ui.comments.CommentsVM" />
 
         <variable
             name="linkdata"
@@ -211,6 +211,6 @@
 
         <variable
             name="clickhandler"
-            type="com.ducktapedapps.updoot.ui.fragments.CommentsFragment.ClickHandler" />
+            type="com.ducktapedapps.updoot.ui.comments.CommentsFragment.ClickHandler" />
     </data>
 </layout>

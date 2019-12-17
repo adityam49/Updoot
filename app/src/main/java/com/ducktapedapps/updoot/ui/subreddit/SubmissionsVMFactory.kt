@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.viewModels
+package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import androidx.lifecycle.ViewModel

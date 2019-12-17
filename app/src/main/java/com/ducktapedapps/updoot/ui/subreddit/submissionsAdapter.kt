@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.adapters
+package com.ducktapedapps.updoot.ui.subreddit
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.LinearSubmissionsItemBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.fragments.SubredditFragment
 
 class SubmissionsAdapter(
         private val clickHandler: SubredditFragment.ClickHandler

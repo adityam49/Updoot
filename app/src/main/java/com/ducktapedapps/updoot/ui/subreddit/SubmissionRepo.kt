@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.repository
+package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import com.ducktapedapps.updoot.UpdootApplication
@@ -26,7 +26,11 @@ class SubmissionRepo(application: Application) {
     }
 
     fun save(submission: LinkData): Completable {
-        return updootComponent
+        return if (submission.saved)
+            updootComponent
+                    .redditAPI
+                    .flatMapCompletable { redditAPI -> redditAPI.unsave(submission.name) }
+        else updootComponent
                 .redditAPI
                 .flatMapCompletable { redditAPI -> redditAPI.save(submission.name) }
     }

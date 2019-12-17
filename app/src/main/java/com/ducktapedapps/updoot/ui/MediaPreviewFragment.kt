@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.fragments
+package com.ducktapedapps.updoot.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
