@@ -14,11 +14,9 @@ import com.ducktapedapps.updoot.R;
 import com.ducktapedapps.updoot.UpdootApplication;
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding;
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.ui.fragments.AccountsBottomSheetDialogFragment;
 import com.ducktapedapps.updoot.utils.Constants;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager;
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener;
-import com.ducktapedapps.updoot.viewModels.ActivityVM;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import javax.inject.Inject;

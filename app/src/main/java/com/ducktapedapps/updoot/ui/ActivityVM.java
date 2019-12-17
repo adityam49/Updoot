@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.viewModels;
+package com.ducktapedapps.updoot.ui;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;

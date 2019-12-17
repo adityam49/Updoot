@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.fragments
+package com.ducktapedapps.updoot.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.ui.fragments.MediaPreviewFragmentArgs
 import com.github.chrisbanes.photoview.PhotoView
 
 

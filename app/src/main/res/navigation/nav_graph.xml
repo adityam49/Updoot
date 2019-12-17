@@ -10,12 +10,12 @@
         app:destination="@id/SubredditDestination" />
     <dialog
         android:id="@+id/AccountsBottomSheetDialog"
-        android:name="com.ducktapedapps.updoot.ui.fragments.AccountsBottomSheetDialogFragment"
+        android:name="com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment"
         android:label="accounts_modal_bottom_sheet"
         tools:layout="@layout/accounts_modal_bottom_sheet" />
     <fragment
         android:id="@+id/SubredditDestination"
-        android:name="com.ducktapedapps.updoot.ui.fragments.SubredditFragment"
+        android:name="com.ducktapedapps.updoot.ui.subreddit.SubredditFragment"
         android:label="fragment_subreddit"
         tools:layout="@layout/fragment_subreddit">
         <action
@@ -40,7 +40,7 @@
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
-        android:name="com.ducktapedapps.updoot.ui.fragments.CommentsFragment"
+        android:name="com.ducktapedapps.updoot.ui.comments.CommentsFragment"
         android:label="fragment_comments"
         tools:layout="@layout/fragment_comments">
         <action
@@ -55,7 +55,7 @@
     </fragment>
     <dialog
         android:id="@+id/mediaPreviewFragment"
-        android:name="com.ducktapedapps.updoot.ui.fragments.MediaPreviewFragment"
+        android:name="com.ducktapedapps.updoot.ui.MediaPreviewFragment"
         android:label="MediaPreviewFragment"
         tools:layout="@layout/image_preview_fragment">
         <argument
