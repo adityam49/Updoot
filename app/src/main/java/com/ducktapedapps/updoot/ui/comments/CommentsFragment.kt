@@ -17,7 +17,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.fragments.MediaPreviewFragmentDirections
+import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.SwipeUtils
 import javax.inject.Inject
 

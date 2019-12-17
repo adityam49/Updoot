@@ -19,7 +19,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.fragments.MediaPreviewFragmentDirections
+import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
