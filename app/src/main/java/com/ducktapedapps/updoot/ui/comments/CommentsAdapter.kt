@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.adapters
+package com.ducktapedapps.updoot.ui.comments
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.ui.fragments.CommentsFragment
 
 class CommentsAdapter(
         private val clickHandler: CommentsFragment.ClickHandler

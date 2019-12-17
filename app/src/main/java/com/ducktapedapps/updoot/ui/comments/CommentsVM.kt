@@ -1,11 +1,10 @@
-package com.ducktapedapps.updoot.viewModels
+package com.ducktapedapps.updoot.ui.comments
 
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.repository.CommentsRepo
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable

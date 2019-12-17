@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.viewModels;
+package com.ducktapedapps.updoot.ui.subreddit;
 
 import android.app.Application;
 import android.util.Log;
@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.ducktapedapps.updoot.model.LinkData;
-import com.ducktapedapps.updoot.repository.SubmissionRepo;
+import com.ducktapedapps.updoot.ui.InfiniteScrollVM;
 import com.ducktapedapps.updoot.utils.SingleLiveEvent;
 
 import org.jetbrains.annotations.NotNull;

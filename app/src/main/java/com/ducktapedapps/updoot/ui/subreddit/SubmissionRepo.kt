@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.repository
+package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import com.ducktapedapps.updoot.UpdootApplication
