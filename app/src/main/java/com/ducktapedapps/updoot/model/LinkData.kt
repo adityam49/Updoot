@@ -3,7 +3,7 @@ package com.ducktapedapps.updoot.model
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
-class LinkData(
+data class LinkData(
         @field:SerializedName("selftext_html") val selftext: String?,
         val title: String,
         val archived: Boolean,
@@ -24,6 +24,7 @@ class LinkData(
         val url: String,
         val isSelfTextExpanded: Boolean = false
 ) : Data, Serializable {
+
     fun vote(direction: Int): LinkData {
         var updatedLikes: Boolean? = this.likes
         var updatedUps = this.ups
@@ -49,74 +50,17 @@ class LinkData(
                 updatedLikes = null
             }
         }
-        return LinkData(
-                title = this.title,
-                archived = this.archived,
-                author = this.author,
-                locked = this.locked,
+        return this.copy(
                 ups = updatedUps,
-                likes = updatedLikes,
-                subredditName = this.subredditName,
-                name = this.name,
-                thumbnail = this.thumbnail,
-                saved = this.saved,
-                created = this.created,
-                commentsCount = this.commentsCount,
-                gildings = this.gildings,
-                preview = this.preview,
-                post_hint = this.post_hint,
-                id = this.id,
-                url = this.url,
-                isSelfTextExpanded = this.isSelfTextExpanded,
-                selftext = this.selftext
+                likes = updatedLikes
         )
     }
 
     fun save(): LinkData {
-        return LinkData(
-                title = this.title,
-                archived = this.archived,
-                author = this.author,
-                locked = this.locked,
-                ups = this.ups,
-                likes = this.likes,
-                subredditName = this.subredditName,
-                name = this.name,
-                thumbnail = this.thumbnail,
-                saved = !this.saved,
-                created = this.created,
-                commentsCount = this.commentsCount,
-                gildings = this.gildings,
-                preview = this.preview,
-                post_hint = this.post_hint,
-                id = this.id,
-                url = this.url,
-                isSelfTextExpanded = this.isSelfTextExpanded,
-                selftext = this.selftext
-        )
+        return this.copy(saved = !this.saved)
     }
 
     fun toggleSelfTextExpansion(): LinkData {
-        return LinkData(
-                title = this.title,
-                archived = this.archived,
-                author = this.author,
-                locked = this.locked,
-                ups = this.ups,
-                likes = this.likes,
-                subredditName = this.subredditName,
-                name = this.name,
-                thumbnail = this.thumbnail,
-                saved = !this.saved,
-                created = this.created,
-                commentsCount = this.commentsCount,
-                gildings = this.gildings,
-                preview = this.preview,
-                post_hint = this.post_hint,
-                id = this.id,
-                url = this.url,
-                isSelfTextExpanded = !this.isSelfTextExpanded,
-                selftext = this.selftext
-        )
+        return this.copy(isSelfTextExpanded = !this.isSelfTextExpanded)
     }
 }
