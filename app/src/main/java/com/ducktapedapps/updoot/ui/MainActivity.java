@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements AccountsBottomShe
                     return false;
                 case R.id.sort:
                 case R.id.more:
+                    navController.navigate(R.id.settingsFragment);
+                    return true;
                 default:
                     return false;
             }

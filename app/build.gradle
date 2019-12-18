@@ -54,7 +54,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
     implementation 'com.google.android.material:material:1.1.0-alpha10'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
-
+    implementation 'androidx.preference:preference:1.1.0'
 
     //android navigation component
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
