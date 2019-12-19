@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class LinkData(
         @field:SerializedName("selftext_html") val selftext: String?,
         val title: String,
@@ -23,7 +25,7 @@ data class LinkData(
         val id: String,
         val url: String,
         val isSelfTextExpanded: Boolean = false
-) : Data, Serializable {
+) : Data, Parcelable {
 
     fun vote(direction: Int): LinkData {
         var updatedLikes: Boolean? = this.likes

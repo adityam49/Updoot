@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class CommentData(
         //common for normal comments and load more comments
         val id: String,
@@ -22,4 +24,4 @@ data class CommentData(
         val count: Int?,
         @SerializedName("children")
         val loadMoreChildren: List<String>?
-) : Data, Serializable
+) : Data, Parcelable

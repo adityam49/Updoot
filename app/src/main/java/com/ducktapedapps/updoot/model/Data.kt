@@ -1,3 +1,5 @@
 package com.ducktapedapps.updoot.model
 
-interface Data
+import android.os.Parcelable
+
+interface Data : Parcelable
