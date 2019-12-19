@@ -44,8 +44,8 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
                 }
 
                 R.id.CommentsDestination -> {
-                    val data = arguments?.getSerializable("SubmissionData") as LinkData
-                    if (data.commentsCount != 0) {
+                    val data = arguments?.getParcelable<LinkData>("SubmissionData")
+                    if (data != null && data.commentsCount != 0) {
                         if (data.commentsCount <= 999) binding.toolbar.title = data.commentsCount.toString() + " comments"
                         else binding.toolbar.title = (data.commentsCount / 1000).toString() + "k comments"
                     } else binding.toolbar.title = getString(R.string.Comments)
