@@ -20,9 +20,9 @@
     </style>
 
     <style name="altDarkTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@color/DT_primaryDarkColor</item>
+        <item name="android:windowBackground">@color/DT_primaryLightColor</item>
         <item name="colorPrimary">@color/DT_primaryDarkColor</item>
-        <item name="android:navigationBarColor">@color/DT_primaryColor</item>
+        <item name="android:navigationBarColor">@color/DT_primaryDarkColor</item>
         <item name="colorPrimaryDark">@color/DT_primaryDarkColor</item>
         <item name="colorSecondary">@color/DT_primaryLightColor</item>
         <item name="colorAccent">@color/secondaryColor</item>

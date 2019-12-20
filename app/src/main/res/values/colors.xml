@@ -13,8 +13,8 @@
 
     <!--alternate dark theme colors-->
     <color name="DT_primaryColor">#232329</color>
-    <color name="DT_primaryLightColor">#2d2d33</color>
-    <color name="DT_primaryDarkColor">#232329</color>
+    <color name="DT_primaryLightColor">#2A2B2E</color>
+    <color name="DT_primaryDarkColor">#202124</color>
     <color name="DT_primaryTextColor">#ffffff</color>
     <color name="DT_secondaryTextColor">#757575</color>
 
