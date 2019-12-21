@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
             startActivityForResult(intent, Constants.ACCOUNT_LOGIN_REQUEST_CODE)
         } else {
             userManager.setCurrentUser(text, null)
-            viewModel.setCurrentAccount(userManager.currentUser.name)
+            viewModel.setCurrentAccount(userManager.currentUser?.name)
         }
     }
 
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
     }
 
     private fun reloadContent() {
-        viewModel.setCurrentAccount(userManager.currentUser.name)
+        viewModel.setCurrentAccount(userManager.currentUser?.name)
     }
 
     //Account switching after new login

@@ -53,7 +53,7 @@ class ApiModule {
             if (currentAccountRemoved) {
                 if (currentCachedAccount != null && currentCachedAccount != Constants.ANON_USER) {
                     userManager.get().setCurrentUser(Constants.ANON_USER, null)
-                    if (userManager.get().getmListener() != null) userManager.get().getmListener().onCurrentAccountRemoved()
+                    userManager.get().listener.onCurrentAccountRemoved()
                 }
             }
         }, null, true)
@@ -64,7 +64,8 @@ class ApiModule {
     @Provides
     fun provideRedditAPI(redditAPILazy: Lazy<RedditAPI?>, authAPILazy: Lazy<AuthAPI>, interceptor: TokenInterceptor, userManager: UserManager, sharedPreferences: SharedPreferences, accountManager: AccountManager): Single<RedditAPI?> {
         val account = userManager.currentUser
-        if (account == null || (interceptor.tokenExpiry == null || interceptor.tokenExpiry < System.currentTimeMillis()) && account.name == Constants.ANON_USER) { //first app launch OR fresh app launch with anonymous Account logged in or userless token expired
+        val expiry = interceptor.tokenExpiry
+        if (account == null || (expiry == null || expiry < System.currentTimeMillis()) && account.name == Constants.ANON_USER) { //first app launch OR fresh app launch with anonymous Account logged in or userless token expired
             return authAPILazy.get()
                     .getUserLessToken(
                             Constants.TOKEN_ACCESS_URL,
@@ -79,7 +80,7 @@ class ApiModule {
                     .doOnError { throwable: Throwable? -> Log.e("provideRedditAPI", "provideRedditAPI: ", throwable) }
                     .map { redditAPILazy.get() }
         } else { //fresh app start but not the fresh install
-            if (interceptor.tokenExpiry == null || interceptor.tokenExpiry < System.currentTimeMillis()) {
+            if (expiry == null || expiry < System.currentTimeMillis()) {
                 return authAPILazy.get()
                         .getRefreshedToken(
                                 Constants.TOKEN_ACCESS_URL,
