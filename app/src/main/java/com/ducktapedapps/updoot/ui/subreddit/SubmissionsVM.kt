@@ -50,8 +50,9 @@ class SubmissionsVM internal constructor(application: Application, subreddit: St
     }
 
     fun castVote(index: Int, direction: Int) {
-        if (_allSubmissions.value != null) {
-            val data = _allSubmissions.value!![index]
+        _allSubmissions.value?.let {
+            val submissions = it
+            val data = it[index]
             if (data.archived) {
                 _toastMessage.value = SingleLiveEvent("Submission is archived!")
                 return
@@ -60,25 +61,24 @@ class SubmissionsVM internal constructor(application: Application, subreddit: St
                 _toastMessage.value = SingleLiveEvent("Submission is locked!")
                 return
             }
-            val currentSubmissions = _allSubmissions.value
             frontPageRepo
                     .castVote(data, direction)
                     .subscribeOn(Schedulers.io())
                     .subscribe(object : CompletableObserver {
                         override fun onSubscribe(d: Disposable) {
-                            var updateData = currentSubmissions!![index]
+                            var updateData = submissions[index]
                             updateData = updateData.vote(direction)
-                            currentSubmissions[index] = updateData
-                            _allSubmissions.postValue(currentSubmissions)
+                            submissions[index] = updateData
+                            _allSubmissions.postValue(submissions)
                             compositeDisposable.add(d)
                         }
 
                         override fun onComplete() {}
                         override fun onError(throwable: Throwable) {
-                            var originalData = currentSubmissions!![index]
+                            var originalData = submissions[index]
                             originalData = originalData.vote(direction)
-                            currentSubmissions[index] = originalData
-                            _allSubmissions.postValue(currentSubmissions)
+                            submissions[index] = originalData
+                            _allSubmissions.postValue(submissions)
                         }
                     })
 
@@ -86,9 +86,9 @@ class SubmissionsVM internal constructor(application: Application, subreddit: St
     }
 
     fun toggleSave(index: Int) {
-        if (_allSubmissions.value != null) {
-            val data = _allSubmissions.value!![index]
-            val currentSubmissions = _allSubmissions.value
+        _allSubmissions.value?.let {
+            val data = it[index]
+            val currentSubmissions = it
             frontPageRepo
                     .save(data)
                     .subscribeOn(Schedulers.io())
@@ -98,9 +98,9 @@ class SubmissionsVM internal constructor(application: Application, subreddit: St
                         }
 
                         override fun onComplete() {
-                            var updatedData = _allSubmissions.value!![index]
+                            var updatedData = it[index]
                             updatedData = updatedData.save()
-                            currentSubmissions!![index] = updatedData
+                            currentSubmissions[index] = updatedData
                             _allSubmissions.postValue(currentSubmissions)
                             if (updatedData.saved) {
                                 _toastMessage.postValue(SingleLiveEvent("Submission saved!"))
@@ -110,9 +110,9 @@ class SubmissionsVM internal constructor(application: Application, subreddit: St
                         }
 
                         override fun onError(e: Throwable) {
-                            var updatedData = _allSubmissions.value!![index]
+                            var updatedData = it[index]
                             updatedData = updatedData.save()
-                            currentSubmissions!![index] = updatedData
+                            currentSubmissions[index] = updatedData
                             _allSubmissions.postValue(currentSubmissions)
                             _toastMessage.postValue(SingleLiveEvent("Error saving submission"))
                         }
