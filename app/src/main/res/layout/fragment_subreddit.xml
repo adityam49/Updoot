@@ -1,56 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <!--https://stackoverflow.com/questions/14171471/remove-vertical-padding-from-horizontal-progressbar/36264357#36264357-->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/slidr_container"
+        android:id="@+id/subredditFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent">
+        android:background="?android:attr/windowBackground"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!--https://stackoverflow.com/questions/14171471/remove-vertical-padding-from-horizontal-progressbar/36264357#36264357-->
-        <LinearLayout
-            android:id="@+id/subredditFragment"
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:elevation="4dp">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="@{submissionViewModel.isLoading ? View.VISIBLE : View.GONE}" />
+        </FrameLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeToRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?android:attr/windowBackground"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            app:refreshing="@{submissionViewModel.isLoading}">
 
-            <FrameLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:elevation="4dp">
-
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"
-                    android:visibility="@{submissionViewModel.isLoading ? View.VISIBLE : View.GONE}" />
-            </FrameLayout>
-
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/swipeToRefreshLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:refreshing="@{submissionViewModel.isLoading}">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="120dp"
-                    tools:listitem="@layout/linear_submissions_item" />
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-        </LinearLayout>
-    </FrameLayout>
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="120dp"
+                tools:listitem="@layout/linear_submissions_item" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
 
     <data>
 
