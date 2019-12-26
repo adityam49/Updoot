@@ -4,6 +4,8 @@ import com.ducktapedapps.updoot.model.Account
 import com.ducktapedapps.updoot.model.Thing
 import io.reactivex.Completable
 import io.reactivex.Single
+import okhttp3.Response
+import okhttp3.ResponseBody
 import retrofit2.http.*
 
 interface RedditAPI {
@@ -42,5 +44,13 @@ interface RedditAPI {
             @Path("subreddit") subreddit: String,
             @Path("id") submissions_id: String
     ): Single<Thing>
+
+    @FormUrlEncoded
+    @POST("/api/vote")
+    suspend fun castVoteCoroutine(
+            @Field("id") thing_id: String,
+            @Field("dir") vote_direction: Int
+    ): ResponseBody
+
 }
 

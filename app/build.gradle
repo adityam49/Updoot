@@ -27,7 +27,7 @@ android {
             buildConfigField 'String', "REDIRECT_URI", UPDOOT_REDIRECT_URI
         }
     }
-    
+
     dataBinding {
         enabled = true
     }
@@ -52,6 +52,7 @@ dependencies {
     def dagger_version = '2.24'
     def glide_version = '4.10.0'
     def nav_version = "2.1.0"
+    def kotlin_coroutine = "1.3.2"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     //android support libs
@@ -74,6 +75,10 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+
+    //kotlin-coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutine"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutine"
 
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"

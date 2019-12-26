@@ -1,12 +1,15 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.app.Application
+import android.util.Log
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.di.UpdootComponent
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.ListingData
 import com.ducktapedapps.updoot.model.Thing
 import io.reactivex.Single
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Singleton
 
 @Singleton
@@ -27,7 +30,22 @@ class CommentsRepo(application: Application) {
                             }
                     fetchedComments
                 }
+    }
 
+    suspend fun castVote(comment: CommentData, direction: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                val result = updootComponent.redditAPI.blockingGet()?.castVoteCoroutine(comment.name, direction)
+                if (result?.string() != null && result.string() == "{}") {
+                    Log.i(this.javaClass.simpleName, "casting vote : success ${result.string()}")
+                } else {
+                    Log.i(this.javaClass.simpleName, "casting vote : fail ${result?.string()}")
+
+                }
+            } catch (exception: Exception) {
+                Log.e(this.javaClass.simpleName, "could not cast vote : ", exception)
+            }
+        }
     }
 }
 

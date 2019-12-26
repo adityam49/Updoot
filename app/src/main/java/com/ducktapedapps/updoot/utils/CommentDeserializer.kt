@@ -42,6 +42,7 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
                     }
                 }
             }
+            val name = json.get("name").asString
             val is_submitter: Boolean = json.get("is_submitter")?.asBoolean ?: false
             var count: Int? = null
             var children: List<String> = listOf()
@@ -66,7 +67,8 @@ class CommentDeserializer : JsonDeserializer<CommentData> {
                     repliesExpanded = false,
                     parent_id = parent_id,
                     count = count,
-                    loadMoreChildren = children
+                    loadMoreChildren = children,
+                    name = name
             )
         }
         return null

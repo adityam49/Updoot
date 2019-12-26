@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.model.CommentData
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.launch
 
 const val TAG = "CommentsVM"
 
@@ -70,6 +72,17 @@ class CommentsVM(application: Application, id: String, subreddit_name: String) :
             }
         }
 
+    }
+
+    fun castVote(direction: Int, index: Int) {
+        viewModelScope.launch {
+            _allComments.value?.let { comments ->
+                repo.castVote(comments[index], direction)
+                val updateCommentList = comments.toMutableList()
+                updateCommentList[index] = comments[index].vote(direction)
+                _allComments.value = updateCommentList
+            }
+        }
     }
 
     private fun recursiveChildrenExpansion(list: List<CommentData>): List<CommentData> {

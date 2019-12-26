@@ -73,8 +73,14 @@ class CommentsFragment : Fragment() {
         recyclerView.adapter = adapter
 
         ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {
-            override fun performSlightLeftSwipeAction(adapterPosition: Int) {}
-            override fun performSlightRightSwipeAction(adapterPosition: Int) {}
+            override fun performSlightLeftSwipeAction(adapterPosition: Int) {
+                viewModel.castVote(-1, adapterPosition)
+            }
+
+            override fun performSlightRightSwipeAction(adapterPosition: Int) {
+                viewModel.castVote(1, adapterPosition)
+            }
+
             override fun performLeftSwipeAction(adapterPosition: Int) {}
             override fun performRightSwipeAction(adapterPosition: Int) {}
         })).attachToRecyclerView(recyclerView)
