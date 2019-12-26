@@ -19,11 +19,11 @@ interface AuthAPI {
     @FormUrlEncoded
     @POST
     fun getUserToken(
-            @Url auth_url: String,
-            @Header("Authorization") credentials: String,
-            @Field("grant_type") grant_type: String,
+            @Url auth_url: String = Constants.TOKEN_ACCESS_URL,
+            @Header("Authorization") credentials: String = Credentials.basic(Constants.client_id, ""),
+            @Field("grant_type") grant_type: String = Constants.user_grantType,
             @Field("code") code: String,
-            @Field("redirect_uri") redirect_uri: String
+            @Field("redirect_uri") redirect_uri: String = Constants.redirect_uri
     ): Single<Token>
 
     @FormUrlEncoded
