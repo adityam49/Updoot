@@ -105,7 +105,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                                 }
 
                             }
-                        }
+                        } else finish()
                     }
                 }
             }
