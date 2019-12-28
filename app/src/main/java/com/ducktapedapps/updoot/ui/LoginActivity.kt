@@ -22,12 +22,16 @@ import com.ducktapedapps.updoot.databinding.ActivityLoginBinding
 import com.ducktapedapps.updoot.model.Token
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), CoroutineScope {
+
     @Inject
     lateinit var redditAPI: RedditAPI
     @Inject
@@ -39,72 +43,10 @@ class LoginActivity : AppCompatActivity() {
     @Inject
     lateinit var sharedPreferences: SharedPreferences
 
-    private var mToken: Token? = null
+    private lateinit var job: Job
 
-    private val disposable = CompositeDisposable()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding: ActivityLoginBinding = DataBindingUtil.setContentView(this, R.layout.activity_login)
-
-        (application as UpdootApplication).updootComponent.inject(this)
-
-        setSupportActionBar(binding.toolbar)
-
-        CookieManager.getInstance().removeAllCookies(null)
-        CookieManager.getInstance().flush()
-
-        val webView = binding.webView
-        val progressBar = binding.loginProgress
-
-        webView.loadUrl(authUrl)
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                Log.i(TAG, "onPageStarted: login $url")
-                val uri = Uri.parse(url)
-                if (uri?.host == Uri.parse(Constants.redirect_uri).host) {
-                    if (uri.getQueryParameter("error") == null) {
-                        webView.stopLoading()
-                        webView.visibility = View.GONE
-                        progressBar.visibility = View.VISIBLE
-                        val code = uri.getQueryParameter("code")
-                        if (code != null)
-                            disposable.add(
-                                    authAPI.getUserToken(code = code)
-                                            .doOnSuccess { token: Token ->
-                                                mToken = token
-                                                token.setAbsoluteExpiry()
-                                                interceptor.setSessionToken(token)
-                                            }
-                                            .doOnError { throwable: Throwable? -> Log.e(TAG, "onPageStarted: ", throwable) }
-                                            .map { redditAPI }
-                                            .flatMap(RedditAPI::userIdentity)
-                                            .doOnSuccess { (name) ->
-                                                sharedPreferences.edit().putString(Constants.LOGIN_STATE, name).apply()
-                                                createAccount(name, mToken)
-                                                setResult(Activity.RESULT_OK)
-                                                finish()
-                                            }
-                                            .doOnError { throwable: Throwable? -> Log.e(TAG, "onPageStarted: ", throwable) }
-                                            .subscribeOn(Schedulers.io())
-                                            .subscribe()
-                            )
-                    } else {
-                        Log.i(TAG, "onPageStarted: ")
-                        finish()
-                    }
-                }
-            }
-        }
-    }
-
-    fun createAccount(username: String?, token: Token?) {
-        val userAccount = Account(username, Constants.ACCOUNT_TYPE)
-        val bundle = Bundle()
-        bundle.putString(Constants.USER_TOKEN_REFRESH_KEY, token!!.refresh_token)
-        accountManager.addAccountExplicitly(userAccount, null, bundle)
-        accountManager.setAuthToken(userAccount, "full_access", token.access_token)
-    }
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
 
     private val authUrl: String
         get() {
@@ -125,14 +67,89 @@ class LoginActivity : AppCompatActivity() {
                     .toString()
         }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!disposable.isDisposed) {
-            disposable.dispose()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val binding: ActivityLoginBinding = DataBindingUtil.setContentView(this, R.layout.activity_login)
+
+        (application as UpdootApplication).updootComponent.inject(this)
+
+        job = Job()
+
+        setSupportActionBar(binding.toolbar)
+
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
+
+        val webView = binding.webView
+        val progressBar = binding.loginProgress
+
+        webView.loadUrl(authUrl)
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                val uri = Uri.parse(url)
+                uri?.let {
+                    if (it.host == Uri.parse(Constants.redirect_uri)?.host) {
+                        if (uri.getQueryParameter("error") == null) {
+
+                            webView.stopLoading()
+                            webView.visibility = View.GONE
+                            progressBar.visibility = View.VISIBLE
+
+                            val code = uri.getQueryParameter("code")
+                            if (code != null) {
+                                launch(Dispatchers.IO) {
+                                    fetchToken(code)?.let { fetchedToken ->
+                                        fetchUserDetailsAndSave(fetchedToken)
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    companion object {
-        private const val TAG = "LoginActivity"
+    private suspend fun fetchToken(code: String): Token? {
+        return try {
+            val token: Token = authAPI.getUserTokenByCoroutine(code = code)
+            token.setAbsoluteExpiry()
+            interceptor.setSessionToken(token)
+            token
+        } catch (exception: Exception) {
+            Log.i(TAG, "unable to fetch user token : ", exception.cause)
+            null
+        }
     }
+
+    private suspend fun fetchUserDetailsAndSave(token: Token) {
+        try {
+            val account: com.ducktapedapps.updoot.model.Account = redditAPI.userIdentity()
+            account.let { fetchedAccountDetails ->
+                sharedPreferences.edit().putString(Constants.LOGIN_STATE, fetchedAccountDetails.name).apply()
+                createAccount(fetchedAccountDetails.name, token)
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+        } catch (exception: Exception) {
+            Log.i(com.ducktapedapps.updoot.ui.TAG, "unable to fetch user details: ", exception.cause)
+        }
+    }
+
+    private fun createAccount(username: String, token: Token) {
+        val userAccount = Account(username, Constants.ACCOUNT_TYPE)
+        val bundle = Bundle()
+        bundle.putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
+        accountManager.addAccountExplicitly(userAccount, null, bundle)
+        accountManager.setAuthToken(userAccount, "full_access", token.access_token)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    companion object { private const val TAG = "LoginActivity" }
 }

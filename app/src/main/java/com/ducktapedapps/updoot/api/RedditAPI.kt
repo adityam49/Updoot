@@ -4,14 +4,13 @@ import com.ducktapedapps.updoot.model.Account
 import com.ducktapedapps.updoot.model.Thing
 import io.reactivex.Completable
 import io.reactivex.Single
-import okhttp3.Response
 import okhttp3.ResponseBody
 import retrofit2.http.*
 
 interface RedditAPI {
 
-    @get:GET("/api/v1/me")
-    val userIdentity: Single<Account>
+    @GET("/api/v1/me")
+    suspend fun userIdentity() : Account
 
     @GET("{subreddit}/{sort}")
     fun getSubreddit(

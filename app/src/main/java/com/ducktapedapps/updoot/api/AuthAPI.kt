@@ -35,4 +35,13 @@ interface AuthAPI {
             @Field("refresh_token") refresh_token: String
     ): Single<Token>
 
+    @FormUrlEncoded
+    @POST
+    suspend fun getUserTokenByCoroutine(
+            @Url auth_url: String = Constants.TOKEN_ACCESS_URL,
+            @Header("Authorization") credentials: String = Credentials.basic(Constants.client_id, ""),
+            @Field("grant_type") grant_type: String = Constants.user_grantType,
+            @Field("code") code: String,
+            @Field("redirect_uri") redirect_uri: String = Constants.redirect_uri
+    ): Token
 }
