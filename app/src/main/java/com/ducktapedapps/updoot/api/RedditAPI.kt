@@ -2,7 +2,6 @@ package com.ducktapedapps.updoot.api
 
 import com.ducktapedapps.updoot.model.Account
 import com.ducktapedapps.updoot.model.Thing
-import io.reactivex.Completable
 import io.reactivex.Single
 import okhttp3.ResponseBody
 import retrofit2.http.*
@@ -10,33 +9,26 @@ import retrofit2.http.*
 interface RedditAPI {
 
     @GET("/api/v1/me")
-    suspend fun userIdentity() : Account
+    suspend fun userIdentity(): Account
 
     @GET("{subreddit}/{sort}")
-    fun getSubreddit(
+    suspend fun getSubreddit(
             @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
             @Query("t") time: String?,
-            @Query("after") after: String?): Single<Thing>
-
-    @FormUrlEncoded
-    @POST("/api/vote")
-    fun castVote(
-            @Field("id") thing_id: String,
-            @Field("dir") vote_direction: Int
-    ): Completable
+            @Query("after") after: String?): Thing
 
     @FormUrlEncoded
     @POST("/api/save")
-    fun save(
+    suspend fun save(
             @Field("id") id: String
-    ): Completable
+    ): ResponseBody
 
     @FormUrlEncoded
     @POST("/api/unsave")
-    fun unsave(
+    suspend fun unsave(
             @Field("id") id: String
-    ): Completable
+    ): ResponseBody
 
     @GET("{subreddit}/comments/{id}")
     fun getComments(

@@ -3,167 +3,63 @@ package com.ducktapedapps.updoot.ui.subreddit
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import io.reactivex.CompletableObserver
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import java.util.*
+import kotlinx.coroutines.launch
 
-class SubmissionsVM internal constructor(application: Application, subreddit: String) : AndroidViewModel(application), InfiniteScrollVM {
-    private val compositeDisposable = CompositeDisposable()
+class SubmissionsVM(application: Application, val subreddit: String) : AndroidViewModel(application), InfiniteScrollVM {
     private val frontPageRepo: SubmissionRepo = SubmissionRepo(application)
-    override var after: String? = null
-    private var expandedSubmissionIndex = -1
-    private var sorting: String
+    override val isLoading = frontPageRepo._isLoading
+
+    private var sorting: String?
     private var time: String?
-    val subreddit: String
-    override val isLoading = MutableLiveData(true)
 
-    private val _allSubmissions = MutableLiveData<MutableList<LinkData>>(ArrayList())
-    private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
-    val allSubmissions: LiveData<MutableList<LinkData>> = _allSubmissions
-    val toastMessage: LiveData<SingleLiveEvent<String?>> = _toastMessage
+    val allSubmissions: LiveData<MutableList<LinkData>> = frontPageRepo.allSubmissions
+    val toastMessage: LiveData<SingleLiveEvent<String?>> = frontPageRepo.toastMessage
 
-    override fun loadNextPage() {
-        compositeDisposable.add(frontPageRepo
-                .loadNextPage(subreddit, sorting, time, after)
-                .map<MutableList<LinkData>> { response: Pair<List<LinkData>?, String?> ->
-                    after = response.second
-                    val submissions: MutableList<LinkData> = _allSubmissions.value
-                            ?: mutableListOf()
-                    submissions.addAll(response.first ?: listOf())
-                    submissions
-                }
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe { isLoading.postValue(true) }
-                .subscribe({ submissions: MutableList<LinkData>? ->
-                    _allSubmissions.postValue(submissions)
-                    isLoading.postValue(false)
-                }) { throwable: Throwable ->
-                    isLoading.postValue(false)
-                    _toastMessage.postValue(SingleLiveEvent(throwable.message))
-                })
+    override fun loadPage(appendPage: Boolean) {
+        viewModelScope.launch {
+            frontPageRepo.loadPageByCoroutine(subreddit, sorting, time,appendPage)
+        }
+    }
+
+    override fun hasNextPage(): Boolean {
+        return frontPageRepo.after != null
     }
 
     fun castVote(index: Int, direction: Int) {
-        _allSubmissions.value?.let {
-            val submissions = it
-            val data = it[index]
-            if (data.archived) {
-                _toastMessage.value = SingleLiveEvent("Submission is archived!")
-                return
-            }
-            if (data.locked) {
-                _toastMessage.value = SingleLiveEvent("Submission is locked!")
-                return
-            }
-            frontPageRepo
-                    .castVote(data, direction)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(object : CompletableObserver {
-                        override fun onSubscribe(d: Disposable) {
-                            var updateData = submissions[index]
-                            updateData = updateData.vote(direction)
-                            submissions[index] = updateData
-                            _allSubmissions.postValue(submissions)
-                            compositeDisposable.add(d)
-                        }
-
-                        override fun onComplete() {}
-                        override fun onError(throwable: Throwable) {
-                            var originalData = submissions[index]
-                            originalData = originalData.vote(direction)
-                            submissions[index] = originalData
-                            _allSubmissions.postValue(submissions)
-                        }
-                    })
-
+        viewModelScope.launch {
+            frontPageRepo.castVote(index, direction)
         }
     }
 
     fun toggleSave(index: Int) {
-        _allSubmissions.value?.let {
-            val data = it[index]
-            val currentSubmissions = it
-            frontPageRepo
-                    .save(data)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(object : CompletableObserver {
-                        override fun onSubscribe(d: Disposable) {
-                            compositeDisposable.add(d)
-                        }
-
-                        override fun onComplete() {
-                            var updatedData = it[index]
-                            updatedData = updatedData.save()
-                            currentSubmissions[index] = updatedData
-                            _allSubmissions.postValue(currentSubmissions)
-                            if (updatedData.saved) {
-                                _toastMessage.postValue(SingleLiveEvent("Submission saved!"))
-                            } else {
-                                _toastMessage.postValue(SingleLiveEvent("Submission unsaved!"))
-                            }
-                        }
-
-                        override fun onError(e: Throwable) {
-                            var updatedData = it[index]
-                            updatedData = updatedData.save()
-                            currentSubmissions[index] = updatedData
-                            _allSubmissions.postValue(currentSubmissions)
-                            _toastMessage.postValue(SingleLiveEvent("Error saving submission"))
-                        }
-                    })
+        viewModelScope.launch {
+            frontPageRepo.save(index)
         }
     }
 
-    fun reload(sort: String?, time: String?) {
-        sorting = sort ?: ""
+    fun reload(sorting: String?, time: String?) {
+        this.sorting = sorting
         this.time = time
-        after = null
-        _allSubmissions.value = null
-        loadNextPage()
+        frontPageRepo.after = null
+        viewModelScope.launch { loadPage(false) }
     }
+
 
     fun expandSelfText(index: Int) {
-        val updatedList = _allSubmissions.value
-        if (updatedList?.get(index) != null) {
-            var data = updatedList[index]
-            if (index == expandedSubmissionIndex) {
-                if (data.selftext != null) {
-                    data = data.toggleSelfTextExpansion()
-                    updatedList[index] = data
-                    if (!data.isSelfTextExpanded) expandedSubmissionIndex = -1
-                }
-            } else {
-                data = data.toggleSelfTextExpansion()
-                updatedList[index] = data
-                if (expandedSubmissionIndex != -1) {
-                    data = updatedList[expandedSubmissionIndex]
-                    data = data.toggleSelfTextExpansion()
-                    updatedList[expandedSubmissionIndex] = data
-                }
-                expandedSubmissionIndex = index
-            }
-        }
-        _allSubmissions.value = updatedList
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        if (compositeDisposable.isDisposed.not()) {
-            compositeDisposable.clear()
-        }
+        frontPageRepo.expandSelfText(index)
     }
 
     init {
-        after = null
         time = null
-        this.subreddit = subreddit
-        sorting = ""
-        loadNextPage()
+        sorting = null
+        viewModelScope.launch {
+            loadPage(false)
+        }
     }
+
+
 }

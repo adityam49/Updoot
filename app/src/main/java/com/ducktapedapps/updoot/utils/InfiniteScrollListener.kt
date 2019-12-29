@@ -13,8 +13,8 @@ class InfiniteScrollListener(private val layoutManager: LinearLayoutManager, pri
             if (layoutManager.itemCount <= 10) return // condition for no more pages
 
             if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 10) {
-                if (viewModel.isLoading.value == false && viewModel.after != null) {
-                    viewModel.loadNextPage()
+                if (viewModel.isLoading.value == false && viewModel.hasNextPage()) {
+                    viewModel.loadPage(true)
                 }
             }
         }

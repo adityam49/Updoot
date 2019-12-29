@@ -1,9 +1,9 @@
 package com.ducktapedapps.updoot.ui
 
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 
 interface InfiniteScrollVM {
-    fun loadNextPage()
-    val after: String?
-    val isLoading: MutableLiveData<Boolean>
+    fun loadPage(appendPage : Boolean)
+    fun hasNextPage() : Boolean
+    val isLoading: LiveData<Boolean>
 }
