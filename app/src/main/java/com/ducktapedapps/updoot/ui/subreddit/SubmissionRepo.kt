@@ -12,22 +12,24 @@ import com.ducktapedapps.updoot.model.Thing
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.ResponseBody
 import java.util.*
 
 class SubmissionRepo(application: Application) {
     private val updootComponent: UpdootComponent = (application as UpdootApplication).updootComponent
+
     var after: String? = null
-    val _isLoading = MutableLiveData(true)
-    val isLoading: LiveData<Boolean> = _isLoading
     private var expandedSubmissionIndex = -1
 
+    private val _isLoading = MutableLiveData(true)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private val _allSubmissions = MutableLiveData<MutableList<LinkData>>(ArrayList())
-    private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
     val allSubmissions: LiveData<MutableList<LinkData>> = _allSubmissions
+
+    private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
     val toastMessage: LiveData<SingleLiveEvent<String?>> = _toastMessage
 
-    suspend fun loadPageByCoroutine(subreddit: String?, sort: String?, time: String?, appendPage: Boolean) {
+    suspend fun loadPage(subreddit: String?, sort: String?, time: String?, appendPage: Boolean) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
             val redditAPI = updootComponent.redditAPI.blockingGet()
@@ -84,18 +86,18 @@ class SubmissionRepo(application: Application) {
                 try {
                     val redditAPI = updootComponent.redditAPI.blockingGet()
                     if (redditAPI != null) {
-                        val response: ResponseBody = if (!cachedSubmissions[index].saved) {
+                        val response = if (!cachedSubmissions[index].saved) {
                             redditAPI.save(cachedSubmissions[index].name)
                         } else {
                             redditAPI.unsave(cachedSubmissions[index].name)
                         }
-                        if (response.string() == "{}") {
+                        if (response == "{}") {
                             val submission = cachedSubmissions.toMutableList()
                             val updatedSubmission = submission[index].save()
                             submission[index] = updatedSubmission
                             _allSubmissions.postValue(submission)
                             _toastMessage.postValue(SingleLiveEvent("Submission ${if (submission[index].saved) "saved" else "unsaved"}!"))
-                        } else throw Exception(response.string())
+                        } else throw Exception(response)
                     }
                 } catch (e: Exception) {
                     Log.e(this.javaClass.simpleName, "unable to save/unsave ", e)
@@ -127,13 +129,13 @@ class SubmissionRepo(application: Application) {
                             -1 -> if (cachedSubmissions[index].likes != false) -1 else 0
                             else -> direction
                         }
-                        val response: ResponseBody = redditAPI.castVoteCoroutine(cachedSubmissions[index].name, intendedDirection)
-                        if (response.string() == "{}") {
+                        val response = redditAPI.castVote(cachedSubmissions[index].name, intendedDirection)
+                        if (response == "{}") {
                             val updatedSubmission = cachedSubmissions[index].vote(direction)
                             submissions[index] = updatedSubmission
                             _allSubmissions.postValue(submissions)
                         } else {
-                            throw Exception("unable to vote : ${response.string()}")
+                            throw Exception("unable to vote : $response")
                         }
                     } else throw Exception("Unable to get authenticated reddit api")
                 } catch (e: Exception) {

@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class SubmissionsVM(application: Application, val subreddit: String) : AndroidViewModel(application), InfiniteScrollVM {
     private val frontPageRepo: SubmissionRepo = SubmissionRepo(application)
-    override val isLoading = frontPageRepo._isLoading
+    override val isLoading = frontPageRepo.isLoading
 
     private var sorting: String?
     private var time: String?
@@ -21,7 +21,7 @@ class SubmissionsVM(application: Application, val subreddit: String) : AndroidVi
 
     override fun loadPage(appendPage: Boolean) {
         viewModelScope.launch {
-            frontPageRepo.loadPageByCoroutine(subreddit, sorting, time,appendPage)
+            frontPageRepo.loadPage(subreddit, sorting, time,appendPage)
         }
     }
 
