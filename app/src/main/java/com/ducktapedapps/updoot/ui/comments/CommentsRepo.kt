@@ -5,16 +5,24 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.di.UpdootComponent
+import com.ducktapedapps.updoot.api.RedditAPI
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.ListingData
+import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CommentsRepo(application: Application) {
-    private val updootComponent: UpdootComponent = (application as UpdootApplication).updootComponent
+
+    init {
+        (application as UpdootApplication).updootComponent.inject(this)
+    }
+
+    @Inject
+    lateinit var reddit: Reddit
 
     private val _allComments = MutableLiveData<List<CommentData>>()
     private val _isLoading = MutableLiveData(true)
@@ -25,7 +33,7 @@ class CommentsRepo(application: Application) {
     suspend fun loadComments(subreddit: String, submission_id: String) {
         withContext(Dispatchers.IO) {
             try {
-                val redditAPI = updootComponent.redditAPI.blockingGet()
+                val redditAPI = reddit.authenticatedAPI()
                 if (redditAPI != null) {
                     try {
                         val response = redditAPI.getComments(subreddit, submission_id)
@@ -45,7 +53,7 @@ class CommentsRepo(application: Application) {
 
             } catch (ex: Exception) {
                 Log.e("commentsRepo", "couldn't get reddit api ", ex)
-            }finally {
+            } finally {
                 _isLoading.postValue(false)
             }
         }
@@ -75,7 +83,6 @@ class CommentsRepo(application: Application) {
                 }
             }
         }
-
     }
 
 
@@ -92,24 +99,32 @@ class CommentsRepo(application: Application) {
     suspend fun castVote(direction: Int, index: Int) {
         withContext(Dispatchers.IO) {
             try {
-                _allComments.value?.let {
-                    val intendedDirection = when (direction) {
-                        1 -> if (it[index].likes != true) 1 else 0
-                        -1 -> if (it[index].likes != false) -1 else 0
-                        else -> direction
+                val redditAPI: RedditAPI? = reddit.authenticatedAPI()
+                if (redditAPI != null) {
+                    try {
+                        _allComments.value?.let {
+                            val intendedDirection = when (direction) {
+                                1 -> if (it[index].likes != true) 1 else 0
+                                -1 -> if (it[index].likes != false) -1 else 0
+                                else -> direction
+                            }
+                            val result = redditAPI.castVote(it[index].name, intendedDirection)
+                            if (result == "{}") {
+                                Log.i(this.javaClass.simpleName, "casting vote : success $result")
+                                val updateCommentList = it.toMutableList()
+                                updateCommentList[index] = it[index].vote(direction)
+                                _allComments.postValue(updateCommentList)
+                            } else {
+                                throw Exception(result)
+                            }
+                        }
+                    } catch (exception: Exception) {
+                        Log.e(this.javaClass.simpleName, "could not cast vote : ", exception)
                     }
-                    val result = updootComponent.redditAPI.blockingGet()?.castVote(it[index].name, intendedDirection)
-                    if (result != null && result == "{}") {
-                        Log.i(this.javaClass.simpleName, "casting vote : success $result")
-                        val updateCommentList = it.toMutableList()
-                        updateCommentList[index] = it[index].vote(direction)
-                        _allComments.postValue(updateCommentList)
-                    } else {
-                        throw Exception("$result")
-                    }
-                }
-            } catch (exception: Exception) {
-                Log.e(this.javaClass.simpleName, "could not cast vote : ", exception)
+                } else throw Exception("Unable to get reddit api")
+
+            } catch (ex: Exception) {
+                Log.e(this.javaClass.simpleName, "unable to get reddit api", ex)
             }
         }
     }

@@ -9,7 +9,6 @@ import android.util.Log
 import com.ducktapedapps.updoot.api.AuthAPI
 import com.ducktapedapps.updoot.ui.LoginActivity
 import com.ducktapedapps.updoot.utils.Constants
-import io.reactivex.schedulers.Schedulers
 import okhttp3.Credentials
 import javax.inject.Inject
 
@@ -33,41 +32,8 @@ class Authenticator internal constructor(private val mContext: Context) : Abstra
         return null
     }
 
-    override fun getAuthToken(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle {
-        val am = AccountManager.get(mContext)
-        var authToken = am.peekAuthToken(account, authTokenType)
-        if (TextUtils.isEmpty(authToken)) {
-            authToken = authAPI
-                    .getUserToken(Constants.TOKEN_ACCESS_URL,
-                            Credentials.basic(Constants.client_id, ""),
-                            Constants.user_grantType,
-                            options.getString("code") ?: "", Constants.redirect_uri)
-                    .subscribeOn(Schedulers.io())
-                    .doOnError { throwable: Throwable? -> Log.e(TAG, "getAuthToken: ", throwable) }
-                    .blockingGet()
-                    .access_token
-        }
-        if (!TextUtils.isEmpty(authToken)) {
-            val result = Bundle()
-            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type)
-            result.putString(AccountManager.KEY_AUTHTOKEN, authToken)
-            return result
-        }
-        // If you reach here, person needs to login again. or sign up
-        // If we get here, then we couldn't access the user's password - so we
-        // need to re-prompt them for their credentials. We do that by creating
-        // an intent to display our AuthenticatorActivity which is the AccountsActivity in my case.
-        val intent = Intent(mContext, LoginActivity::class.java)
-        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
-        intent.putExtra(Constants.ACCOUNT_TYPE, account.type)
-        intent.putExtra("full_access", authTokenType)
-        val retBundle = Bundle()
-        retBundle.putParcelable(AccountManager.KEY_INTENT, intent)
-        return retBundle
-    }
+    override fun getAuthToken(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle? = null
 
-    @Throws(NetworkErrorException::class)
     override fun getAccountRemovalAllowed(response: AccountAuthenticatorResponse, account: Account): Bundle {
         if (account.name == Constants.ANON_USER) {
             val result = Bundle()
