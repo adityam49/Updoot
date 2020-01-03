@@ -3,14 +3,13 @@ package com.ducktapedapps.updoot.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
-import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
@@ -52,24 +51,25 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
                 }
             }
 
-            NavigationUI.setupWithNavController(bottomNavigationView, navController)
-            bottomNavigationView.setOnNavigationItemSelectedListener { menuItem: MenuItem ->
-                when (menuItem.itemId) {
-                    R.id.home -> {
-                        navController.navigate(R.id.SubredditDestination)
-                        return@setOnNavigationItemSelectedListener true
-                    }
-                    R.id.accounts -> {
-                        navController.navigate(R.id.AccountsBottomSheetDialog)
-                        return@setOnNavigationItemSelectedListener true
-                    }
-                    R.id.more -> {
-                        navController.navigate(R.id.settingsFragment)
-                        return@setOnNavigationItemSelectedListener true
-                    }
-                    else -> return@setOnNavigationItemSelectedListener false
-                }
-            }
+            bottomNavigationView.setupWithNavController(navController)
+//            NavigationUI.setupWithNavController(bottomNavigationView, navController)
+//            bottomNavigationView.setOnNavigationItemSelectedListener { menuItem: MenuItem ->
+//                when (menuItem.itemId) {
+//                    R.id.home -> {
+//                        navController.navigate(R.id.SubredditDestination)
+//                        return@setOnNavigationItemSelectedListener true
+//                    }
+//                    R.id.accounts -> {
+//                        navController.navigate(R.id.AccountsBottomSheetDialog)
+//                        return@setOnNavigationItemSelectedListener true
+//                    }
+//                    R.id.more -> {
+//                        navController.navigate(R.id.settingsFragment)
+//                        return@setOnNavigationItemSelectedListener true
+//                    }
+//                    else -> return@setOnNavigationItemSelectedListener false
+//                }
+//            }
             userManager.attachListener(this)
             viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
         }
