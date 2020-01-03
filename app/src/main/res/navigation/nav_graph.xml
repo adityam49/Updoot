@@ -73,4 +73,13 @@
         android:id="@+id/SettingsDestination"
         android:name="com.ducktapedapps.updoot.ui.settings.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/ExploreDestination"
+        android:name="com.ducktapedapps.updoot.ui.explore.ExploreFragment"
+        android:label="ExploreDestination"
+        tools:layout="@layout/fragment_explore">
+        <action
+            android:id="@+id/action_ExploreDestination_to_SubredditDestination"
+            app:destination="@id/SubredditDestination" />
+    </fragment>
 </navigation>

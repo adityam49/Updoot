@@ -151,5 +151,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
-    companion object { private const val TAG = "LoginActivity" }
+    companion object {
+        private const val TAG = "LoginActivity"
+    }
 }

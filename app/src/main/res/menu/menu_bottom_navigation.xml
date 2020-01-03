@@ -7,10 +7,10 @@
         android:title="@string/home" />
 
     <item
-        android:id="@+id/explore"
+        android:id="@id/ExploreDestination"
         android:enabled="true"
         android:icon="@drawable/ic_explore_black_24dp"
-        android:title="@string/search" />
+        android:title="@string/explore" />
 
     <item
         android:id="@id/AccountsBottomSheetDialog"

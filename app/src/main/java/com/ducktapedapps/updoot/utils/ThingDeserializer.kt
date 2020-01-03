@@ -1,9 +1,6 @@
 package com.ducktapedapps.updoot.utils
 
-import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.model.ListingData
-import com.ducktapedapps.updoot.model.Thing
+import com.ducktapedapps.updoot.model.*
 import com.google.gson.*
 import java.lang.reflect.Type
 
@@ -25,6 +22,7 @@ class ThingDeserializer : JsonDeserializer<Thing?> {
                         "Listing" -> Thing("Listing", context.deserialize(element, ListingData::class.java))
                         "t3" -> Thing("t3", context.deserialize(element, LinkData::class.java))
                         "more", "t1" -> Thing("t1", context.deserialize(element, CommentData::class.java))
+                        "t5" -> Thing("t5", context.deserialize(element, Subreddit::class.java))
                         else -> null
                     }
                 }

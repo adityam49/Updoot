@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="clickHandler"
+            type="com.ducktapedapps.updoot.ui.explore.ExploreFragment.ClickHandler" />
+
+        <variable
+            name="Subreddit"
+            type="com.ducktapedapps.updoot.model.Subreddit" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> clickHandler.onSubredditClick(Subreddit.display_name_prefixed)}">
+
+
+        <ImageView
+            android:id="@+id/subreddit_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:subredditThumbnail="@{Subreddit.icon_img}"
+            tools:src="@drawable/ic_image_error" />
+
+        <TextView
+            android:id="@+id/subreddit_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{Subreddit.display_name_prefixed}"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/subreddit_icon"
+            app:layout_constraintTop_toTopOf="@+id/subreddit_icon"
+            tools:text="r/subreddit_name" />
+
+        <TextView
+            android:id="@+id/subreddit_description_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@{Subreddit.public_description}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/subreddit_title_tv"
+            app:layout_constraintTop_toBottomOf="@+id/subreddit_title_tv"
+            tools:text="This is a subreddit description" />
+
+        <TextView
+            android:id="@+id/subscriber_count_tv"
+            subscriberCount="@{Subreddit.subscribers}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/subreddit_title_tv"
+            app:layout_constraintTop_toBottomOf="@+id/subreddit_description_tv"
+            tools:text="14.3k subscribers" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

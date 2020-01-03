@@ -41,5 +41,9 @@ interface RedditAPI {
             @Field("dir") vote_direction: Int
     ): String
 
+    @GET("/subreddits/search")
+    suspend fun search(
+            @Query("q") query: String
+    ): Thing
 }
 
