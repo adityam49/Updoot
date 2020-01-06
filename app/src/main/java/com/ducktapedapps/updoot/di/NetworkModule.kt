@@ -24,13 +24,6 @@ import javax.inject.Singleton
 class NetworkModule {
     @Singleton
     @Provides
-    fun provideTokenInterceptor(): TokenInterceptor {
-        return TokenInterceptor()
-    }
-
-
-    @Singleton
-    @Provides
     fun provideOkHttpClient(tokenInterceptor: TokenInterceptor): OkHttpClient {
         val okHttpClient = OkHttpClient.Builder()
         okHttpClient.addNetworkInterceptor(tokenInterceptor)
