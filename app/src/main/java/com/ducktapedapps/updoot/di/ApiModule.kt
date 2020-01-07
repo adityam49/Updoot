@@ -7,8 +7,6 @@ import android.content.SharedPreferences
 import com.ducktapedapps.updoot.api.AuthAPI
 import com.ducktapedapps.updoot.api.RedditAPI
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.Reddit
-import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager
 import dagger.Lazy
 import dagger.Module
@@ -53,14 +51,4 @@ class ApiModule {
         }, null, true)
         return accountManager
     }
-
-    @Provides
-    fun provideReddit(
-            redditAPI: RedditAPI,
-            authAPI: AuthAPI,
-            interceptor: TokenInterceptor,
-            sharedPreferences: SharedPreferences,
-            userManager: UserManager,
-            accountManager: AccountManager
-    ) = Reddit(redditAPI, authAPI, interceptor, sharedPreferences, userManager, accountManager)
 }
