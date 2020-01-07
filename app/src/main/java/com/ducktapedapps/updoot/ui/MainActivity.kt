@@ -90,6 +90,11 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
         reloadContent()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        userManager.detachListener()
+    }
+
     private fun reloadContent() {
         viewModel.setCurrentAccount(userManager.currentUser?.name)
     }

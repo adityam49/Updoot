@@ -91,12 +91,14 @@ dependencies {
 
     //dagger
     implementation "com.google.dagger:dagger:$dagger_version"
-    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
     //rich text view
     implementation 'me.kaelaela:OpenGraphView:1.2.0@aar'
+
+    //leak canary for detecting memory leaks
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
 
     //testing
     testImplementation 'junit:junit:4.13-beta-3'

@@ -11,8 +11,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UserManager @Inject constructor(private val accountManager: AccountManager, private val sharedPreferences: SharedPreferences, private val interceptor: TokenInterceptor) {
-    lateinit var listener: AccountChangeListener
+class UserManager @Inject constructor(
+        private val accountManager: AccountManager,
+        private val sharedPreferences: SharedPreferences,
+        private val interceptor: TokenInterceptor
+) {
+    var listener: AccountChangeListener? = null
 
     val currentUser: Account?
         get() {
@@ -49,10 +53,16 @@ class UserManager @Inject constructor(private val accountManager: AccountManager
         listener = context as AccountChangeListener
     }
 
+    fun detachListener() {
+        listener = null
+    }
+
     interface AccountChangeListener {
         fun onCurrentAccountRemoved()
     }
 
-    companion object { private const val TAG = "UserManager" }
+    companion object {
+        private const val TAG = "UserManager"
+    }
 
 }

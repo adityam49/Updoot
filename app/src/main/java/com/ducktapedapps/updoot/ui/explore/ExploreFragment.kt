@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
 import kotlinx.coroutines.*
@@ -23,10 +22,6 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     @Inject
     lateinit var application: Application
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var searchView: SearchView
-    private lateinit var adapter: SearchAdapter
-    private lateinit var binding: FragmentExploreBinding
     private lateinit var viewModel: ExploreVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,16 +30,16 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentExploreBinding.inflate(inflater, container, false).apply { lifecycleOwner = viewLifecycleOwner }
-        setUpViewModel()
-        setUpRecyclerView()
-        setUpSearchView()
+        val binding = FragmentExploreBinding.inflate(inflater, container, false).apply { lifecycleOwner = viewLifecycleOwner }
+        val adapter = SearchAdapter(ClickHandler())
+        setUpViewModel(binding, adapter)
+        setUpRecyclerView(binding, adapter)
+        setUpSearchView(binding)
         return binding.root
     }
 
-    private fun setUpRecyclerView() {
-        adapter = SearchAdapter(ClickHandler())
-        recyclerView = binding.recyclerView.apply {
+    private fun setUpRecyclerView(binding: FragmentExploreBinding, adapter: SearchAdapter) {
+        val recyclerView = binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this.context).apply {
                 stackFromEnd = false
                 reverseLayout = true
@@ -53,8 +48,8 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
         recyclerView.adapter = adapter
     }
 
-    private fun setUpSearchView() {
-        searchView = binding.searchView
+    private fun setUpSearchView(binding: FragmentExploreBinding) {
+        val searchView = binding.searchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener, androidx.appcompat.widget.SearchView.OnQueryTextListener {
             private var oldQuery: String = ""
             override fun onQueryTextSubmit(query: String?) = false
@@ -73,7 +68,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
         })
     }
 
-    private fun setUpViewModel() {
+    private fun setUpViewModel(binding: FragmentExploreBinding, adapter: SearchAdapter) {
         viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application)).get(ExploreVM::class.java)
         viewModel.result.observe(viewLifecycleOwner, Observer { newResults -> adapter.submitList(newResults.toMutableList()) })
         viewModel.isLoading.observe(viewLifecycleOwner, Observer { loading -> binding.loadingView.visibility = if (loading) View.VISIBLE else View.INVISIBLE })

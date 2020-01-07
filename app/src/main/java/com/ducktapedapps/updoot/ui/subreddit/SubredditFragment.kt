@@ -30,9 +30,7 @@ class SubredditFragment : Fragment() {
     @Inject
     lateinit var appContext: Application
 
-    private lateinit var binding: FragmentSubredditBinding
     private lateinit var submissionsVM: SubmissionsVM
-    private lateinit var adapter: SubmissionsAdapter
     private lateinit var navController: NavController
     private val args: SubredditFragmentArgs by navArgs()
 
@@ -43,30 +41,30 @@ class SubredditFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         navController = findNavController()
-        binding = FragmentSubredditBinding.inflate(inflater, container, false)
+        val binding = FragmentSubredditBinding.inflate(inflater, container, false)
                 .apply { lifecycleOwner = viewLifecycleOwner }
-        setUpViewModel()
-        setUpRecyclerView()
+
+        val adapter = SubmissionsAdapter(ClickHandler())
+
+        setUpViewModel(binding, adapter)
+        setUpRecyclerView(binding, adapter)
         return binding.root
     }
 
-    private fun setUpRecyclerView() {
+    private fun setUpRecyclerView(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
         val recyclerView = binding.recyclerView
         val linearLayoutManager = LinearLayoutManager(this@SubredditFragment.context)
-        adapter = SubmissionsAdapter(ClickHandler())
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.itemAnimator = CustomItemAnimator()
 
         ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
-            override fun performSlightLeftSwipeAction(adapterPosition: Int) {
-                submissionsVM.castVote(adapterPosition, -1)
-            }
+            override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
 
-            override fun performSlightRightSwipeAction(adapterPosition: Int) {
-                submissionsVM.castVote(adapterPosition, 1)
-            }
+
+            override fun performSlightRightSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, 1)
+
 
             override fun performLeftSwipeAction(adapterPosition: Int) {
                 val data = adapter.currentList[adapterPosition]
@@ -89,7 +87,7 @@ class SubredditFragment : Fragment() {
         swipeRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
     }
 
-    private fun setUpViewModel() {
+    private fun setUpViewModel(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
         val subreddit = args.rSubreddit ?: ""
         submissionsVM = ViewModelProvider(this@SubredditFragment, SubmissionsVMFactory(appContext, subreddit)).get(SubmissionsVM::class.java)
         binding.submissionViewModel = submissionsVM

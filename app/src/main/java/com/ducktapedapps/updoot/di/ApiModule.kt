@@ -45,7 +45,7 @@ class ApiModule {
             if (currentAccountRemoved) {
                 if (currentCachedAccount != null && currentCachedAccount != Constants.ANON_USER) {
                     userManager.get().setCurrentUser(Constants.ANON_USER, null)
-                    userManager.get().listener.onCurrentAccountRemoved()
+                    userManager.get().listener?.onCurrentAccountRemoved()
                 }
             }
         }, null, true)
