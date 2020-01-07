@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.di
 
 import android.content.SharedPreferences
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment
 import com.ducktapedapps.updoot.ui.LoginActivity
 import com.ducktapedapps.updoot.ui.MainActivity
@@ -18,8 +17,6 @@ import javax.inject.Singleton
 @Component(modules = [NetworkModule::class, ApiModule::class, ApplicationModule::class])
 interface UpdootComponent {
     //Injectors
-    fun inject(updootApp: UpdootApplication)
-
     fun inject(loginActivity: LoginActivity)
     fun inject(subredditFragment: SubredditFragment)
     fun inject(commentsFragment: CommentsFragment)
