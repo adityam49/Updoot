@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -33,6 +34,19 @@ class SubmissionsAdapter(
         super.submitList(updatedList)
     }
 
+    override fun onBindViewHolder(holder: SubmissionHolder, position: Int, payloads: MutableList<Any>) {
+        super.onBindViewHolder(holder, position, payloads)
+        if (payloads.isNotEmpty()) {
+            if (payloads.contains(PartialChanges.VOTE_CHANGE)) {
+                setVotes(holder.binding.scoreTv, getItem(position).ups, getItem(position).likes)
+            }
+            if (payloads.contains(PartialChanges.SAVE_STATE_CHANGE)) {
+                //TODO : add saved state ui indication
+                Log.i("submissionsAdapter", "save state change ")
+            }
+        }
+    }
+
     override fun onBindViewHolder(holder: SubmissionHolder, position: Int) {
         holder.binding.linkdata = getItem(position)
         holder.binding.itemIndex = position
@@ -48,11 +62,35 @@ class SubmissionsAdapter(
         }
 
         override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
+            val voteChanged = ((oldItem.likes == null && newItem.likes == null)
+                    || (oldItem.likes != null && newItem.likes != null && oldItem.likes == newItem.likes))
             return if (oldItem.selftext != null) {
                 (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
-                        && oldItem.ups == newItem.ups)
+                        && voteChanged)
             } else
-                oldItem.ups == newItem.ups
+                voteChanged
         }
+
+        override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? {
+            val partialChanges: MutableList<PartialChanges> = mutableListOf()
+            //checking for vote change
+            if ((oldItem.likes == null && newItem.likes != null)
+                    || (oldItem.likes != null && newItem.likes == null)
+                    || (oldItem.likes != newItem.likes)) {
+                partialChanges += PartialChanges.VOTE_CHANGE
+            }
+
+            //checking for submission save state change
+//            if (oldItem.saved != newItem.saved) {
+//                partialChanges += PartialChanges.SAVE_STATE_CHANGE
+//            }
+            Log.i("submissionsAdapter", "changes found : ${partialChanges.size}")
+            return partialChanges
+        }
+    }
+
+    enum class PartialChanges {
+        VOTE_CHANGE,
+        SAVE_STATE_CHANGE
     }
 }
