@@ -52,24 +52,6 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
             }
 
             bottomNavigationView.setupWithNavController(navController)
-//            NavigationUI.setupWithNavController(bottomNavigationView, navController)
-//            bottomNavigationView.setOnNavigationItemSelectedListener { menuItem: MenuItem ->
-//                when (menuItem.itemId) {
-//                    R.id.home -> {
-//                        navController.navigate(R.id.SubredditDestination)
-//                        return@setOnNavigationItemSelectedListener true
-//                    }
-//                    R.id.accounts -> {
-//                        navController.navigate(R.id.AccountsBottomSheetDialog)
-//                        return@setOnNavigationItemSelectedListener true
-//                    }
-//                    R.id.more -> {
-//                        navController.navigate(R.id.settingsFragment)
-//                        return@setOnNavigationItemSelectedListener true
-//                    }
-//                    else -> return@setOnNavigationItemSelectedListener false
-//                }
-//            }
             userManager.attachListener(this)
             viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
         }

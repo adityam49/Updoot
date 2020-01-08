@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -28,7 +27,6 @@ class CommentsFragment : Fragment() {
     private lateinit var binding: FragmentCommentsBinding
     private lateinit var viewModel: CommentsVM
     private lateinit var adapter: CommentsAdapter
-    private lateinit var navController: NavController
     private val args: CommentsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +35,6 @@ class CommentsFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        navController = findNavController()
         binding = FragmentCommentsBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
@@ -93,7 +90,7 @@ class CommentsFragment : Fragment() {
 
         fun onImageClick(data: LinkData) {
 
-            navController.navigate(
+            findNavController().navigate(
                     MediaPreviewFragmentDirections.actionGlobalMediaPreviewFragment(
                             data.preview!!.images[0].source.url
                     )

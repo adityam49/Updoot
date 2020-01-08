@@ -33,20 +33,18 @@ class ExploreRepo(application: Application) {
             try {
                 _isLoading.postValue(true)
                 val redditAPI = reddit.authenticatedAPI()
-                redditAPI?.let { api ->
-                    try {
-                        val results = api.search(query = query)
-                        if (results.data is ListingData) {
-                            val resultList: MutableList<Subreddit> = mutableListOf()
-                            val fetchedSubredditList = results.data.children
-                            for (subreddit: Thing in fetchedSubredditList) {
-                                if (subreddit.data is Subreddit) resultList += subreddit.data
-                            }
-                            _results.postValue(resultList)
-                        } else throw Exception("Unexpected Json response")
-                    } catch (ex: Exception) {
-                        Log.e("ExploreRepo", "Unable to fetch search json ", ex)
-                    }
+                try {
+                    val results = redditAPI.search(query)
+                    if (results.data is ListingData) {
+                        val resultList: MutableList<Subreddit> = mutableListOf()
+                        val fetchedSubredditList = results.data.children
+                        for (subreddit: Thing in fetchedSubredditList) {
+                            if (subreddit.data is Subreddit) resultList += subreddit.data
+                        }
+                        _results.postValue(resultList)
+                    } else throw Exception("Unexpected Json response")
+                } catch (ex: Exception) {
+                    Log.e("ExploreRepo", "Unable to fetch search json ", ex)
                 }
             } catch (ex: Exception) {
                 Log.e("ExploreRepo", "unable to authenticate api : ", ex)

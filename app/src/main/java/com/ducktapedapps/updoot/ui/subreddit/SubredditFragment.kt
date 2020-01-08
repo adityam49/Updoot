@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -31,22 +30,23 @@ class SubredditFragment : Fragment() {
     lateinit var appContext: Application
 
     private lateinit var submissionsVM: SubmissionsVM
-    private lateinit var navController: NavController
     private val args: SubredditFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
+        submissionsVM = ViewModelProvider(this@SubredditFragment,
+                SubmissionsVMFactory(appContext, args.rSubreddit ?: "")
+        ).get(SubmissionsVM::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        navController = findNavController()
         val binding = FragmentSubredditBinding.inflate(inflater, container, false)
                 .apply { lifecycleOwner = viewLifecycleOwner }
 
         val adapter = SubmissionsAdapter(ClickHandler())
 
-        setUpViewModel(binding, adapter)
+        setUpVMWithViews(binding, adapter)
         setUpRecyclerView(binding, adapter)
         return binding.root
     }
@@ -55,9 +55,11 @@ class SubredditFragment : Fragment() {
         val recyclerView = binding.recyclerView
         val linearLayoutManager = LinearLayoutManager(this@SubredditFragment.context)
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = linearLayoutManager
-        recyclerView.itemAnimator = CustomItemAnimator()
+        recyclerView.apply {
+            this.adapter = adapter
+            layoutManager = linearLayoutManager
+            itemAnimator = CustomItemAnimator()
+        }
 
         ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
             override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
@@ -70,7 +72,7 @@ class SubredditFragment : Fragment() {
                 val data = adapter.currentList[adapterPosition]
                 if (submissionsVM.subreddit != data.subredditName) {
                     val action = SubredditFragmentDirections.actionGoToSubreddit().setRSubreddit(data.subredditName)
-                    navController.navigate(action)
+                    findNavController().navigate(action)
                 }
             }
 
@@ -87,11 +89,8 @@ class SubredditFragment : Fragment() {
         swipeRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
     }
 
-    private fun setUpViewModel(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
-        val subreddit = args.rSubreddit ?: ""
-        submissionsVM = ViewModelProvider(this@SubredditFragment, SubmissionsVMFactory(appContext, subreddit)).get(SubmissionsVM::class.java)
+    private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
         binding.submissionViewModel = submissionsVM
-
         activity?.let {
             val activityVM = ViewModelProvider(it).get(ActivityVM::class.java)
             activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
@@ -117,11 +116,11 @@ class SubredditFragment : Fragment() {
     inner class ClickHandler {
         fun onClick(linkData: LinkData) {
             val action = SubredditFragmentDirections.actionGoToComments(linkData)
-            navController.navigate(action)
+            findNavController().navigate(action)
         }
 
         fun handleImagePreview(data: LinkData) {
-            navController.navigate(
+            findNavController().navigate(
                     MediaPreviewFragmentDirections.actionGlobalMediaPreviewFragment(
                             data.preview!!.images[0].source.url
                     )

@@ -21,7 +21,7 @@ class SubmissionsVM(application: Application, val subreddit: String) : AndroidVi
 
     override fun loadPage(appendPage: Boolean) {
         viewModelScope.launch {
-            frontPageRepo.loadPage(subreddit, sorting, time,appendPage)
+            frontPageRepo.loadPage(subreddit, sorting, time, appendPage)
         }
     }
 
@@ -60,6 +60,4 @@ class SubmissionsVM(application: Application, val subreddit: String) : AndroidVi
             loadPage(false)
         }
     }
-
-
 }

@@ -1,24 +1,17 @@
 package com.ducktapedapps.updoot.utils.accountManagement
 
-import android.accounts.*
+import android.accounts.AbstractAccountAuthenticator
+import android.accounts.Account
+import android.accounts.AccountAuthenticatorResponse
+import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Log
-import com.ducktapedapps.updoot.api.AuthAPI
 import com.ducktapedapps.updoot.ui.LoginActivity
 import com.ducktapedapps.updoot.utils.Constants
-import okhttp3.Credentials
-import javax.inject.Inject
 
 class Authenticator internal constructor(private val mContext: Context) : AbstractAccountAuthenticator(mContext) {
-    @Inject
-    lateinit var authAPI: AuthAPI
-
-    override fun editProperties(response: AccountAuthenticatorResponse, accountType: String): Bundle {
-        throw UnsupportedOperationException()
-    }
+    override fun editProperties(response: AccountAuthenticatorResponse, accountType: String): Bundle = throw UnsupportedOperationException()
 
     override fun addAccount(response: AccountAuthenticatorResponse, accountType: String, authTokenType: String, requiredFeatures: Array<String>, options: Bundle): Bundle {
         val intent = Intent(mContext, LoginActivity::class.java)
@@ -28,9 +21,7 @@ class Authenticator internal constructor(private val mContext: Context) : Abstra
         return bundle
     }
 
-    override fun confirmCredentials(response: AccountAuthenticatorResponse, account: Account, options: Bundle): Bundle? {
-        return null
-    }
+    override fun confirmCredentials(response: AccountAuthenticatorResponse, account: Account, options: Bundle): Bundle? = null
 
     override fun getAuthToken(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle? = null
 
@@ -44,20 +35,12 @@ class Authenticator internal constructor(private val mContext: Context) : Abstra
         return super.getAccountRemovalAllowed(response, account)
     }
 
-    override fun getAuthTokenLabel(authTokenType: String): String {
-        throw UnsupportedOperationException()
-    }
+    override fun getAuthTokenLabel(authTokenType: String): String = throw UnsupportedOperationException()
 
-    override fun updateCredentials(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle {
-        throw UnsupportedOperationException()
-    }
 
-    override fun hasFeatures(response: AccountAuthenticatorResponse, account: Account, features: Array<String>): Bundle {
-        throw UnsupportedOperationException()
-    }
+    override fun updateCredentials(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle = throw UnsupportedOperationException()
 
-    companion object {
-        private const val TAG = "Authenticator"
-    }
+
+    override fun hasFeatures(response: AccountAuthenticatorResponse, account: Account, features: Array<String>): Bundle = throw UnsupportedOperationException()
 
 }
