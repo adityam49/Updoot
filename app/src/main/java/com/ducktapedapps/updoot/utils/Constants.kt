@@ -39,4 +39,6 @@ object Constants {
     const val ANON_USER = "Anonymous"
 
     const val DIFF_VOTE_KEY = "diff_vote_key"
+    const val SCREEN_TITLE_KEY = "screen_title_key"
 }
+

@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -49,12 +50,25 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
                         else binding.toolbar.title = (data.commentsCount / 1000).toString() + "k comments"
                     } else binding.toolbar.title = getString(R.string.Comments)
                 }
+
+                R.id.ExploreDestination -> binding.toolbar.title = getString(R.string.explore)
+
             }
 
             bottomNavigationView.setupWithNavController(navController)
             userManager.attachListener(this)
             viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(Constants.SCREEN_TITLE_KEY, this.supportActionBar?.title.toString())
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        this.supportActionBar?.title = savedInstanceState.getString(Constants.SCREEN_TITLE_KEY, getString(R.string.app_name))
     }
 
     //for bottomSheet Account switching
@@ -74,6 +88,7 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.i(this.javaClass.simpleName, "onDestroy")
         userManager.detachListener()
     }
 
