@@ -14,3 +14,4 @@
 .externalNativeBuild
 /app/build/output/apk/debug/app-dubug.apk
 /app/build/release/app-release.apk
+/app/release/
