@@ -26,7 +26,8 @@ data class LinkData(
         val post_hint: String?,
         val id: String,
         val url: String,
-        val isSelfTextExpanded: Boolean = false
+        val isSelfTextExpanded: Boolean = false,
+        val permalink: String
 ) : Parcelable {
 
     fun vote(direction: Int): LinkData {

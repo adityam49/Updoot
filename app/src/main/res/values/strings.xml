@@ -31,4 +31,6 @@
 
     <string name="Comments">Comments</string>
     <string name="childrenCommentCount">+%d</string>
+    <string name="submission_link">Copy Link</string>
+    <string name="save_offline">Save offline</string>
 </resources>

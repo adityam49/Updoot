@@ -19,10 +19,7 @@ import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
-import com.ducktapedapps.updoot.utils.CustomItemAnimator
-import com.ducktapedapps.updoot.utils.InfiniteScrollListener
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import com.ducktapedapps.updoot.utils.SwipeUtils
+import com.ducktapedapps.updoot.utils.*
 import javax.inject.Inject
 
 class SubredditFragment : Fragment() {
@@ -68,13 +65,12 @@ class SubredditFragment : Fragment() {
             override fun performSlightRightSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, 1)
 
 
-            override fun performLeftSwipeAction(adapterPosition: Int) {
-                val data = adapter.currentList[adapterPosition]
-                if (submissionsVM.subreddit != data.subredditName) {
-                    val action = SubredditFragmentDirections.actionGoToSubreddit().setRSubreddit(data.subredditName)
-                    findNavController().navigate(action)
-                }
-            }
+            override fun performLeftSwipeAction(adapterPosition: Int) =
+                    showMenuFor(args.rSubreddit,
+                            adapter.currentList[adapterPosition],
+                            this@SubredditFragment.requireContext(),
+                            recyclerView.findViewHolderForAdapterPosition(adapterPosition)?.itemView,
+                            findNavController())
 
             override fun performRightSwipeAction(adapterPosition: Int) {
                 submissionsVM.toggleSave(adapterPosition)

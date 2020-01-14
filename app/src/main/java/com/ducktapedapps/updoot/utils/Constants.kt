@@ -11,6 +11,7 @@ object Constants {
     const val client_id = BuildConfig.CLIENT_ID
     const val redirect_uri = BuildConfig.REDIRECT_URI
     const val API_BASE_URL = "https://oauth.reddit.com/"
+    const val BASE_URL = "https://www.reddit.com"
     const val TOKEN_ACCESS_URL = "https://www.reddit.com/api/v1/access_token"
     const val scopes = "identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread"
     const val userLess_grantType = "https://oauth.reddit.com/grants/installed_client"
