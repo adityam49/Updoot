@@ -1,7 +1,9 @@
 package com.ducktapedapps.updoot.api
 
 import com.ducktapedapps.updoot.model.Account
-import com.ducktapedapps.updoot.model.Thing
+import com.ducktapedapps.updoot.model.CommentListing
+import com.ducktapedapps.updoot.model.SearchListing
+import com.ducktapedapps.updoot.model.SubmissionListing
 import retrofit2.http.*
 
 interface RedditAPI {
@@ -14,7 +16,7 @@ interface RedditAPI {
             @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
             @Query("t") time: String?,
-            @Query("after") after: String?): Thing
+            @Query("after") after: String?): SubmissionListing
 
     @FormUrlEncoded
     @POST("/api/save")
@@ -32,7 +34,7 @@ interface RedditAPI {
     suspend fun getComments(
             @Path("subreddit") subreddit: String,
             @Path("id") submissions_id: String
-    ): Thing
+    ): CommentListing?
 
     @FormUrlEncoded
     @POST("/api/vote")
@@ -44,6 +46,6 @@ interface RedditAPI {
     @GET("/subreddits/search")
     suspend fun search(
             @Query("q") query: String
-    ): Thing
+    ): SearchListing?
 }
 

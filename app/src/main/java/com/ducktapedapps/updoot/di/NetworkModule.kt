@@ -1,14 +1,12 @@
 package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.BuildConfig
-import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.Thing
-import com.ducktapedapps.updoot.utils.CommentDeserializer
+import com.ducktapedapps.updoot.utils.CommentListingAdapter
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.ThingDeserializer
+import com.ducktapedapps.updoot.utils.SearchAdapter
+import com.ducktapedapps.updoot.utils.SubmissionListingAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
@@ -16,7 +14,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
@@ -44,22 +42,20 @@ class NetworkModule {
 
     @Reusable
     @Provides
-    fun provideGson(): Gson {
-        val gsonBuilder = GsonBuilder()
-                .registerTypeAdapter(Thing::class.java, ThingDeserializer())
-                .registerTypeAdapter(CommentData::class.java, CommentDeserializer())
-        return gsonBuilder.create()
-    }
-
+    fun provideMoshi(): Moshi = Moshi
+            .Builder()
+            .add(SubmissionListingAdapter())
+            .add(CommentListingAdapter())
+            .add(SearchAdapter())
+            .build()
 
     @Singleton
     @Provides
-    fun provideRetrofit(client: OkHttpClient, gson: Gson): Retrofit {
-        return Retrofit.Builder()
-                .baseUrl(Constants.API_BASE_URL)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(client)
-                .build()
-    }
+    fun provideRetrofit(client: OkHttpClient, moshi: Moshi) = Retrofit.Builder()
+            .baseUrl(Constants.API_BASE_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi).asLenient())
+            .client(client)
+            .build()
+
 }

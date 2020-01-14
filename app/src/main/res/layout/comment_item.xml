@@ -55,19 +55,17 @@
             app:commentDepth="@{commentData.depth}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:loadCommentsCount="@{commentData.loadMoreChildren.size()}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/childCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            app:childCommentCount="@{commentData.replies.size()}"
+            app:childCommentCount="@{commentData.replies.commentList.size() + commentData.replies.moreData.count}"
             app:isExpanded="@{commentData.repliesExpanded}"
             app:layout_constraintEnd_toStartOf="@+id/score_tv"
-            app:layout_constraintTop_toTopOf="parent"
-            app:loadMoreCommentCount="@{commentData.loadMoreChildren.size()}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

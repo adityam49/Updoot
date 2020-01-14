@@ -6,9 +6,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 @JsonClass(generateAdapter = true)
-data class Subreddit(
-        val display_name_prefixed: String,
-        val icon_img: String,
-        val subscribers: Long,
-        val public_description: String
+data class SubmissionListing(
+        val after: String?,
+        val submissions: List<LinkData>
 ) : Parcelable

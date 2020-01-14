@@ -1,31 +1,33 @@
 package com.ducktapedapps.updoot.model
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
+@JsonClass(generateAdapter = true)
 data class LinkData(
-        @field:SerializedName("selftext_html") val selftext: String?,
+        @Json(name = "selftext_html") val selftext: String?,
         val title: String,
         val archived: Boolean,
         val author: String,
         val locked: Boolean,
         val ups: Int,
         val likes: Boolean?,
-        @field:SerializedName("subreddit_name_prefixed") val subredditName: String,
+        @Json(name = "subreddit_name_prefixed") val subredditName: String,
         val name: String,
         val thumbnail: String,
         val saved: Boolean,
-        @field:SerializedName("created_utc") val created: Long,
-        @field:SerializedName("num_comments") val commentsCount: Int,
+        @Json(name = "created_utc") val created: Long,
+        @Json(name = "num_comments") val commentsCount: Int,
         val gildings: Gildings,
         val preview: Preview?,
         val post_hint: String?,
         val id: String,
         val url: String,
         val isSelfTextExpanded: Boolean = false
-) : Data, Parcelable {
+) : Parcelable {
 
     fun vote(direction: Int): LinkData {
         var updatedLikes: Boolean? = this.likes

@@ -1,8 +1,9 @@
 package com.ducktapedapps.updoot.model
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.JsonClass
 import kotlinx.android.parcel.Parcelize
 
+@JsonClass(generateAdapter = true)
 @Parcelize
-data class Account(@field:SerializedName("name") val name: String) : Parcelable
+data class Account(val name: String) : Parcelable

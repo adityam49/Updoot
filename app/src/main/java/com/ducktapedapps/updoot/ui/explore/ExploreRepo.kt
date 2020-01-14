@@ -5,9 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.model.ListingData
 import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.model.Thing
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,15 +32,10 @@ class ExploreRepo(application: Application) {
                 _isLoading.postValue(true)
                 val redditAPI = reddit.authenticatedAPI()
                 try {
-                    val results = redditAPI.search(query)
-                    if (results.data is ListingData) {
-                        val resultList: MutableList<Subreddit> = mutableListOf()
-                        val fetchedSubredditList = results.data.children
-                        for (subreddit: Thing in fetchedSubredditList) {
-                            if (subreddit.data is Subreddit) resultList += subreddit.data
-                        }
-                        _results.postValue(resultList)
-                    } else throw Exception("Unexpected Json response")
+                    val results = redditAPI.search(query = query)
+                    if (results != null) {
+                        _results.postValue(results.children)
+                    } else Log.e(this.javaClass.simpleName, "search results from retrofit are null")
                 } catch (ex: Exception) {
                     Log.e("ExploreRepo", "Unable to fetch search json ", ex)
                 }

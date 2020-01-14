@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.api.RedditAPI
 import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.ListingData
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,23 +33,15 @@ class CommentsRepo(application: Application) {
         withContext(Dispatchers.IO) {
             try {
                 val redditAPI = reddit.authenticatedAPI()
-                if (redditAPI != null) {
-                    try {
-                        val response = redditAPI.getComments(subreddit, submission_id)
-                        if (response.data is ListingData) {
-                            val list = mutableListOf<CommentData>()
-                            if (response.data.children.isNotEmpty()) {
-                                for (child in response.data.children) list.add(child.data as CommentData)
-                            } else {
-                            }
-                            _allComments.postValue(list)
-                        } else throw Exception("unexpected json response!")
-                    } catch (ex: Exception) {
-                        Log.e("commentsRepo", "couldn't fetch comments ", ex)
-                    }
-
-                } else throw Exception("couldn't get reddit api")
-
+                try {
+                    val response = redditAPI.getComments(subreddit, submission_id)
+                    if (response != null)
+                        _allComments.postValue(response.commentList)
+                    else
+                        Log.e(this.javaClass.simpleName, "response from retrofit is null")
+                } catch (ex: Exception) {
+                    Log.e("commentsRepo", "couldn't fetch comments ", ex)
+                }
             } catch (ex: Exception) {
                 Log.e("commentsRepo", "couldn't get reddit api ", ex)
             } finally {
@@ -65,12 +56,13 @@ class CommentsRepo(application: Application) {
                 val list = it.toMutableList()
                 val parentComment = list[index]
 
-                if (parentComment.replies.isNotEmpty()) {
+                if (!parentComment.replies?.commentList.isNullOrEmpty()) {
                     list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
                     if (!parentComment.repliesExpanded) {
-                        list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies))
+                        list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies?.commentList
+                                ?: listOf()))
                     } else {
-                        if (parentComment.replies.isNotEmpty()) {
+                        if (!parentComment.replies?.commentList.isNullOrEmpty()) {
                             val commentsToBeRemoved = mutableListOf<CommentData>()
                             for (i in index + 1 until list.size) {
                                 if (list[i].depth > parentComment.depth) commentsToBeRemoved.add(list[i])
@@ -90,7 +82,8 @@ class CommentsRepo(application: Application) {
         val updateList = mutableListOf<CommentData>()
         for (comment in list) {
             updateList.add(comment.copy(repliesExpanded = !comment.repliesExpanded))
-            if (comment.replies.isNotEmpty()) updateList.addAll(recursiveChildrenExpansion(comment.replies))
+            if (!comment.replies?.commentList.isNullOrEmpty()) updateList.addAll(recursiveChildrenExpansion(comment.replies?.commentList
+                    ?: listOf()))
         }
         return updateList
     }

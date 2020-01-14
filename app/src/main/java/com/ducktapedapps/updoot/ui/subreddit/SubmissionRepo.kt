@@ -6,8 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.model.ListingData
-import com.ducktapedapps.updoot.model.Thing
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
@@ -42,23 +40,22 @@ class SubmissionRepo(application: Application) {
             try {
                 val redditAPI = reddit.authenticatedAPI()
                 try {
-                    val thing: Thing = redditAPI.getSubreddit(subreddit, "top", time, after)
+                    val fetchedSubmissions = redditAPI.getSubreddit(subreddit, "top", time, after)
+
                     val submissions = if (appendPage) _allSubmissions.value
                             ?: mutableListOf() else mutableListOf()
                     withContext(Dispatchers.Default) {
-                        if (thing.data is ListingData) {
-                            for (child in thing.data.children) submissions.add(child.data as LinkData)
-                            after = thing.data.after
-                            _allSubmissions.postValue(submissions)
-                        } else throw Exception("unsupported json response")
+                        after = fetchedSubmissions.after
+                        submissions += fetchedSubmissions.submissions
+                        _allSubmissions.postValue(submissions)
                     }
                 } catch (e: Exception) {
                     Log.e(this.javaClass.simpleName, "unable to fetch json ", e)
-                    _toastMessage.postValue(SingleLiveEvent("Something went wrong! Try again after some time"))
+                    _toastMessage.postValue(SingleLiveEvent("Something went wrong! try again later some time"))
                 }
             } catch (ex: Exception) {
                 Log.e(this.javaClass.simpleName, "unable to get reddit api")
-                _toastMessage.postValue(SingleLiveEvent("Something went wrong! Try again after some time"))
+                _toastMessage.postValue(SingleLiveEvent("Something went wrong! try again later some later"))
 
             } finally {
                 _isLoading.postValue(false)

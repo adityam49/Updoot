@@ -1,31 +1,25 @@
 package com.ducktapedapps.updoot.model
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.JsonClass
 import kotlinx.android.parcel.Parcelize
 
+@JsonClass(generateAdapter = true)
 @Parcelize
 data class CommentData(
-        //common for normal comments and load more comments
         val id: String,
         val depth: Int,
         val parent_id: String,
-
         val author: String,
         val name: String,
         var body: String,
         var ups: Int,
         val likes: Boolean?,
-        val replies: List<CommentData>,
+        val replies: CommentListing?,
         val gildings: Gildings,
         val repliesExpanded: Boolean = false,
-        val is_submitter: Boolean,
-
-        //only for load more comments
-        val count: Int?,
-        @SerializedName("children")
-        val loadMoreChildren: List<String>?
-) : Data, Parcelable {
+        val is_submitter: Boolean
+) : Parcelable {
 
     fun vote(direction: Int): CommentData {
         var updatedLikes: Boolean? = this.likes

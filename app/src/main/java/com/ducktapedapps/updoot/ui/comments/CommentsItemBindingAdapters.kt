@@ -16,10 +16,10 @@ import com.ducktapedapps.updoot.model.Preview
 import com.ducktapedapps.updoot.utils.MarkdownUtils
 import me.kaelaela.opengraphview.OpenGraphView
 
-@BindingAdapter("bind:childCommentCount", "bind:loadMoreCommentCount", "bind:isExpanded")
+@BindingAdapter("bind:childCommentCount", "bind:isExpanded")
 
-fun setChildCount(textView: TextView, childCount: Int, loadMoreCommentCount: Int, isExpanded: Boolean) {
-    if (loadMoreCommentCount != 0 || childCount == 0) textView.visibility = View.GONE
+fun setChildCount(textView: TextView, childCount: Int, isExpanded: Boolean) {
+    if (childCount == 0) textView.visibility = View.GONE
     else {
         if (!isExpanded) {
             textView.visibility = View.VISIBLE
@@ -30,12 +30,11 @@ fun setChildCount(textView: TextView, childCount: Int, loadMoreCommentCount: Int
     }
 }
 
-@BindingAdapter("bind:commentDepth", "bind:loadCommentsCount")
-fun setCommentDepthMargin(view: View, depth: Int, loadCommentsCount: Int) {
+@BindingAdapter("bind:commentDepth")
+fun setCommentDepthMargin(view: View, depth: Int) {
     if (depth != 0) {
         val newLayoutParams = view.layoutParams as ConstraintLayout.LayoutParams
         newLayoutParams.leftMargin = 8 + depth * 16
-        if (loadCommentsCount != 0) view.visibility = View.INVISIBLE
         view.layoutParams = newLayoutParams
         view.visibility = View.VISIBLE
     } else {
