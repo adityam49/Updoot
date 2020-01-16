@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.databinding.LinearSubmissionsItemBinding
+import com.ducktapedapps.updoot.databinding.LargeSubmissionsItemBinding
 import com.ducktapedapps.updoot.model.LinkData
 
 class SubmissionsAdapter(
@@ -19,7 +19,7 @@ class SubmissionsAdapter(
         return SubmissionHolder(
                 DataBindingUtil.inflate(
                         LayoutInflater.from(parent.context),
-                        R.layout.linear_submissions_item,
+                        R.layout.large_submissions_item,
                         parent,
                         false
                 )
@@ -54,7 +54,7 @@ class SubmissionsAdapter(
         holder.binding.executePendingBindings()
     }
 
-    class SubmissionHolder(val binding: LinearSubmissionsItemBinding) : RecyclerView.ViewHolder(binding.root)
+    class SubmissionHolder(val binding: LargeSubmissionsItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     private object CALLBACK : DiffUtil.ItemCallback<LinkData>() {
         override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {

@@ -18,7 +18,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                app:layout_scrollFlags="scroll|enterAlways"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
                 tools:title="@string/app_name" />
 
 
@@ -41,9 +41,9 @@
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="120dp"
+            android:layout_marginBottom="?attr/actionBarSize"
             app:defaultNavHost="true"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             app:navGraph="@navigation/nav_graph" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

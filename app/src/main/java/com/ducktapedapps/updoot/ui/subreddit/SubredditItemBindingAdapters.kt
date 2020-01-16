@@ -11,13 +11,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.model.Preview
 import com.ducktapedapps.updoot.utils.MarkdownUtils
 
 @BindingAdapter("metadata")
 
 fun setMetadata(textView: TextView, data: LinkData) {
-    val metadata = StringBuilder().append(data.subredditName)
-    metadata.append(" \u2022 ")
+    val metadata = StringBuilder()
     if (data.commentsCount > 999) {
         metadata.append(data.commentsCount / 1000).append("K replies")
     } else {
@@ -74,6 +74,19 @@ fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?) {
     }
 }
 
+@BindingAdapter("imageBind")
+fun setPreview(view: ImageView, image: Preview?) {
+    if (image != null) {
+        val lowResImage = image.images[0].source
+        Glide.with(view.context)
+                .load(lowResImage.url)
+                .override(view.width, (lowResImage.height * view.width) / lowResImage.width)
+                .placeholder(R.color.DT_primaryColor)
+                .fitCenter()
+                .into(view)
+        view.visibility = View.VISIBLE
+    } else view.visibility = View.GONE
+}
 
 @BindingAdapter("submissionMetadata")
 fun setSubmissionMetadata(textView: TextView, linkData: LinkData) {
