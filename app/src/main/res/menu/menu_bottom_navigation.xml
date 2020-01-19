@@ -22,7 +22,7 @@
         android:id="@+id/sort"
         android:enabled="true"
         android:icon="@drawable/ic_sort_black_24dp"
-        android:title="@string/sort" />
+        android:title="@string/sorting_mode" />
 
     <item
         android:id="@id/SettingsDestination"

@@ -3,22 +3,25 @@ package com.ducktapedapps.updoot.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment.BottomSheetListener
+import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVM
 import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.utils.QuickActionSheetBehavior
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeListener {
@@ -26,39 +29,59 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
     @Inject
     lateinit var userManager: UserManager
 
+    private lateinit var qasSubredditVM: QASSubredditVM
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as UpdootApplication).updootComponent.inject(this)
 
+        setUpViews()
+
+        setUpViewModels()
+
+        userManager.attachListener(this)
+    }
+
+    private fun setUpViews() {
         val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
-        val bottomNavigationView = binding.bottomNavigationBar
-
         setSupportActionBar(binding.toolbar)
 
+        val bottomNavigationView = binding.bottomNavigationBar
+        bottomNavigationView.setupWithNavController(navController)
+
+        val behavior: QuickActionSheetBehavior = BottomSheetBehavior.from(binding.qasContainer) as QuickActionSheetBehavior
+        val qasController: NavController = findNavController(R.id.qas_fragment)
+
         navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, arguments: Bundle? ->
-            when (destination.id) {
+            behavior.hideQAS()
+            binding.toolbar.title = when (destination.id) {
                 R.id.SubredditDestination -> {
-                    val title = arguments?.getString("r/subreddit")
-                    binding.toolbar.title = title ?: getString(R.string.app_name)
+                    qasController.navigate(R.id.QASSubredditDestination)
+                    arguments?.getString("r/subreddit") ?: getString(R.string.app_name)
                 }
 
                 R.id.CommentsDestination -> {
                     val data = arguments?.getParcelable<LinkData>("SubmissionData")
                     if (data != null && data.commentsCount != 0) {
-                        if (data.commentsCount <= 999) binding.toolbar.title = data.commentsCount.toString() + " comments"
-                        else binding.toolbar.title = (data.commentsCount / 1000).toString() + "k comments"
-                    } else binding.toolbar.title = getString(R.string.Comments)
+                        if (data.commentsCount <= 999) data.commentsCount.toString() + " comments"
+                        else (data.commentsCount / 1000).toString() + "k comments"
+                    } else getString(R.string.Comments)
                 }
 
-                R.id.ExploreDestination -> binding.toolbar.title = getString(R.string.explore)
+                R.id.ExploreDestination -> getString(R.string.explore)
 
+                R.id.SettingsDestination -> getString(R.string.settings)
+
+                else -> getString(R.string.app_name)
             }
-
-            bottomNavigationView.setupWithNavController(navController)
-            userManager.attachListener(this)
-            viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
         }
+
+
+    }
+
+    private fun setUpViewModels() {
+        viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
+        qasSubredditVM = ViewModelProvider(this).get(QASSubredditVM::class.java)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -82,19 +105,16 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
         }
     }
 
-    override fun onCurrentAccountRemoved() {
-        reloadContent()
-    }
+    override fun onCurrentAccountRemoved() = reloadContent()
+
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i(this.javaClass.simpleName, "onDestroy")
         userManager.detachListener()
     }
 
-    private fun reloadContent() {
-        viewModel.setCurrentAccount(userManager.currentUser?.name)
-    }
+    private fun reloadContent() = viewModel.setCurrentAccount(userManager.currentUser?.name)
+
 
     //Account switching after new login
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

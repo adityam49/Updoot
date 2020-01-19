@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,14 +34,13 @@ class SubmissionRepo(application: Application) {
     private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
     val toastMessage: LiveData<SingleLiveEvent<String?>> = _toastMessage
 
-    suspend fun loadPage(subreddit: String?, sort: String?, time: String?, appendPage: Boolean) {
+    suspend fun loadPage(subreddit: String?, sort: Sorting, time: String?, appendPage: Boolean) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
-
             try {
                 val redditAPI = reddit.authenticatedAPI()
                 try {
-                    val fetchedSubmissions = redditAPI.getSubreddit(subreddit, "top", time, after)
+                    val fetchedSubmissions = redditAPI.getSubreddit(subreddit, sort.toString(), time, after)
 
                     val submissions = if (appendPage) _allSubmissions.value
                             ?: mutableListOf() else mutableListOf()

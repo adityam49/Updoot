@@ -7,13 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.Sorting
 import kotlinx.coroutines.launch
 
 class SubmissionsVM(application: Application, val subreddit: String) : AndroidViewModel(application), InfiniteScrollVM {
     private val frontPageRepo: SubmissionRepo = SubmissionRepo(application)
     override val isLoading = frontPageRepo.isLoading
 
-    private var sorting: String?
+    private var sorting: Sorting
     private var time: String?
 
     val allSubmissions: LiveData<MutableList<LinkData>> = frontPageRepo.allSubmissions
@@ -41,8 +42,9 @@ class SubmissionsVM(application: Application, val subreddit: String) : AndroidVi
         }
     }
 
-    fun reload(sorting: String?, time: String?) {
-        this.sorting = sorting
+    fun reload(sorting: Sorting?, time: String?) {
+        if (this.sorting == sorting) return
+        this.sorting = sorting ?: Sorting.HOT
         this.time = time
         frontPageRepo.after = null
         viewModelScope.launch { loadPage(false) }
@@ -55,7 +57,7 @@ class SubmissionsVM(application: Application, val subreddit: String) : AndroidVi
 
     init {
         time = null
-        sorting = null
+        sorting = Sorting.HOT
         viewModelScope.launch {
             loadPage(false)
         }

@@ -36,6 +36,40 @@
             app:itemTextColor="@color/nav_item_selector"
             app:menu="@menu/menu_bottom_navigation" />
 
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/qas_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSecondary"
+            android:elevation="4dp"
+            app:behavior_hideable="true"
+            app:behavior_peekHeight="16dp"
+            app:layout_behavior=".utils.QuickActionSheetBehavior">
+
+            <LinearLayout
+                android:id="@+id/qas_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/handle_image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorPrimaryDark"
+                    android:src="@drawable/ic_expand_more_black_14dp" />
+
+                <fragment
+                    android:id="@+id/qas_fragment"
+                    android:name="androidx.navigation.fragment.NavHostFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:defaultNavHost="true"
+                    app:navGraph="@navigation/qas_nav_graph" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
         <fragment
             android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"

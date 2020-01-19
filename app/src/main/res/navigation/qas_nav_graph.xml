@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/qas_nav_graph"
+    app:startDestination="@id/QASSubredditDestination">
+
+
+    <fragment
+        android:id="@+id/QASSubredditDestination"
+        android:name="com.ducktapedapps.updoot.ui.subreddit.QASSubredditFragment"
+        android:label="QASSubredditFragment"
+        tools:layout="@layout/qas_subreddit_contents" />
+    <action
+        android:id="@+id/action_global_QASSubredditFragment"
+        app:destination="@id/QASSubredditDestination" />
+</navigation>

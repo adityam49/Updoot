@@ -95,6 +95,10 @@ class SubredditFragment : Fragment() {
                     Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
                 }
             })
+            val qasVM = ViewModelProvider(it).get(QASSubredditVM::class.java)
+            qasVM.sorting.observe(viewLifecycleOwner, Observer { newSorting ->
+                submissionsVM.reload(newSorting, null)
+            })
         }
 
         submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })

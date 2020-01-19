@@ -80,7 +80,7 @@ fun setPreview(view: ImageView, image: Preview?) {
         val lowResImage = image.images[0].source
         Glide.with(view.context)
                 .load(lowResImage.url)
-                .override(view.width, (lowResImage.height * view.width) / lowResImage.width)
+                .override(view.width, view.width * (lowResImage.height / lowResImage.width))
                 .placeholder(R.color.DT_primaryColor)
                 .fitCenter()
                 .into(view)

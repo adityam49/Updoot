@@ -25,7 +25,7 @@
     <string name="thousandSuffix">%dk</string>
     <string name="thumbnailDescription">Submission Thumbnail</string>
     <string name="search">Search</string>
-    <string name="sort">Sort</string>
+    <string name="sorting_mode">Sorting Mode</string>
     <string name="viewType">View Type</string>
     <string name="settings">Settings</string>
 
