@@ -4,22 +4,21 @@ import android.os.Parcelable
 import com.squareup.moshi.JsonClass
 import kotlinx.android.parcel.Parcelize
 
-@JsonClass(generateAdapter = true)
 @Parcelize
 data class CommentData(
-        val id: String,
-        val depth: Int,
-        val parent_id: String,
+        val _id: String,
+        val _depth: Int,
+        val _parent_id: String,
+        val _name: String,
         val author: String,
-        val name: String,
         var body: String,
         var ups: Int,
         val likes: Boolean?,
-        val replies: CommentListing?,
+        val replies: List<BaseComment>,
         val gildings: Gildings,
         val repliesExpanded: Boolean = false,
         val is_submitter: Boolean
-) : Parcelable {
+) : Parcelable, BaseComment(_id, _depth, _name, _parent_id) {
 
     fun vote(direction: Int): CommentData {
         var updatedLikes: Boolean? = this.likes

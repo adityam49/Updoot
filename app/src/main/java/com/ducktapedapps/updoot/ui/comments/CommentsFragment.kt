@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
+import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
@@ -54,7 +55,7 @@ class CommentsFragment : Fragment() {
 
         viewModel.allComments.observe(
                 this@CommentsFragment,
-                Observer<List<CommentData>?> { commentDataList: List<CommentData>? ->
+                Observer<List<BaseComment>?> { commentDataList: List<BaseComment>? ->
                     adapter.submitList(commentDataList)
                 }
         )

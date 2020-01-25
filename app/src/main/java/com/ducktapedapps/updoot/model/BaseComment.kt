@@ -6,4 +6,9 @@ import kotlinx.android.parcel.Parcelize
 
 @JsonClass(generateAdapter = true)
 @Parcelize
-class CommentListing(val comments: List<BaseComment>) : Parcelable
+open class BaseComment(
+        val id: String,
+        val depth: Int,
+        val name: String,
+        val parent_id: String
+) : Parcelable

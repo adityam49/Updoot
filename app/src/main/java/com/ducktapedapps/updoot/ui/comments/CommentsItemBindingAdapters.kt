@@ -95,3 +95,12 @@ fun setMarkdownSelftext(selftextTextView: TextView, selfText: String?) {
         selftextTextView.visibility = View.GONE
     }
 }
+
+@BindingAdapter("moreCommentCount")
+fun setMoreCommentCount(view: TextView, count: Int) {
+    val stringBuilder = StringBuilder()
+            .append("Load more ")
+            .append(count)
+            .append(if (count == 1) " comment" else " comments")
+    view.text = stringBuilder.toString()
+}
