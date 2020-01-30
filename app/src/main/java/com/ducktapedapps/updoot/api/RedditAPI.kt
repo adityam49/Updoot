@@ -1,9 +1,6 @@
 package com.ducktapedapps.updoot.api
 
-import com.ducktapedapps.updoot.model.Account
-import com.ducktapedapps.updoot.model.CommentListing
-import com.ducktapedapps.updoot.model.SearchListing
-import com.ducktapedapps.updoot.model.SubmissionListing
+import com.ducktapedapps.updoot.model.*
 import retrofit2.http.*
 
 interface RedditAPI {
@@ -41,7 +38,7 @@ interface RedditAPI {
             @Query("children") children: String,
             @Query("link_id") link_id: String,
             @Query("api_type") type: String = "json"
-    ): String
+    ): MoreComments
 
     @FormUrlEncoded
     @POST("/api/vote")

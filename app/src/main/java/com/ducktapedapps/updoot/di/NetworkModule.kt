@@ -1,10 +1,7 @@
 package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.BuildConfig
-import com.ducktapedapps.updoot.utils.CommentListingAdapter
-import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.SearchAdapter
-import com.ducktapedapps.updoot.utils.SubmissionListingAdapter
+import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -45,6 +42,7 @@ class NetworkModule {
     fun provideMoshi(): Moshi = Moshi
             .Builder()
             .add(SubmissionListingAdapter())
+            .add(MoreCommentsListAdapter())
             .add(CommentListingAdapter())
             .add(SearchAdapter())
             .build()

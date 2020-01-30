@@ -84,14 +84,23 @@ class CommentsRepo(application: Application) {
             }
     }
 
-    suspend fun loadMoreChildren(link_id: String, children_ids: List<String>) {
+    private suspend fun loadMoreChildren(link_id: String, children_ids: List<String>) {
         withContext(Dispatchers.IO) {
-            val api = reddit.authenticatedAPI()
-            val result = api.getMoreChildren(
-                    children_ids.joinToString(","),
-                    "t3_$link_id"
-            )
+            _isLoading.postValue(true)
+            try {
+                val api = reddit.authenticatedAPI()
+                val result = api.getMoreChildren(
+                        children_ids.joinToString(","),
+                        "t3_$link_id"
+                )
+                //TODO : merge loaded moreComments to parent comment tree
+            } catch (ex: Exception) {
+                Log.e(this.javaClass.simpleName, "unable to load more comments", ex)
+            } finally {
+                _isLoading.postValue(false)
+            }
         }
+
     }
 
     private fun recursiveChildrenExpansion(list: List<BaseComment>): List<BaseComment> {
