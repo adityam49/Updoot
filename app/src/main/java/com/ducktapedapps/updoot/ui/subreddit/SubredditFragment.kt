@@ -99,6 +99,12 @@ class SubredditFragment : Fragment() {
             qasVM.sorting.observe(viewLifecycleOwner, Observer { newSorting ->
                 submissionsVM.reload(newSorting, null)
             })
+
+            qasVM.viewType.observe(viewLifecycleOwner, Observer { ui ->
+                adapter.itemUi = ui
+                binding.recyclerView.adapter = null
+                binding.recyclerView.adapter = adapter
+            })
         }
 
         submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })

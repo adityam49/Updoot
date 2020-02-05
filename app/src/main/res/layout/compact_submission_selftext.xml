@@ -16,7 +16,7 @@
             android:layout_height="0dp"
             android:onClick="@{()->clickHandler.handleExpansion(itemIndex)}"
             android:visibility="@{linkdata.selftext == null ? View.GONE : View.VISIBLE}"
-            app:layout_constraintBottom_toTopOf="@+id/barrier"
+            app:layout_constraintBottom_toTopOf="@+id/self_text_cardView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/title_tv"
             app:layout_constraintTop_toTopOf="parent">
@@ -32,8 +32,7 @@
         </FrameLayout>
 
         <ImageView
-            android:onClick="@{()->clickHandler.handleImagePreview(linkdata)}"
-            android:id="@+id/mediaPreview"
+            android:id="@+id/self_text_thumbnail"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
@@ -41,7 +40,7 @@
             android:layout_marginBottom="8dp"
             android:contentDescription="@string/thumbnailDescription"
             android:scaleType="fitStart"
-            app:layout_constraintBottom_toTopOf="@id/barrier"
+            app:layout_constraintBottom_toTopOf="@id/self_text_cardView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
@@ -52,11 +51,11 @@
             android:id="@+id/gildingView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@id/metadata"
-            app:layout_constraintStart_toStartOf="@+id/metadata"
-            app:layout_constraintTop_toBottomOf="@+id/title_tv"
+            app:layout_constraintStart_toEndOf="@id/metadata"
+            app:layout_constraintTop_toTopOf="@id/metadata"
             tools:visibility="visible">
 
             <TextView
@@ -114,27 +113,26 @@
             android:text="@{linkdata.title}"
             android:textColor="?android:textColorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/score_tv"
-            app:layout_constraintStart_toEndOf="@+id/mediaPreview"
-            app:layout_constraintTop_toTopOf="@+id/mediaPreview"
+            app:layout_constraintStart_toEndOf="@+id/self_text_thumbnail"
+            app:layout_constraintTop_toTopOf="@+id/self_text_thumbnail"
             tools:text="This is an example of a long title " />
 
         <TextView
             android:id="@+id/metadata"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@id/barrier"
-            app:layout_constraintEnd_toStartOf="@+id/revel_more_view"
+            app:layout_constraintBottom_toTopOf="@id/self_text_cardView"
             app:layout_constraintStart_toStartOf="@+id/title_tv"
-            app:layout_constraintTop_toBottomOf="@+id/gildingView"
+            app:layout_constraintTop_toBottomOf="@id/subreddit_name"
             app:metadata="@{linkdata}"
-            tools:text="r/changeMyView \u2022 999 replies \u2022 19 hours ago" />
+            tools:text="999 replies \u2022 19 hours ago" />
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/selftext_cardView"
+            android:id="@+id/self_text_cardView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -147,36 +145,39 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/barrier">
+            app:layout_constraintTop_toBottomOf="@+id/metadata">
 
             <TextView
                 android:id="@+id/selfText_tv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:autoLink="all"
+                android:ellipsize="end"
+                android:maxLines="5"
                 android:padding="16dp"
                 android:visibility="@{linkdata.selfTextExpanded ? View.VISIBLE:View.GONE}"
                 app:selfText="@{linkdata.selftext}"
                 app:selfTextVisibility="@{linkdata.selfTextExpanded}"
-                tools:text="On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain."
+                tools:text="@tools:sample/lorem/random"
                 tools:visibility="visible" />
         </androidx.cardview.widget.CardView>
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier"
+        <TextView
+            android:id="@+id/subreddit_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toTopOf="@id/selftext_cardView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/metadata" />
+            android:text="@{linkdata.subredditName}"
+            app:layout_constraintStart_toStartOf="@+id/title_tv"
+            app:layout_constraintTop_toBottomOf="@+id/title_tv"
+            tools:text="@tools:sample/lorem" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <data>
 
         <import type="android.view.View" />
+
         <variable
             name="itemIndex"
             type="Integer" />

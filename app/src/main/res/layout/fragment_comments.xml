@@ -32,7 +32,7 @@
             </FrameLayout>
 
             <ImageView
-                android:id="@+id/mediaPreview"
+                android:id="@+id/self_text_thumbnail"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
@@ -60,10 +60,10 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/selftext_cardView"
+                app:layout_constraintBottom_toTopOf="@id/self_text_cardView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/mediaPreview"
+                app:layout_constraintTop_toBottomOf="@id/self_text_thumbnail"
                 tools:text="On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain." />
 
             <TextView
@@ -76,7 +76,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/selftext_cardView"
+                app:layout_constraintTop_toBottomOf="@id/self_text_cardView"
                 app:submissionMetadata="@{linkdata}"
                 tools:text="by u/dumbusername in r/somesubreddit\n34 upvotes \u2022 4 hrs ago \u2022 " />
 
@@ -134,7 +134,7 @@
                 app:layout_constraintTop_toBottomOf="@id/metadata" />
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/selftext_cardView"
+                android:id="@+id/self_text_cardView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"

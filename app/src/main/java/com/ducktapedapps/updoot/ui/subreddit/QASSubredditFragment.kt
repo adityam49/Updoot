@@ -26,6 +26,9 @@ class QASSubredditFragment : Fragment() {
             showMenuFor(requireContext(), it, qasSubredditVM)
         }
 
+        binding.viewModeButton.setOnClickListener {
+            qasSubredditVM.toggleUi()
+        }
         return binding.root
     }
 

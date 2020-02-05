@@ -30,11 +30,10 @@
             android:id="@+id/gildingView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mediaPreview"
+            app:layout_constraintTop_toTopOf="@+id/metadata"
             tools:visibility="visible">
 
             <TextView
@@ -68,19 +67,20 @@
                 tools:visibility="visible" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/mediaPreview"
+        <TextView
+            android:id="@+id/selfText_tv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:adjustViewBounds="true"
-            android:onClick="@{()->clickHandler.handleImagePreview(linkdata)}"
-            android:scaleType="fitCenter"
-            app:imageBind="@{linkdata.preview}"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="5"
+            app:ellipsizeSelfText="@{linkdata.selftext}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_tv"
-            tools:src="@drawable/ic_settings_black_24dp" />
+            tools:text="@tools:sample/lorem/random" />
 
         <TextView
             android:id="@+id/metadata"
@@ -92,7 +92,7 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/gildingView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/subreddit_tv"
             app:metadata="@{linkdata}"
@@ -108,7 +108,7 @@
             android:layout_marginBottom="8dp"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/mediaPreview"
+            app:layout_constraintBottom_toTopOf="@id/selfText_tv"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/title_tv"
             app:layout_constraintTop_toTopOf="parent"
@@ -126,7 +126,7 @@
             android:text="@{linkdata.subredditName}"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mediaPreview"
+            app:layout_constraintTop_toBottomOf="@id/selfText_tv"
             tools:text="r/some_subreddit" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -134,10 +134,6 @@
     <data>
 
         <import type="android.view.View" />
-
-        <variable
-            name="itemIndex"
-            type="Integer" />
 
         <variable
             name="clickHandler"

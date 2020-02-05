@@ -48,6 +48,11 @@ fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {
     textView.text = upVotes
 }
 
+@BindingAdapter("ellipsizeSelfText")
+fun showEllipsizedSelfText(textView: TextView, htmlSelfText: String?) = MarkdownUtils.decodeAndSet(htmlSelfText
+        ?: "", textView)
+
+
 @BindingAdapter("selfTextVisibility", "selfText")
 fun toggleSelfTextVisibility(selfTextView: TextView, isSelfTextExpanded: Boolean, htmlSelfText: String?) {
     if (isSelfTextExpanded) {
