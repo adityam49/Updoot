@@ -1,15 +1,22 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.ducktapedapps.updoot.UpdootApplication
+import javax.inject.Inject
 
-class ExploreVMFactory(private val appContext: Application) : ViewModelProvider.Factory {
+class ExploreVMFactory(updootApplication: UpdootApplication) : ViewModelProvider.Factory {
+    init {
+        updootApplication.updootComponent.inject(this)
+    }
+
+    @Inject
+    lateinit var exploreRepo: ExploreRepo
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ExploreVM::class.java)) {
-            return ExploreVM(appContext) as T
+            return ExploreVM(exploreRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

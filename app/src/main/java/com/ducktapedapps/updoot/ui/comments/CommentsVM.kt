@@ -1,12 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class CommentsVM(application: Application, val id: String, subreddit_name: String) : AndroidViewModel(application) {
-    private val repo = CommentsRepo(application)
+class CommentsVM(private val repo: CommentsRepo, val id: String, subreddit_name: String) : ViewModel() {
     val allComments = repo.allComments
     val isLoading = repo.isLoading
 
@@ -22,7 +20,7 @@ class CommentsVM(application: Application, val id: String, subreddit_name: Strin
 
     fun toggleChildrenVisibility(index: Int) {
         viewModelScope.launch {
-            repo.toggleChildrenCommentVisibility(index,id)
+            repo.toggleChildrenCommentVisibility(index, id)
         }
     }
 

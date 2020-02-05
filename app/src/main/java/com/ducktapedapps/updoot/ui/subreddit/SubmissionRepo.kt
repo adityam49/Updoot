@@ -1,10 +1,8 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.Sorting
@@ -14,13 +12,7 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-class SubmissionRepo(application: Application) {
-    init {
-        (application as UpdootApplication).updootComponent.inject(this)
-    }
-
-    @Inject
-    lateinit var reddit: Reddit
+class SubmissionRepo @Inject constructor(private val reddit: Reddit) {
 
     var after: String? = null
     private var expandedSubmissionIndex = -1

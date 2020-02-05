@@ -1,13 +1,11 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class ExploreVM(application: Application) : AndroidViewModel(application) {
-    private val exploreRepo: ExploreRepo = ExploreRepo(application)
+class ExploreVM(private val exploreRepo: ExploreRepo) : ViewModel() {
 
     val isLoading = exploreRepo.isLoading
     val result = exploreRepo.results

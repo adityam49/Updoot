@@ -1,18 +1,23 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.ducktapedapps.updoot.UpdootApplication
+import javax.inject.Inject
 
-class SubmissionsVMFactory(private val application: Application,
-                           private val subreddit: String) : ViewModelProvider.AndroidViewModelFactory(application) {
+class SubmissionsVMFactory(private val subreddit: String, updootApplication: UpdootApplication) : ViewModelProvider.Factory {
+    init {
+        updootApplication.updootComponent.inject(this)
+    }
+
+    @Inject
+    lateinit var submissionRepo: SubmissionRepo
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SubmissionsVM::class.java)) {
-            return SubmissionsVM(application, subreddit) as T
+            return SubmissionsVM(subreddit, submissionRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
-
     }
 }

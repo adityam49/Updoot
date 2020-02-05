@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.BaseComment
-import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.SwipeUtils
@@ -49,7 +48,7 @@ class CommentsFragment : Fragment() {
 
     private fun setUpViewModel(data: LinkData) {
         viewModel = ViewModelProvider(this@CommentsFragment,
-                CommentsVMFactory(appContext, data.id, data.subredditName)
+                CommentsVMFactory(appContext as UpdootApplication, data.id, data.subredditName)
         ).get(CommentsVM::class.java)
         binding.commentsViewModel = viewModel
 

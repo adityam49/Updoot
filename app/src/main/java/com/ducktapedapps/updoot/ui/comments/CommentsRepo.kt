@@ -1,10 +1,8 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.api.RedditAPI
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
@@ -13,17 +11,8 @@ import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CommentsRepo(application: Application) {
-
-    init {
-        (application as UpdootApplication).updootComponent.inject(this)
-    }
-
-    @Inject
-    lateinit var reddit: Reddit
+class CommentsRepo @Inject constructor(val reddit: Reddit) {
 
     private val _allComments = MutableLiveData<List<BaseComment>>()
     private val _isLoading = MutableLiveData(true)

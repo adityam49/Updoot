@@ -69,7 +69,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     }
 
     private fun setUpViewModel(binding: FragmentExploreBinding, adapter: SearchAdapter) {
-        viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application)).get(ExploreVM::class.java)
+        viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application as UpdootApplication)).get(ExploreVM::class.java)
         viewModel.result.observe(viewLifecycleOwner, Observer { newResults -> adapter.submitList(newResults.toMutableList()) })
         viewModel.isLoading.observe(viewLifecycleOwner, Observer { loading -> binding.loadingView.visibility = if (loading) View.VISIBLE else View.INVISIBLE })
     }

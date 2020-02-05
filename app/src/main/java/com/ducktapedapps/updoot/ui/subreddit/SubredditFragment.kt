@@ -33,7 +33,7 @@ class SubredditFragment : Fragment() {
         super.onCreate(savedInstanceState)
         (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
         submissionsVM = ViewModelProvider(this@SubredditFragment,
-                SubmissionsVMFactory(appContext, args.rSubreddit ?: "")
+                SubmissionsVMFactory(args.rSubreddit ?: "", appContext as UpdootApplication)
         ).get(SubmissionsVM::class.java)
     }
 
