@@ -16,7 +16,9 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment.BottomSheetListener
+import com.ducktapedapps.updoot.ui.subreddit.QASSubredditFragmentDirections
 import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVM
+import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVMFactory
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.QuickActionSheetBehavior
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager
@@ -26,17 +28,21 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeListener {
     private lateinit var viewModel: ActivityVM
+    private lateinit var qasSubredditVM: QASSubredditVM
+
     @Inject
     lateinit var userManager: UserManager
 
-    private lateinit var qasSubredditVM: QASSubredditVM
+    @Inject
+    lateinit var qasSubredditVMFactory: QASSubredditVMFactory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as UpdootApplication).updootComponent.inject(this)
 
-        setUpViews()
-
         setUpViewModels()
+
+        setUpViews()
 
         userManager.attachListener(this)
     }
@@ -56,8 +62,11 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
             behavior.hideQAS()
             binding.toolbar.title = when (destination.id) {
                 R.id.SubredditDestination -> {
-                    qasController.navigate(R.id.QASSubredditDestination)
-                    arguments?.getString("r/subreddit") ?: getString(R.string.app_name)
+                    val subredditName = arguments?.getString("r/subreddit")
+                    qasController.navigate(QASSubredditFragmentDirections.actionGlobalQASSubredditFragment().setSubredditName(subredditName))
+                    qasSubredditVM.subredditName = subredditName
+                    qasSubredditVM.loadInfo()
+                    subredditName ?: getString(R.string.app_name)
                 }
 
                 R.id.CommentsDestination -> {
@@ -81,7 +90,7 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
 
     private fun setUpViewModels() {
         viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
-        qasSubredditVM = ViewModelProvider(this).get(QASSubredditVM::class.java)
+        qasSubredditVM = ViewModelProvider(this, qasSubredditVMFactory).get(QASSubredditVM::class.java)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

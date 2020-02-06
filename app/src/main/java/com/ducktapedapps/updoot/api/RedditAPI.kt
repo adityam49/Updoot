@@ -51,5 +51,10 @@ interface RedditAPI {
     suspend fun search(
             @Query("q") query: String
     ): SearchListing?
+
+    @GET("{subreddit}/about")
+    suspend fun getSubredditInfo(
+            @Path("subreddit") subreddit: String
+    ): Subreddit
 }
 

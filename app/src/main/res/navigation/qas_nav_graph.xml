@@ -10,7 +10,14 @@
         android:id="@+id/QASSubredditDestination"
         android:name="com.ducktapedapps.updoot.ui.subreddit.QASSubredditFragment"
         android:label="QASSubredditFragment"
-        tools:layout="@layout/qas_subreddit_contents" />
+        tools:layout="@layout/qas_subreddit_contents">
+        <argument
+            android:name="subredditName"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
     <action
         android:id="@+id/action_global_QASSubredditFragment"
         app:destination="@id/QASSubredditDestination" />

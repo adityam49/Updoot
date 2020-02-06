@@ -8,6 +8,7 @@ import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
+import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import dagger.Component
@@ -26,6 +27,7 @@ interface UpdootComponent {
     fun inject(submissionsVMFactory: SubmissionsVMFactory)
     fun inject(commentsVMFactory: CommentsVMFactory)
     fun inject(exploreVMFactory: ExploreVMFactory)
+    fun inject(qasSubredditVMFactory: QASSubredditVMFactory)
 
     //dependencies
     val sharedPreferences: SharedPreferences

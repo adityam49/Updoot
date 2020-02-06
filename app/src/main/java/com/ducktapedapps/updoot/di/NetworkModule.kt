@@ -45,11 +45,12 @@ class NetworkModule {
             .add(MoreCommentsListAdapter())
             .add(CommentListingAdapter())
             .add(SearchAdapter())
+            .add(SubredditInfoAdapter())
             .build()
 
     @Singleton
     @Provides
-    fun provideRetrofit(client: OkHttpClient, moshi: Moshi) = Retrofit.Builder()
+    fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit = Retrofit.Builder()
             .baseUrl(Constants.API_BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi).asLenient())
