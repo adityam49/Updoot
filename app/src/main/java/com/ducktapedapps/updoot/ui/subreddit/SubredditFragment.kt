@@ -90,7 +90,7 @@ class SubredditFragment : Fragment() {
         activity?.let {
             val activityVM = ViewModelProvider(it).get(ActivityVM::class.java)
             activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
-                if (account?.contentIfNotHandled != null) {
+                if ((account?.peekContent() == Constants.ANON_USER && account.contentIfNotHandled != null) || account?.contentIfNotHandled != null) {
                     reloadFragmentContent()
                     Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
                 }

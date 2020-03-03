@@ -15,7 +15,6 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment.BottomSheetListener
 import com.ducktapedapps.updoot.ui.subreddit.QASSubredditFragmentDirections
 import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVM
 import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVMFactory
@@ -26,7 +25,7 @@ import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChang
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeListener {
+class MainActivity : AppCompatActivity(), AccountChangeListener {
     private lateinit var viewModel: ActivityVM
     private lateinit var qasSubredditVM: QASSubredditVM
 
@@ -84,8 +83,6 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
                 else -> getString(R.string.app_name)
             }
         }
-
-
     }
 
     private fun setUpViewModels() {
@@ -103,17 +100,6 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
         this.supportActionBar?.title = savedInstanceState.getString(Constants.SCREEN_TITLE_KEY, getString(R.string.app_name))
     }
 
-    //for bottomSheet Account switching
-    override fun onButtonClicked(text: String?) {
-        if (text == "Add Account") {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivityForResult(intent, Constants.ACCOUNT_LOGIN_REQUEST_CODE)
-        } else {
-            userManager.setCurrentUser(text, null)
-            viewModel.setCurrentAccount(userManager.currentUser?.name)
-        }
-    }
-
     override fun onCurrentAccountRemoved() = reloadContent()
 
 
@@ -123,7 +109,6 @@ class MainActivity : AppCompatActivity(), BottomSheetListener, AccountChangeList
     }
 
     private fun reloadContent() = viewModel.setCurrentAccount(userManager.currentUser?.name)
-
 
     //Account switching after new login
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

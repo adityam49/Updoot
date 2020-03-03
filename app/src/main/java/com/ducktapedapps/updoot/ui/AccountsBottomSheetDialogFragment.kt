@@ -1,17 +1,19 @@
 package com.ducktapedapps.updoot.ui
 
 import android.accounts.AccountManager
-import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
-import android.widget.ListView
+import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.databinding.AccountsModalBottomSheetBinding
+import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.utils.accountManagement.UserManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.util.*
 import javax.inject.Inject
@@ -21,7 +23,10 @@ class AccountsBottomSheetDialogFragment : BottomSheetDialogFragment() {
     @Inject
     lateinit var accountManager: AccountManager
 
-    private var accountChangeListener: BottomSheetListener? = null
+    @Inject
+    lateinit var userManager: UserManager
+
+    private lateinit var viewModel: ActivityVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,37 +34,37 @@ class AccountsBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.accounts_modal_bottom_sheet, container, false)
+        val binding = AccountsModalBottomSheetBinding.inflate(inflater, container, false)
+
+        viewModel = ViewModelProvider(requireActivity()).get(ActivityVM::class.java)
+
         val allAccounts: MutableList<String> = ArrayList()
         for (account in accountManager.accounts) {
             allAccounts.add(account.name)
         }
         allAccounts.add("Add Account")
-        val accountLV = view.findViewById<ListView>(R.id.accountsLV)
-        val adapter = ArrayAdapter(inflater.context, R.layout.modal_sheet_account_item, R.id.bottom_sheet_userName, allAccounts)
-        accountLV.adapter = adapter
-        accountLV.onItemClickListener = OnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-            accountChangeListener?.onButtonClicked(adapter.getItem(position))
-            dismiss()
+
+        val accountsAdapter = ArrayAdapter(inflater.context, R.layout.modal_sheet_account_item, R.id.bottom_sheet_userName, allAccounts)
+        binding.accountsLV.apply {
+            adapter = accountsAdapter
+            onItemClickListener = OnItemClickListener { _, _, position, _ ->
+                when {
+                    adapter.getItem(position) == "Add Account" -> {
+                        val intent = Intent(requireActivity(), LoginActivity::class.java)
+                        startActivityForResult(intent, Constants.ACCOUNT_LOGIN_REQUEST_CODE)
+                    }
+                    adapter.getItem(position) == Constants.ANON_USER -> {
+                        userManager.setCurrentUser(Constants.ANON_USER, null)
+                        viewModel.setCurrentAccount(Constants.ANON_USER)
+                    }
+                    else -> {
+                        userManager.setCurrentUser(accountsAdapter.getItem(position), null)
+                        viewModel.setCurrentAccount(accountsAdapter.getItem(position))
+                    }
+                }
+                this@AccountsBottomSheetDialogFragment.dismiss()
+            }
         }
-        return view
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        accountChangeListener = try {
-            context as BottomSheetListener
-        } catch (e: ClassCastException) {
-            throw ClassCastException(context.toString() + "has not implemented BottomSheetListener")
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        accountChangeListener = null
-    }
-
-    interface BottomSheetListener {
-        fun onButtonClicked(text: String?)
+        return binding.root
     }
 }
