@@ -1,16 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="altAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@android:color/white</item>
-        <item name="colorPrimaryDark">@android:color/darker_gray</item>
-        <item name="colorAccent">@android:color/black</item>
-    </style>
-
-    <style name="altAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:navigationBarColor">@color/LT_primaryColor</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
         <item name="colorPrimary">@color/LT_primaryColor</item>
         <item name="colorPrimaryDark">@color/LT_primaryColor</item>
         <item name="colorSecondary">@android:color/white</item>
@@ -19,13 +12,13 @@
         <item name="android:textColorSecondary">@color/LT_secondaryTextColor</item>
     </style>
 
-    <style name="altDarkTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="altDarkTheme" parent="Theme.MaterialComponents.NoActionBar.Bridge">
         <item name="android:windowBackground">@color/DT_primaryLightColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
         <item name="colorPrimary">@color/DT_primaryDarkColor</item>
         <item name="android:navigationBarColor">@color/DT_primaryDarkColor</item>
         <item name="colorPrimaryDark">@color/DT_primaryDarkColor</item>
         <item name="colorSecondary">@color/DT_primaryLightColor</item>
-        <item name="colorAccent">@color/secondaryColor</item>
         <item name="android:textColorPrimary">@color/DT_primaryTextColor</item>
         <item name="android:textColorSecondary">@color/DT_secondaryTextColor</item>
     </style>
