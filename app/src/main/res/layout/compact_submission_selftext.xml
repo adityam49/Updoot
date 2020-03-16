@@ -7,14 +7,14 @@
         android:id="@+id/submissionsView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{()->clickHandler.onClick(linkdata)}"
+        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}"
         app:cardBackgroundColor="?attr/colorSecondary">
 
         <FrameLayout
             android:id="@+id/revel_more_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:onClick="@{()->clickHandler.handleExpansion(itemIndex)}"
+            android:onClick="@{()->clickListener.handleExpansion(itemIndex)}"
             android:visibility="@{linkdata.selftext == null ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toTopOf="@+id/self_text_cardView"
             app:layout_constraintEnd_toEndOf="parent"
@@ -183,8 +183,8 @@
             type="Integer" />
 
         <variable
-            name="clickHandler"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubredditFragment.ClickHandler" />
+            name="clickListener"
+            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

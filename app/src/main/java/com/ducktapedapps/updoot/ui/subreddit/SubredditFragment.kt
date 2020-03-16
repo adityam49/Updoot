@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -21,6 +23,7 @@ import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.utils.*
 import javax.inject.Inject
 
+private const val TAG = "SubredditFragment"
 class SubredditFragment : Fragment() {
     @Inject
     lateinit var appContext: Application
@@ -40,8 +43,20 @@ class SubredditFragment : Fragment() {
         val binding = FragmentSubredditBinding.inflate(inflater, container, false)
                 .apply { lifecycleOwner = viewLifecycleOwner }
 
-        val adapter = SubmissionsAdapter(ClickHandler())
+        val adapter = SubmissionsAdapter()
+        adapter.submissionClickListener = object : SubmissionsAdapter.SubmissionClickListener {
+            override fun onSubmissionClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
+            override fun onThumbnailClick(imageView: View, linkData: LinkData) {
+                val extra = FragmentNavigatorExtras(imageView as ImageView to imageView.transitionName)
+                findNavController().navigate(
+                        SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(linkData.thumbnail, linkData.preview!!.images[0].source.url),
+                        extra
+                )
+            }
 
+            override fun handleExpansion(index: Int) = submissionsVM.expandSelfText(index)
+
+        }
         setUpVMWithViews(binding, adapter)
         setUpRecyclerView(binding, adapter)
         return binding.root
@@ -114,15 +129,4 @@ class SubredditFragment : Fragment() {
     }
 
     private fun reloadFragmentContent() = submissionsVM.reload(null, null)
-
-    inner class ClickHandler {
-        fun onClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
-
-        fun handleImagePreview(data: LinkData) =
-                findNavController().navigate(
-                        SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(data.preview!!.images[0].source.url)
-                )
-
-        fun handleExpansion(index: Int) = submissionsVM.expandSelfText(index)
-    }
 }

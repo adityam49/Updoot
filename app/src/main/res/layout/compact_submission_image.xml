@@ -7,7 +7,7 @@
         android:id="@+id/submissionsView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{()->clickHandler.onClick(linkdata)}"
+        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}"
         app:cardBackgroundColor="?attr/colorSecondary">
 
         <ImageView
@@ -17,7 +17,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:contentDescription="@string/thumbnailDescription"
-            android:onClick="@{()->clickHandler.handleImagePreview(linkdata)}"
+            android:onClick="@{(view)->clickListener.onThumbnailClick(view,linkdata)}"
             android:scaleType="fitStart"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -127,8 +127,8 @@
         <import type="android.view.View" />
 
         <variable
-            name="clickHandler"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubredditFragment.ClickHandler" />
+            name="clickListener"
+            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

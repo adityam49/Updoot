@@ -33,6 +33,7 @@
 
             <ImageView
                 android:id="@+id/self_text_thumbnail"
+                android:transitionName="@{linkdata.thumbnail}"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"

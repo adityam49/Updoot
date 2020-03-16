@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:background="?attr/colorPrimaryDark"
-        android:onClick="@{()->clickHandler.onClick(linkdata)}">
+        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}">
 
         <TextView
             android:id="@+id/title_tv"
@@ -136,8 +136,8 @@
         <import type="android.view.View" />
 
         <variable
-            name="clickHandler"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubredditFragment.ClickHandler" />
+            name="clickListener"
+            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

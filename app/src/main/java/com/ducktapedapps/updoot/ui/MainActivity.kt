@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
         navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, arguments: Bundle? ->
             behavior.hideQAS()
             binding.apply {
-                appbarLayout.setExpanded(true, true)
+                appbarLayout.setExpanded(true, false)
                 bottomNavigationBar.visibility = View.VISIBLE
                 qasContainer.visibility = View.VISIBLE
                 toolbar.title = when (destination.id) {

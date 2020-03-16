@@ -17,9 +17,8 @@ import com.ducktapedapps.updoot.ui.subreddit.SubmissionVH.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
-class SubmissionsAdapter(
-        private val clickHandlerGiven: SubredditFragment.ClickHandler
-) : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
+class SubmissionsAdapter : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
+    lateinit var submissionClickListener: SubmissionClickListener
 
     var itemUi: SubmissionUiType = COMPACT
 
@@ -83,25 +82,28 @@ class SubmissionsAdapter(
         when (holder) {
             is LargeSubmissionSelfTextVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickHandler = clickHandlerGiven
+                clickListener = submissionClickListener
                 executePendingBindings()
             }
+
             is LargeSubmissionImageVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickHandler = clickHandlerGiven
+                clickListener = submissionClickListener
+                selfTextThumbnail.transitionName = getItem(position).thumbnail
                 executePendingBindings()
             }
 
             is CompactImageVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickHandler = clickHandlerGiven
+                clickListener = submissionClickListener
+                selfTextThumbnail.transitionName = getItem(position).thumbnail
                 executePendingBindings()
             }
 
             is CompactSelfTextVH -> holder.binding.apply {
                 linkdata = getItem(position)
                 itemIndex = position
-                clickHandler = clickHandlerGiven
+                clickListener = submissionClickListener
                 executePendingBindings()
             }
         }
@@ -147,6 +149,11 @@ class SubmissionsAdapter(
     }
 
 
+    interface SubmissionClickListener {
+        fun onSubmissionClick(linkData: LinkData)
+        fun onThumbnailClick(imageView: View, linkData: LinkData)
+        fun handleExpansion(index: Int)
+    }
 }
 
 sealed class SubmissionVH(itemView: View) : RecyclerView.ViewHolder(itemView) {

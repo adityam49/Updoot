@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -85,7 +86,8 @@ class CommentsFragment : Fragment() {
         fun onClick(index: Int) = viewModel.toggleChildrenVisibility(index)
 
         fun onImageClick(data: LinkData) = findNavController().navigate(
-                CommentsFragmentDirections.actionCommentsDestinationToImagePreviewDestination(data.preview!!.images[0].source.url)
+                CommentsFragmentDirections.actionCommentsDestinationToImagePreviewDestination(data.thumbnail, data.preview!!.images[0].source.url)
+                , FragmentNavigatorExtras(binding.selfTextThumbnail to data.thumbnail)
         )
     }
 }

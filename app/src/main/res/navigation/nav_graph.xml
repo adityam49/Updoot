@@ -65,6 +65,10 @@
         android:label="ImagePreviewDestination"
         tools:layout="@layout/image_preview_fragment">
         <argument
+            android:name="placeHolderMedia"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
             android:name="mediaUrl"
             app:argType="string" />
     </fragment>

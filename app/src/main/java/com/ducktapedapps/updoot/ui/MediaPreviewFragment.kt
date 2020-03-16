@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
-import com.ducktapedapps.updoot.R
-import com.github.chrisbanes.photoview.PhotoView
+import com.ducktapedapps.updoot.databinding.ImagePreviewFragmentBinding
 
 
 const val TAG = "MediaPreviewFragment"
@@ -16,11 +16,26 @@ const val TAG = "MediaPreviewFragment"
 class MediaPreviewFragment : Fragment() {
 
     private val args: MediaPreviewFragmentArgs by navArgs()
-
+    private lateinit var binding: ImagePreviewFragmentBinding
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.image_preview_fragment, container, false)
-        val photoView: PhotoView = root.findViewById(R.id.imageView)
-        Glide.with(photoView.context).load(args.mediaUrl).into(photoView)
-        return root
+        binding = ImagePreviewFragmentBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        sharedElementEnterTransition = TransitionInflater.from(context).inflateTransition(android.R.transition.move)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.imageView.transitionName = args.placeHolderMedia
+        Glide
+                .with(binding.imageView.context)
+                .load(args.mediaUrl)
+                .thumbnail(
+                        Glide.with(binding.imageView.context)
+                                .load(args.placeHolderMedia)
+                ).into(binding.imageView)
     }
 }

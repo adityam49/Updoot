@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:background="?attr/colorPrimaryDark"
-        android:onClick="@{()->clickHandler.onClick(linkdata)}">
+        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}">
 
         <TextView
             android:id="@+id/title_tv"
@@ -74,8 +74,9 @@
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
             android:adjustViewBounds="true"
-            android:onClick="@{()->clickHandler.handleImagePreview(linkdata)}"
+            android:onClick="@{(view)->clickListener.onThumbnailClick(view,linkdata)}"
             android:scaleType="fitCenter"
+            app:thumbnailBind="@{linkdata.thumbnail}"
             app:imageBind="@{linkdata.preview}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -135,8 +136,8 @@
 
         <import type="android.view.View" />
         <variable
-            name="clickHandler"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubredditFragment.ClickHandler" />
+            name="clickListener"
+            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

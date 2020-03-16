@@ -79,14 +79,15 @@ fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?) {
     }
 }
 
-@BindingAdapter("imageBind")
-fun setPreview(view: ImageView, image: Preview?) {
+@BindingAdapter("imageBind", "thumbnailBind")
+fun setPreview(view: ImageView, image: Preview?, thumbnail: String) {
     if (image != null) {
         val lowResImage = image.images[0].source
         Glide.with(view.context)
                 .load(lowResImage.url)
                 .override(view.width, view.width * (lowResImage.height / lowResImage.width))
                 .placeholder(R.color.DT_primaryColor)
+                .thumbnail(Glide.with(view).load(thumbnail))
                 .fitCenter()
                 .into(view)
         view.visibility = View.VISIBLE
