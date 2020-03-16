@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.R
@@ -13,7 +13,7 @@ import com.github.chrisbanes.photoview.PhotoView
 
 const val TAG = "MediaPreviewFragment"
 
-class MediaPreviewFragment : DialogFragment() {
+class MediaPreviewFragment : Fragment() {
 
     private val args: MediaPreviewFragmentArgs by navArgs()
 
@@ -22,14 +22,5 @@ class MediaPreviewFragment : DialogFragment() {
         val photoView: PhotoView = root.findViewById(R.id.imageView)
         Glide.with(photoView.context).load(args.mediaUrl).into(photoView)
         return root
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        setStyle(STYLE_NO_TITLE, R.style.FullScreenDialog)
-        dialog?.window?.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        super.onCreate(savedInstanceState)
     }
 }

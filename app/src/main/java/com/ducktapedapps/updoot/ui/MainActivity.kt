@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -59,28 +60,42 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
 
         navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, arguments: Bundle? ->
             behavior.hideQAS()
-            binding.toolbar.title = when (destination.id) {
-                R.id.SubredditDestination -> {
-                    val subredditName = arguments?.getString("r/subreddit")
-                    qasController.navigate(QASSubredditFragmentDirections.actionGlobalQASSubredditFragment().setSubredditName(subredditName))
-                    qasSubredditVM.subredditName = subredditName
-                    qasSubredditVM.loadInfo()
-                    subredditName ?: getString(R.string.app_name)
+            binding.apply {
+                appbarLayout.setExpanded(true, true)
+                bottomNavigationBar.visibility = View.VISIBLE
+                qasContainer.visibility = View.VISIBLE
+                toolbar.title = when (destination.id) {
+                    R.id.SubredditDestination -> {
+                        val subredditName = arguments?.getString("r/subreddit")
+                        qasController.navigate(QASSubredditFragmentDirections.actionGlobalQASSubredditFragment().setSubredditName(subredditName))
+                        qasSubredditVM.subredditName = subredditName
+                        qasSubredditVM.loadInfo()
+                        subredditName ?: getString(R.string.app_name)
+                    }
+
+                    R.id.CommentsDestination -> {
+                        val data = arguments?.getParcelable<LinkData>("SubmissionData")
+                        if (data != null && data.commentsCount != 0) {
+                            if (data.commentsCount <= 999) data.commentsCount.toString() + " comments"
+                            else (data.commentsCount / 1000).toString() + "k comments"
+                        } else getString(R.string.Comments)
+                    }
+
+                    R.id.ExploreDestination -> getString(R.string.explore)
+
+                    R.id.SettingsDestination -> getString(R.string.settings)
+
+                    R.id.ImagePreviewDestination -> {
+                        binding.apply {
+                            appbarLayout.setExpanded(false, true)
+                            bottomNavigationBar.visibility = View.GONE
+                            qasContainer.visibility = View.GONE
+                        }
+                        ""
+                    }
+
+                    else -> getString(R.string.app_name)
                 }
-
-                R.id.CommentsDestination -> {
-                    val data = arguments?.getParcelable<LinkData>("SubmissionData")
-                    if (data != null && data.commentsCount != 0) {
-                        if (data.commentsCount <= 999) data.commentsCount.toString() + " comments"
-                        else (data.commentsCount / 1000).toString() + "k comments"
-                    } else getString(R.string.Comments)
-                }
-
-                R.id.ExploreDestination -> getString(R.string.explore)
-
-                R.id.SettingsDestination -> getString(R.string.settings)
-
-                else -> getString(R.string.app_name)
             }
         }
     }

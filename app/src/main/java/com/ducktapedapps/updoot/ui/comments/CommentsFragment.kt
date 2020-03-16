@@ -15,7 +15,6 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.SwipeUtils
 import javax.inject.Inject
 
@@ -83,18 +82,10 @@ class CommentsFragment : Fragment() {
     }
 
     inner class ClickHandler {
-        fun onClick(index: Int) {
-            viewModel.toggleChildrenVisibility(index)
-        }
+        fun onClick(index: Int) = viewModel.toggleChildrenVisibility(index)
 
-        fun onImageClick(data: LinkData) {
-
-            findNavController().navigate(
-                    MediaPreviewFragmentDirections.actionGlobalMediaPreviewFragment(
-                            data.preview!!.images[0].source.url
-                    )
-            )
-        }
-
+        fun onImageClick(data: LinkData) = findNavController().navigate(
+                CommentsFragmentDirections.actionCommentsDestinationToImagePreviewDestination(data.preview!!.images[0].source.url)
+        )
     }
 }

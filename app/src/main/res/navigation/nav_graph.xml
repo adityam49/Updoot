@@ -37,6 +37,9 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_SubredditDestination_to_ImagePreviewDestination"
+            app:destination="@id/ImagePreviewDestination" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
@@ -52,19 +55,19 @@
         <argument
             android:name="SubmissionData"
             app:argType="com.ducktapedapps.updoot.model.LinkData" />
+        <action
+            android:id="@+id/action_CommentsDestination_to_ImagePreviewDestination"
+            app:destination="@id/ImagePreviewDestination" />
     </fragment>
-    <dialog
-        android:id="@+id/mediaPreviewFragment"
+    <fragment
+        android:id="@+id/ImagePreviewDestination"
         android:name="com.ducktapedapps.updoot.ui.MediaPreviewFragment"
-        android:label="MediaPreviewFragment"
+        android:label="ImagePreviewDestination"
         tools:layout="@layout/image_preview_fragment">
         <argument
             android:name="mediaUrl"
             app:argType="string" />
-    </dialog>
-    <action
-        android:id="@+id/action_global_mediaPreviewFragment"
-        app:destination="@id/mediaPreviewFragment" />
+    </fragment>
     <action
         android:id="@+id/action_global_settingsFragment"
         app:destination="@id/SettingsDestination" />

@@ -18,7 +18,6 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.MediaPreviewFragmentDirections
 import com.ducktapedapps.updoot.utils.*
 import javax.inject.Inject
 
@@ -112,31 +111,18 @@ class SubredditFragment : Fragment() {
             val toast = toastMessage.contentIfNotHandled
             if (toast != null) Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
         })
-
     }
 
-    private fun reloadFragmentContent() {
-        submissionsVM.reload(null, null)
-    }
+    private fun reloadFragmentContent() = submissionsVM.reload(null, null)
 
     inner class ClickHandler {
-        fun onClick(linkData: LinkData) {
-            val action = SubredditFragmentDirections.actionGoToComments(linkData)
-            findNavController().navigate(action)
-        }
+        fun onClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
 
-        fun handleImagePreview(data: LinkData) {
-            findNavController().navigate(
-                    MediaPreviewFragmentDirections.actionGlobalMediaPreviewFragment(
-                            data.preview!!.images[0].source.url
-                    )
-            )
-        }
+        fun handleImagePreview(data: LinkData) =
+                findNavController().navigate(
+                        SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(data.preview!!.images[0].source.url)
+                )
 
-        fun handleExpansion(index: Int) {
-            submissionsVM.expandSelfText(index)
-        }
+        fun handleExpansion(index: Int) = submissionsVM.expandSelfText(index)
     }
-
-
 }
