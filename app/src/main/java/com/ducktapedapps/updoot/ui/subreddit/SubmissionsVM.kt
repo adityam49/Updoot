@@ -40,9 +40,12 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
         }
     }
 
+    /**
+     * Clears the cached data and fetches data with passed in parameters
+     * @param sorting if null uses the cached sorting method
+     */
     fun reload(sorting: Sorting?, time: String?) {
-        if (this.sorting == sorting) return
-        this.sorting = sorting ?: Sorting.HOT
+        this.sorting = sorting ?: this.sorting
         this.time = time
         submissionRepo.after = null
         viewModelScope.launch { loadPage(false) }
