@@ -43,8 +43,10 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
     /**
      * Clears the cached data and fetches data with passed in parameters
      * @param sorting if null uses the cached sorting method
+     * @param forceReload is used to circumvent reload on lifecycle change
      */
-    fun reload(sorting: Sorting?, time: String?) {
+    fun reload(sorting: Sorting?, time: String?, forceReload: Boolean = false) {
+        if (!forceReload && this.sorting == sorting) return
         this.sorting = sorting ?: this.sorting
         this.time = time
         submissionRepo.after = null

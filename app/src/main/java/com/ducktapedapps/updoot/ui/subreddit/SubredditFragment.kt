@@ -96,7 +96,7 @@ class SubredditFragment : Fragment() {
                 R.color.DT_primaryColor,
                 R.color.secondaryColor,
                 R.color.secondaryDarkColor)
-        swipeRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
+        swipeRefreshLayout.setOnRefreshListener { submissionsVM.reload(null, null, true) }
     }
 
     private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
