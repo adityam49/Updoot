@@ -16,8 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.api.AuthAPI
-import com.ducktapedapps.updoot.api.RedditAPI
+import com.ducktapedapps.updoot.api.remote.AuthAPI
+import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.databinding.ActivityLoginBinding
 import com.ducktapedapps.updoot.model.Token
 import com.ducktapedapps.updoot.utils.Constants

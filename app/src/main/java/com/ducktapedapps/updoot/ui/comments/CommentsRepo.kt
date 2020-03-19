@@ -3,7 +3,7 @@ package com.ducktapedapps.updoot.ui.comments
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.api.RedditAPI
+import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData

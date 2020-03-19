@@ -16,7 +16,7 @@ import com.ducktapedapps.updoot.model.Preview
 import com.ducktapedapps.updoot.utils.MarkdownUtils
 import me.kaelaela.opengraphview.OpenGraphView
 
-@BindingAdapter("bind:childCommentCount", "bind:isExpanded")
+@BindingAdapter("childCommentCount", "isExpanded")
 
 fun setChildCount(textView: TextView, childCount: Int, isExpanded: Boolean) {
     if (childCount == 0) textView.visibility = View.GONE
@@ -30,7 +30,7 @@ fun setChildCount(textView: TextView, childCount: Int, isExpanded: Boolean) {
     }
 }
 
-@BindingAdapter("bind:commentDepth")
+@BindingAdapter("commentDepth")
 fun setCommentDepthMargin(view: View, depth: Int) {
     if (depth != 0) {
         val newLayoutParams = view.layoutParams as ConstraintLayout.LayoutParams
@@ -42,7 +42,7 @@ fun setCommentDepthMargin(view: View, depth: Int) {
     }
 }
 
-@BindingAdapter("bind:isAuthorOp")
+@BindingAdapter("isAuthorOp")
 fun setOPColor(authorTV: TextView, isOP: Boolean) {
     if (isOP) {
         authorTV.setBackgroundColor(Color.WHITE)

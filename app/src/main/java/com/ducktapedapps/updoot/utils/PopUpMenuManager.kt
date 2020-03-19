@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.navigation.NavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.subreddit.QASSubredditVM
+import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVM
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragmentDirections
 
 fun showMenuFor(
@@ -57,13 +57,13 @@ fun showMenuFor(
     popupMenu.show()
 }
 
-fun showMenuFor(context: Context, anchorView: View, qasSubredditVM: QASSubredditVM) {
+fun showMenuFor(context: Context, anchorView: View, vm: SubmissionsVM) {
     val popupMenu = PopupMenu(context, anchorView)
 
     popupMenu.menuInflater.inflate(R.menu.sort_menu, popupMenu.menu)
 
     popupMenu.setOnMenuItemClickListener { item ->
-        qasSubredditVM.changeSort(when (item.itemId) {
+        vm.changeSort(when (item.itemId) {
             R.id.hot_item -> Sorting.HOT
             R.id.top_item -> Sorting.TOP
             R.id.controversial_item -> Sorting.CONTROVERSIAL

@@ -2,21 +2,21 @@ package com.ducktapedapps.updoot.utils
 
 enum class Sorting {
     RISING {
-        override fun toString() = "rising"
+        override fun toString() = Constants.RISING
     },
     BEST {
-        override fun toString() = "best"
+        override fun toString() = Constants.BEST
     },
     NEW {
-        override fun toString() = "new"
+        override fun toString() = Constants.NEW
     },
     HOT {
-        override fun toString() = "hot"
+        override fun toString() = Constants.HOT
     },
     CONTROVERSIAL {
-        override fun toString() = "controversial"
+        override fun toString() = Constants.CONTROVERSIAL
     },
     TOP {
-        override fun toString() = "top"
+        override fun toString() = Constants.TOP
     };
 }

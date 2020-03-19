@@ -21,9 +21,11 @@ import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.utils.*
+import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import javax.inject.Inject
 
 private const val TAG = "SubredditFragment"
+
 class SubredditFragment : Fragment() {
     @Inject
     lateinit var appContext: Application
@@ -35,7 +37,7 @@ class SubredditFragment : Fragment() {
         super.onCreate(savedInstanceState)
         (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
         submissionsVM = ViewModelProvider(this@SubredditFragment,
-                SubmissionsVMFactory(args.rSubreddit ?: "", appContext as UpdootApplication)
+                SubmissionsVMFactory(args.rSubreddit ?: FRONTPAGE, appContext as UpdootApplication)
         ).get(SubmissionsVM::class.java)
     }
 
@@ -56,6 +58,10 @@ class SubredditFragment : Fragment() {
 
             override fun handleExpansion(index: Int) = submissionsVM.expandSelfText(index)
 
+        }
+        binding.apply {
+            qasContainerContents.sortButton.setOnClickListener { showMenuFor(requireContext(), it, submissionsVM) }
+            qasContainerContents.viewModeButton.setOnClickListener { submissionsVM.toggleUi() }
         }
         setUpVMWithViews(binding, adapter)
         setUpRecyclerView(binding, adapter)
@@ -96,7 +102,7 @@ class SubredditFragment : Fragment() {
                 R.color.DT_primaryColor,
                 R.color.secondaryColor,
                 R.color.secondaryDarkColor)
-        swipeRefreshLayout.setOnRefreshListener { submissionsVM.reload(null, null, true) }
+        swipeRefreshLayout.setOnRefreshListener { submissionsVM.reload() }
     }
 
     private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
@@ -109,24 +115,23 @@ class SubredditFragment : Fragment() {
                     Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
                 }
             })
-            val qasVM = ViewModelProvider(it).get(QASSubredditVM::class.java)
-            qasVM.sorting.observe(viewLifecycleOwner, Observer { newSorting ->
-                submissionsVM.reload(newSorting, null)
-            })
-
-            qasVM.viewType.observe(viewLifecycleOwner, Observer { ui ->
-                adapter.itemUi = ui
+        }
+        submissionsVM.apply {
+            uiType.observe(viewLifecycleOwner, Observer { it: SubmissionUiType ->
+                adapter.itemUi = it
                 binding.recyclerView.adapter = null
                 binding.recyclerView.adapter = adapter
             })
-        }
 
-        submissionsVM.allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })
-        submissionsVM.toastMessage.observe(viewLifecycleOwner, Observer { toastMessage: SingleLiveEvent<String?> ->
-            val toast = toastMessage.contentIfNotHandled
-            if (toast != null) Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show()
-        })
+            allSubmissions.observe(viewLifecycleOwner, Observer { things: List<LinkData>? -> adapter.submitList(things) })
+
+            toastMessage.observe(viewLifecycleOwner, Observer { toastMessage: SingleLiveEvent<String?> ->
+                val toast = toastMessage.contentIfNotHandled
+                if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
+            })
+
+        }
     }
 
-    private fun reloadFragmentContent() = submissionsVM.reload(null, null)
+    private fun reloadFragmentContent() = submissionsVM.reload()
 }

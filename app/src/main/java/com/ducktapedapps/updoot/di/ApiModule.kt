@@ -4,8 +4,8 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
 import android.content.SharedPreferences
-import com.ducktapedapps.updoot.api.AuthAPI
-import com.ducktapedapps.updoot.api.RedditAPI
+import com.ducktapedapps.updoot.api.remote.AuthAPI
+import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager
 import dagger.Lazy

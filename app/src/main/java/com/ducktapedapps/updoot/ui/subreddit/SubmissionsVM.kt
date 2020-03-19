@@ -4,22 +4,45 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.Sorting
+import com.ducktapedapps.updoot.utils.SubmissionUiType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+
+private const val TAG = "SubmissionsVM"
 
 class SubmissionsVM constructor(val subreddit: String, private val submissionRepo: SubmissionRepo) : ViewModel(), InfiniteScrollVM {
     override val isLoading = submissionRepo.isLoading
 
-    private var sorting: Sorting
-    private var time: String?
+    private var time: String? = null
 
+    val subredditInfo: LiveData<Subreddit> = submissionRepo.subredditInfo
+    val sorting: LiveData<Sorting> = submissionRepo.sorting
+    val uiType: LiveData<SubmissionUiType> = submissionRepo.submissionsUI
     val allSubmissions: LiveData<MutableList<LinkData>> = submissionRepo.allSubmissions
     val toastMessage: LiveData<SingleLiveEvent<String?>> = submissionRepo.toastMessage
 
+    init {
+        //Using async as subreddit info is independent of the submission api request
+        viewModelScope.launch(Dispatchers.IO) {
+            async {
+                submissionRepo.loadSubredditPrefs(subreddit)
+                loadPage(false)
+            }
+            async {
+                submissionRepo.loadSubredditInfo(subreddit)
+            }
+        }
+
+    }
+
     override fun loadPage(appendPage: Boolean) {
         viewModelScope.launch {
+            val sorting = sorting.value!!
             submissionRepo.loadPage(subreddit, sorting, time, appendPage)
         }
     }
@@ -41,28 +64,25 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
     }
 
     /**
-     * Clears the cached data and fetches data with passed in parameters
-     * @param sorting if null uses the cached sorting method
-     * @param forceReload is used to circumvent reload on lifecycle change
+     * Clears the cached data and fetches new data
      */
-    fun reload(sorting: Sorting?, time: String?, forceReload: Boolean = false) {
-        if (!forceReload && this.sorting == sorting) return
-        this.sorting = sorting ?: this.sorting
-        this.time = time
-        submissionRepo.after = null
-        viewModelScope.launch { loadPage(false) }
-    }
+    fun reload() = viewModelScope.launch { loadPage(false) }
+
 
 
     fun expandSelfText(index: Int) {
         submissionRepo.expandSelfText(index)
     }
 
-    init {
-        time = null
-        sorting = Sorting.HOT
-        viewModelScope.launch {
-            loadPage(false)
+    fun toggleUi() {
+        viewModelScope.launch(Dispatchers.IO) {
+            submissionRepo.toggleUI(subreddit)
+        }
+    }
+
+    fun changeSort(newSorting: Sorting) {
+        viewModelScope.launch((Dispatchers.IO)) {
+            submissionRepo.changeSort(newSorting, subreddit)
         }
     }
 }

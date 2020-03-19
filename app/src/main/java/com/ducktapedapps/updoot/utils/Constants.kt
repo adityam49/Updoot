@@ -34,6 +34,8 @@ object Constants {
     const val THIS_YEAR = "year"
     const val ALL_TIME = "all"
 
+    const val FRONTPAGE = ""
+
     const val ACCOUNT_LOGIN_REQUEST_CODE = 99
 
     const val ACCOUNT_TYPE = "updoot_account"
@@ -41,5 +43,7 @@ object Constants {
 
     const val DIFF_VOTE_KEY = "diff_vote_key"
     const val SCREEN_TITLE_KEY = "screen_title_key"
+
+    const val SUBREDDIT_METADATA_DB = "subreddit_metadata_db"
 }
 

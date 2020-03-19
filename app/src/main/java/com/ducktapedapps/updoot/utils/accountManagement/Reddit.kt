@@ -2,8 +2,8 @@ package com.ducktapedapps.updoot.utils.accountManagement
 
 import android.accounts.AccountManager
 import android.util.Log
-import com.ducktapedapps.updoot.api.AuthAPI
-import com.ducktapedapps.updoot.api.RedditAPI
+import com.ducktapedapps.updoot.api.remote.AuthAPI
+import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.utils.Constants
 import javax.inject.Inject
 import javax.inject.Named

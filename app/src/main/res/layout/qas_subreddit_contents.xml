@@ -6,22 +6,22 @@
     <data>
 
         <variable
-            name="QASSubredditVM"
-            type="com.ducktapedapps.updoot.ui.subreddit.QASSubredditVM" />
+            name="Subreddit"
+            type="com.ducktapedapps.updoot.model.Subreddit" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_margin="16dp">
+        android:layout_gravity="bottom">
+
 
         <ImageView
             android:id="@+id/subreddit_icon_iv"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginTop="16dp"
-            app:imageUrl="@{QASSubredditVM.subredditInfo.icon_img}"
+            app:imageUrl="@{Subreddit.display_name_prefixed}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{QASSubredditVM.subredditInfo.display_name_prefixed}"
+            android:text="@{Subreddit.display_name_prefixed}"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
 
         <TextView
             android:id="@+id/meta_data_tv"
-            subredditMetadata="@{QASSubredditVM.subredditInfo}"
+            subredditMetadata="@{Subreddit}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"

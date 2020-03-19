@@ -3,16 +3,22 @@ package com.ducktapedapps.updoot.ui.subreddit
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.model.SubredditPrefs
+import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.Sorting
+import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.IOException
 import java.util.*
 import javax.inject.Inject
 
-class SubmissionRepo @Inject constructor(private val reddit: Reddit) {
+class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val dao: SubredditPrefsDAO) {
 
     var after: String? = null
     private var expandedSubmissionIndex = -1
@@ -26,16 +32,82 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit) {
     private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
     val toastMessage: LiveData<SingleLiveEvent<String?>> = _toastMessage
 
-    suspend fun loadPage(subreddit: String?, sort: Sorting, time: String?, appendPage: Boolean) {
+    private val _subredditInfo: MutableLiveData<Subreddit> = MutableLiveData()
+    val subredditInfo: LiveData<Subreddit> = _subredditInfo
+
+    private val _subredditSorting: MutableLiveData<Sorting> = MutableLiveData()
+    val sorting: LiveData<Sorting> = _subredditSorting
+
+    private val _submissionsUI: MutableLiveData<SubmissionUiType> = MutableLiveData()
+    val submissionsUI: LiveData<SubmissionUiType> = _submissionsUI
+
+    /**
+     * Loads subreddit metaData and saves to persistent storage
+     */
+    suspend fun loadSubredditPrefs(subreddit: String) {
+        var data = dao.getSubredditPrefs(subreddit)
+        if (data == null) {
+            //creating new entry of preferences
+            data = SubredditPrefs(subreddit, SubmissionUiType.COMPACT, Sorting.HOT).also {
+                dao.insertSubredditPrefs(it)
+            }
+        }
+        _subredditSorting.postValue(data.sorting)
+        _submissionsUI.postValue(data.viewType)
+    }
+
+    /**
+     *  Loads subreddit info like subs, description etc
+     */
+    suspend fun loadSubredditInfo(subreddit: String) {
+        if (subreddit == FRONTPAGE) {
+            _subredditInfo.postValue(Subreddit(
+                    "FrontPage",
+                    "",
+                    0,
+                    "The front page of the Internet"
+            ))
+        } else
+            try {
+                val api = reddit.authenticatedAPI()
+                _subredditInfo.postValue(api.getSubredditInfo(subreddit))
+            } catch (exception: IOException) {
+                exception.printStackTrace()
+            }
+    }
+
+    suspend fun toggleUI(subreddit: String) {
+        val uiType = if (_submissionsUI.value == SubmissionUiType.COMPACT)
+            SubmissionUiType.LARGE
+        else
+            SubmissionUiType.COMPACT
+        dao.setUIType(uiType, subreddit)
+        _submissionsUI.postValue(uiType)
+    }
+
+    suspend fun changeSort(newSort: Sorting, subreddit: String) {
+        withContext(Dispatchers.IO) {
+            if (_subredditSorting.value != newSort) {
+                dao.setSorting(newSort, subreddit)
+                _subredditSorting.postValue(newSort)
+                loadPage(subreddit, newSort, null, false)
+            }
+        }
+    }
+
+    suspend fun loadPage(subreddit: String, sort: Sorting, time: String?, appendPage: Boolean) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
             try {
                 val redditAPI = reddit.authenticatedAPI()
                 try {
+                    val submissions: MutableList<LinkData> = if (appendPage) _allSubmissions.value
+                            ?: mutableListOf()
+                    else {
+                        after = null
+                        mutableListOf()
+                    }
                     val fetchedSubmissions = redditAPI.getSubreddit(subreddit, sort.toString(), time, after)
-
-                    val submissions = if (appendPage) _allSubmissions.value
-                            ?: mutableListOf() else mutableListOf()
                     withContext(Dispatchers.Default) {
                         after = fetchedSubmissions.after
                         submissions += fetchedSubmissions.submissions

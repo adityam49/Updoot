@@ -20,7 +20,7 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 class SubmissionsAdapter : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
     lateinit var submissionClickListener: SubmissionClickListener
 
-    var itemUi: SubmissionUiType = COMPACT
+    lateinit var itemUi: SubmissionUiType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionVH {
         val inflater = LayoutInflater.from(parent.context)

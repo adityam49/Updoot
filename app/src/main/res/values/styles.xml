@@ -10,6 +10,7 @@
         <item name="colorAccent">@color/secondaryColor</item>
         <item name="android:textColorPrimary">@color/LT_primaryTextColor</item>
         <item name="android:textColorSecondary">@color/LT_secondaryTextColor</item>
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
     </style>
 
     <style name="altDarkTheme" parent="Theme.MaterialComponents.NoActionBar.Bridge">
@@ -21,5 +22,18 @@
         <item name="colorSecondary">@color/DT_primaryLightColor</item>
         <item name="android:textColorPrimary">@color/DT_primaryTextColor</item>
         <item name="android:textColorSecondary">@color/DT_secondaryTextColor</item>
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+    </style>
+
+    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
+    </style>
+
+    <style name="CustomShapeAppearanceBottomSheetDialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">32dp</item>
+        <item name="cornerSizeTopLeft">32dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
     </style>
 </resources>

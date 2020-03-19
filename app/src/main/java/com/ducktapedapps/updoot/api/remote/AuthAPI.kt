@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.api
+package com.ducktapedapps.updoot.api.remote
 
 import com.ducktapedapps.updoot.model.Token
 import com.ducktapedapps.updoot.utils.Constants
