@@ -22,7 +22,6 @@
     <string name="login">Login</string>
     <string name="explore">Explore</string>
 
-    <string name="thousandSuffix">%dk</string>
     <string name="thumbnailDescription">Submission Thumbnail</string>
     <string name="search">Search</string>
     <string name="sorting_mode">Sorting Mode</string>
@@ -33,4 +32,7 @@
     <string name="childrenCommentCount">+%d</string>
     <string name="submission_link">Copy Link</string>
     <string name="save_offline">Save offline</string>
+
+    <string name="online_subscriber_count">%1$s Online / %2$s Subscribers</string>
+    <string name="r_subreddit_name_age">r/%1$s \u25CF %2$s</string>
 </resources>

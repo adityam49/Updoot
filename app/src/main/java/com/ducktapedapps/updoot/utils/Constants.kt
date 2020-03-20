@@ -12,6 +12,9 @@ object Constants {
     const val redirect_uri = BuildConfig.REDIRECT_URI
     const val API_BASE_URL = "https://oauth.reddit.com/"
     const val BASE_URL = "https://www.reddit.com"
+
+    //reddit api has no oauth support for trending subreddits api so using a hardcoded endPoint
+    const val TRENDING_API_URL = "https://www.reddit.com/api/trending_subreddits/.json"
     const val TOKEN_ACCESS_URL = "https://www.reddit.com/api/v1/access_token"
     const val scopes = "identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread"
     const val userLess_grantType = "https://oauth.reddit.com/grants/installed_client"
@@ -41,9 +44,8 @@ object Constants {
     const val ACCOUNT_TYPE = "updoot_account"
     const val ANON_USER = "Anonymous"
 
-    const val DIFF_VOTE_KEY = "diff_vote_key"
-    const val SCREEN_TITLE_KEY = "screen_title_key"
-
-    const val SUBREDDIT_METADATA_DB = "subreddit_metadata_db"
+    //DB names
+    const val SUBREDDIT_PREFS_DB = "subreddit_prefs_db"
+    const val SUBREDDIT_DB = "subreddit_db"
 }
 

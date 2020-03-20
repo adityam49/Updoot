@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.api.remote
 
 import com.ducktapedapps.updoot.model.*
+import com.ducktapedapps.updoot.utils.Constants
 import retrofit2.http.*
 
 interface RedditAPI {
@@ -56,5 +57,8 @@ interface RedditAPI {
     suspend fun getSubredditInfo(
             @Path("subreddit") subreddit: String
     ): Subreddit
+
+    @GET()
+    suspend fun getTrendingSubredditNames(@Url fullUrl: String = Constants.TRENDING_API_URL): List<String>
 }
 

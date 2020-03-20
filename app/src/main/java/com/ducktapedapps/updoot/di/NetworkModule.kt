@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.di
 import com.ducktapedapps.updoot.BuildConfig
 import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
+import com.ducktapedapps.updoot.utils.moshiAdapters.TrendingSubsJsonAdapter
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -36,7 +37,6 @@ class NetworkModule {
         return okHttpClient.build()
     }
 
-
     @Reusable
     @Provides
     fun provideMoshi(): Moshi = Moshi
@@ -44,6 +44,7 @@ class NetworkModule {
             .add(SubmissionListingAdapter())
             .add(MoreCommentsListAdapter())
             .add(CommentListingAdapter())
+            .add(TrendingSubsJsonAdapter())
             .add(SearchAdapter())
             .add(SubredditInfoAdapter())
             .build()

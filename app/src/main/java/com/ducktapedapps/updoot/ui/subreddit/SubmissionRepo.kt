@@ -62,10 +62,13 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val
     suspend fun loadSubredditInfo(subreddit: String) {
         if (subreddit == FRONTPAGE) {
             _subredditInfo.postValue(Subreddit(
-                    "FrontPage",
-                    "",
-                    0,
-                    "The front page of the Internet"
+                    display_name = "Front page",
+                    community_icon = "",
+                    public_description = "The front page of the internet",
+                    active_user_count = 0L,
+                    subscribers = 0L,
+                    created = 1137566705,
+                    lastUpdated = System.currentTimeMillis() / 1000
             ))
         } else
             try {

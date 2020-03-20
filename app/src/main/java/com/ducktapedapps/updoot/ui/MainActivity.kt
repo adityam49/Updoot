@@ -54,16 +54,6 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
         viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(Constants.SCREEN_TITLE_KEY, this.supportActionBar?.title.toString())
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        this.supportActionBar?.title = savedInstanceState.getString(Constants.SCREEN_TITLE_KEY, getString(R.string.app_name))
-    }
-
     override fun onCurrentAccountRemoved() = reloadContent()
 
 

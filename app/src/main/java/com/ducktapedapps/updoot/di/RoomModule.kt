@@ -6,9 +6,11 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.model.SubredditPrefs
+import com.ducktapedapps.updoot.ui.explore.SubredditDB
 import com.ducktapedapps.updoot.ui.subreddit.SubredditPrefsDB
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
-import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_METADATA_DB
+import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_DB
+import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_PREFS_DB
 import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import dagger.Module
@@ -23,10 +25,10 @@ class RoomModule {
 
     @Singleton
     @Provides
-    fun providesRoomDatabase(application: Application): SubredditPrefsDB = Room.databaseBuilder(
+    fun provideSubredditPrefsDB(application: Application): SubredditPrefsDB = Room.databaseBuilder(
                     application,
                     SubredditPrefsDB::class.java,
-                    SUBREDDIT_METADATA_DB
+                    SUBREDDIT_PREFS_DB
             ).addCallback(SubredditPrefsCallback())
             .build()
 
@@ -51,6 +53,17 @@ class RoomModule {
     }
 
     @Provides
+    fun providesSubredditPrefsDAO(db: SubredditPrefsDB): SubredditPrefsDAO = db.subredditPrefsDAO()
+
+    @Provides
     @Singleton
-    fun providesProductDao(db: SubredditPrefsDB): SubredditPrefsDAO = db.subredditPrefsDAO()
+    fun provideSubredditDB(application: Application): SubredditDB = Room.databaseBuilder(
+            application,
+            SubredditDB::class.java,
+            SUBREDDIT_DB
+    ).build()
+
+    @Provides
+    fun provideSubredditDAO(db: SubredditDB) = db.subredditDAO()
+
 }

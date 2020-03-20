@@ -17,7 +17,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> clickHandler.onSubredditClick(Subreddit.display_name_prefixed)}">
+        android:onClick="@{() -> clickHandler.onSubredditClick(Subreddit.display_name)}">
 
 
         <ImageView
@@ -28,7 +28,6 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:subredditThumbnail="@{Subreddit.icon_img}"
             tools:src="@drawable/ic_image_error" />
 
         <TextView
@@ -36,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="@{Subreddit.display_name_prefixed}"
+            android:text="@{Subreddit.display_name}"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/subreddit_icon"
             app:layout_constraintTop_toTopOf="@+id/subreddit_icon"
@@ -55,7 +54,6 @@
 
         <TextView
             android:id="@+id/subscriber_count_tv"
-            subscriberCount="@{Subreddit.subscribers}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

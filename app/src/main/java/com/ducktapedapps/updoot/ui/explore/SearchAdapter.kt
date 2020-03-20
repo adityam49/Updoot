@@ -17,7 +17,7 @@ class SearchAdapter(private val clickHandler: ExploreFragment.ClickHandler) : Li
 
     private object CALLBACK : DiffUtil.ItemCallback<Subreddit>() {
         override fun areItemsTheSame(oldItem: Subreddit, newItem: Subreddit): Boolean {
-            return oldItem.display_name_prefixed == newItem.display_name_prefixed
+            return oldItem.display_name == newItem.display_name
         }
 
         override fun areContentsTheSame(oldItem: Subreddit, newItem: Subreddit) = true
