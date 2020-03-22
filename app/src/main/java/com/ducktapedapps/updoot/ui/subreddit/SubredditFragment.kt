@@ -2,11 +2,14 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,6 +18,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
@@ -23,6 +28,7 @@ import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import javax.inject.Inject
+
 
 private const val TAG = "SubredditFragment"
 
@@ -46,6 +52,7 @@ class SubredditFragment : Fragment() {
                 .apply { lifecycleOwner = viewLifecycleOwner }
 
         val adapter = SubmissionsAdapter()
+
         adapter.submissionClickListener = object : SubmissionsAdapter.SubmissionClickListener {
             override fun onSubmissionClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
             override fun onThumbnailClick(imageView: View, linkData: LinkData) {
@@ -57,11 +64,11 @@ class SubredditFragment : Fragment() {
             }
 
             override fun handleExpansion(index: Int) = submissionsVM.expandSelfText(index)
-
         }
+
         binding.apply {
-            qasContainerContents.sortButton.setOnClickListener { showMenuFor(requireContext(), it, submissionsVM) }
-            qasContainerContents.viewModeButton.setOnClickListener { submissionsVM.toggleUi() }
+            subredditQas.sortButton.setOnClickListener { showMenuFor(requireContext(), it, submissionsVM) }
+            subredditQas.viewModeButton.setOnClickListener { submissionsVM.toggleUi() }
         }
         setUpVMWithViews(binding, adapter)
         setUpRecyclerView(binding, adapter)
@@ -69,44 +76,39 @@ class SubredditFragment : Fragment() {
     }
 
     private fun setUpRecyclerView(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
-        val recyclerView = binding.recyclerView
         val linearLayoutManager = LinearLayoutManager(this@SubredditFragment.context)
 
-        recyclerView.apply {
+        binding.recyclerView.apply {
             this.adapter = adapter
             layoutManager = linearLayoutManager
             itemAnimator = CustomItemAnimator()
+
+            ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
+                override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
+
+
+                override fun performSlightRightSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, 1)
+
+
+                override fun performLeftSwipeAction(adapterPosition: Int) =
+                        showMenuFor(args.rSubreddit,
+                                adapter.currentList[adapterPosition],
+                                this@SubredditFragment.requireContext(),
+                                binding.recyclerView.findViewHolderForAdapterPosition(adapterPosition)?.itemView,
+                                findNavController())
+
+                override fun performRightSwipeAction(adapterPosition: Int) {
+                    submissionsVM.toggleSave(adapterPosition)
+                }
+            })).attachToRecyclerView(this)
+
+            addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
         }
-
-        ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
-            override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
-
-
-            override fun performSlightRightSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, 1)
-
-
-            override fun performLeftSwipeAction(adapterPosition: Int) =
-                    showMenuFor(args.rSubreddit,
-                            adapter.currentList[adapterPosition],
-                            this@SubredditFragment.requireContext(),
-                            recyclerView.findViewHolderForAdapterPosition(adapterPosition)?.itemView,
-                            findNavController())
-
-            override fun performRightSwipeAction(adapterPosition: Int) {
-                submissionsVM.toggleSave(adapterPosition)
-            }
-        })).attachToRecyclerView(recyclerView)
-        recyclerView.addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
-        val swipeRefreshLayout = binding.swipeToRefreshLayout
-        swipeRefreshLayout.setColorSchemeResources(
-                R.color.DT_primaryColor,
-                R.color.secondaryColor,
-                R.color.secondaryDarkColor)
-        swipeRefreshLayout.setOnRefreshListener { submissionsVM.reload() }
     }
 
     private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
-        binding.submissionViewModel = submissionsVM
+        binding.vm = submissionsVM
+        binding.swipeToRefreshLayout.setOnRefreshListener { submissionsVM.reload() }
         activity?.let {
             val activityVM = ViewModelProvider(it).get(ActivityVM::class.java)
             activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
@@ -130,8 +132,29 @@ class SubredditFragment : Fragment() {
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             })
 
+            isLoading.observe(viewLifecycleOwner, Observer {
+                Log.i(TAG, "new loading value  $it")
+                //Hack for motionLayout visibility
+                if (binding.root is MotionLayout) {
+                    val layout = binding.progressBar.parent as MotionLayout
+                    val setToVisibility = if (it) View.VISIBLE else View.GONE
+                    for (constraintId in layout.constraintSetIds) {
+                        layout.getConstraintSet(constraintId)?.setVisibility(R.id.progressBar, setToVisibility)
+                    }
+                }
+            })
         }
     }
 
     private fun reloadFragmentContent() = submissionsVM.reload()
 }
+
+@BindingAdapter("subreddit_header_icon")
+fun bindIcon(view: ImageView, url: String?) =
+        Glide.with(view)
+                .load(url)
+                .placeholder(R.drawable.ic_explore_black_24dp)
+                .apply(RequestOptions.circleCropTransform())
+                .override(128, 128)
+                .into(view)
+

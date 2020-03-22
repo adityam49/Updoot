@@ -27,6 +27,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
+            android:background="?attr/colorPrimary"
             app:itemHorizontalTranslationEnabled="false"
             app:itemIconTint="@color/nav_item_selector"
             app:itemTextColor="@color/nav_item_selector"
