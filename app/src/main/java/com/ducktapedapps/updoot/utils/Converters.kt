@@ -4,7 +4,7 @@ fun getCompactCountAsString(count: Long): String =
         when (count) {
             in 0..999 -> count.toString()
             in 1000..999999 -> String.format("%.1fK", count / 1000.0)
-            else -> "1M+"
+            else -> String.format("%.1fM+", count / 1000000.0)
         }
 
 fun getCompactDateAsString(date: Long): String =

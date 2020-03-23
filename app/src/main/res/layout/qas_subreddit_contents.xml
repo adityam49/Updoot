@@ -33,6 +33,8 @@
 
             <TextView
                 android:id="@+id/user_count"
+                onlineCount="@{Subreddit.active_user_count}"
+                subscriberCount="@{Subreddit.subscribers}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

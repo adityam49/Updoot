@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.databinding.BindingAdapter
@@ -157,4 +158,9 @@ fun bindIcon(view: ImageView, url: String?) =
                 .apply(RequestOptions.circleCropTransform())
                 .override(128, 128)
                 .into(view)
+
+@BindingAdapter("onlineCount", "subscriberCount")
+fun bindUserCount(view: TextView, onlineCount: Long, subscriberCount: Long) {
+    view.text = String.format("%s Online / %s Subscribers", getCompactCountAsString(onlineCount), getCompactCountAsString(subscriberCount))
+}
 
