@@ -28,7 +28,7 @@ interface RedditAPI {
             @Field("id") id: String
     ): String
 
-    @GET("{subreddit}/comments/{id}")
+    @GET("r/{subreddit}/comments/{id}")
     suspend fun getComments(
             @Path("subreddit") subreddit: String,
             @Path("id") submissions_id: String
@@ -53,7 +53,7 @@ interface RedditAPI {
             @Query("q") query: String
     ): SearchListing?
 
-    @GET("{subreddit}/about")
+    @GET("r/{subreddit}/about")
     suspend fun getSubredditInfo(
             @Path("subreddit") subreddit: String
     ): Subreddit

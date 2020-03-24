@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.subreddit
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.Subreddit
@@ -14,12 +15,14 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okio.IOException
 import java.util.*
 import javax.inject.Inject
 
-class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val dao: SubredditPrefsDAO) {
-
+class SubmissionRepo @Inject constructor(private val reddit: Reddit
+                                         , private val prefsDAO: SubredditPrefsDAO
+                                         , private val subredditDAO: SubredditDAO
+) {
+    private val TAG = "SubmissionRepo"
     var after: String? = null
     private var expandedSubmissionIndex = -1
 
@@ -45,11 +48,11 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val
      * Loads subreddit metaData and saves to persistent storage
      */
     suspend fun loadSubredditPrefs(subreddit: String) {
-        var data = dao.getSubredditPrefs(subreddit)
+        var data = prefsDAO.getSubredditPrefs(subreddit)
         if (data == null) {
             //creating new entry of preferences
             data = SubredditPrefs(subreddit, SubmissionUiType.COMPACT, Sorting.HOT).also {
-                dao.insertSubredditPrefs(it)
+                prefsDAO.insertSubredditPrefs(it)
             }
         }
         _subredditSorting.postValue(data.sorting)
@@ -60,38 +63,50 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val
      *  Loads subreddit info like subs, description etc
      */
     suspend fun loadSubredditInfo(subreddit: String) {
-        if (subreddit == FRONTPAGE) {
-            _subredditInfo.postValue(Subreddit(
-                    display_name = "Front page",
-                    community_icon = "",
-                    public_description = "The front page of the internet",
-                    active_user_count = 0L,
-                    subscribers = 0L,
-                    created = 1137566705,
-                    lastUpdated = System.currentTimeMillis() / 1000
-            ))
-        } else
-            try {
-                val api = reddit.authenticatedAPI()
-                _subredditInfo.postValue(api.getSubredditInfo(subreddit))
-            } catch (exception: IOException) {
-                exception.printStackTrace()
+        try {
+            val api = reddit.authenticatedAPI()
+
+            subredditDAO.getSubreddit(subreddit).let {
+                if (it == null) {
+                    api.getSubredditInfo(subreddit).let { fetchedSub ->
+                        fetchedSub.lastUpdated = System.currentTimeMillis()
+                        _subredditInfo.postValue(fetchedSub)
+                        subredditDAO.insertSubreddit(fetchedSub)
+                    }
+                } else {
+                    _subredditInfo.postValue(it)
+                    if (subreddit == FRONTPAGE) return@let
+                    if (isInfoOlderThan(1, it.lastUpdated ?: 0)) {
+                        api.getSubredditInfo(subreddit).let { fetchedSub ->
+                            fetchedSub.lastUpdated = System.currentTimeMillis()
+                            _subredditInfo.postValue(fetchedSub)
+                            subredditDAO.insertSubreddit(fetchedSub)
+                        }
+                    }
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e(TAG, "error on frontpage : ", e)
+            _toastMessage.postValue(SingleLiveEvent("Failed to load subreddit info"))
+        }
     }
+
+    private fun isInfoOlderThan(hours: Int, lastUpdated: Long) = hours * 60 * 60 * 1000L < System.currentTimeMillis() - lastUpdated
 
     suspend fun toggleUI(subreddit: String) {
         val uiType = if (_submissionsUI.value == SubmissionUiType.COMPACT)
             SubmissionUiType.LARGE
         else
             SubmissionUiType.COMPACT
-        dao.setUIType(uiType, subreddit)
+        prefsDAO.setUIType(uiType, subreddit)
         _submissionsUI.postValue(uiType)
     }
 
     suspend fun changeSort(newSort: Sorting, subreddit: String) {
         withContext(Dispatchers.IO) {
             if (_subredditSorting.value != newSort) {
-                dao.setSorting(newSort, subreddit)
+                prefsDAO.setSorting(newSort, subreddit)
                 _subredditSorting.postValue(newSort)
                 loadPage(subreddit, newSort, null, false)
             }
@@ -110,7 +125,7 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit, private val
                         after = null
                         mutableListOf()
                     }
-                    val fetchedSubmissions = redditAPI.getSubreddit(subreddit, sort.toString(), time, after)
+                    val fetchedSubmissions = redditAPI.getSubreddit("${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit", sort.toString(), time, after)
                     withContext(Dispatchers.Default) {
                         after = fetchedSubmissions.after
                         submissions += fetchedSubmissions.submissions

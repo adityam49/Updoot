@@ -77,15 +77,12 @@ fun bannerUrlLoad(view: ImageView, url: String) =
 
 @BindingAdapter("onlineCount", "subscriberCount")
 fun subscriberCount(view: TextView, onlineCount: Long, subscriberCount: Long) {
-    view.text = view.resources.getString(
-            R.string.online_subscriber_count
-            , getCompactCountAsString(onlineCount)
-            , getCompactCountAsString(subscriberCount)
-    )
+    view.text = if (onlineCount <= -0L || subscriberCount <= 0L) ""
+    else String.format("%s Online / %s Subscribers", getCompactCountAsString(onlineCount), getCompactCountAsString(subscriberCount))
 }
 
 @BindingAdapter("subredditIconUrl")
-fun subredditIconUrl(view: ImageView, url: String) {
+fun subredditIconUrl(view: ImageView, url: String?) {
     Glide
             .with(view)
             .load(url)
@@ -96,7 +93,7 @@ fun subredditIconUrl(view: ImageView, url: String) {
 
 @BindingAdapter("trendingSubredditMetaData")
 fun trendingSubredditMetaData(view: TextView, subreddit: Subreddit) {
-    view.text = "${subreddit.public_description} ${if (subreddit.public_description.length < 30) "\n\n" else ""}"
+    view.text = String.format("%s%s", subreddit.public_description, if (subreddit.public_description.length < 30) "\n\n" else "")
 }
 
 @BindingAdapter("subredditName", "subredditAge")

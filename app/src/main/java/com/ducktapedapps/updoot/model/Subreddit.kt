@@ -16,6 +16,6 @@ data class Subreddit(
         val active_user_count: Long,
         val public_description: String,
         val created: Long,
-        val lastUpdated: Long?,
+        var lastUpdated: Long?,
         val isTrending: Int = 0 //0 is not trending 1 is trending
 ) : Parcelable

@@ -1,9 +1,8 @@
-package com.ducktapedapps.updoot.ui.subreddit
+package com.ducktapedapps.updoot.api.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.model.SubredditPrefs
 import com.ducktapedapps.updoot.utils.SubredditPrefsConverter
 

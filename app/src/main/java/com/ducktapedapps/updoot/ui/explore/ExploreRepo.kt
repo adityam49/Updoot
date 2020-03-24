@@ -1,19 +1,25 @@
 package com.ducktapedapps.updoot.ui.explore
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.abs
 
 private const val TAG = "ExploreRepo"
 
-class ExploreRepo @Inject constructor(private val reddit: Reddit, private val subredditDAO: SubredditDAO) {
+class ExploreRepo @Inject constructor(
+        private val reddit: Reddit,
+        private val subredditDAO: SubredditDAO,
+        private val sharedPreferences: SharedPreferences
+) {
 
     private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -31,17 +37,19 @@ class ExploreRepo @Inject constructor(private val reddit: Reddit, private val su
 
                 //looking if there are cached trending subreddits
                 subredditDAO.getTrendingSubreddits().apply {
-                    if (this.isNotEmpty() && !areTrendingSubsStale(this)) _trendingSubs.postValue(this)
+                    if (this.isNotEmpty()) _trendingSubs.postValue(this)
 
-                    //no trending subreddits found or subs are stale
+                    if (this.isNotEmpty() && !areTrendingSubsStale()) return@apply
+                    //getting new trending subs and caching them
                     else {
                         val api = reddit.authenticatedAPI()
                         val trendingSubs = api.getTrendingSubredditNames()
+                        sharedPreferences.edit().putLong(Constants.LAST_TRENDING_UPDATED_KEY, System.currentTimeMillis()).apply()
                         val fetchedSubs: MutableList<Subreddit> = _trendingSubs.value?.toMutableList()
                                 ?: mutableListOf()
                         for (sub in trendingSubs) {
                             async {
-                                api.getSubredditInfo("r/$sub").apply {
+                                api.getSubredditInfo(sub).apply {
                                     subredditDAO.insertSubreddit(this.copy(
                                             isTrending = 1,
                                             lastUpdated = System.currentTimeMillis() / 1000
@@ -62,13 +70,13 @@ class ExploreRepo @Inject constructor(private val reddit: Reddit, private val su
     }
 
     /**
-     * Helper function to determine if cached subs are stale (more than a day old)
+     * Helper function to determine if cached subs are stale (more than a 12 hrs old)
      */
-    private fun areTrendingSubsStale(trendingSubs: List<Subreddit>): Boolean {
-        for (sub in trendingSubs)
-            if (abs((sub.lastUpdated ?: 0) - System.currentTimeMillis() / 1000) > 86400000)
-                return true
-        return false
+    private fun areTrendingSubsStale(): Boolean {
+        val current = System.currentTimeMillis()
+        val last = sharedPreferences.getLong(Constants.LAST_TRENDING_UPDATED_KEY, 0)
+        val duration = 12 * 60 * 60 * 1000L
+        return current - last > duration
     }
 
     suspend fun searchSubreddit(query: String) {

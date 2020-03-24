@@ -26,7 +26,6 @@
             android:background="?attr/colorPrimary"
             android:gravity="center"
             android:padding="8dp"
-            android:text="@{vm.subredditInfo.display_name}"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/swipeToRefreshLayout"
@@ -52,8 +51,7 @@
             app:layout_constraintBottom_toTopOf="@id/subreddit_qas"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subreddit_name"
-            app:refreshing="@{vm.isLoading}">
+            app:layout_constraintTop_toBottomOf="@id/subreddit_name">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"

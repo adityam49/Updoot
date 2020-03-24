@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.ui.explore
+package com.ducktapedapps.updoot.api.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

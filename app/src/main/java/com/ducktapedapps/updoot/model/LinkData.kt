@@ -15,7 +15,7 @@ data class LinkData(
         val locked: Boolean,
         val ups: Int,
         val likes: Boolean?,
-        @Json(name = "subreddit_name_prefixed") val subredditName: String,
+        @Json(name = "subreddit") val subredditName: String,
         val name: String,
         val thumbnail: String,
         val saved: Boolean,

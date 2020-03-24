@@ -2,7 +2,6 @@ package com.ducktapedapps.updoot.ui.explore
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,10 +53,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
 
     private fun setUpViewModel() {
         viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application as UpdootApplication)).get(ExploreVM::class.java)
-        viewModel.trendingSubs.observe(viewLifecycleOwner, Observer { it ->
-            for (sub in it) {
-                Log.i(TAG, sub.toString())
-            }
+        viewModel.trendingSubs.observe(viewLifecycleOwner, Observer {
             trendingAdapter.submitList(it)
         })
     }

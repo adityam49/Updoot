@@ -3,6 +3,8 @@ package com.ducktapedapps.updoot.utils
 import com.ducktapedapps.updoot.BuildConfig
 
 object Constants {
+    const val SHARED_PREFS = "shared_prefs"
+    const val LAST_TRENDING_UPDATED_KEY = "last_trending_updated_key"
     const val TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey"
     const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
 

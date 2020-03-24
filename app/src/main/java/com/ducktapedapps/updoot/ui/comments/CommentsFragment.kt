@@ -16,6 +16,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.ducktapedapps.updoot.utils.SwipeUtils
 import javax.inject.Inject
 
@@ -25,7 +26,7 @@ class CommentsFragment : Fragment() {
 
     private lateinit var binding: FragmentCommentsBinding
     private lateinit var viewModel: CommentsVM
-    private lateinit var adapter: CommentsAdapter
+    private lateinit var commentsAdapter: CommentsAdapter
     private val args: CommentsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,8 +54,8 @@ class CommentsFragment : Fragment() {
 
         viewModel.allComments.observe(
                 viewLifecycleOwner,
-                androidx.lifecycle.Observer<List<BaseComment>?> { commentDataList: List<BaseComment>? ->
-                    adapter.submitList(commentDataList)
+                androidx.lifecycle.Observer { commentDataList: List<BaseComment>? ->
+                    commentsAdapter.submitList(commentDataList)
                 }
         )
     }
@@ -62,11 +63,13 @@ class CommentsFragment : Fragment() {
     private fun setUpRecyclerView() {
         val handler = ClickHandler()
         binding.clickhandler = handler
-        adapter = CommentsAdapter(handler)
+        commentsAdapter = CommentsAdapter(handler)
 
-        val recyclerView = binding.recyclerView
-        recyclerView.layoutManager = LinearLayoutManager(this@CommentsFragment.context)
-        recyclerView.adapter = adapter
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = commentsAdapter
+            itemAnimator = CustomItemAnimator()
+        }
 
         ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {
             override fun performSlightLeftSwipeAction(adapterPosition: Int) {
@@ -79,7 +82,7 @@ class CommentsFragment : Fragment() {
 
             override fun performLeftSwipeAction(adapterPosition: Int) {}
             override fun performRightSwipeAction(adapterPosition: Int) {}
-        })).attachToRecyclerView(recyclerView)
+        })).attachToRecyclerView(binding.recyclerView)
     }
 
     inner class ClickHandler {

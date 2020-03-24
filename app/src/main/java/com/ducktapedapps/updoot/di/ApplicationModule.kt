@@ -21,7 +21,7 @@ class ApplicationModule(private val mApplication: Application) {
     @Singleton
     @Provides
     fun provideSharedPreferences(): SharedPreferences {
-        return mApplication.getSharedPreferences(Constants.TOKEN_SHARED_PREFS_KEY, Context.MODE_PRIVATE)
+        return mApplication.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE)
     }
 
     @Provides

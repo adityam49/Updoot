@@ -2,12 +2,10 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.databinding.BindingAdapter
@@ -70,6 +68,7 @@ class SubredditFragment : Fragment() {
         binding.apply {
             subredditQas.sortButton.setOnClickListener { showMenuFor(requireContext(), it, submissionsVM) }
             subredditQas.viewModeButton.setOnClickListener { submissionsVM.toggleUi() }
+            subredditName.text = if (args.rSubreddit.isNullOrEmpty()) "Front page" else "r/${args.rSubreddit}"
         }
         setUpVMWithViews(binding, adapter)
         setUpRecyclerView(binding, adapter)
@@ -120,7 +119,7 @@ class SubredditFragment : Fragment() {
             })
         }
         submissionsVM.apply {
-            uiType.observe(viewLifecycleOwner, Observer { it: SubmissionUiType ->
+            uiType.observe(viewLifecycleOwner, Observer {
                 adapter.itemUi = it
                 binding.recyclerView.adapter = null
                 binding.recyclerView.adapter = adapter
@@ -134,8 +133,8 @@ class SubredditFragment : Fragment() {
             })
 
             isLoading.observe(viewLifecycleOwner, Observer {
-                Log.i(TAG, "new loading value  $it")
-                //Hack for motionLayout visibility
+                if (!it) binding.swipeToRefreshLayout.isRefreshing = false
+                //Hack for motionLayout view visibility
                 if (binding.root is MotionLayout) {
                     val layout = binding.progressBar.parent as MotionLayout
                     val setToVisibility = if (it) View.VISIBLE else View.GONE
@@ -158,9 +157,3 @@ fun bindIcon(view: ImageView, url: String?) =
                 .apply(RequestOptions.circleCropTransform())
                 .override(128, 128)
                 .into(view)
-
-@BindingAdapter("onlineCount", "subscriberCount")
-fun bindUserCount(view: TextView, onlineCount: Long, subscriberCount: Long) {
-    view.text = String.format("%s Online / %s Subscribers", getCompactCountAsString(onlineCount), getCompactCountAsString(subscriberCount))
-}
-
