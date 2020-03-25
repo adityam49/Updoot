@@ -37,16 +37,22 @@ class ExploreRepo @Inject constructor(
 
                 //looking if there are cached trending subreddits
                 subredditDAO.getTrendingSubreddits().apply {
-                    if (this.isNotEmpty()) _trendingSubs.postValue(this)
-
-                    if (this.isNotEmpty() && !areTrendingSubsStale()) return@apply
+                    var subsStale = false
+                    if (this.isNotEmpty()) {
+                        _trendingSubs.postValue(this)
+                        if (areTrendingSubsStale()) {
+                            subsStale = true
+                            forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
+                        }
+                    }
                     //getting new trending subs and caching them
-                    else {
+                    if (this.isEmpty() || subsStale) {
                         val api = reddit.authenticatedAPI()
                         val trendingSubs = api.getTrendingSubredditNames()
                         sharedPreferences.edit().putLong(Constants.LAST_TRENDING_UPDATED_KEY, System.currentTimeMillis()).apply()
                         val fetchedSubs: MutableList<Subreddit> = _trendingSubs.value?.toMutableList()
                                 ?: mutableListOf()
+                        if (subsStale) _trendingSubs.postValue(listOf())
                         for (sub in trendingSubs) {
                             async {
                                 api.getSubredditInfo(sub).apply {
@@ -70,7 +76,7 @@ class ExploreRepo @Inject constructor(
     }
 
     /**
-     * Helper function to determine if cached subs are stale (more than a 12 hrs old)
+     * Helper function to determine if cached trending subs are stale (more than a 12 hrs old)
      */
     private fun areTrendingSubsStale(): Boolean {
         val current = System.currentTimeMillis()

@@ -75,8 +75,8 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
                     }
                 } else {
                     _subredditInfo.postValue(it)
-                    if (subreddit == FRONTPAGE) return@let
-                    if (isInfoOlderThan(1, it.lastUpdated ?: 0)) {
+                    if (subreddit == FRONTPAGE) return
+                    else if (isInfoOlderThan(1, it.lastUpdated ?: 0)) {
                         api.getSubredditInfo(subreddit).let { fetchedSub ->
                             fetchedSub.lastUpdated = System.currentTimeMillis()
                             _subredditInfo.postValue(fetchedSub)
@@ -241,4 +241,3 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
         }
     }
 }
-
