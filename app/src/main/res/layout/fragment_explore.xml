@@ -10,56 +10,55 @@
             type="com.ducktapedapps.updoot.ui.explore.ExploreVM" />
     </data>
 
-    <androidx.constraintlayout.motion.widget.MotionLayout
-        android:id="@+id/parentLayout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutDescription="@xml/explore_scene">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/header"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/parentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/explore"
+                android:textSize="24sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/trending_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/header"
+                tools:listitem="@layout/trending_subreddit_item" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/search_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/explore"
-            android:textSize="24sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/trending_rv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/header"
-            tools:listitem="@layout/trending_subreddit_item" />
-
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/search_qas"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_margin="16dp"
+            android:backgroundTint="?attr/colorOnBackground"
+            android:src="@drawable/ic_search_24dp"
+            app:layout_anchor="@id/included_qas"
+            app:layout_anchorGravity="center_horizontal"
+            app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline_bottom" />
+            app:layout_constraintStart_toStartOf="parent" />
 
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_mid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.5" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.95" />
-    </androidx.constraintlayout.motion.widget.MotionLayout>
+        <include
+            android:id="@+id/included_qas"
+            layout="@layout/qas_search_content" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

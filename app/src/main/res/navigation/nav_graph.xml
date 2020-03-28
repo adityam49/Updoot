@@ -5,9 +5,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/SubredditDestination">
 
-    <action
-        android:id="@+id/action_go_to_home"
-        app:destination="@id/SubredditDestination" />
     <dialog
         android:id="@+id/AccountsBottomSheetDialog"
         android:name="com.ducktapedapps.updoot.ui.AccountsBottomSheetDialogFragment"
@@ -86,7 +83,11 @@
         android:label="ExploreDestination"
         tools:layout="@layout/fragment_explore">
         <action
-            android:id="@+id/action_ExploreDestination_to_SubredditDestination"
-            app:destination="@id/SubredditDestination" />
+            android:id="@+id/explore_to_subreddit"
+            app:destination="@id/SubredditDestination"
+            app:enterAnim="@anim/enter_from_left"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/enter_from_right"
+            app:popExitAnim="@anim/exit_to_left" />
     </fragment>
 </navigation>

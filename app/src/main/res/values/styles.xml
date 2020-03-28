@@ -25,7 +25,7 @@
         <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
     </style>
 
-    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+    <style name="CustomBottomSheet" parent="Widget.Design.BottomSheet.Modal">
         <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
     </style>
 

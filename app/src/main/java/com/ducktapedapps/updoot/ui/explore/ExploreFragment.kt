@@ -1,22 +1,28 @@
 package com.ducktapedapps.updoot.ui.explore
 
+import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
 import com.ducktapedapps.updoot.utils.CustomItemAnimator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 
@@ -26,6 +32,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     @Inject
     lateinit var application: Application
 
+    private lateinit var searchAdapter: SearchAdapter
     private lateinit var trendingAdapter: TrendingSubsAdapter
     private lateinit var viewModel: ExploreVM
 
@@ -39,6 +46,8 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
 
         setUpViewModel()
         trendingAdapter = TrendingSubsAdapter()
+        searchAdapter = SearchAdapter(ClickHandler())
+
         binding.apply {
             trendingRv.apply {
                 adapter = trendingAdapter
@@ -47,21 +56,74 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
                 PagerSnapHelper().attachToRecyclerView(this)
             }
             vm = viewModel
+            val behavior = BottomSheetBehavior.from(includedQas.cardView).apply {
+                state = BottomSheetBehavior.STATE_HIDDEN
+            }
+            searchFab.setOnClickListener {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                includedQas.searchView.onActionViewExpanded()
+            }
+            includedQas.apply {
+                searchView.apply {
+                    setOnQueryTextFocusChangeListener { v, hasFocus ->
+                        if (hasFocus) behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        else hideKeyboardFrom(requireContext(), this)
+                    }
+                    setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?): Boolean = true
+                        private var oldQuery: String = ""
+                        override fun onQueryTextChange(newQuery: String): Boolean {
+                            if (oldQuery != newQuery) {
+                                oldQuery = newQuery
+                                if (oldQuery == newQuery && oldQuery.isNotEmpty() && viewModel.isLoading.value != true) {
+                                    launch {
+                                        delay(700)
+                                        viewModel.searchSubreddit(oldQuery)
+                                    }
+                                    return true
+                                }
+                            }
+                            return false
+                        }
+                    })
+                }
+                searchResultRv.apply {
+                    addItemDecoration(DividerItemDecoration(requireContext(), VERTICAL))
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = searchAdapter
+                }
+            }
         }
+
         return binding.root
+    }
+
+    fun hideKeyboardFrom(context: Context, view: View) {
+        val imm: InputMethodManager = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun setUpViewModel() {
         viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application as UpdootApplication)).get(ExploreVM::class.java)
-        viewModel.trendingSubs.observe(viewLifecycleOwner, Observer {
-            trendingAdapter.submitList(it)
-        })
+                .apply {
+                    trendingSubs.observe(viewLifecycleOwner, Observer {
+                        trendingAdapter.submitList(it)
+                    })
+
+                    result.observe(viewLifecycleOwner, Observer {
+                        searchAdapter.submitList(it.toMutableList())
+                    })
+                }
+
     }
 
     inner class ClickHandler {
-        fun onSubredditClick(rSubreddit: String) {
-
+        fun onSubredditClick(subreddit_name: String) {
+            findNavController().navigate(
+                    ExploreFragmentDirections.exploreToSubreddit().setRSubreddit(subreddit_name)
+            )
         }
+
     }
 
     override fun onDestroy() {

@@ -2,9 +2,13 @@ package com.ducktapedapps.updoot.ui.explore
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.databinding.SubredditItemBinding
 import com.ducktapedapps.updoot.model.Subreddit
 
@@ -33,3 +37,10 @@ class SearchAdapter(private val clickHandler: ExploreFragment.ClickHandler) : Li
         holder.binding.executePendingBindings()
     }
 }
+
+@BindingAdapter("searchSubredditIcon")
+fun bindIcon(view: ImageView, url: String?) =
+        Glide.with(view)
+                .load(url)
+                .apply(RequestOptions.circleCropTransform())
+                .into(view)

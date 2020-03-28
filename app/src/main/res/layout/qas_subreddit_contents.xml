@@ -10,8 +10,9 @@
             type="com.ducktapedapps.updoot.model.Subreddit" />
     </data>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"
+        style="@style/CustomBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -95,5 +96,5 @@
                 app:layout_constraintTop_toTopOf="@id/sort_button" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </layout>
