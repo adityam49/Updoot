@@ -1,12 +1,10 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,8 +15,7 @@ private const val TAG = "ExploreRepo"
 
 class ExploreRepo @Inject constructor(
         private val reddit: Reddit,
-        private val subredditDAO: SubredditDAO,
-        private val sharedPreferences: SharedPreferences
+        private val subredditDAO: SubredditDAO
 ) {
 
     private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -34,35 +31,18 @@ class ExploreRepo @Inject constructor(
         _isLoading.postValue(true)
         withContext(Dispatchers.IO) {
             try {
-
-                //looking if there are cached trending subreddits
                 subredditDAO.getTrendingSubreddits().apply {
-                    var subsStale = false
-                    if (this.isNotEmpty()) {
-                        _trendingSubs.postValue(this)
-                        if (areTrendingSubsStale()) {
-                            subsStale = true
-                            forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
-                        }
-                    }
-                    //getting new trending subs and caching them
-                    if (this.isEmpty() || subsStale) {
-                        val api = reddit.authenticatedAPI()
-                        val trendingSubs = api.getTrendingSubredditNames()
-                        sharedPreferences.edit().putLong(Constants.LAST_TRENDING_UPDATED_KEY, System.currentTimeMillis()).apply()
-                        val fetchedSubs: MutableList<Subreddit> = _trendingSubs.value?.toMutableList()
-                                ?: mutableListOf()
-                        if (subsStale) _trendingSubs.postValue(listOf())
-                        for (sub in trendingSubs) {
-                            async {
-                                api.getSubredditInfo(sub).apply {
-                                    subredditDAO.insertSubreddit(this.copy(
-                                            isTrending = 1,
-                                            lastUpdated = System.currentTimeMillis() / 1000
-                                    ))
-                                    fetchedSubs += this
-                                    _trendingSubs.postValue(fetchedSubs)
-                                }
+                    if (this.isNotEmpty()) _trendingSubs.postValue(this)
+                    val api = reddit.authenticatedAPI()
+                    val trendingSubs = api.getTrendingSubredditNames()
+                    if (this.isNotEmpty()) forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0, lastUpdated = System.currentTimeMillis())) }
+                    val fetchedSubs: MutableList<Subreddit> = mutableListOf()
+                    for (sub in trendingSubs) {
+                        async {
+                            api.getSubredditInfo(sub).apply {
+                                this.copy(isTrending = 1, lastUpdated = System.currentTimeMillis()).apply { subredditDAO.insertSubreddit(this) }
+                                fetchedSubs += this
+                                _trendingSubs.postValue(fetchedSubs)
                             }
                         }
                     }
@@ -73,16 +53,6 @@ class ExploreRepo @Inject constructor(
                 _isLoading.postValue(false)
             }
         }
-    }
-
-    /**
-     * Helper function to determine if cached trending subs are stale (more than a 12 hrs old)
-     */
-    private fun areTrendingSubsStale(): Boolean {
-        val current = System.currentTimeMillis()
-        val last = sharedPreferences.getLong(Constants.LAST_TRENDING_UPDATED_KEY, 0)
-        val duration = 12 * 60 * 60 * 1000L
-        return current - last > duration
     }
 
     suspend fun searchSubreddit(query: String) {
