@@ -16,8 +16,8 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.ducktapedapps.updoot.utils.SwipeUtils
+import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
@@ -68,7 +68,7 @@ class CommentsFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = commentsAdapter
-            itemAnimator = CustomItemAnimator()
+            itemAnimator = SlideInDownAnimator()
         }
 
         ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {

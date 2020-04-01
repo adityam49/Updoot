@@ -71,7 +71,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    //android arch
+    //android lifecycle
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
 
@@ -103,6 +103,9 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
+
+    //recyclerview animations
+    implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
 
     //rich text view
     implementation 'me.kaelaela:OpenGraphView:1.2.0@aar'

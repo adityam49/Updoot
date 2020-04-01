@@ -21,6 +21,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <ProgressBar
+                android:id="@+id/search_progress"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="@id/search_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/search_view"
+                app:layout_constraintTop_toTopOf="@id/search_view" />
+
             <ImageView
                 android:id="@+id/drag_handle"
                 android:layout_width="wrap_content"
@@ -34,13 +44,13 @@
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/search_view"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:imeOptions="actionSearch"
                 app:iconifiedByDefault="false"
                 app:layout_constraintBottom_toTopOf="@+id/search_result_rv"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/search_progress"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/drag_handle"
                 app:searchHintIcon="@drawable/ic_explore_black_24dp" />

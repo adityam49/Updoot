@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
@@ -20,8 +21,8 @@ import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
-import com.ducktapedapps.updoot.utils.CustomItemAnimator
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -44,7 +45,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = FragmentExploreBinding.inflate(inflater, container, false).apply { lifecycleOwner = viewLifecycleOwner }
 
-        setUpViewModel()
+        setUpViewModel(binding)
         trendingAdapter = TrendingSubsAdapter()
         searchAdapter = SearchAdapter(ClickHandler())
 
@@ -52,7 +53,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
             trendingRv.apply {
                 adapter = trendingAdapter
                 layoutManager = LinearLayoutManager(requireContext(), HORIZONTAL, false)
-                itemAnimator = CustomItemAnimator()
+                itemAnimator = SlideInUpAnimator()
                 PagerSnapHelper().attachToRecyclerView(this)
             }
             vm = viewModel
@@ -98,12 +99,12 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
         return binding.root
     }
 
-    fun hideKeyboardFrom(context: Context, view: View) {
+    private fun hideKeyboardFrom(context: Context, view: View) {
         val imm: InputMethodManager = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun setUpViewModel() {
+    private fun setUpViewModel(binding: FragmentExploreBinding) {
         viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application as UpdootApplication)).get(ExploreVM::class.java)
                 .apply {
                     trendingSubs.observe(viewLifecycleOwner, Observer {
@@ -112,6 +113,10 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
 
                     result.observe(viewLifecycleOwner, Observer {
                         searchAdapter.submitList(it.toMutableList())
+                    })
+
+                    isLoading.observe(viewLifecycleOwner, Observer {
+                        binding.includedQas.searchProgress.visibility = if (it) View.VISIBLE else GONE
                     })
                 }
 

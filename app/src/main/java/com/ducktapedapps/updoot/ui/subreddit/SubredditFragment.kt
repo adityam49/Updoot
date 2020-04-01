@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -26,6 +27,7 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import javax.inject.Inject
 
 
@@ -81,7 +83,7 @@ class SubredditFragment : Fragment() {
         binding.recyclerView.apply {
             this.adapter = adapter
             layoutManager = linearLayoutManager
-            itemAnimator = CustomItemAnimator()
+            itemAnimator = SlideInUpAnimator(OvershootInterpolator(1f))
 
             ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
                 override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
