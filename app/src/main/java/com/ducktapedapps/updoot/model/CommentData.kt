@@ -16,7 +16,8 @@ data class CommentData(
         val replies: List<BaseComment>,
         val gildings: Gildings,
         val repliesExpanded: Boolean = false,
-        val is_submitter: Boolean
+        val is_submitter: Boolean,
+        val author_flair_text: String
 ) : Parcelable, BaseComment(_id, _depth, _name, _parent_id) {
 
     fun vote(direction: Int): CommentData {

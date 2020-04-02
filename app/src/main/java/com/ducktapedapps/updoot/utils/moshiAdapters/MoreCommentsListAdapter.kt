@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.utils
+package com.ducktapedapps.updoot.utils.moshiAdapters
 
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
@@ -55,7 +55,8 @@ class MoreCommentsListAdapter {
                 is_submitter = data["is_submitter"] as? Boolean ?: false,
                 likes = data["likes"] as Boolean?,
                 _parent_id = data["parent_id"] as String,
-                _name = data["name"] as String
+                _name = data["name"] as String,
+                author_flair_text = data["author_flair_text"] as? String ?: ""
         )
     }
 }

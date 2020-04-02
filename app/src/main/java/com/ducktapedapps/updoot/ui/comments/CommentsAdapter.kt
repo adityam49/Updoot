@@ -2,6 +2,8 @@ package com.ducktapedapps.updoot.ui.comments
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -78,4 +80,10 @@ class CommentsAdapter(
             } else true
         }
     }
+}
+
+@BindingAdapter("commentFlairText")
+fun bindFlair(textView: TextView, commentFlairText: String) {
+    if (commentFlairText.trim().isNotEmpty())
+        textView.text = String.format("\u00B7 %s", commentFlairText)
 }

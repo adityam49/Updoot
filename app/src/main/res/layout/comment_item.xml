@@ -58,6 +58,23 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/flair"
+            commentFlairText="@{commentData.author_flair_text}"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="@id/username_tv"
+            app:layout_constraintEnd_toStartOf="@id/score_tv"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/username_tv"
+            app:layout_constraintTop_toTopOf="@id/username_tv"
+            tools:text="\u00B7 this is a long flair which will get ellipsized" />
+
+        <TextView
             android:id="@+id/childCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
