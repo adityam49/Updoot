@@ -31,7 +31,11 @@ class NetworkModule {
         okHttpClient.addNetworkInterceptor(Interceptor { chain: Interceptor.Chain ->
             //as per reddit api guidelines to include proper user agent
             val userAgent = "android:com.ducktapedapps.updoot:" + BuildConfig.VERSION_NAME + " (by /u/nothoneypot)"
-            val request = chain.request().newBuilder().addHeader("User-Agent", userAgent).build()
+
+            //For removing default legacy json character support
+            val url = chain.request().url.newBuilder().addQueryParameter("raw_json", "1").build()
+
+            val request = chain.request().newBuilder().url(url).addHeader("User-Agent", userAgent).build()
             chain.proceed(request)
         })
         if (BuildConfig.DEBUG) {
