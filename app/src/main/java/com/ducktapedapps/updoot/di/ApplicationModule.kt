@@ -7,6 +7,7 @@ import com.ducktapedapps.updoot.utils.Constants
 import dagger.Module
 import dagger.Provides
 import io.noties.markwon.Markwon
+import io.noties.markwon.linkify.LinkifyPlugin
 import java.util.*
 import javax.inject.Named
 import javax.inject.Singleton
@@ -28,7 +29,9 @@ class ApplicationModule(private val mApplication: Application) {
     @Provides
     @Singleton
     fun provideMarkwon(application: Application): Markwon {
-        return Markwon.builder(application).build()
+        return Markwon.builder(application)
+                .usePlugin(LinkifyPlugin.create())
+                .build()
     }
 
     @Provides

@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui.comments
 
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -60,7 +61,12 @@ class CommentsAdapter(
 
     inner class CommentHolder(val binding: CommentItemBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
-            binding.root.setOnClickListener { clickHandler.onClick(adapterPosition) }
+            binding.apply {
+                commentTv.apply {
+                    movementMethod = LinkMovementMethod.getInstance()
+                    setOnClickListener { clickHandler.onClick(adapterPosition) }
+                }
+            }
         }
     }
 

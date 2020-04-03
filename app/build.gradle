@@ -104,6 +104,7 @@ dependencies {
 
     //markdown support
     implementation "io.noties.markwon:core:$markwon_version"
+    implementation "io.noties.markwon:linkify:$markwon_version"
 
     //leak canary for detecting memory leaks
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
