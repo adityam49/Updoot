@@ -1,16 +1,14 @@
 package com.ducktapedapps.updoot.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import android.text.Spanned
 
-@Parcelize
 data class CommentData(
         val _id: String,
         val _depth: Int,
         val _parent_id: String,
         val _name: String,
         val author: String,
-        var body: String,
+        var body: Spanned,
         var ups: Int,
         val likes: Boolean?,
         val replies: List<BaseComment>,
@@ -18,7 +16,7 @@ data class CommentData(
         val repliesExpanded: Boolean = false,
         val is_submitter: Boolean,
         val author_flair_text: String
-) : Parcelable, BaseComment(_id, _depth, _name, _parent_id) {
+) : BaseComment(_id, _depth, _name, _parent_id) {
 
     fun vote(direction: Int): CommentData {
         var updatedLikes: Boolean? = this.likes

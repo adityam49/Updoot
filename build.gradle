@@ -11,6 +11,7 @@ buildscript {
         kotlin_coroutines = "1.3.2"
         moshi_version = "1.9.2"
         room_version = '2.2.5'
+        markwon_version = "4.3.1"
     }
     repositories {
         google()

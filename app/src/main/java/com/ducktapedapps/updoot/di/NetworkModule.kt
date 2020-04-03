@@ -13,6 +13,7 @@ import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
+import io.noties.markwon.Markwon
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -48,11 +49,11 @@ class NetworkModule {
 
     @Reusable
     @Provides
-    fun provideMoshi(): Moshi = Moshi
+    fun provideMoshi(markwon: Markwon): Moshi = Moshi
             .Builder()
             .add(SubmissionListingAdapter())
-            .add(MoreCommentsListAdapter())
-            .add(CommentListingAdapter())
+            .add(MoreCommentsListAdapter(markwon))
+            .add(CommentListingAdapter(markwon))
             .add(TrendingSubsJsonAdapter())
             .add(SearchAdapter())
             .add(SubredditInfoAdapter())

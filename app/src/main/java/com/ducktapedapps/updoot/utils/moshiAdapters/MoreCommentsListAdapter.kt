@@ -7,8 +7,10 @@ import com.ducktapedapps.updoot.model.MoreComments
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import io.noties.markwon.Markwon
+import javax.inject.Inject
 
-class MoreCommentsListAdapter {
+class MoreCommentsListAdapter @Inject constructor(private val markwon: Markwon) {
 
     private val moshi = Moshi.Builder().build()
     private val mapAdapter = moshi.adapter(Map::class.java)
@@ -44,7 +46,7 @@ class MoreCommentsListAdapter {
 
         return CommentData(
                 author = data["author"] as? String ?: "Unknown",
-                body = data["body"] as? String ?: "",
+                body = markwon.toMarkdown(data["body"] as? String ?: ""),
                 gildings = gildingsAdapter.fromJson(mapAdapter.toJson(data["gildings"] as Map<*, *>))
                         ?: Gildings(),
                 _id = data["id"] as String,

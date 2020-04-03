@@ -5,8 +5,10 @@ import com.ducktapedapps.updoot.model.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import io.noties.markwon.Markwon
+import javax.inject.Inject
 
-class CommentListingAdapter {
+class CommentListingAdapter @Inject constructor(private val markwon: Markwon) {
     private val moshi = Moshi.Builder().build()
     private val mapAdapter = moshi.adapter(Map::class.java)
     private val gildingsAdapter = moshi.adapter(Gildings::class.java)
@@ -41,10 +43,10 @@ class CommentListingAdapter {
 
         return CommentData(
                 author = data["author"] as? String ?: "Unknown",
-                body = data["body"] as? String ?: "",
+                body = markwon.toMarkdown(data["body"] as? String ?: ""),
                 gildings = gildingsAdapter.fromJson(mapAdapter.toJson(data["gildings"] as Map<*, *>))
                         ?: Gildings(),
-                _id = data["id"] as String ,
+                _id = data["id"] as String,
                 ups = (data["ups"] as? Double)?.toInt() ?: 0,
                 replies = if (replies != null) deserializeListing(replies) else listOf(),
                 _depth = (data["depth"] as? Double)?.toInt() ?: 0,

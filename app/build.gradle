@@ -102,6 +102,9 @@ dependencies {
     //rich text view
     implementation 'me.kaelaela:OpenGraphView:1.2.0@aar'
 
+    //markdown support
+    implementation "io.noties.markwon:core:$markwon_version"
+
     //leak canary for detecting memory leaks
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
 
