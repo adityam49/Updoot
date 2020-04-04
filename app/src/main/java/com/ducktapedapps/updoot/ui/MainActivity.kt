@@ -41,11 +41,10 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
         val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
 
         binding.bottomNavView.setupWithNavController(navController)
-
-        navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, arguments: Bundle? ->
+        navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, _: Bundle? ->
             when (destination.id) {
-                R.id.ImagePreviewDestination -> binding.bottomNavView.visibility = View.GONE
-                else -> binding.bottomNavView.visibility = View.VISIBLE
+                R.id.ImagePreviewDestination -> binding.bottomNavView.apply { visibility = View.GONE }
+                else -> binding.bottomNavView.apply { visibility = View.VISIBLE }
             }
         }
     }
