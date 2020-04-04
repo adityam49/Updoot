@@ -33,8 +33,6 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     @Inject
     lateinit var application: Application
 
-    private lateinit var searchAdapter: SearchAdapter
-    private lateinit var trendingAdapter: TrendingSubsAdapter
     private lateinit var viewModel: ExploreVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +43,9 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = FragmentExploreBinding.inflate(inflater, container, false).apply { lifecycleOwner = viewLifecycleOwner }
 
-        setUpViewModel(binding)
-        trendingAdapter = TrendingSubsAdapter()
-        searchAdapter = SearchAdapter(ClickHandler())
+        val trendingAdapter = TrendingSubsAdapter()
+        val searchAdapter = SearchAdapter(ClickHandler())
+        setUpViewModel(binding, searchAdapter, trendingAdapter)
 
         binding.apply {
             trendingRv.apply {
@@ -104,7 +102,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun setUpViewModel(binding: FragmentExploreBinding) {
+    private fun setUpViewModel(binding: FragmentExploreBinding, searchAdapter: SearchAdapter, trendingAdapter: TrendingSubsAdapter) {
         viewModel = ViewModelProvider(this@ExploreFragment, ExploreVMFactory(application as UpdootApplication)).get(ExploreVM::class.java)
                 .apply {
                     trendingSubs.observe(viewLifecycleOwner, Observer {
@@ -132,7 +130,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         cancel()
+        super.onDestroy()
     }
 }
