@@ -33,7 +33,6 @@
 
             <ImageView
                 android:id="@+id/self_text_thumbnail"
-                android:transitionName="@{linkdata.thumbnail}"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
@@ -42,6 +41,7 @@
                 android:paddingTop="16dp"
                 android:paddingEnd="16dp"
                 android:scaleType="fitXY"
+                android:transitionName="@{linkdata.thumbnail}"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/title_tv"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -58,7 +58,6 @@
                 android:paddingTop="16dp"
                 android:paddingEnd="16dp"
                 android:text="@{linkdata.title}"
-                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@id/self_text_cardView"
@@ -74,7 +73,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/self_text_cardView"
@@ -129,7 +127,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:background="?android:attr/textColorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/metadata" />
@@ -165,15 +162,9 @@
                     android:id="@+id/richLinkPreview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
                     android:padding="8dp"
                     android:visibility="gone"
                     app:cornerRadius="8dp"
-                    app:descTextColor="?android:attr/textColorSecondary"
-                    app:richLinkPreview="@{linkdata}"
-                    app:strokeColor="@android:color/transparent"
-                    app:titleColor="?android:attr/textColorPrimary"
-                    app:urlTextColor="?android:attr/textColorSecondary"
                     tools:visibility="gone" />
             </androidx.cardview.widget.CardView>
 

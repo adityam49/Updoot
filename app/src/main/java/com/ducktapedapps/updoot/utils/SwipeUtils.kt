@@ -33,7 +33,7 @@ class SwipeUtils(context: Context?, callback: SwipeActionCallback) : ItemTouchHe
             upVoteColor = ContextCompat.getColor(context, R.color.upVoteColor)
             downVoteColor = ContextCompat.getColor(context, R.color.downVoteColor)
             saveContentColor = ContextCompat.getColor(context, R.color.saveContentColor)
-            optionsColor = ContextCompat.getColor(context, R.color.neutralColor)
+            optionsColor = ContextCompat.getColor(context, R.color.color_on_primary)
         }
     }
 

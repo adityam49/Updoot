@@ -107,7 +107,7 @@ dependencies {
     implementation "io.noties.markwon:linkify:$markwon_version"
 
     //leak canary for detecting memory leaks
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
 
     //testing
     testImplementation 'junit:junit:4.13-beta-3'

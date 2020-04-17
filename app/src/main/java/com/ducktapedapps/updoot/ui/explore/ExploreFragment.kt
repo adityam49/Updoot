@@ -55,7 +55,7 @@ class ExploreFragment : Fragment(), CoroutineScope by MainScope() {
                 PagerSnapHelper().attachToRecyclerView(this)
             }
             vm = viewModel
-            val behavior = BottomSheetBehavior.from(includedQas.cardView).apply {
+            val behavior = BottomSheetBehavior.from(includedQas.searchQasRoot).apply {
                 state = BottomSheetBehavior.STATE_HIDDEN
             }
             searchFab.setOnClickListener {

@@ -2,6 +2,8 @@ package com.ducktapedapps.updoot.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setUpStatusBarColors()
         (application as UpdootApplication).updootComponent.inject(this)
 
         setUpViewModels()
@@ -34,6 +37,12 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
         setUpViews()
 
         userManager.attachListener(this)
+    }
+
+    private fun setUpStatusBarColors() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            window.statusBarColor = Color.BLACK
+        }
     }
 
     private fun setUpViews() {

@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ducktapedapps.updoot">
 
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".UpdootApplication"
         android:allowBackup="false"
@@ -10,9 +14,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/altDarkTheme"
-        tools:replace="android:allowBackup"
-        tools:ignore="GoogleAppIndexingWarning">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:allowBackup">
 
         <activity
             android:name=".ui.LoginActivity"
@@ -36,9 +40,4 @@
                 android:resource="@xml/authenticator" />
         </service>
     </application>
-
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

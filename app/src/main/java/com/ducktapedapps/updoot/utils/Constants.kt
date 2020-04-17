@@ -49,5 +49,7 @@ object Constants {
     //DB names
     const val SUBREDDIT_PREFS_DB = "subreddit_prefs_db"
     const val SUBREDDIT_DB = "subreddit_db"
+
+    const val THEME_KEY = "theme_key"
 }
 

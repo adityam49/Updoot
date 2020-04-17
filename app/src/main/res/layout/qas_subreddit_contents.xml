@@ -11,16 +11,16 @@
     </data>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardView"
-        style="@style/CustomBottomSheet"
+        android:id="@+id/subreddit_header_root"
+        style="@style/Theme.MaterialComponents.BottomSheetDialog"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/color_surface"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/subreddit_header_root"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/drag_handle"
@@ -96,5 +96,6 @@
                 app:layout_constraintTop_toTopOf="@id/sort_button" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </com.google.android.material.card.MaterialCardView>
 </layout>

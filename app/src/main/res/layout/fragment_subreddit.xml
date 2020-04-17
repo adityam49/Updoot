@@ -19,11 +19,11 @@
         app:layoutDescription="@xml/fragment_subreddit_scene">
 
         <TextView
+            android:background="@color/color_primary"
             android:id="@+id/subreddit_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:background="?attr/colorPrimary"
             android:gravity="center"
             android:padding="8dp"
             android:textSize="24sp"

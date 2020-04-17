@@ -1,32 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
-
-    <!--alternate light theme colors-->
-    <color name="LT_primaryColor">#f5f5f5</color>
-    <color name="LT_primaryLightColor">#ffffff</color>
-    <color name="LT_primaryDarkColor">#c2c2c2</color>
-    <color name="LT_primaryTextColor">#000000</color>
-    <color name="LT_secondaryTextColor">#212121</color>
-
-    <!--alternate dark theme colors-->
-    <color name="DT_primaryColor">#232329</color>
-    <color name="DT_primaryLightColor">#2A2B2E</color>
-    <color name="DT_primaryDarkColor">#202124</color>
-    <color name="DT_primaryTextColor">#ffffff</color>
-    <color name="DT_secondaryTextColor">#757575</color>
-
-    <!--accent color-->
-    <color name="secondaryColor">#2196f3</color>
-    <color name="secondaryLightColor">#83b9ff</color>
-    <color name="secondaryDarkColor">#005ecb</color>
-
     <!--reddit colors-->
     <color name="upVoteColor">#FF8B60</color>
     <color name="downVoteColor">#9494FF</color>
     <color name="saveContentColor">#FFB100</color>
-    <color name="neutralColor">#C6C6C6</color>
+
+
+    <!--light theme colors-->
+    <color name="color_primary">#FFFFFF</color>
+    <color name="color_primary_variant">#FAFAFA</color>
+    <color name="color_on_primary">#000000</color>
+    <color name="color_secondary">#6200EE</color>
+    <color name="color_secondary_variant">#3700B3</color>
+    <color name="color_on_secondary">#000000</color>
+    <color name="color_error">#F44336</color>
+    <color name="color_on_error">#FFFFFF</color>
+    <color name="color_surface">#FFFFFF</color>
+    <color name="color_on_surface">#000000</color>
+    <color name="color_background">#FFFFFF</color>
+    <color name="color_on_background">#000000</color>
+    <color name="color_status_bar">#FFFFFF</color>
 </resources>
 

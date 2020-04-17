@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.graphics.Color
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.ImageView
@@ -40,7 +39,7 @@ fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {
     }
 
     when {
-        likes == null -> textView.setTextColor(Color.WHITE)
+        likes == null -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.color_on_background))
         likes -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.upVoteColor))
         else -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.downVoteColor))
     }
@@ -86,7 +85,7 @@ fun setPreview(view: ImageView, image: Preview?, thumbnail: String) {
         Glide.with(view.context)
                 .load(lowResImage.url)
                 .override(view.width, view.width * (lowResImage.height / lowResImage.width))
-                .placeholder(R.color.DT_primaryColor)
+                .placeholder(R.color.color_background)
                 .thumbnail(Glide.with(view).load(thumbnail))
                 .fitCenter()
                 .into(view)

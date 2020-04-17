@@ -7,7 +7,6 @@
     android:orientation="horizontal">
 
     <ImageView
-        android:tint="@color/secondaryColor"
         android:id="@+id/avatar_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -15,10 +14,10 @@
         android:src="@drawable/ic_account_circle_black_24dp" />
 
     <TextView
-        android:layout_gravity="center_vertical"
         android:id="@+id/bottom_sheet_userName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_margin="8dp"
         android:textSize="18sp"
         tools:text="u/dumbUserName420" />
