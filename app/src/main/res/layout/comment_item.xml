@@ -7,18 +7,21 @@
         android:id="@+id/commentView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
         <TextView
             android:id="@+id/comment_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
             android:text="@{commentData.body}"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/commentThreadView"
+            app:layout_constraintStart_toEndOf="@+id/indentView"
             app:layout_constraintTop_toBottomOf="@+id/username_tv"
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum" />
 
@@ -26,10 +29,11 @@
             android:id="@+id/username_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
             android:text="@{commentData.author}"
             app:isAuthorOp="@{commentData.is_submitter}"
-            app:layout_constraintStart_toEndOf="@id/commentThreadView"
+            app:layout_constraintStart_toEndOf="@id/indentView"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="u/dumbusername" />
 
@@ -46,15 +50,19 @@
             tools:text="12k" />
 
 
-        <View
-            android:id="@+id/commentThreadView"
-            android:layout_width="1dp"
+        <com.ducktapedapps.updoot.ui.comments.IndentView
+            android:id="@+id/indentView"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:background="@color/color_secondary_variant"
-            app:commentDepth="@{commentData.depth}"
+            android:layout_marginStart="4dp"
+            app:indentLevel="@{commentData.depth}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:singleThreadMode="false"
+            app:threadColor="@color/color_secondary_variant"
+            app:threadSeparationSpace="3dp"
+            app:threadWidth="1dp" />
 
         <TextView
             android:id="@+id/flair"
@@ -63,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:ellipsize="end"
+            android:ellipsize="middle"
             android:singleLine="true"
             app:layout_constraintBottom_toBottomOf="@id/username_tv"
             app:layout_constraintEnd_toStartOf="@id/score_tv"

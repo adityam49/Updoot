@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IndentView">
+        <attr name="singleThreadMode" format="boolean" />
+        <attr name="threadColor" format="color" />
+        <attr name="threadSeparationSpace" format="dimension" />
+        <attr name="indentLevel" format="integer" />
+        <attr name="threadWidth" format="dimension" />
+        <attr name="indentSpace" format="dimension" />
+    </declare-styleable>
+</resources>

@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.FitCenter
@@ -27,18 +26,6 @@ fun setChildCount(textView: TextView, childCount: Int, isExpanded: Boolean) {
             textView.visibility = View.GONE
         }
         textView.text = textView.context.getString(R.string.childrenCommentCount, childCount)
-    }
-}
-
-@BindingAdapter("commentDepth")
-fun setCommentDepthMargin(view: View, depth: Int) {
-    if (depth != 0) {
-        val newLayoutParams = view.layoutParams as ConstraintLayout.LayoutParams
-        newLayoutParams.leftMargin = 8 + depth * 16
-        view.layoutParams = newLayoutParams
-        view.visibility = View.VISIBLE
-    } else {
-        view.visibility = View.GONE
     }
 }
 
