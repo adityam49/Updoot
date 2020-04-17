@@ -5,10 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.model.Subreddit
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class ExploreVM(private val exploreRepo: ExploreRepo) : ViewModel() {
 
+    private var currentSearchJob: Job? = null
     val isLoading = exploreRepo.isLoading
     val result = exploreRepo.results
     val trendingSubs: LiveData<List<Subreddit>> = exploreRepo.trendingSubs
@@ -19,9 +21,9 @@ class ExploreVM(private val exploreRepo: ExploreRepo) : ViewModel() {
         }
     }
     fun searchSubreddit(query: String) {
-        viewModelScope.launch {
+        currentSearchJob?.cancel()
+        currentSearchJob = viewModelScope.launch {
             exploreRepo.searchSubreddit(query)
-            exploreRepo.loadTrendingSubs()
         }
     }
 

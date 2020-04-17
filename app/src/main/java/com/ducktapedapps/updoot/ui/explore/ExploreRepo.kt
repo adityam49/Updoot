@@ -7,11 +7,8 @@ import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.utils.accountManagement.Reddit
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
-private const val TAG = "ExploreRepo"
 
 class ExploreRepo @Inject constructor(
         private val reddit: Reddit,
@@ -38,12 +35,10 @@ class ExploreRepo @Inject constructor(
                     if (this.isNotEmpty()) forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0, lastUpdated = System.currentTimeMillis())) }
                     val fetchedSubs: MutableList<Subreddit> = mutableListOf()
                     for (sub in trendingSubs) {
-                        async {
-                            api.getSubredditInfo(sub).apply {
-                                this.copy(isTrending = 1, lastUpdated = System.currentTimeMillis()).apply { subredditDAO.insertSubreddit(this) }
-                                fetchedSubs += this
-                                _trendingSubs.postValue(fetchedSubs)
-                            }
+                        api.getSubredditInfo(sub).apply {
+                            this.copy(isTrending = 1, lastUpdated = System.currentTimeMillis()).apply { subredditDAO.insertSubreddit(this) }
+                            fetchedSubs += this
+                            _trendingSubs.postValue(fetchedSubs)
                         }
                     }
                 }
@@ -77,4 +72,7 @@ class ExploreRepo @Inject constructor(
         }
     }
 
+    companion object {
+        private const val TAG = "ExploreRepo"
+    }
 }
