@@ -4,94 +4,78 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/commentView"
+        android:id="@+id/root_view_comment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
-
-        <TextView
-            android:id="@+id/comment_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:text="@{commentData.body}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/indentView"
-            app:layout_constraintTop_toBottomOf="@+id/username_tv"
-            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum" />
-
-        <TextView
-            android:id="@+id/username_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="8dp"
-            android:text="@{commentData.author}"
-            app:isAuthorOp="@{commentData.is_submitter}"
-            app:layout_constraintStart_toEndOf="@id/indentView"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="u/dumbusername" />
-
-        <TextView
-            android:id="@+id/score_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:submissionVotes="@{commentData.ups}"
-            app:voteColor="@{commentData.likes}"
-            tools:text="12k" />
-
+        android:importantForAccessibility="noHideDescendants">
 
         <com.ducktapedapps.updoot.ui.comments.IndentView
             android:id="@+id/indentView"
+            style="@style/indentation_style"
+            threadVisibility="@{commentData.depth}"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
             app:indentLevel="@{commentData.depth}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:singleThreadMode="false"
-            app:threadColor="@color/color_secondary_variant"
-            app:threadSeparationSpace="3dp"
-            app:threadWidth="1dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/flair"
-            commentFlairText="@{commentData.author_flair_text}"
+            android:id="@+id/text_view_comment_header"
+            commentHeaderContent="@{commentData}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="middle"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
             android:singleLine="true"
-            app:layout_constraintBottom_toBottomOf="@id/username_tv"
-            app:layout_constraintEnd_toStartOf="@id/score_tv"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@id/username_tv"
-            app:layout_constraintTop_toTopOf="@id/username_tv"
-            tools:text="\u00B7 this is a long flair which will get ellipsized" />
+            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+            app:layout_constraintEnd_toStartOf="@id/text_view_children_count"
+            app:layout_constraintStart_toEndOf="@id/indentView"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/lorem" />
 
         <TextView
-            android:id="@+id/childCount"
-            android:layout_width="wrap_content"
+            android:id="@+id/text_view_comment_body"
+            commentBodyContent="@{commentData.body}"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:childCommentCount="@{commentData.replies.size()}"
-            app:isExpanded="@{commentData.repliesExpanded}"
-            app:layout_constraintEnd_toStartOf="@+id/score_tv"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/text_view_comment_header"
+            app:layout_constraintTop_toBottomOf="@id/text_view_comment_header" />
 
+        <TextView
+            android:id="@+id/text_view_children_count"
+            childrenCount="@{commentData.replies.size()}"
+            repliesExpanded="@{commentData.repliesExpanded}"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+            app:layout_constraintEnd_toStartOf="@id/text_score"
+            app:layout_constraintStart_toEndOf="@id/text_view_comment_header"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="+12" />
 
+        <TextView
+            android:id="@+id/text_score"
+            commentScore="@{commentData.ups}"
+            voted="@{commentData.likes}"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/text_view_children_count"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="32" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <data>
 

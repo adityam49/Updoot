@@ -47,7 +47,7 @@ class CommentListingAdapter @Inject constructor(private val markwon: Markwon) {
                 gildings = gildingsAdapter.fromJson(mapAdapter.toJson(data["gildings"] as Map<*, *>))
                         ?: Gildings(),
                 _id = data["id"] as String,
-                ups = (data["ups"] as? Double)?.toInt() ?: 0,
+                ups = (data["ups"] as Double).toInt(),
                 replies = if (replies != null) deserializeListing(replies) else listOf(),
                 _depth = (data["depth"] as? Double)?.toInt() ?: 0,
                 repliesExpanded = false,

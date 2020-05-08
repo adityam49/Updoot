@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.graphics.Color
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -9,34 +8,11 @@ import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.Preview
 import com.ducktapedapps.updoot.utils.MarkdownUtils
 import me.kaelaela.opengraphview.OpenGraphView
 
-@BindingAdapter("childCommentCount", "isExpanded")
-
-fun setChildCount(textView: TextView, childCount: Int, isExpanded: Boolean) {
-    if (childCount == 0) textView.visibility = View.GONE
-    else {
-        if (!isExpanded) {
-            textView.visibility = View.VISIBLE
-        } else {
-            textView.visibility = View.GONE
-        }
-        textView.text = textView.context.getString(R.string.childrenCommentCount, childCount)
-    }
-}
-
-@BindingAdapter("isAuthorOp")
-fun setOPColor(authorTV: TextView, isOP: Boolean) {
-    if (isOP) {
-        authorTV.setBackgroundColor(Color.WHITE)
-    } else {
-        authorTV.setBackgroundColor(Color.TRANSPARENT)
-    }
-}
 
 @BindingAdapter("richLinkPreview")
 fun setRichLinkPreview(openGraphView: OpenGraphView, data: LinkData) {
@@ -91,3 +67,4 @@ fun setMoreCommentCount(view: TextView, count: Int) {
             .append(if (count == 1) " comment" else " comments")
     view.text = stringBuilder.toString()
 }
+

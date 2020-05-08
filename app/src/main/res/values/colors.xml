@@ -10,7 +10,9 @@
     <color name="color_primary">#FFFFFF</color>
     <color name="color_primary_variant">#FAFAFA</color>
     <color name="color_on_primary">#000000</color>
+    <color name="color_on_primary_light">#dbe2ef</color>
     <color name="color_secondary">#9e47ff</color>
+    <color name="color_secondary_alt">#ffd700</color>
     <color name="color_secondary_variant">#6200ee</color>
     <color name="color_on_secondary">#000000</color>
     <color name="color_error">#F44336</color>

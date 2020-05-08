@@ -5,10 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +16,7 @@ import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.SwipeUtils
-import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
+import com.google.android.material.appbar.MaterialToolbar
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
@@ -68,7 +67,6 @@ class CommentsFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = commentsAdapter
-            itemAnimator = SlideInDownAnimator()
         }
 
         ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {
@@ -88,9 +86,12 @@ class CommentsFragment : Fragment() {
     inner class ClickHandler {
         fun onClick(index: Int) = viewModel.toggleChildrenVisibility(index)
 
-        fun onImageClick(data: LinkData) = findNavController().navigate(
-                CommentsFragmentDirections.actionCommentsDestinationToImagePreviewDestination(data.thumbnail, data.preview!!.images[0].source.url)
-                , FragmentNavigatorExtras(binding.selfTextThumbnail to data.thumbnail)
-        )
+        fun onImageClick(data: LinkData) {}
     }
+}
+
+@BindingAdapter("commentCount")
+fun bindCommentCount(toolbar: MaterialToolbar, count: Int) {
+    toolbar.title = if (count == 0) "No comments found"
+    else String.format("%d Comments", count)
 }

@@ -46,30 +46,29 @@ class CommentsRepo @Inject constructor(val reddit: Reddit) {
             val moreCommentObject = _allComments.value?.get(index) as MoreCommentData
             loadMoreChildren(link_id, moreCommentObject.children)
         } else
-            withContext(Dispatchers.Default) {
-                _allComments.value?.let {
-                    val list = it.toMutableList()
-                    val parentComment = list[index]
+            _allComments.value?.let {
+                val list = it.toMutableList()
+                val parentComment = list[index]
 
-                    if (parentComment is CommentData) {
-                        if (!parentComment.replies.isNullOrEmpty()) {
-                            list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
-                            if (!parentComment.repliesExpanded) {
-                                list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies))
-                            } else {
-                                if (parentComment.replies.isNotEmpty()) {
-                                    val commentsToBeRemoved = mutableListOf<BaseComment>()
-                                    for (i in index + 1 until list.size) {
-                                        if (list[i].depth > parentComment.depth) commentsToBeRemoved.add(list[i])
-                                        else break
-                                    }
-                                    list.removeAll(commentsToBeRemoved)
+                if (parentComment is CommentData) {
+                    if (!parentComment.replies.isNullOrEmpty()) {
+                        list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
+                        if (!parentComment.repliesExpanded) {
+                            list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies))
+                        } else {
+                            if (parentComment.replies.isNotEmpty()) {
+                                val commentsToBeRemoved = mutableListOf<BaseComment>()
+                                for (i in index + 1 until list.size) {
+                                    if (list[i].depth > parentComment.depth) commentsToBeRemoved.add(list[i])
+                                    else break
                                 }
+                                list.removeAll(commentsToBeRemoved)
                             }
-                            _allComments.postValue(list)
                         }
+                        _allComments.postValue(list)
                     }
                 }
+
             }
     }
 

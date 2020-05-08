@@ -9,7 +9,7 @@ data class CommentData(
         val _name: String,
         val author: String,
         var body: Spanned,
-        var ups: Int,
+        var ups: Int?,
         val likes: Boolean?,
         val replies: List<BaseComment>,
         val gildings: Gildings,
@@ -24,25 +24,31 @@ data class CommentData(
         when (direction) {
             1 -> if (this.likes == null) {
                 updatedLikes = true
-                updatedUps++
+                if (updatedUps != null)
+                    updatedUps++
             } else if (!this.likes) {
                 updatedLikes = true
-                updatedUps += 2
+                if (updatedUps != null)
+                    updatedUps += 2
             } else {
                 updatedLikes = null
-                updatedUps--
+                if (updatedUps != null)
+                    updatedUps--
             }
             -1 -> when {
                 this.likes == null -> {
-                    updatedUps--
+                    if (updatedUps != null)
+                        updatedUps--
                     updatedLikes = false
                 }
                 this.likes -> {
-                    updatedUps -= 2
+                    if (updatedUps != null)
+                        updatedUps -= 2
                     updatedLikes = false
                 }
                 else -> {
-                    updatedUps++
+                    if (updatedUps != null)
+                        updatedUps++
                     updatedLikes = null
                 }
             }

@@ -10,27 +10,19 @@
             type="com.ducktapedapps.updoot.model.MoreCommentData" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:gravity="center_vertical">
+        android:orientation="horizontal">
 
         <com.ducktapedapps.updoot.ui.comments.IndentView
             android:id="@+id/indentView"
+            style="@style/indentation_style"
+            threadVisibility="@{moreComment.depth}"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="4dp"
-            app:indentLevel="@{moreComment.depth}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/more_comment_count_tv"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:singleThreadMode="false"
-            app:threadColor="@color/color_secondary_variant"
-            app:threadSeparationSpace="3dp"
-            app:threadWidth="1dp" />
+            app:indentLevel="@{moreComment.depth}" />
 
         <TextView
             android:id="@+id/more_comment_count_tv"
@@ -40,22 +32,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/indentView"
-            app:layout_constraintTop_toTopOf="parent"
             tools:text="Load more 32 comments" />
 
-        <ProgressBar
-            android:id="@+id/more_comment_load_progress"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/more_comment_count_tv"
-            app:layout_constraintStart_toEndOf="@+id/more_comment_count_tv"
-            app:layout_constraintTop_toTopOf="@+id/more_comment_count_tv" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </layout>
