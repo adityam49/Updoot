@@ -2,9 +2,17 @@ package com.ducktapedapps.updoot.utils
 
 fun getCompactCountAsString(count: Long): String =
         when (count) {
-            in 0..999 -> count.toString()
-            in 1000..999999 -> String.format("%.1fK", count / 1000.0)
-            else -> String.format("%.1fM+", count / 1000000.0)
+            in -Long.MAX_VALUE..-1001 -> {
+                val temp = count / 1000f
+                val temp2 = (temp * 10).toInt()
+                String.format("%.1fK <", temp2 / 10f)
+            }
+            in -1000..1000 -> count.toString()
+            else -> {
+                val temp = count / 1000f
+                val temp2 = (temp * 10).toInt()
+                String.format("%.1fK+", temp2 / 10f)
+            }
         }
 
 fun getCompactDateAsString(date: Long): String =
