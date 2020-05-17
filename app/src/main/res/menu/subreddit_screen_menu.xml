@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/hot_item"
+        android:title="@string/Hot"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/top_item"
+        android:title="@string/Top"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/controversial_item"
+        android:title="@string/Controversial"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/best_item"
+        android:title="@string/Best"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/new_item"
+        android:title="@string/New"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/rising_item"
+        android:title="@string/Rising"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/view_type_item"
+        android:icon="@drawable/ic_view_mode_icon"
+        android:title="@string/viewType"
+        app:showAsAction="always" />
+</menu>

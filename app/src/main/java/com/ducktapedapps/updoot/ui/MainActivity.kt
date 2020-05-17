@@ -5,37 +5,38 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
+import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager
 import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener
+import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), AccountChangeListener {
-    private lateinit var viewModel: ActivityVM
+    private val viewModel: ActivityVM by lazy { ViewModelProvider(this).get(ActivityVM::class.java) }
+    private lateinit var binding: ActivityMainBinding
+    private val navController by lazy { findNavController(R.id.nav_host_fragment) }
 
     @Inject
     lateinit var userManager: UserManager
 
+    private val bottomNavDrawerFragment: NavDrawerFragment by lazy {
+        supportFragmentManager.findFragmentById(R.id.bottom_nav_drawer) as NavDrawerFragment
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setUpViews()
         setUpStatusBarColors()
         (application as UpdootApplication).updootComponent.inject(this)
-
-        setUpViewModels()
-
-        setUpViews()
-
         userManager.attachListener(this)
     }
 
@@ -46,20 +47,31 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
     }
 
     private fun setUpViews() {
-        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        binding.bottomNavView.setupWithNavController(navController)
-        navController.addOnDestinationChangedListener { _: NavController?, destination: NavDestination, _: Bundle? ->
-            when (destination.id) {
-                R.id.ImagePreviewDestination -> binding.bottomNavView.apply { visibility = View.GONE }
-                else -> binding.bottomNavView.apply { visibility = View.VISIBLE }
+        binding.apply {
+            bottomAppBar.apply {
+                setSupportActionBar(this)
+                setupWithNavController(navController)
+                setOnClickListener { bottomNavDrawerFragment.toggleState() }
             }
         }
-    }
-
-    private fun setUpViewModels() {
-        viewModel = ViewModelProvider(this).get(ActivityVM::class.java)
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            when (destination.id) {
+                R.id.SubredditDestination -> {
+                    binding.textToolbarTitle.text = arguments?.getString("r/subreddit")
+                            ?: "Frontpage"
+                }
+                R.id.CommentsDestination -> {
+                    binding.textToolbarTitle.text = String.format(
+                            "%s comments",
+                            getCompactCountAsString(arguments?.getParcelable<LinkData>("SubmissionData")?.commentsCount?.toLong()
+                                    ?: 0L)
+                    )
+                }
+                else -> Unit
+            }
+        }
     }
 
     override fun onCurrentAccountRemoved() = reloadContent()

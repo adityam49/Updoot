@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_primary">#202124</color>
+    <color name="color_primary">#2A2B2E</color>
     <color name="color_primary_variant">#101218</color>
     <color name="color_on_primary">#ffffff</color>
     <color name="color_on_primary_light">#393e46</color>
@@ -10,8 +10,8 @@
     <color name="color_on_secondary">#000000</color>
     <color name="color_error">#FF7961</color>
     <color name="color_on_error">#000000</color>
-    <color name="color_surface">#434346</color>
+    <color name="color_surface">#202124</color>
     <color name="color_on_surface">#FFFFFF</color>
-    <color name="color_background">#2A2B2E</color>
+    <color name="color_background">#202124</color>
     <color name="color_on_background">#FFFFFF</color>
 </resources>

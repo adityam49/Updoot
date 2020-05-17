@@ -56,23 +56,3 @@ fun showMenuFor(
     }
     popupMenu.show()
 }
-
-fun showMenuFor(context: Context, anchorView: View, vm: SubmissionsVM) {
-    val popupMenu = PopupMenu(context, anchorView)
-
-    popupMenu.menuInflater.inflate(R.menu.sort_menu, popupMenu.menu)
-
-    popupMenu.setOnMenuItemClickListener { item ->
-        vm.changeSort(when (item.itemId) {
-            R.id.hot_item -> Sorting.HOT
-            R.id.top_item -> Sorting.TOP
-            R.id.controversial_item -> Sorting.CONTROVERSIAL
-            R.id.best_item -> Sorting.BEST
-            R.id.new_item -> Sorting.NEW
-            else -> Sorting.RISING
-        })
-        true
-    }
-
-    popupMenu.show()
-}
