@@ -130,7 +130,12 @@ fun bindContent(textView: TextView, commentData: CommentData) {
                                     ContextCompat.getColor(textView.context, R.color.color_secondary),
                                     ContextCompat.getColor(textView.context, R.color.color_on_secondary)
                             )
-                        } else ForegroundColorSpan(ContextCompat.getColor(textView.context, R.color.color_on_background)))
+                        } else {
+                            RoundedBackgroundSpan(
+                                    ContextCompat.getColor(textView.context, R.color.color_on_primary_light),
+                                    ContextCompat.getColor(textView.context, R.color.color_on_primary)
+                            )
+                        })
                 append(commentData.author)
                 popSpan()
                 append(if (!commentData.author_flair_text.isBlank()) String.format(" · %s ", commentData.author_flair_text) else "")
