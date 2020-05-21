@@ -6,6 +6,7 @@ import android.view.*
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +21,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
+import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Sorting.*
@@ -93,25 +95,32 @@ class SubredditFragment : Fragment() {
             layoutManager = linearLayoutManager
             itemAnimator = SlideInUpAnimator(OvershootInterpolator(1f))
 
-            ItemTouchHelper(SwipeUtils(activity, object : SwipeUtils.SwipeActionCallback {
-                override fun performSlightLeftSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, -1)
+            ItemTouchHelper(SwipeCallback(
+                    ContextCompat.getColor(requireContext(), R.color.saveContentColor),
+                    ContextCompat.getColor(requireContext(), R.color.upVoteColor),
+                    ContextCompat.getColor(requireContext(), R.color.downVoteColor),
+                    ContextCompat.getColor(requireContext(), R.color.color_on_primary_light),
+                    ContextCompat.getColor(requireContext(), R.color.color_background),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_black_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_upvote_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_downvote_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_expand_more_black_14dp)!!,
+                    object : SwipeCallback.Callback {
+                        override fun extremeLeftAction(position: Int) = submissionsVM.toggleSave(position)
 
+                        override fun leftAction(position: Int) = submissionsVM.castVote(position, 1)
 
-                override fun performSlightRightSwipeAction(adapterPosition: Int) = submissionsVM.castVote(adapterPosition, 1)
+                        override fun rightAction(position: Int) = submissionsVM.castVote(position, -1)
 
-
-                override fun performLeftSwipeAction(adapterPosition: Int) =
-                        showMenuFor(args.rSubreddit,
-                                adapter.currentList[adapterPosition],
-                                this@SubredditFragment.requireContext(),
-                                binding.recyclerView.findViewHolderForAdapterPosition(adapterPosition)?.itemView,
-                                findNavController())
-
-                override fun performRightSwipeAction(adapterPosition: Int) {
-                    submissionsVM.toggleSave(adapterPosition)
-                }
-            })).attachToRecyclerView(this)
-
+                        override fun extremeRightAction(position: Int) =
+                                showMenuFor(args.rSubreddit,
+                                        adapter.currentList[position],
+                                        this@SubredditFragment.requireContext(),
+                                        binding.recyclerView.findViewHolderForAdapterPosition(position)?.itemView,
+                                        findNavController()
+                                )
+                    }
+            )).attachToRecyclerView(this)
             addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
         }
     }

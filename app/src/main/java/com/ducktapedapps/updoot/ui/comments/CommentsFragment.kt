@@ -8,13 +8,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.utils.SwipeUtils
+import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
@@ -63,20 +65,28 @@ class CommentsFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = commentsAdapter
+            ItemTouchHelper(SwipeCallback(
+                    ContextCompat.getColor(requireContext(), R.color.saveContentColor),
+                    ContextCompat.getColor(requireContext(), R.color.upVoteColor),
+                    ContextCompat.getColor(requireContext(), R.color.downVoteColor),
+                    ContextCompat.getColor(requireContext(), R.color.color_on_primary_light),
+                    ContextCompat.getColor(requireContext(), R.color.color_background),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_black_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_upvote_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_downvote_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_expand_more_black_14dp)!!,
+                    object : SwipeCallback.Callback {
+                        override fun extremeLeftAction(position: Int) = Unit
+
+                        override fun leftAction(position: Int) = viewModel.castVote(position, 1)
+
+                        override fun rightAction(position: Int) = viewModel.castVote(position, -1)
+
+                        override fun extremeRightAction(position: Int) = Unit
+                    }
+
+            )).attachToRecyclerView(this)
         }
-
-        ItemTouchHelper(SwipeUtils(this@CommentsFragment.context, object : SwipeUtils.SwipeActionCallback {
-            override fun performSlightLeftSwipeAction(adapterPosition: Int) {
-                viewModel.castVote(-1, adapterPosition)
-            }
-
-            override fun performSlightRightSwipeAction(adapterPosition: Int) {
-                viewModel.castVote(1, adapterPosition)
-            }
-
-            override fun performLeftSwipeAction(adapterPosition: Int) {}
-            override fun performRightSwipeAction(adapterPosition: Int) {}
-        })).attachToRecyclerView(binding.recyclerView)
     }
 
     inner class ClickHandler {
