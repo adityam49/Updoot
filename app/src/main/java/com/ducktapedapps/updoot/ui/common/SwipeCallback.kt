@@ -3,7 +3,6 @@ package com.ducktapedapps.updoot.ui.common
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.LEFT
@@ -45,6 +44,8 @@ class SwipeCallback(
     private companion object {
         const val EXTREME_THRESHOLD = 0.6
         const val THRESHOLD = 0.3
+        const val THRESHOLD_ANIMATION_START = 0.25
+        const val EXTREME_THRESHOLD_ANIMATION_START = 0.75
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder) = false
@@ -61,20 +62,19 @@ class SwipeCallback(
 
         drawBackgroundColor(c, viewHolder, dX)
 
-        Log.d("Swipe", "onChildDraw: ${dX / viewHolder.itemView.width}")
-
+        //draw and animate drawable
         when (dX / viewHolder.itemView.width) {
             in -Double.MAX_VALUE..-EXTREME_THRESHOLD -> {
-                viewHolder.itemView.run { drawExtremeRightDrawable(left, top, right, bottom, c, dX) }
+                viewHolder.itemView.run { drawExtremeDrawable(left, top, right, bottom, c, dX, viewHolder.itemView.width, extremeRightDrawable) }
             }
             in -EXTREME_THRESHOLD..-THRESHOLD -> {
-                viewHolder.itemView.run { drawRightDrawable(left, top, right, bottom, c, dX) }
+                viewHolder.itemView.run { drawDrawable(left, top, right, bottom, c, dX, viewHolder.itemView.width, rightDrawable) }
             }
             in THRESHOLD..EXTREME_THRESHOLD -> {
-                viewHolder.itemView.run { drawLeftDrawable(left, top, right, bottom, c, dX) }
+                viewHolder.itemView.run { drawDrawable(left, top, right, bottom, c, dX, viewHolder.itemView.width, leftDrawable) }
             }
             in EXTREME_THRESHOLD..Double.MAX_VALUE -> {
-                viewHolder.itemView.run { drawExtremeLeftDrawable(left, top, right, bottom, c, dX) }
+                viewHolder.itemView.run { drawExtremeDrawable(left, top, right, bottom, c, dX, viewHolder.itemView.width, extremeLeftDrawable) }
             }
         }
         //save action performed
@@ -122,15 +122,102 @@ class SwipeCallback(
         }
     }
 
-    //TODO : draw drawable according to location of viewHolder dX
-    private fun drawLeftDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float) {}
+    private fun interpolate(inputStart: Double, inputEnd: Double, progress: Double, outputStart: Double, outputEnd: Double): Double =
+            outputEnd - ((progress - inputStart) / (inputEnd - inputStart)) * (outputEnd - outputStart)
 
-    private fun drawExtremeLeftDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float) {}
+    private fun drawDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float, itemWidth: Int, drawable: Drawable) {
+        drawable.apply {
+            when (abs(dX) / itemWidth) {
+                in THRESHOLD..THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START -> {
+                    val displacedTop = interpolate(
+                            inputStart = THRESHOLD,
+                            inputEnd = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START,
+                            progress = (abs(dX) / itemWidth).toDouble(),
+                            outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
+                            outputEnd = bottom.toDouble()
+                    ).toInt()
+                    setBounds(
+                            if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                            displacedTop,
+                            if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                            displacedTop + intrinsicHeight
+                    )
 
-    private fun drawRightDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float) {}
+                }
+                in THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START..THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START -> setBounds(
+                        if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                        top + (bottom - top) / 2 - intrinsicHeight / 2,
+                        if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                        top + (bottom - top) / 2 + intrinsicHeight / 2
+                )
 
-    private fun drawExtremeRightDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float) {}
+                else -> {
+                    val displacedTop = interpolate(
+                            inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START,
+                            inputEnd = EXTREME_THRESHOLD,
+                            progress = (abs(dX) / itemWidth).toDouble(),
+                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
+                            outputStart = top.toDouble()
+                    ).toInt()
+                    setBounds(
+                            if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                            displacedTop,
+                            if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                            displacedTop + intrinsicHeight
+                    )
+                }
+            }
+            draw(canvas)
 
+        }
+    }
+
+    private fun drawExtremeDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float, itemWidth: Int, drawable: Drawable) {
+        drawable.apply {
+            when (abs(dX) / itemWidth) {
+                in EXTREME_THRESHOLD..EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START -> {
+                    val displacedTop = interpolate(
+                            inputStart = EXTREME_THRESHOLD,
+                            inputEnd = EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START,
+                            progress = (abs(dX) / itemWidth).toDouble(),
+                            outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
+                            outputEnd = bottom.toDouble()
+                    ).toInt()
+                    setBounds(
+                            if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                            displacedTop,
+                            if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                            displacedTop + intrinsicHeight
+                    )
+
+                }
+                in EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START..EXTREME_THRESHOLD + EXTREME_THRESHOLD * EXTREME_THRESHOLD_ANIMATION_START -> setBounds(
+                        if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                        top + (bottom - top) / 2 - intrinsicHeight / 2,
+                        if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                        top + (bottom - top) / 2 + intrinsicHeight / 2
+                )
+
+                else -> {
+                    val displacedTop = interpolate(
+                            inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START,
+                            inputEnd = 1.0,
+                            progress = (abs(dX) / itemWidth).toDouble(),
+                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
+                            outputStart = top.toDouble()
+                    ).toInt()
+
+                    setBounds(
+                            if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
+                            displacedTop,
+                            if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
+                            displacedTop + intrinsicHeight
+                    )
+                }
+            }
+            draw(canvas)
+        }
+    }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
