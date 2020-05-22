@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.common
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.LEFT
@@ -123,7 +124,7 @@ class SwipeCallback(
     }
 
     private fun interpolate(inputStart: Double, inputEnd: Double, progress: Double, outputStart: Double, outputEnd: Double): Double =
-            outputEnd - ((progress - inputStart) / (inputEnd - inputStart)) * (outputEnd - outputStart)
+            outputStart - (progress - inputStart) / (inputEnd - inputStart) * (abs(outputEnd - outputStart))
 
     private fun drawDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float, itemWidth: Int, drawable: Drawable) {
         drawable.apply {
@@ -133,8 +134,8 @@ class SwipeCallback(
                             inputStart = THRESHOLD,
                             inputEnd = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START,
                             progress = (abs(dX) / itemWidth).toDouble(),
-                            outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
-                            outputEnd = bottom.toDouble()
+                            outputStart = (bottom - intrinsicHeight).toDouble(),
+                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
                     ).toInt()
                     setBounds(
                             if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
@@ -142,7 +143,6 @@ class SwipeCallback(
                             if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
                             displacedTop + intrinsicHeight
                     )
-
                 }
                 in THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START..THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START -> setBounds(
                         if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
@@ -156,8 +156,8 @@ class SwipeCallback(
                             inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START,
                             inputEnd = EXTREME_THRESHOLD,
                             progress = (abs(dX) / itemWidth).toDouble(),
-                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
-                            outputStart = top.toDouble()
+                            outputEnd = top.toDouble(),
+                            outputStart = (top + (bottom - top) / 2 - intrinsicHeight).toDouble()
                     ).toInt()
                     setBounds(
                             if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
@@ -168,7 +168,6 @@ class SwipeCallback(
                 }
             }
             draw(canvas)
-
         }
     }
 
@@ -180,8 +179,8 @@ class SwipeCallback(
                             inputStart = EXTREME_THRESHOLD,
                             inputEnd = EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START,
                             progress = (abs(dX) / itemWidth).toDouble(),
-                            outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
-                            outputEnd = bottom.toDouble()
+                            outputStart = (bottom - intrinsicHeight).toDouble(),
+                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
                     ).toInt()
                     setBounds(
                             if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
@@ -197,23 +196,7 @@ class SwipeCallback(
                         if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
                         top + (bottom - top) / 2 + intrinsicHeight / 2
                 )
-
-                else -> {
-                    val displacedTop = interpolate(
-                            inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START,
-                            inputEnd = 1.0,
-                            progress = (abs(dX) / itemWidth).toDouble(),
-                            outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble(),
-                            outputStart = top.toDouble()
-                    ).toInt()
-
-                    setBounds(
-                            if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
-                            displacedTop,
-                            if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
-                            displacedTop + intrinsicHeight
-                    )
-                }
+                else -> Unit
             }
             draw(canvas)
         }
