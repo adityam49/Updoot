@@ -158,8 +158,3 @@ fun bindChildCount(textView: TextView, repliesExpanded: Boolean, childrenCount: 
         } else View.GONE
     }
 }
-
-@BindingAdapter("threadVisibility")
-fun bindThreadVisibility(indentView: IndentView, level: Int) {
-    indentView.visibility = if (level == 0) View.GONE else View.VISIBLE
-}

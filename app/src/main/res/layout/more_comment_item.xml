@@ -18,10 +18,10 @@
         <com.ducktapedapps.updoot.ui.comments.IndentView
             android:id="@+id/indentView"
             style="@style/indentation_style"
-            threadVisibility="@{moreComment.depth}"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             app:indentLevel="@{moreComment.depth}" />
 
         <TextView
@@ -29,7 +29,6 @@
             moreCommentCount="@{moreComment.count}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             tools:text="Load more 32 comments" />

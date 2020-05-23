@@ -12,12 +12,13 @@
         <com.ducktapedapps.updoot.ui.comments.IndentView
             android:id="@+id/indentView"
             style="@style/indentation_style"
-            threadVisibility="@{commentData.depth}"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             app:indentLevel="@{commentData.depth}"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/text_view_comment_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,7 +27,7 @@
             commentHeaderContent="@{commentData}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
             android:ellipsize="end"
             android:singleLine="true"

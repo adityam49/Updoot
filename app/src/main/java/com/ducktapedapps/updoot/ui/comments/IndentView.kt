@@ -52,14 +52,14 @@ class IndentView @JvmOverloads constructor(
         val desiredWidth: Int = +paddingStart + paddingEnd +
                 ceil((indentLevel * (threadSeparationSpace + threadWidth))).toInt()
 
-        val _width = when (requestedWidthMode) {
+        val _width = if (indentLevel != 0) when (requestedWidthMode) {
             MeasureSpec.EXACTLY -> requestedWidth
             MeasureSpec.AT_MOST -> min(
                     requestedWidth,
                     desiredWidth
             ) //AT_MOST for wrap_content and match_parent
             else -> desiredWidth
-        }
+        } else 0
         setMeasuredDimension(_width, MeasureSpec.getSize(heightMeasureSpec))
     }
 
