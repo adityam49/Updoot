@@ -3,7 +3,6 @@ package com.ducktapedapps.updoot.ui.common
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.LEFT
@@ -147,7 +146,7 @@ class SwipeCallback(
                     val displacedTop = interpolate(
                             inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START, inputEnd = EXTREME_THRESHOLD,
                             progress = (swipeProgress).toDouble(),
-                            outputEnd = top.toDouble(), outputStart = (top + (bottom - top) / 2 - intrinsicHeight).toDouble()
+                            outputEnd = top.toDouble(), outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
                     ).toInt()
                     setBounds(
                             if (dX > 0) left + intrinsicWidth else right - intrinsicWidth * 2,
