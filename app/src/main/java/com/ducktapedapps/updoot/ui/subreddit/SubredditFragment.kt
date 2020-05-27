@@ -99,7 +99,7 @@ class SubredditFragment : Fragment() {
                     ContextCompat.getColor(requireContext(), R.color.downVoteColor),
                     ContextCompat.getColor(requireContext(), R.color.color_on_primary_light),
                     ContextCompat.getColor(requireContext(), R.color.color_background),
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_black_24dp)!!,
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_24dp)!!,
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_upvote_24dp)!!,
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_downvote_24dp)!!,
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_expand_more_black_14dp)!!,

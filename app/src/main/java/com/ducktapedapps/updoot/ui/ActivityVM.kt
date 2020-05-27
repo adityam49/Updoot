@@ -11,10 +11,10 @@ class ActivityVM : ViewModel() {
     val currentAccount: MutableLiveData<SingleLiveEvent<String?>> = MutableLiveData(SingleLiveEvent<String?>(null))
     val navItemList: LiveData<List<NavDrawerItemModel>> = MutableLiveData(
             listOf(
-                    NavDrawerItemModel("Item1", R.drawable.ic_explore_black_24dp),
-                    NavDrawerItemModel("Item2", R.drawable.ic_explore_black_24dp),
-                    NavDrawerItemModel("Item3", R.drawable.ic_explore_black_24dp),
-                    NavDrawerItemModel("Item4", R.drawable.ic_explore_black_24dp)
+                    NavDrawerItemModel("Item1", R.drawable.ic_explore_24dp),
+                    NavDrawerItemModel("Item2", R.drawable.ic_explore_24dp),
+                    NavDrawerItemModel("Item3", R.drawable.ic_explore_24dp),
+                    NavDrawerItemModel("Item4", R.drawable.ic_explore_24dp)
             )
     )
 

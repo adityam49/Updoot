@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:gravity="center"
-            tools:src="@drawable/ic_explore_black_24dp" />
+            tools:src="@drawable/ic_explore_24dp" />
 
         <TextView
             android:id="@+id/textView"

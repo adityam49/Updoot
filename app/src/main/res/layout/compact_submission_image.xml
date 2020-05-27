@@ -22,7 +22,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:submissionThumbnailSource="@{linkdata.thumbnail}"
-            tools:src="@drawable/ic_selftext" />
+            tools:src="@drawable/ic_selftext_24dp" />
 
         <include
             android:id="@+id/gildingView"

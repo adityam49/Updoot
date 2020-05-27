@@ -52,7 +52,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_tv"
-            tools:src="@drawable/ic_settings_black_24dp" />
+            tools:src="@drawable/ic_settings_24dp" />
 
         <TextView
             android:id="@+id/metadata"

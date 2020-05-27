@@ -87,7 +87,7 @@ fun subredditIconUrl(view: ImageView, url: String?) {
             .with(view)
             .load(url)
             .apply(RequestOptions.circleCropTransform())
-            .placeholder(R.drawable.ic_explore_black_24dp)
+            .placeholder(R.drawable.ic_explore_24dp)
             .into(view)
 }
 

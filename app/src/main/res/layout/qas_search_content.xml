@@ -54,7 +54,7 @@
                 app:layout_constraintEnd_toStartOf="@id/search_progress"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/drag_handle"
-                app:searchHintIcon="@drawable/ic_explore_black_24dp" />
+                app:searchHintIcon="@drawable/ic_explore_24dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/search_result_rv"

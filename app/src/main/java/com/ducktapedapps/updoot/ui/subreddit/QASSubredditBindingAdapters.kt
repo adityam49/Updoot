@@ -22,6 +22,6 @@ fun setMetadata(textView: TextView, subreddit: Subreddit?) {
 fun setImageFromUrl(imageView: ImageView, url: String?) =
         Glide.with(imageView.context)
                 .load(url)
-                .placeholder(R.drawable.ic_image_error)
+                .placeholder(R.drawable.ic_image_error_24dp)
                 .apply(RequestOptions.circleCropTransform())
                 .into(imageView)

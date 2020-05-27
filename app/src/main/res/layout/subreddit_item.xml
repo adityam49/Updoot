@@ -29,7 +29,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_image_error" />
+            tools:src="@drawable/ic_image_error_24dp" />
 
         <TextView
             android:id="@+id/subreddit_title_tv"

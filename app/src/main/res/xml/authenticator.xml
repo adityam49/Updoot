@@ -3,4 +3,4 @@
     android:accountType="updoot_account"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
-    android:smallIcon="@drawable/ic_home_black_24dp" />
+    android:smallIcon="@drawable/ic_home_24dp" />

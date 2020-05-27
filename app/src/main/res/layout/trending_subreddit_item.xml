@@ -31,7 +31,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                tools:src="@drawable/ic_explore_black_24dp" />
+                tools:src="@drawable/ic_explore_24dp" />
 
             <TextView
                 android:id="@+id/subreddit_name_age"
