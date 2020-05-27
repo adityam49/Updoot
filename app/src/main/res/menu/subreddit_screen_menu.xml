@@ -2,33 +2,89 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/hot_item"
-        android:title="@string/Hot"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/top_item"
-        android:title="@string/Top"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/controversial_item"
-        android:title="@string/Controversial"
-        app:showAsAction="never" />
+        android:id="@+id/item_comment_sort"
+        android:icon="@drawable/ic_sort_icon"
+        android:title="@string/sorting_mode"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/hot_item"
+                android:title="@string/Hot" />
 
-    <item
-        android:id="@+id/best_item"
-        android:title="@string/Best"
-        app:showAsAction="never" />
+            <item
+                android:id="@+id/best_item"
+                android:title="@string/Best" />
 
-    <item
-        android:id="@+id/new_item"
-        android:title="@string/New"
-        app:showAsAction="never" />
+            <item
+                android:id="@+id/new_item"
+                android:title="@string/New" />
 
-    <item
-        android:id="@+id/rising_item"
-        android:title="@string/Rising"
-        app:showAsAction="never" />
+            <item
+                android:id="@+id/rising_item"
+                android:title="@string/Rising" />
 
+            <item android:title="@string/Controversial">
+                <menu>
+                    <item
+                        android:id="@+id/controversial_hour_item"
+                        android:title="@string/now" />
+
+                    <item
+                        android:id="@+id/controversial_day_item"
+                        android:title="@string/today" />
+
+                    <item
+                        android:id="@+id/controversial_week_item"
+                        android:title="@string/this_week" />
+
+                    <item
+                        android:id="@+id/controversial_month_item"
+                        android:title="@string/this_month" />
+
+                    <item
+                        android:id="@+id/controversial_year_item"
+                        android:title="@string/this_year" />
+
+                    <item
+                        android:id="@+id/controversial_all_time_item"
+                        android:title="@string/all_time" />
+                </menu>
+            </item>
+
+            <item android:title="@string/Top">
+                <menu>
+                    <item
+                        android:id="@+id/top_hour_item"
+                        android:title="@string/now" />
+
+                    <item
+                        android:id="@+id/top_day_item"
+                        android:title="@string/today" />
+
+                    <item
+                        android:id="@+id/top_week_item"
+                        android:title="@string/this_week" />
+
+                    <item
+                        android:id="@+id/top_month_item"
+                        android:title="@string/this_month" />
+
+                    <item
+                        android:id="@+id/top_year_item"
+                        android:title="@string/this_year" />
+
+                    <item
+                        android:id="@+id/top_all_time_item"
+                        android:title="@string/all_time" />
+                </menu>
+            </item>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/search_item"
+        android:icon="@drawable/ic_search_24dp"
+        android:title="@string/search"
+        app:showAsAction="always" />
     <item
         android:id="@+id/view_type_item"
         android:icon="@drawable/ic_view_mode_icon"

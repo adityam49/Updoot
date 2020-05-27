@@ -52,9 +52,7 @@ class SubredditFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.hot_item -> submissionsVM.changeSort(HOT)
-            R.id.top_item -> submissionsVM.changeSort(TOP)
             R.id.rising_item -> submissionsVM.changeSort(RISING)
-            R.id.controversial_item -> submissionsVM.changeSort(CONTROVERSIAL)
             R.id.new_item -> submissionsVM.changeSort(NEW)
             R.id.best_item -> submissionsVM.changeSort(BEST)
             R.id.view_type_item -> submissionsVM.toggleUi()

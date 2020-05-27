@@ -1,29 +1,29 @@
-package com.ducktapedapps.updoot.ui
+package com.ducktapedapps.updoot.ui.navDrawer
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.FragmentBottomNavDrawerBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
-import com.google.android.material.shape.*
 
-class NavDrawerFragment : Fragment() {
+class BottomNavDrawerFragment : Fragment() {
 
     private lateinit var binding: FragmentBottomNavDrawerBinding
     private val behaviour: BottomSheetBehavior<FrameLayout> by lazy {
         from(binding.backgroundContainer)
     }
 
-    val scrim: View by lazy {
+    private val bottomNavDrawerCallback = BottomNavDrawerCallback()
+    fun addOnSlideAction(action: OnSlideAction) = bottomNavDrawerCallback.addOnSlideAction(action)
+    fun addOnStateChangeAction(action: OnStateChangeAction) = bottomNavDrawerCallback.addOnStateChangeAction(action)
+
+    private val scrim: View by lazy {
         binding.scrimView.apply {
             setOnClickListener { toggleState() }
         }
@@ -42,12 +42,13 @@ class NavDrawerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         behaviour.apply {
             state = STATE_HIDDEN
-            addBottomSheetCallback(object : BottomSheetCallback() {
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            addOnSlideAction(object : OnSlideAction {
+                override fun onSlide(slideOffset: Float) {
                     if (slideOffset < 0) scrim.alpha = 1 + slideOffset
                 }
-
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
+            })
+            addOnStateChangeAction(object : OnStateChangeAction {
+                override fun onStateChange(newState: Int) {
                     val visibility = when (newState) {
                         STATE_HIDDEN -> GONE
                         else -> VISIBLE
@@ -56,7 +57,7 @@ class NavDrawerFragment : Fragment() {
                     scrim.visibility = visibility
                 }
             })
-
+            addBottomSheetCallback(bottomNavDrawerCallback)
         }
     }
 
@@ -68,6 +69,10 @@ class NavDrawerFragment : Fragment() {
             STATE_EXPANDED -> STATE_HIDDEN
             else -> STATE_HIDDEN
         }
+    }
+
+    fun hide() {
+        behaviour.state = STATE_HIDDEN
     }
 
     private companion object {
