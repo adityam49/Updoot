@@ -24,14 +24,14 @@
             app:layout_behavior="@string/bottom_sheet_behavior">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/account_recycler_view"
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.0"
                 android:clipToPadding="false"
                 android:orientation="vertical"
                 android:paddingTop="32dp"
-                android:paddingBottom="32dp" />
+                android:paddingBottom="32dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </FrameLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

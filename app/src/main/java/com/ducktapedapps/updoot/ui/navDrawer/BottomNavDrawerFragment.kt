@@ -8,33 +8,42 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.ducktapedapps.updoot.databinding.FragmentBottomNavDrawerBinding
+import com.ducktapedapps.updoot.ui.ActivityVM
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 
 class BottomNavDrawerFragment : Fragment() {
 
+    private val activityVM by lazy { ViewModelProvider(requireActivity()).get(ActivityVM::class.java) }
+    private val bottomNavDrawerCallback = BottomNavDrawerCallback()
+    private val navAdapter = NavAdapter()
     private lateinit var binding: FragmentBottomNavDrawerBinding
+    private lateinit var scrim: View
+
     private val behaviour: BottomSheetBehavior<FrameLayout> by lazy {
         from(binding.backgroundContainer)
     }
 
-    private val bottomNavDrawerCallback = BottomNavDrawerCallback()
     fun addOnSlideAction(action: OnSlideAction) = bottomNavDrawerCallback.addOnSlideAction(action)
     fun addOnStateChangeAction(action: OnStateChangeAction) = bottomNavDrawerCallback.addOnStateChangeAction(action)
-
-    private val scrim: View by lazy {
-        binding.scrimView.apply {
-            setOnClickListener { toggleState() }
-        }
-    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentBottomNavDrawerBinding.inflate(inflater, container, false)
+        binding = FragmentBottomNavDrawerBinding.inflate(inflater, container, false).apply {
+            scrim = scrimView.also { it.setOnClickListener { toggleState() } }
+            recyclerView.apply {
+                adapter = navAdapter
+            }
+            activityVM.navItemList.observe(viewLifecycleOwner) {
+                navAdapter.submitList(it)
+            }
+        }
         return binding.root
     }
 
