@@ -7,12 +7,14 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.remote.AuthAPI
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.Token
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.SystemModel
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.Constants
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -106,7 +108,7 @@ class RedditClient @Inject constructor(
         token = null
     }
 
-    fun createUserAccountAndSetItAsCurrent(username: String, token: Token) {
+    fun createUserAccountAndSetItAsCurrent(username: String, icon: String, token: Token) {
         sharedPreferences.edit().putString(Constants.CURRENT_ACCOUNT_NAME, username).apply()
         androidAccountManager
                 .addAccountExplicitly(
@@ -114,10 +116,11 @@ class RedditClient @Inject constructor(
                         null,
                         Bundle().apply {
                             putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
+                            putString(Constants.USER_ICON_KEY, icon)
                         })
     }
 
-    val currentUpdootAccount: String
+    private val currentUpdootAccount: String
         get() {
             val currentAccountInSharedPrefs = sharedPreferences.getString(Constants.CURRENT_ACCOUNT_NAME, null)
                     ?: Constants.ANON_USER
@@ -145,12 +148,26 @@ class RedditClient @Inject constructor(
         }
     }
 
-    fun getCachedAccount(): List<String> =
+    private fun getCachedAccount(): List<String> =
             androidAccountManager
                     .accounts
                     .filter { it.name != currentUpdootAccount }
                     .map { it.name }
 
+    fun getAccountModels(): List<AccountModel> =
+            mutableListOf<String>().apply {
+                add(currentUpdootAccount)
+                addAll(getCachedAccount())
+                add(Constants.ADD_ACCOUNT)
+            }.map { it.toAccountModel() }
+
+    private fun String.toAccountModel(): AccountModel = when (this) {
+        Constants.ANON_USER -> SystemModel(Constants.ANON_USER, R.drawable.ic_account_circle_24dp)
+        Constants.ADD_ACCOUNT -> SystemModel(Constants.ADD_ACCOUNT, R.drawable.ic_round_add_circle_24)
+        else -> UserModel(this, with(androidAccountManager) {
+            getUserData(accounts.first { it.name == this@toAccountModel }, Constants.USER_ICON_KEY)
+        })
+    }
 
     suspend fun removeUser(accountName: String): Boolean {
         val accountToRemove = androidAccountManager.accounts.firstOrNull { it.name == accountName }

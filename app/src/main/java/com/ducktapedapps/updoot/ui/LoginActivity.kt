@@ -33,12 +33,16 @@ class LoginActivity : AccountAuthenticatorActivity(), CoroutineScope {
 
     @Inject
     lateinit var redditAPI: RedditAPI
+
     @Inject
     lateinit var authAPI: AuthAPI
+
     @Inject
     lateinit var interceptor: TokenInterceptor
+
     @Inject
     lateinit var accountManager: AccountManager
+
     @Inject
     lateinit var sharedPreferences: SharedPreferences
 
@@ -126,7 +130,11 @@ class LoginActivity : AccountAuthenticatorActivity(), CoroutineScope {
             val account = redditAPI.userIdentity()
             account.let { fetchedAccountDetails ->
                 withContext(Dispatchers.Main) {
-                    redditClient.createUserAccountAndSetItAsCurrent(fetchedAccountDetails.name, token)
+                    redditClient.createUserAccountAndSetItAsCurrent(
+                            fetchedAccountDetails.name,
+                            fetchedAccountDetails.icon_img,
+                            token
+                    )
                 }
             }
         } catch (exception: Exception) {

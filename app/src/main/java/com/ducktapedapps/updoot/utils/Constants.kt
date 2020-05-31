@@ -7,6 +7,7 @@ object Constants {
     const val LAST_TRENDING_UPDATED_KEY = "last_trending_updated_key"
     const val TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey"
     const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
+    const val USER_ICON_KEY: String = "user_icon_key"
 
     const val CURRENT_ACCOUNT_NAME = "current_account_name"
     const val CACHED_ACCOUNT_COUNT = "cached_account_count"

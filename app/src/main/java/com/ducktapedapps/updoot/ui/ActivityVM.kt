@@ -26,17 +26,7 @@ class ActivityVM @Inject constructor(private val redditClient: RedditClient) : V
     }
 
     private fun reloadAccountList() {
-        _accounts.value = mutableListOf<String>().apply {
-            add(redditClient.currentUpdootAccount)
-            redditClient.getCachedAccount().forEach { add(it) }
-            add(Constants.ADD_ACCOUNT)
-        }.map { it.toAccountModel() }
-    }
-
-    private fun String.toAccountModel(): AccountModel = when (this) {
-        Constants.ANON_USER -> AccountModel(Constants.ANON_USER, false, R.drawable.ic_account_circle_24dp)
-        Constants.ADD_ACCOUNT -> AccountModel(Constants.ADD_ACCOUNT, false, R.drawable.ic_round_add_circle_24)
-        else -> AccountModel(this, true, R.drawable.ic_account_circle_24dp)
+        _accounts.value = redditClient.getAccountModels()
     }
 
     fun setCurrentAccount(name: String) {
