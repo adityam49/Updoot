@@ -11,9 +11,8 @@ import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.databinding.ImagePreviewFragmentBinding
 
 
-const val TAG = "MediaPreviewFragment"
-
 class MediaPreviewFragment : Fragment() {
+    private val TAG = "MediaPreviewFragment"
 
     private val args: MediaPreviewFragmentArgs by navArgs()
     private lateinit var binding: ImagePreviewFragmentBinding

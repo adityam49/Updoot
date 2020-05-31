@@ -12,15 +12,16 @@ import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
-import com.ducktapedapps.updoot.utils.accountManagement.Reddit
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-class SubmissionRepo @Inject constructor(private val reddit: Reddit
-                                         , private val prefsDAO: SubredditPrefsDAO
-                                         , private val subredditDAO: SubredditDAO
+class SubmissionRepo @Inject constructor(
+        private val redditClient: RedditClient,
+        private val prefsDAO: SubredditPrefsDAO,
+        private val subredditDAO: SubredditDAO
 ) {
     private val TAG = "SubmissionRepo"
     var after: String? = null
@@ -64,7 +65,7 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
      */
     suspend fun loadSubredditInfo(subreddit: String) {
         try {
-            val api = reddit.authenticatedAPI()
+            val api = redditClient.api()
 
             subredditDAO.getSubreddit(subreddit).let {
                 if (it == null) {
@@ -113,11 +114,15 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
         }
     }
 
-    suspend fun loadPage(subreddit: String, sort: Sorting, time: String?, appendPage: Boolean) {
+    fun clearSubmissions() {
+        _allSubmissions.value = mutableListOf()
+    }
+
+    suspend fun loadPage(subreddit: String, sort: Sorting = Sorting.NO_SORT, time: String?, appendPage: Boolean) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
             try {
-                val redditAPI = reddit.authenticatedAPI()
+                val redditAPI = redditClient.api()
                 try {
                     val submissions: MutableList<LinkData> = if (appendPage) _allSubmissions.value
                             ?: mutableListOf()
@@ -136,7 +141,7 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
                     _toastMessage.postValue(SingleLiveEvent("Something went wrong! try again later some time"))
                 }
             } catch (ex: Exception) {
-                Log.e(this.javaClass.simpleName, "unable to get reddit api")
+                Log.e(this.javaClass.simpleName, "unable to get reddit api", ex)
                 _toastMessage.postValue(SingleLiveEvent("Something went wrong! try again later some later"))
 
             } finally {
@@ -174,7 +179,7 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
             withContext(Dispatchers.IO) {
                 _isLoading.postValue(true)
                 try {
-                    val redditAPI = reddit.authenticatedAPI()
+                    val redditAPI = redditClient.api()
                     try {
                         val response = if (!cachedSubmissions[index].saved) {
                             redditAPI.save(cachedSubmissions[index].name)
@@ -215,7 +220,7 @@ class SubmissionRepo @Inject constructor(private val reddit: Reddit
             }
             withContext(Dispatchers.IO) {
                 try {
-                    val redditAPI = reddit.authenticatedAPI()
+                    val redditAPI = redditClient.api()
                     try {
                         val intendedDirection = when (direction) {
                             1 -> if (cachedSubmissions[index].likes != true) 1 else 0

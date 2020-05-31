@@ -26,11 +26,20 @@ interface AuthAPI {
 
     @FormUrlEncoded
     @POST
-    suspend fun getUserTokenByCoroutine(
+    suspend fun getUserToken(
             @Url auth_url: String = Constants.TOKEN_ACCESS_URL,
             @Header("Authorization") credentials: String = Credentials.basic(Constants.client_id, ""),
             @Field("grant_type") grant_type: String = Constants.user_grantType,
             @Field("code") code: String,
             @Field("redirect_uri") redirect_uri: String = Constants.redirect_uri
     ): Token
+
+    @FormUrlEncoded
+    @POST
+    suspend fun logout(
+            @Url auth_url: String = Constants.TOKEN_REVOKE_URL,
+            @Header("Authorization") credentials: String = Credentials.basic(Constants.client_id, ""),
+            @Field("token") refresh_token: String,
+            @Field("token_type") token_type: String = "bearer"
+    ) : retrofit2.Response<Unit>
 }

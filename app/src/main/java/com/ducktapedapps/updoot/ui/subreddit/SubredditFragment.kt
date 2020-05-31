@@ -126,15 +126,13 @@ class SubredditFragment : Fragment() {
     private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
         binding.vm = submissionsVM
         binding.swipeToRefreshLayout.setOnRefreshListener { submissionsVM.reload() }
-        activity?.let {
-            val activityVM = ViewModelProvider(it).get(ActivityVM::class.java)
-            activityVM.currentAccount.observe(viewLifecycleOwner, Observer { account: SingleLiveEvent<String?>? ->
-                if ((account?.peekContent() == Constants.ANON_USER && account.contentIfNotHandled != null) || account?.contentIfNotHandled != null) {
-                    reloadFragmentContent()
-                    Toast.makeText(this.context, account.peekContent().toString() + " is logged in!", Toast.LENGTH_SHORT).show()
-                }
-            })
+        ViewModelProvider(requireActivity()).get(ActivityVM::class.java).shouldReload.observe(viewLifecycleOwner) { shouldReload ->
+            if (shouldReload.contentIfNotHandled == true) {
+                Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
+                reloadFragmentContent()
+            }
         }
+
         submissionsVM.apply {
             uiType.observe(viewLifecycleOwner) {
                 adapter.itemUi = it

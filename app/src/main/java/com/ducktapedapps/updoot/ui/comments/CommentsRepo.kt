@@ -7,12 +7,12 @@ import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData
-import com.ducktapedapps.updoot.utils.accountManagement.Reddit
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class CommentsRepo @Inject constructor(val reddit: Reddit) {
+class CommentsRepo @Inject constructor(val redditClient: RedditClient) {
 
     private val _allComments = MutableLiveData<List<BaseComment>>()
     private val _isLoading = MutableLiveData(true)
@@ -23,7 +23,7 @@ class CommentsRepo @Inject constructor(val reddit: Reddit) {
     suspend fun loadComments(subreddit: String, submission_id: String) {
         withContext(Dispatchers.IO) {
             try {
-                val redditAPI = reddit.authenticatedAPI()
+                val redditAPI = redditClient.api()
                 try {
                     val response = redditAPI.getComments(subreddit, submission_id).comments
                     if (response.isNotEmpty()) {
@@ -76,7 +76,7 @@ class CommentsRepo @Inject constructor(val reddit: Reddit) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
             try {
-                val api = reddit.authenticatedAPI()
+                val api = redditClient.api()
                 val result = api.getMoreChildren(
                         children_ids.joinToString(","),
                         "t3_$link_id"
@@ -106,7 +106,7 @@ class CommentsRepo @Inject constructor(val reddit: Reddit) {
     suspend fun castVote(direction: Int, index: Int) {
         withContext(Dispatchers.IO) {
             try {
-                val redditAPI: RedditAPI? = reddit.authenticatedAPI()
+                val redditAPI: RedditAPI? = redditClient.api()
                 if (redditAPI != null) {
                     try {
                         _allComments.value?.let {

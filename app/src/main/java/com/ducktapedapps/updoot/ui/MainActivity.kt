@@ -1,7 +1,5 @@
 package com.ducktapedapps.updoot.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -17,21 +15,18 @@ import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
 import com.ducktapedapps.updoot.ui.navDrawer.OnStateChangeAction
-import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.UserManager
-import com.ducktapedapps.updoot.utils.accountManagement.UserManager.AccountChangeListener
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), AccountChangeListener {
-    private val viewModel: ActivityVM by lazy { ViewModelProvider(this).get(ActivityVM::class.java) }
+class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener {
+    @Inject lateinit var redditClient: RedditClient
+    @Inject lateinit var activityVMFactory: ActivityVMFactory
+    private  val viewModel by lazy { ViewModelProvider(this@MainActivity, activityVMFactory).get(ActivityVM::class.java) }
+
     private lateinit var binding: ActivityMainBinding
     private val navController by lazy { findNavController(R.id.nav_host_fragment) }
-
-    @Inject
-    lateinit var userManager: UserManager
-
     private val bottomNavDrawerFragment: BottomNavDrawerFragment by lazy {
         supportFragmentManager.findFragmentById(R.id.bottom_nav_drawer) as BottomNavDrawerFragment
     }
@@ -49,10 +44,10 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (application as UpdootApplication).updootComponent.inject(this)
+        redditClient.attachListener(this)
         setUpViews()
         setUpStatusBarColors()
-        (application as UpdootApplication).updootComponent.inject(this)
-        userManager.attachListener(this)
     }
 
     private fun setUpStatusBarColors() {
@@ -115,19 +110,11 @@ class MainActivity : AppCompatActivity(), AccountChangeListener {
         }
     }
 
-    override fun onCurrentAccountRemoved() = reloadContent()
-
 
     override fun onDestroy() {
+        redditClient.detachListener()
         super.onDestroy()
-        userManager.detachListener()
     }
 
-    private fun reloadContent() = viewModel.setCurrentAccount(userManager.currentUser?.name)
-
-    //Account switching after new login
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == Constants.ACCOUNT_LOGIN_REQUEST_CODE && resultCode == Activity.RESULT_OK) reloadContent()
-    }
+    override fun currentAccountChanged() = viewModel.reloadContent()
 }

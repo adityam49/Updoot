@@ -12,20 +12,8 @@ import javax.inject.Singleton
 //Adds token to endpoint api caches current user session info
 @Singleton
 class TokenInterceptor @Inject constructor() : Interceptor {
-    private var sessionToken: String? = null
-    var tokenExpiry: Long? = null
-
-    fun setSessionToken(token: Token?) {
-        Log.i(TAG, "setSessionToken: setting session token $token")
-        if (token != null) {
-            sessionToken = token.access_token
-            tokenExpiry = token.absoluteExpiry
-        } else {
-            sessionToken = null
-            tokenExpiry = null
-        }
-    }
-
+    var sessionToken: String? = null
+    
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
@@ -42,5 +30,7 @@ class TokenInterceptor @Inject constructor() : Interceptor {
         return chain.proceed(requestBuilder.build())
     }
 
-    companion object { private const val TAG = "TokenInterceptor" }
+    companion object {
+        private const val TAG = "TokenInterceptor"
+    }
 }

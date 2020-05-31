@@ -18,5 +18,8 @@ enum class Sorting {
     },
     TOP {
         override fun toString() = Constants.TOP
-    };
+    },
+    NO_SORT{
+        override fun toString() = ""
+    }
 }

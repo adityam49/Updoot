@@ -3,7 +3,7 @@
     <item
         android:id="@+id/item_author"
         android:enabled="true"
-        android:icon="@drawable/ic_account_circle_black_24dp"
+        android:icon="@drawable/ic_account_circle_24dp"
         android:title="" />
     <item
         android:id="@+id/item_subreddit"

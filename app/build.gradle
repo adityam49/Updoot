@@ -30,8 +30,8 @@ android {
     }
 
 
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -40,7 +40,6 @@ android {
 
     androidExtensions {
         experimental = true
-        features = ["parcelize"]
     }
 
     kotlinOptions {
@@ -55,7 +54,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
     implementation "androidx.recyclerview:recyclerview:1.2.0-alpha03"
-    implementation 'com.google.android.material:material:1.2.0-alpha06'
+    implementation 'com.google.android.material:material:1.2.0-beta01'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
     implementation 'androidx.preference:preference:1.1.1'
 

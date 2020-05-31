@@ -1,8 +1,7 @@
 package com.ducktapedapps.updoot.ui
 
-import android.accounts.Account
+import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
-import android.app.Activity
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.net.Uri
@@ -12,7 +11,7 @@ import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
@@ -21,16 +20,16 @@ import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.databinding.ActivityLoginBinding
 import com.ducktapedapps.updoot.model.Token
 import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class LoginActivity : AppCompatActivity(), CoroutineScope {
+class LoginActivity : AccountAuthenticatorActivity(), CoroutineScope {
+    @Inject
+    lateinit var redditClient: RedditClient
 
     @Inject
     lateinit var redditAPI: RedditAPI
@@ -75,8 +74,6 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
 
         job = Job()
 
-        setSupportActionBar(binding.toolbar)
-
         CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
 
@@ -114,36 +111,32 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
 
     private suspend fun fetchToken(code: String): Token? {
         return try {
-            val token: Token = authAPI.getUserTokenByCoroutine(code = code)
+            val token: Token = authAPI.getUserToken(code = code)
             token.setAbsoluteExpiry()
-            interceptor.setSessionToken(token)
+            interceptor.sessionToken = token.access_token
             token
         } catch (exception: Exception) {
-            Log.i(TAG, "unable to fetch user token : ", exception.cause)
+            Log.e(TAG, "unable to fetch user token : ", exception)
             null
         }
     }
 
     private suspend fun fetchUserDetailsAndSave(token: Token) {
         try {
-            val account: com.ducktapedapps.updoot.model.Account = redditAPI.userIdentity()
+            val account = redditAPI.userIdentity()
             account.let { fetchedAccountDetails ->
-                sharedPreferences.edit().putString(Constants.LOGIN_STATE, fetchedAccountDetails.name).apply()
-                createAccount(fetchedAccountDetails.name, token)
-                setResult(Activity.RESULT_OK)
-                finish()
+                withContext(Dispatchers.Main) {
+                    redditClient.createUserAccountAndSetItAsCurrent(fetchedAccountDetails.name, token)
+                }
             }
         } catch (exception: Exception) {
-            Log.i(com.ducktapedapps.updoot.ui.TAG, "unable to fetch user details: ", exception.cause)
+            Log.e(TAG, "unable to fetch user details: ", exception)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@LoginActivity, "Unable to login", Toast.LENGTH_SHORT).show()
+            }
+        } finally {
+            withContext(Dispatchers.Main) { finish() }
         }
-    }
-
-    private fun createAccount(username: String, token: Token) {
-        val userAccount = Account(username, Constants.ACCOUNT_TYPE)
-        val bundle = Bundle()
-        bundle.putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
-        accountManager.addAccountExplicitly(userAccount, null, bundle)
-        accountManager.setAuthToken(userAccount, "full_access", token.access_token)
     }
 
     override fun onDestroy() {

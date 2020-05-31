@@ -5,13 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.utils.accountManagement.Reddit
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ExploreRepo @Inject constructor(
-        private val reddit: Reddit,
+        private val redditClient: RedditClient,
         private val subredditDAO: SubredditDAO
 ) {
 
@@ -30,7 +30,7 @@ class ExploreRepo @Inject constructor(
             try {
                 subredditDAO.getTrendingSubreddits().apply {
                     if (this.isNotEmpty()) _trendingSubs.postValue(this)
-                    val api = reddit.authenticatedAPI()
+                    val api = redditClient.api()
                     val trendingSubs = api.getTrendingSubredditNames()
                     if (this.isNotEmpty()) forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0, lastUpdated = System.currentTimeMillis())) }
                     val fetchedSubs: MutableList<Subreddit> = mutableListOf()
@@ -55,7 +55,7 @@ class ExploreRepo @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 _isLoading.postValue(true)
-                val redditAPI = reddit.authenticatedAPI()
+                val redditAPI = redditClient.api()
                 try {
                     val results = redditAPI.search(query = query)
                     if (results != null) {

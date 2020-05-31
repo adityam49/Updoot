@@ -13,9 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-private const val TAG = "SubmissionsVM"
 
 class SubmissionsVM constructor(val subreddit: String, private val submissionRepo: SubmissionRepo) : ViewModel(), InfiniteScrollVM {
+    private val TAG = "SubmissionsVM"
     override val isLoading = submissionRepo.isLoading
 
     private var time: String? = null
@@ -34,7 +34,7 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
                 loadPage(false)
             }
             async {
-                submissionRepo.loadSubredditInfo(subreddit)
+//                submissionRepo.loadSubredditInfo(subreddit)
             }
         }
 
@@ -42,8 +42,9 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
 
     override fun loadPage(appendPage: Boolean) {
         viewModelScope.launch {
-            val sorting = sorting.value!!
-            submissionRepo.loadPage(subreddit, sorting, time, appendPage)
+            val sorting = sorting.value
+            submissionRepo.loadPage(subreddit = subreddit, sort = sorting
+                    ?: Sorting.NO_SORT, time = time, appendPage = appendPage)
         }
     }
 
@@ -66,8 +67,10 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
     /**
      * Clears the cached data and fetches new data
      */
-    fun reload() = viewModelScope.launch { loadPage(false) }
-
+    fun reload() {
+        submissionRepo.clearSubmissions()
+        viewModelScope.launch { loadPage(false) }
+    }
 
 
     fun expandSelfText(index: Int) {

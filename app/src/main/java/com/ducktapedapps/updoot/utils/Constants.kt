@@ -8,7 +8,9 @@ object Constants {
     const val TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey"
     const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
 
-    const val LOGIN_STATE = "login_state"
+    const val CURRENT_ACCOUNT_NAME = "current_account_name"
+    const val CACHED_ACCOUNT_COUNT = "cached_account_count"
+
     const val DEVICE_ID_KEY = "deviceIdKey"
     const val client_id = BuildConfig.CLIENT_ID
     const val redirect_uri = BuildConfig.REDIRECT_URI
@@ -18,6 +20,7 @@ object Constants {
     //reddit api has no oauth support for trending subreddits api so using a hardcoded endPoint
     const val TRENDING_API_URL = "https://www.reddit.com/api/trending_subreddits/.json"
     const val TOKEN_ACCESS_URL = "https://www.reddit.com/api/v1/access_token"
+    const val TOKEN_REVOKE_URL = "https://www.reddit.com/api/v1/revoke_token"
     const val scopes = "identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread"
     const val userLess_grantType = "https://oauth.reddit.com/grants/installed_client"
     const val user_grantType = "authorization_code"
@@ -43,7 +46,8 @@ object Constants {
 
     const val ACCOUNT_LOGIN_REQUEST_CODE = 99
 
-    const val ACCOUNT_TYPE = "updoot_account"
+    const val UPDOOT_ACCOUNT = "updoot_account"
+    const val ADD_ACCOUNT = "add account"
     const val ANON_USER = "Anonymous"
 
     //DB names

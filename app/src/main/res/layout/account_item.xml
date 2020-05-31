@@ -22,5 +22,13 @@
             android:textSize="18sp"
             android:textStyle="bold"
             tools:text="Explore" />
+
+        <ImageView
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:src="@drawable/ic_baseline_remove_24" />
     </LinearLayout>
 </layout>

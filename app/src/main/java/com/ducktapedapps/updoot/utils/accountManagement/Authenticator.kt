@@ -25,15 +25,10 @@ class Authenticator internal constructor(private val mContext: Context) : Abstra
 
     override fun getAuthToken(response: AccountAuthenticatorResponse, account: Account, authTokenType: String, options: Bundle): Bundle? = null
 
-    override fun getAccountRemovalAllowed(response: AccountAuthenticatorResponse, account: Account): Bundle {
-        if (account.name == Constants.ANON_USER) {
-            val result = Bundle()
-            //restrict anon Account removal from settings
-            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)
-            return result
-        }
-        return super.getAccountRemovalAllowed(response, account)
-    }
+    override fun getAccountRemovalAllowed(response: AccountAuthenticatorResponse, account: Account) =
+            Bundle().apply {
+                putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)
+            }
 
     override fun getAuthTokenLabel(authTokenType: String): String = throw UnsupportedOperationException()
 
