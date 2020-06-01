@@ -20,6 +20,7 @@ class AccountsAdapter(private val action: AccountAction) : ListAdapter<AccountMo
         fun login()
         fun switch(accountName: String)
         fun logout(accountName: String)
+        fun toggleEntryMenu()
     }
 
     inner class NavDrawerItemViewHolder(val binding: AccountItemBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -42,7 +43,10 @@ class AccountsAdapter(private val action: AccountAction) : ListAdapter<AccountMo
                         visibility = View.VISIBLE
                         setOnClickListener { action.logout(account.name) }
                     }
-                    root.setOnClickListener { action.switch(account.name) }
+                    root.setOnClickListener {
+                        if (account.isCurrentAccount) action.toggleEntryMenu()
+                        else action.switch(account.name)
+                    }
                 }
 
         private fun bindSystemAccount(account: SystemModel) =
@@ -51,7 +55,8 @@ class AccountsAdapter(private val action: AccountAction) : ListAdapter<AccountMo
                     imageView.setImageDrawable(ContextCompat.getDrawable(imageView.context, account.icon))
                     logout.visibility = View.GONE
                     root.setOnClickListener {
-                        when (account.name) {
+                        if (account.isCurrentAccount) action.toggleEntryMenu()
+                        else when (account.name) {
                             Constants.ADD_ACCOUNT -> action.login()
                             else -> action.switch(account.name)
                         }

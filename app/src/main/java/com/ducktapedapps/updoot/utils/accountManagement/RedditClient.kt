@@ -155,17 +155,17 @@ class RedditClient @Inject constructor(
                     .map { it.name }
 
     fun getAccountModels(): List<AccountModel> =
-            mutableListOf<String>().apply {
-                add(currentUpdootAccount)
-                addAll(getCachedAccount())
-                add(Constants.ADD_ACCOUNT)
+            mutableListOf<Pair<String, Boolean>>().apply {
+                add(Pair(currentUpdootAccount,/* is current account */true))
+                getCachedAccount().forEach { add(Pair(it, false)) }
+                add(Pair(Constants.ADD_ACCOUNT, false))
             }.map { it.toAccountModel() }
 
-    private fun String.toAccountModel(): AccountModel = when (this) {
-        Constants.ANON_USER -> SystemModel(Constants.ANON_USER, R.drawable.ic_account_circle_24dp)
-        Constants.ADD_ACCOUNT -> SystemModel(Constants.ADD_ACCOUNT, R.drawable.ic_round_add_circle_24)
-        else -> UserModel(this, with(androidAccountManager) {
-            getUserData(accounts.first { it.name == this@toAccountModel }, Constants.USER_ICON_KEY)
+    private fun Pair<String, Boolean>.toAccountModel(): AccountModel = when (this.first) {
+        Constants.ANON_USER -> SystemModel(Constants.ANON_USER, this.second, R.drawable.ic_account_circle_24dp)
+        Constants.ADD_ACCOUNT -> SystemModel(Constants.ADD_ACCOUNT, this.second, R.drawable.ic_round_add_circle_24)
+        else -> UserModel(this.first, this.second, with(androidAccountManager) {
+            getUserData(accounts.first { it.name == this@toAccountModel.first }, Constants.USER_ICON_KEY)
         })
     }
 

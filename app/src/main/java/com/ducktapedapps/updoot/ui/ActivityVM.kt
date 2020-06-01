@@ -1,12 +1,7 @@
 package com.ducktapedapps.updoot.ui
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.R
+import androidx.lifecycle.*
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
-import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +14,19 @@ class ActivityVM @Inject constructor(private val redditClient: RedditClient) : V
     val shouldReload: LiveData<SingleLiveEvent<Boolean>> = _shouldReload
 
     private val _accounts: MutableLiveData<List<AccountModel>> = MutableLiveData(listOf())
-    val accounts: LiveData<List<AccountModel>> = _accounts
+    private val accountEntriesExpanded = MutableLiveData(false)
+
+    val accounts = MediatorLiveData<List<AccountModel>>().apply {
+        var isExpanded: Boolean
+        addSource(accountEntriesExpanded) {
+            isExpanded = it
+            value = if (isExpanded) _accounts.value?.toList()!!
+            else listOf(_accounts.value?.first()!!)
+        }
+        addSource(_accounts) {
+            accountEntriesExpanded.value = false
+        }
+    }
 
     init {
         reloadAccountList()
@@ -47,5 +54,9 @@ class ActivityVM @Inject constructor(private val redditClient: RedditClient) : V
                 reloadContent()
             }
         }
+    }
+
+    fun expandOrCollapseAccountsMenu() {
+        accountEntriesExpanded.value = accountEntriesExpanded.value?.run { !this }
     }
 }

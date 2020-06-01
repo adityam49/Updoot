@@ -19,6 +19,7 @@ import com.ducktapedapps.updoot.ui.ActivityVMFactory
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
+import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
 import javax.inject.Inject
 
 class BottomNavDrawerFragment : Fragment() {
@@ -35,8 +36,9 @@ class BottomNavDrawerFragment : Fragment() {
         override fun switch(accountName: String) = activityVM.setCurrentAccount(accountName)
 
         override fun logout(accountName: String) = activityVM.logout(accountName)
-    })
 
+        override fun toggleEntryMenu() = activityVM.expandOrCollapseAccountsMenu()
+    })
     private val behaviour: BottomSheetBehavior<FrameLayout> by lazy {
         from(binding.backgroundContainer)
     }
@@ -54,6 +56,7 @@ class BottomNavDrawerFragment : Fragment() {
         binding = FragmentBottomNavDrawerBinding.inflate(inflater, container, false).apply {
             scrim = scrimView.also { it.setOnClickListener { toggleState() } }
             recyclerView.apply {
+                itemAnimator = SlideInDownAnimator()
                 adapter = accountsAdapter
             }
             activityVM.accounts.observe(viewLifecycleOwner) {
@@ -104,7 +107,5 @@ class BottomNavDrawerFragment : Fragment() {
 
     fun addOnStateChangeAction(action: OnStateChangeAction) = bottomNavDrawerCallback.addOnStateChangeAction(action)
 
-    private companion object {
-        const val TAG = "NavDrawerFragment"
-    }
+    private companion object{  const val TAG = "NavDrawerFragment" }
 }
