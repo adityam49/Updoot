@@ -44,11 +44,11 @@ class RoomModule {
                                         //reddit's api directs to frontpage if no subreddit name is specified
                                         subredditName = FRONTPAGE,
                                         viewType = SubmissionUiType.COMPACT,
-                                        sorting = Sorting.HOT
+                                        sorting = Sorting.hot,
+                                        sortTimePeriod = null
                                 ))
                 }
             }
-
         })
                 .build()
         return subredditPrefsDb

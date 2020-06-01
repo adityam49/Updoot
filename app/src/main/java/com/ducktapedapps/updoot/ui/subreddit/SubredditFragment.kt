@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -22,9 +21,12 @@ import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
-import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.InfiniteScrollListener
+import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.SortTimePeriod.*
 import com.ducktapedapps.updoot.utils.Sorting.*
+import com.ducktapedapps.updoot.utils.showMenuFor
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import javax.inject.Inject
 
@@ -51,11 +53,23 @@ class SubredditFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.hot_item -> submissionsVM.changeSort(HOT)
-            R.id.rising_item -> submissionsVM.changeSort(RISING)
-            R.id.new_item -> submissionsVM.changeSort(NEW)
-            R.id.best_item -> submissionsVM.changeSort(BEST)
             R.id.view_type_item -> submissionsVM.toggleUi()
+            R.id.hot_item -> submissionsVM.changeSort(hot, null)
+            R.id.rising_item -> submissionsVM.changeSort(rising, null)
+            R.id.new_item -> submissionsVM.changeSort(new, null)
+            R.id.best_item -> submissionsVM.changeSort(best, null)
+            R.id.top_hour_item -> submissionsVM.changeSort(top, hour)
+            R.id.top_day_item -> submissionsVM.changeSort(top, day)
+            R.id.top_week_item -> submissionsVM.changeSort(top, week)
+            R.id.top_month_item -> submissionsVM.changeSort(top, month)
+            R.id.top_year_item -> submissionsVM.changeSort(top, year)
+            R.id.top_all_time_item -> submissionsVM.changeSort(top, all)
+            R.id.controversial_hour_item -> submissionsVM.changeSort(controversial, hour)
+            R.id.controversial_day_item -> submissionsVM.changeSort(controversial, day)
+            R.id.controversial_week_item -> submissionsVM.changeSort(controversial, week)
+            R.id.controversial_month_item -> submissionsVM.changeSort(controversial, month)
+            R.id.controversial_year_item -> submissionsVM.changeSort(controversial, year)
+            R.id.controversial_all_time_item -> submissionsVM.changeSort(controversial, all)
             else -> return false
         }
         return true

@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ducktapedapps.updoot.utils.SortTimePeriod
 import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 
@@ -16,5 +17,6 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType
 data class SubredditPrefs(
         @PrimaryKey val subredditName: String,
         val viewType: SubmissionUiType,
-        val sorting: Sorting
+        val sorting: Sorting,
+        val sortTimePeriod: SortTimePeriod?
 )

@@ -10,6 +10,7 @@ import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.model.SubredditPrefs
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.SortTimePeriod
 import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
@@ -39,9 +40,6 @@ class SubmissionRepo @Inject constructor(
     private val _subredditInfo: MutableLiveData<Subreddit> = MutableLiveData()
     val subredditInfo: LiveData<Subreddit> = _subredditInfo
 
-    private val _subredditSorting: MutableLiveData<Sorting> = MutableLiveData()
-    val sorting: LiveData<Sorting> = _subredditSorting
-
     private val _submissionsUI: MutableLiveData<SubmissionUiType> = MutableLiveData()
     val submissionsUI: LiveData<SubmissionUiType> = _submissionsUI
 
@@ -52,11 +50,10 @@ class SubmissionRepo @Inject constructor(
         var data = prefsDAO.getSubredditPrefs(subreddit)
         if (data == null) {
             //creating new entry of preferences
-            data = SubredditPrefs(subreddit, SubmissionUiType.COMPACT, Sorting.HOT).also {
-                prefsDAO.insertSubredditPrefs(it)
+            data = SubredditPrefs(subreddit, SubmissionUiType.COMPACT, Sorting.hot, null).apply {
+                prefsDAO.insertSubredditPrefs(this)
             }
         }
-        _subredditSorting.postValue(data.sorting)
         _submissionsUI.postValue(data.viewType)
     }
 
@@ -104,21 +101,17 @@ class SubmissionRepo @Inject constructor(
         _submissionsUI.postValue(uiType)
     }
 
-    suspend fun changeSort(newSort: Sorting, subreddit: String) {
-        withContext(Dispatchers.IO) {
-            if (_subredditSorting.value != newSort) {
-                prefsDAO.setSorting(newSort, subreddit)
-                _subredditSorting.postValue(newSort)
-                loadPage(subreddit, newSort, null, false)
+    suspend fun changeSort(newSort: Sorting, sortPeriod: SortTimePeriod?, subreddit: String) =
+            withContext(Dispatchers.IO) {
+                prefsDAO.setSorting(newSort, sortPeriod, subreddit)
+                loadPage(subreddit, false)
             }
-        }
-    }
 
     fun clearSubmissions() {
         _allSubmissions.value = mutableListOf()
     }
 
-    suspend fun loadPage(subreddit: String, sort: Sorting = Sorting.NO_SORT, time: String?, appendPage: Boolean) {
+    suspend fun loadPage(subreddit: String, appendPage: Boolean) {
         withContext(Dispatchers.IO) {
             _isLoading.postValue(true)
             try {
@@ -130,7 +123,12 @@ class SubmissionRepo @Inject constructor(
                         after = null
                         mutableListOf()
                     }
-                    val fetchedSubmissions = redditAPI.getSubreddit("${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit", sort.toString(), time, after)
+                    val fetchedSubmissions = redditAPI.getSubreddit(
+                            "${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit",
+                            prefsDAO.getSubredditSorting(subreddit).name,
+                            prefsDAO.getSubredditSortPeriod(subreddit)?.name,
+                            after
+                    )
                     withContext(Dispatchers.Default) {
                         after = fetchedSubmissions.after
                         submissions += fetchedSubmissions.submissions

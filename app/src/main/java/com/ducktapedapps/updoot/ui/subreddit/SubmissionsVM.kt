@@ -7,6 +7,7 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.SortTimePeriod
 import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,7 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
     private val TAG = "SubmissionsVM"
     override val isLoading = submissionRepo.isLoading
 
-    private var time: String? = null
-
     val subredditInfo: LiveData<Subreddit> = submissionRepo.subredditInfo
-    val sorting: LiveData<Sorting> = submissionRepo.sorting
     val uiType: LiveData<SubmissionUiType> = submissionRepo.submissionsUI
     val allSubmissions: LiveData<MutableList<LinkData>> = submissionRepo.allSubmissions
     val toastMessage: LiveData<SingleLiveEvent<String?>> = submissionRepo.toastMessage
@@ -42,9 +40,10 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
 
     override fun loadPage(appendPage: Boolean) {
         viewModelScope.launch {
-            val sorting = sorting.value
-            submissionRepo.loadPage(subreddit = subreddit, sort = sorting
-                    ?: Sorting.NO_SORT, time = time, appendPage = appendPage)
+            submissionRepo.loadPage(
+                    subreddit = subreddit,
+                    appendPage = appendPage
+            )
         }
     }
 
@@ -83,9 +82,9 @@ class SubmissionsVM constructor(val subreddit: String, private val submissionRep
         }
     }
 
-    fun changeSort(newSorting: Sorting) {
+    fun changeSort(newSorting: Sorting, sortPeriod: SortTimePeriod?) {
         viewModelScope.launch((Dispatchers.IO)) {
-            submissionRepo.changeSort(newSorting, subreddit)
+            submissionRepo.changeSort(newSorting, sortPeriod, subreddit)
         }
     }
 }
