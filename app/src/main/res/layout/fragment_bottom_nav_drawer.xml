@@ -29,8 +29,6 @@
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:orientation="vertical"
-                android:paddingTop="32dp"
-                android:paddingBottom="32dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </FrameLayout>
 

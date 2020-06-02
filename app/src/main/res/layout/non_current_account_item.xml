@@ -4,52 +4,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground">
-
+    android:layout_height="wrap_content">
+    <!--TODO : Extract image dimensions (24dp) to dimens.xml-->
     <ImageView
         android:id="@+id/user_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="18dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_account_circle_24dp" />
+        tools:src="@drawable/ic_explore_24dp" />
 
     <TextView
         android:id="@+id/user_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="32dp"
+        android:gravity="center"
         android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/user_icon"
-        app:layout_constraintTop_toTopOf="@+id/user_icon"
-        tools:text="@tools:sample/lorem" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Explore" />
 
     <ImageButton
         android:id="@+id/logout_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_baseline_remove_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/chevron"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/chevron"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:layout_marginEnd="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
-        android:src="@drawable/ic_baseline_chevron_down_24"
+        android:src="@drawable/ic_baseline_remove_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

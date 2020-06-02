@@ -6,15 +6,16 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.ducktapedapps.updoot.databinding.AccountItemBinding
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.SystemModel
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.UserModel
-import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.databinding.CurrentAccountItemBinding
+import com.ducktapedapps.updoot.databinding.NonCurrentAccountItemBinding
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.*
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter.AccountVH.CurrentAccountVH
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter.AccountVH.NonCurrentAccountVH
 
-class AccountsAdapter(private val action: AccountAction) : ListAdapter<AccountModel, AccountsAdapter.NavDrawerItemViewHolder>(CALLBACK) {
+class AccountsAdapter(private val actions: AccountAction) : ListAdapter<AccountModel, AccountsAdapter.AccountVH>(CALLBACK) {
 
     interface AccountAction {
         fun login()
@@ -23,57 +24,92 @@ class AccountsAdapter(private val action: AccountAction) : ListAdapter<AccountMo
         fun toggleEntryMenu()
     }
 
-    inner class NavDrawerItemViewHolder(val binding: AccountItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(account: AccountModel) = when (account) {
-            is UserModel -> bindUserAccount(account)
-            is SystemModel -> bindSystemAccount(account)
-        }
 
-        private fun bindUserAccount(account: UserModel) =
-                binding.apply {
-                    textView.text = account.name
-                    with(imageView) {
-                        Glide
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            if (viewType == CURRENT_VH)
+                CurrentAccountVH(CurrentAccountItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            else
+                NonCurrentAccountVH(NonCurrentAccountItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+
+
+    override fun getItemViewType(position: Int) = with(getItem(position)) {
+        when (this) {
+            is AnonymousAccount -> if (this.isCurrent) CURRENT_VH else NON_CURRENT_VH
+            is AddAccount -> NON_CURRENT_VH
+            is UserModel -> if (this.isCurrentAccount) CURRENT_VH else NON_CURRENT_VH
+        }
+    }
+
+
+    override fun onBindViewHolder(holder: AccountVH, position: Int) {
+        when (holder) {
+            is CurrentAccountVH -> holder.bind(getItem(position), actions)
+            is NonCurrentAccountVH -> holder.bind(getItem(position), actions)
+        }
+    }
+
+    sealed class AccountVH(view: View) : ViewHolder(view) {
+        class CurrentAccountVH(val binding: CurrentAccountItemBinding) : AccountVH(binding.root) {
+            fun bind(account: AccountModel, actions: AccountAction) = binding.apply {
+                chevron.setOnClickListener { actions.toggleEntryMenu() }
+                logoutButton.apply {
+                    if (account is UserModel) {
+                        visibility = View.VISIBLE
+                        setOnClickListener { actions.logout(account.name) }
+                    } else visibility = View.GONE
+                }
+                userNameText.text = account.name
+                with(userIcon) {
+                    when (account) {
+                        is UserModel -> Glide
                                 .with(this)
                                 .load(account.userIcon)
                                 .apply(RequestOptions.circleCropTransform())
                                 .into(this)
+
+                        //TODO : glide shows white drawable icons on white background for light theme
+                        is AnonymousAccount -> setImageDrawable(ContextCompat.getDrawable(context, account.icon))
+                        is AddAccount -> setImageDrawable(ContextCompat.getDrawable(context, account.icon))
                     }
-                    logout.apply {
+                }
+            }
+
+        }
+
+        class NonCurrentAccountVH(val binding: NonCurrentAccountItemBinding) : AccountVH(binding.root) {
+            fun bind(account: AccountModel, actions: AccountAction) = binding.apply {
+                userNameText.text = account.name
+                root.setOnClickListener { if (account is AddAccount) actions.login() else actions.switch(account.name) }
+                with(userIcon) {
+                    when (account) {
+                        is UserModel ->
+                            Glide
+                                    .with(this)
+                                    .load(account.userIcon)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(this)
+                        is AnonymousAccount -> setImageDrawable(ContextCompat.getDrawable(context, account.icon))
+                        is AddAccount -> setImageDrawable(ContextCompat.getDrawable(context, account.icon))
+                    }
+                }
+                logoutButton.apply {
+                    if (account is UserModel) {
+                        setOnClickListener { actions.logout(account.name) }
                         visibility = View.VISIBLE
-                        setOnClickListener { action.logout(account.name) }
-                    }
-                    root.setOnClickListener {
-                        if (account.isCurrentAccount) action.toggleEntryMenu()
-                        else action.switch(account.name)
-                    }
+                    } else visibility = View.GONE
                 }
+            }
+        }
 
-        private fun bindSystemAccount(account: SystemModel) =
-                binding.apply {
-                    textView.text = account.name
-                    imageView.setImageDrawable(ContextCompat.getDrawable(imageView.context, account.icon))
-                    logout.visibility = View.GONE
-                    root.setOnClickListener {
-                        if (account.isCurrentAccount) action.toggleEntryMenu()
-                        else when (account.name) {
-                            Constants.ADD_ACCOUNT -> action.login()
-                            else -> action.switch(account.name)
-                        }
-                    }
-                }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            NavDrawerItemViewHolder(AccountItemBinding.inflate(LayoutInflater.from(parent.context)))
+    private companion object {
+        val CALLBACK = object : DiffUtil.ItemCallback<AccountModel>() {
+            override fun areItemsTheSame(oldItem: AccountModel, newItem: AccountModel) = oldItem == newItem
 
-    override fun onBindViewHolder(holder: NavDrawerItemViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    private companion object CALLBACK : DiffUtil.ItemCallback<AccountModel>() {
-        override fun areItemsTheSame(oldItem: AccountModel, newItem: AccountModel) = oldItem == newItem
-
-        override fun areContentsTheSame(oldItem: AccountModel, newItem: AccountModel) = true
+            override fun areContentsTheSame(oldItem: AccountModel, newItem: AccountModel) = true
+        }
+        const val CURRENT_VH = 1
+        const val NON_CURRENT_VH = 2
     }
 }
