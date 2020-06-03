@@ -70,6 +70,7 @@ class SubredditFragment : Fragment() {
             R.id.controversial_month_item -> submissionsVM.changeSort(controversial, month)
             R.id.controversial_year_item -> submissionsVM.changeSort(controversial, year)
             R.id.controversial_all_time_item -> submissionsVM.changeSort(controversial, all)
+            R.id.search_item -> findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSearchOverlayDestination())
             else -> return false
         }
         return true

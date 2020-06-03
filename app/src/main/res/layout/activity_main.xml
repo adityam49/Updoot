@@ -11,6 +11,7 @@
         tools:context=".ui.MainActivity">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -18,7 +19,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_scrollFlags="scroll|enterAlways">
+                app:layout_scrollFlags="scroll|enterAlways|snap">
 
                 <TextView
                     android:id="@+id/text_toolbar_title"

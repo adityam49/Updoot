@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_SubredditDestination_to_ImagePreviewDestination"
             app:destination="@id/ImagePreviewDestination" />
+        <action
+            android:id="@+id/action_SubredditDestination_to_SearchOverlayDestination"
+            app:destination="@id/ExploreOverlayDestination" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
@@ -92,4 +95,10 @@
         android:id="@+id/loginActivity"
         android:name="com.ducktapedapps.updoot.ui.LoginActivity"
         android:label="LoginActivity" />
+    <dialog
+        android:id="@+id/ExploreOverlayDestination"
+        android:name="com.ducktapedapps.updoot.ui.ExploreDialogFragment"
+        android:label="SearchDialogFragment"
+        tools:layout="@layout/fragment_explore_overlay_dialog" />
+
 </navigation>
