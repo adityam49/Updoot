@@ -29,11 +29,9 @@
     <string name="settings">Settings</string>
 
     <string name="Comments">Comments</string>
-    <string name="childrenCommentCount">+%d</string>
     <string name="submission_link">Copy Link</string>
     <string name="save_offline">Save offline</string>
 
     <string name="reloading">Reloading…</string>
-    <string name="online_subscriber_count">%1$s Online / %2$s Subscribers</string>
-    <string name="r_subreddit_name_age">r/%1$s \u25CF %2$s</string>
+    <string name="subreddit_icon">Subreddit icon</string>
 </resources>

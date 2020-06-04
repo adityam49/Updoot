@@ -78,10 +78,7 @@ class SubredditFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = FragmentSubredditBinding.inflate(inflater, container, false)
-                .apply { lifecycleOwner = viewLifecycleOwner }
-
         val adapter = SubmissionsAdapter()
-
         adapter.submissionClickListener = object : SubmissionsAdapter.SubmissionClickListener {
             override fun onSubmissionClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
             override fun onThumbnailClick(imageView: View, linkData: LinkData) {
@@ -139,7 +136,6 @@ class SubredditFragment : Fragment() {
     }
 
     private fun setUpVMWithViews(binding: FragmentSubredditBinding, adapter: SubmissionsAdapter) {
-        binding.vm = submissionsVM
         binding.swipeToRefreshLayout.setOnRefreshListener { submissionsVM.reload() }
         ViewModelProvider(requireActivity()).get(ActivityVM::class.java).shouldReload.observe(viewLifecycleOwner) { shouldReload ->
             if (shouldReload.contentIfNotHandled == true) {

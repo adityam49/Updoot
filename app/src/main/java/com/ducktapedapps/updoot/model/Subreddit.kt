@@ -1,12 +1,10 @@
 package com.ducktapedapps.updoot.model
 
-import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ducktapedapps.updoot.ui.explore.ExploreUiModel
 import com.squareup.moshi.JsonClass
-import kotlinx.android.parcel.Parcelize
 
-@Parcelize
 @Entity
 @JsonClass(generateAdapter = true)
 data class Subreddit(
@@ -18,4 +16,4 @@ data class Subreddit(
         val created: Long,
         var lastUpdated: Long?,
         val isTrending: Int = 0 //0 is not trending 1 is trending
-) : Parcelable
+) : ExploreUiModel

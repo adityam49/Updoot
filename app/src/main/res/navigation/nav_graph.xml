@@ -34,7 +34,7 @@
             app:destination="@id/ImagePreviewDestination" />
         <action
             android:id="@+id/action_SubredditDestination_to_SearchOverlayDestination"
-            app:destination="@id/ExploreOverlayDestination" />
+            app:destination="@id/ExploreDestination" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
@@ -75,19 +75,6 @@
         android:id="@+id/SettingsDestination"
         android:name="com.ducktapedapps.updoot.ui.settings.SettingsFragment"
         android:label="SettingsFragment" />
-    <fragment
-        android:id="@+id/ExploreDestination"
-        android:name="com.ducktapedapps.updoot.ui.explore.ExploreFragment"
-        android:label="ExploreDestination"
-        tools:layout="@layout/fragment_explore">
-        <action
-            android:id="@+id/explore_to_subreddit"
-            app:destination="@id/SubredditDestination"
-            app:enterAnim="@anim/enter_from_left"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/enter_from_right"
-            app:popExitAnim="@anim/exit_to_left" />
-    </fragment>
     <action
         android:id="@+id/action_global_loginActivity"
         app:destination="@id/loginActivity" />
@@ -95,10 +82,14 @@
         android:id="@+id/loginActivity"
         android:name="com.ducktapedapps.updoot.ui.LoginActivity"
         android:label="LoginActivity" />
-    <dialog
-        android:id="@+id/ExploreOverlayDestination"
-        android:name="com.ducktapedapps.updoot.ui.ExploreDialogFragment"
+    <fragment
+        android:id="@+id/ExploreDestination"
+        android:name="com.ducktapedapps.updoot.ui.explore.ExploreFragment"
         android:label="SearchDialogFragment"
-        tools:layout="@layout/fragment_explore_overlay_dialog" />
+        tools:layout="@layout/fragment_explore">
+        <action
+            android:id="@+id/action_ExploreDestination_to_SubredditDestination"
+            app:destination="@id/SubredditDestination" />
+    </fragment>
 
 </navigation>

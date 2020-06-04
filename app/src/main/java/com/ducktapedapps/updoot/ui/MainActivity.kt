@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
                 hidePeripheralElements()
             }
 
-            R.id.ExploreOverlayDestination -> hidePeripheralElements()
+            R.id.ExploreDestination -> hidePeripheralElements()
 
             else -> hidePeripheralElements()
         }

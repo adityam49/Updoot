@@ -1,22 +1,22 @@
-package com.ducktapedapps.updoot.ui.explore
+package com.ducktapedapps.updoot.ui.explore.trending
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.TrendingSubredditItemBinding
 import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.ui.explore.TrendingSubsAdapter.TrendingSubVh
+import com.ducktapedapps.updoot.ui.explore.trending.HorizontalTrendingSubsAdapter.TrendingSubVh
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.ducktapedapps.updoot.utils.getCompactDateAsString
 
-class TrendingSubsAdapter : androidx.recyclerview.widget.ListAdapter<Subreddit, TrendingSubVh>(CALLBACK) {
+class HorizontalTrendingSubsAdapter : ListAdapter<Subreddit, TrendingSubVh>(CALLBACK) {
     inner class TrendingSubVh(val binding: TrendingSubredditItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -24,9 +24,12 @@ class TrendingSubsAdapter : androidx.recyclerview.widget.ListAdapter<Subreddit, 
 
 
     override fun onBindViewHolder(holder: TrendingSubVh, position: Int) {
-        holder.binding.apply {
-            subreddit = getItem(position)
-            executePendingBindings()
+        with(getItem(position)) {
+            holder.binding.apply {
+                bindSubredditIcon(subredditIcon, community_icon)
+                bindSubredditTitle(subredditNameAge, display_name, created)
+                bindSubscriberCount(subscriberCountTv, active_user_count, subscribers)
+            }
         }
     }
 
@@ -35,10 +38,26 @@ class TrendingSubsAdapter : androidx.recyclerview.widget.ListAdapter<Subreddit, 
                 super.onBindViewHolder(holder, position, payloads)
             } else {
                 if (payloads.contains(SUBS_OR_ONLINE_CHANGED))
-                    subscriberCount(holder.binding.subscriberCountTv, getItem(position).active_user_count, getItem(position).subscribers)
+                    bindSubscriberCount(holder.binding.subscriberCountTv, getItem(position).active_user_count, getItem(position).subscribers)
                 else {
                 }
             }
+
+    private fun bindSubscriberCount(view: TextView, onlineCount: Long, subscriberCount: Long) {
+        view.text = if (onlineCount <= -0L || subscriberCount <= 0L) ""
+        else String.format("%s Online / %s Subscribers", getCompactCountAsString(onlineCount), getCompactCountAsString(subscriberCount))
+    }
+
+    private fun bindSubredditIcon(view: ImageView, url: String?) = Glide
+            .with(view)
+            .load(url)
+            .apply(RequestOptions.circleCropTransform())
+            .placeholder(R.drawable.ic_subreddit_default_24dp)
+            .into(view)
+
+    private fun bindSubredditTitle(view: TextView, subredditName: String, subredditAge: Long) {
+        view.text = String.format("%s \u25CF %s", subredditName, getCompactDateAsString(subredditAge))
+    }
 
     override fun submitList(list: List<Subreddit>?) {
         val updatedList: MutableList<Subreddit> = mutableListOf()
@@ -69,38 +88,4 @@ class TrendingSubsAdapter : androidx.recyclerview.widget.ListAdapter<Subreddit, 
     private companion object {
         const val SUBS_OR_ONLINE_CHANGED = 1
     }
-}
-
-@BindingAdapter("bannerUrlLoad")
-fun bannerUrlLoad(view: ImageView, url: String) =
-        Glide.with(view).load(url).into(view)
-
-@BindingAdapter("onlineCount", "subscriberCount")
-fun subscriberCount(view: TextView, onlineCount: Long, subscriberCount: Long) {
-    view.text = if (onlineCount <= -0L || subscriberCount <= 0L) ""
-    else String.format("%s Online / %s Subscribers", getCompactCountAsString(onlineCount), getCompactCountAsString(subscriberCount))
-}
-
-@BindingAdapter("subredditIconUrl")
-fun subredditIconUrl(view: ImageView, url: String?) {
-    Glide
-            .with(view)
-            .load(url)
-            .apply(RequestOptions.circleCropTransform())
-            .placeholder(R.drawable.ic_explore_24dp)
-            .into(view)
-}
-
-@BindingAdapter("trendingSubredditMetaData")
-fun trendingSubredditMetaData(view: TextView, subreddit: Subreddit) {
-    view.text = String.format("%s%s", subreddit.public_description, if (subreddit.public_description.length < 30) "\n\n" else "")
-}
-
-@BindingAdapter("subredditName", "subredditAge")
-fun subredditNameAge(view: TextView, subredditName: String, subredditAge: Long) {
-    view.text = view.resources.getString(
-            R.string.r_subreddit_name_age,
-            subredditName,
-            getCompactDateAsString(subredditAge)
-    )
 }
