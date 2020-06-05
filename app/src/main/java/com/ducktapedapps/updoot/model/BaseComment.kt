@@ -4,8 +4,8 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 open class BaseComment(
-        val id: String,
-        val depth: Int,
-        val name: String,
-        val parent_id: String
+        open val id: String,
+        open val depth: Int,
+        open val name: String,
+        open val parent_id: String
 )

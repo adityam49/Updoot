@@ -51,8 +51,11 @@
             android:id="@+id/action_go_to_subreddit"
             app:destination="@id/SubredditDestination" />
         <argument
-            android:name="SubmissionData"
-            app:argType="com.ducktapedapps.updoot.model.LinkData" />
+            android:name="subreddit"
+            app:argType="string" />
+        <argument
+            android:name="id"
+            app:argType="string" />
         <action
             android:id="@+id/action_CommentsDestination_to_ImagePreviewDestination"
             app:destination="@id/ImagePreviewDestination" />

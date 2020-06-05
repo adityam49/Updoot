@@ -1,37 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
-    <data>
+    <com.ducktapedapps.updoot.ui.comments.IndentView
+        android:id="@+id/indentView"
+        style="@style/indentation_style"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp" />
 
-        <variable
-            name="moreComment"
-            type="com.ducktapedapps.updoot.model.MoreCommentData" />
-    </data>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/more_comment_count_tv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        tools:text="Load more 32 comments" />
 
-        <com.ducktapedapps.updoot.ui.comments.IndentView
-            android:id="@+id/indentView"
-            style="@style/indentation_style"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            app:indentLevel="@{moreComment.depth}" />
-
-        <TextView
-            android:id="@+id/more_comment_count_tv"
-            moreCommentCount="@{moreComment.count}"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            tools:text="Load more 32 comments" />
-
-    </LinearLayout>
-</layout>
+</LinearLayout>

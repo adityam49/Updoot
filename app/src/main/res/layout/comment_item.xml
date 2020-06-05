@@ -1,87 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_view_comment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:importantForAccessibility="noHideDescendants">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/root_view_comment"
-        android:layout_width="match_parent"
+    <com.ducktapedapps.updoot.ui.comments.IndentView
+        android:id="@+id/indentView"
+        style="@style/indentation_style"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/text_view_comment_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:indentLevel="6" />
+
+    <TextView
+        android:id="@+id/text_view_comment_header"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:importantForAccessibility="noHideDescendants">
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+        app:layout_constraintEnd_toStartOf="@id/text_view_children_count"
+        app:layout_constraintStart_toEndOf="@id/indentView"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/lorem" />
 
-        <com.ducktapedapps.updoot.ui.comments.IndentView
-            android:id="@+id/indentView"
-            style="@style/indentation_style"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            app:indentLevel="@{commentData.depth}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/text_view_comment_header"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/text_view_comment_body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/text_view_comment_header"
+        app:layout_constraintTop_toBottomOf="@id/text_view_comment_header" />
 
-        <TextView
-            android:id="@+id/text_view_comment_header"
-            commentHeaderContent="@{commentData}"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="8dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
-            app:layout_constraintEnd_toStartOf="@id/text_view_children_count"
-            app:layout_constraintStart_toEndOf="@id/indentView"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@tools:sample/lorem" />
+    <TextView
+        android:id="@+id/text_view_children_count"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+        app:layout_constraintEnd_toStartOf="@id/text_score"
+        app:layout_constraintStart_toEndOf="@id/text_view_comment_header"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="+12" />
 
-        <TextView
-            android:id="@+id/text_view_comment_body"
-            commentBodyContent="@{commentData.body}"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/text_view_comment_header"
-            app:layout_constraintTop_toBottomOf="@id/text_view_comment_header" />
-
-        <TextView
-            android:id="@+id/text_view_children_count"
-            childrenCount="@{commentData.replies.size()}"
-            repliesExpanded="@{commentData.repliesExpanded}"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
-            app:layout_constraintEnd_toStartOf="@id/text_score"
-            app:layout_constraintStart_toEndOf="@id/text_view_comment_header"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="+12" />
-
-        <TextView
-            android:id="@+id/text_score"
-            commentScore="@{commentData.ups}"
-            voted="@{commentData.likes}"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/text_view_children_count"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="32" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <data>
-
-        <variable
-            name="commentData"
-            type="com.ducktapedapps.updoot.model.CommentData" />
-    </data>
-</layout>
+    <TextView
+        android:id="@+id/text_score"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_children_count"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="32" />
+</androidx.constraintlayout.widget.ConstraintLayout>

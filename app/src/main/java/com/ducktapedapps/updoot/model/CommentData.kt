@@ -3,10 +3,10 @@ package com.ducktapedapps.updoot.model
 import android.text.Spanned
 
 data class CommentData(
-        val _id: String,
-        val _depth: Int,
-        val _parent_id: String,
-        val _name: String,
+        override val id: String,
+        override val depth: Int,
+        override val parent_id: String,
+        override val name: String,
         val author: String,
         var body: Spanned,
         var ups: Int?,
@@ -16,7 +16,7 @@ data class CommentData(
         val repliesExpanded: Boolean = false,
         val is_submitter: Boolean,
         val author_flair_text: String
-) : BaseComment(_id, _depth, _name, _parent_id) {
+) : BaseComment(id, depth, name, parent_id) {
 
     fun vote(direction: Int): CommentData {
         var updatedLikes: Boolean? = this.likes

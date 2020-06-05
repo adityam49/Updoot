@@ -49,15 +49,15 @@ class MoreCommentsListAdapter @Inject constructor(private val markwon: Markwon) 
                 body = markwon.toMarkdown(data["body"] as? String ?: ""),
                 gildings = gildingsAdapter.fromJson(mapAdapter.toJson(data["gildings"] as Map<*, *>))
                         ?: Gildings(),
-                _id = data["id"] as String,
+                id = data["id"] as String,
                 ups = (data["ups"] as? Double)?.toInt() ?: 0,
                 replies = listOf(),
-                _depth = (data["depth"] as? Double)?.toInt() ?: 0,
+                depth = (data["depth"] as? Double)?.toInt() ?: 0,
                 repliesExpanded = false,
                 is_submitter = data["is_submitter"] as? Boolean ?: false,
                 likes = data["likes"] as Boolean?,
-                _parent_id = data["parent_id"] as String,
-                _name = data["name"] as String,
+                parent_id = data["parent_id"] as String,
+                name = data["name"] as String,
                 author_flair_text = data["author_flair_text"] as? String ?: ""
         )
     }

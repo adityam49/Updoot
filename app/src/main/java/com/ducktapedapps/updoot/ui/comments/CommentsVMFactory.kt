@@ -5,23 +5,20 @@ import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.UpdootApplication
 import javax.inject.Inject
 
-class CommentsVMFactory(application: UpdootApplication,
-                        private val id: String,
-                        private val subreddit_name: String) : ViewModelProvider.Factory {
+class CommentsVMFactory @Inject constructor(private val commentsRepo: CommentsRepo) : ViewModelProvider.Factory {
+    private lateinit var subredditName: String
+    private lateinit var id: String
 
-    init {
-        application.updootComponent.inject(this)
+    fun setSubredditAndId(name: String, id: String) {
+        subredditName = name
+        this.id = id
     }
-
-    @Inject
-    lateinit var commentsRepo: CommentsRepo
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CommentsVM::class.java)) {
-            return CommentsVM(commentsRepo, id, subreddit_name) as T
+            return CommentsVM(commentsRepo, id, subredditName) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
-
 }

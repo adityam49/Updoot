@@ -15,11 +15,9 @@ import androidx.navigation.ui.setupWithNavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
 import com.ducktapedapps.updoot.ui.navDrawer.OnStateChangeAction
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import javax.inject.Inject
 
@@ -112,7 +110,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
             }
 
             R.id.CommentsDestination -> {
-                setCommentsTitle(arguments)
+                setCommentsTitle()
                 showPeripheralElements()
             }
 
@@ -131,12 +129,8 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
         binding.textToolbarTitle.text = getString(R.string.settings)
     }
 
-    private fun setCommentsTitle(arguments: Bundle?) = binding.apply {
-        textToolbarTitle.text = String.format(
-                "%s comments",
-                getCompactCountAsString(arguments?.getParcelable<LinkData>("SubmissionData")?.commentsCount?.toLong()
-                        ?: 0L))
-
+    private fun setCommentsTitle() = binding.apply {
+        textToolbarTitle.text = "0 comments"
     }
 
     private fun setSubredditTitle(arg: Bundle?) = binding.apply {

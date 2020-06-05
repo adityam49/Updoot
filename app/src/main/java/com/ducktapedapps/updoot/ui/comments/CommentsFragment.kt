@@ -1,35 +1,41 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.app.Application
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
     @Inject
-    lateinit var appContext: Application
-
+    lateinit var commentsVMFactory: CommentsVMFactory
     private lateinit var binding: FragmentCommentsBinding
     private lateinit var viewModel: CommentsVM
-    private lateinit var commentsAdapter: CommentsAdapter
+    private val commentsAdapter = CommentsAdapter(::expandCollapseComment)
     private val args: CommentsFragmentArgs by navArgs()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (activity?.application as UpdootApplication).updootComponent.inject(this@CommentsFragment)
+        setUpViewModel(args.subreddit, args.id)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        (activity?.application as UpdootApplication).updootComponent.inject(this@CommentsFragment)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -37,47 +43,41 @@ class CommentsFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentCommentsBinding.inflate(inflater, container, false).apply {
-            lifecycleOwner = viewLifecycleOwner
-        }
-
-        setUpRecyclerView()
-        binding.linkdata = args.submissionData
-        setUpViewModel(args.submissionData)
-
+        binding = FragmentCommentsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    private fun setUpViewModel(data: LinkData) {
-        viewModel = ViewModelProvider(this@CommentsFragment,
-                CommentsVMFactory(appContext as UpdootApplication, data.id, data.subredditName)
-        ).get(CommentsVM::class.java)
-        binding.commentsViewModel = viewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setUpRecyclerView()
+        observeData()
+    }
 
-        viewModel.apply {
-            allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
-            isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-        }
+    private fun setUpViewModel(name: String, id: String) {
+        viewModel = ViewModelProvider(
+                this@CommentsFragment,
+                commentsVMFactory.apply { setSubredditAndId(name, id) }
+        ).get(CommentsVM::class.java)
+    }
+
+    private fun observeData() = viewModel.apply {
+        allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
+        isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
     }
 
     private fun setUpRecyclerView() {
-        val handler = ClickHandler()
-        binding.clickhandler = handler
-        commentsAdapter = CommentsAdapter(handler)
-
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = commentsAdapter
             ItemTouchHelper(SwipeCallback(
-                    ContextCompat.getColor(requireContext(), R.color.saveContentColor),
-                    ContextCompat.getColor(requireContext(), R.color.upVoteColor),
-                    ContextCompat.getColor(requireContext(), R.color.downVoteColor),
-                    ContextCompat.getColor(requireContext(), R.color.color_on_primary_light),
-                    ContextCompat.getColor(requireContext(), R.color.color_background),
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_24dp)!!,
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_upvote_24dp)!!,
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_downvote_24dp)!!,
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_expand_more_black_14dp)!!,
+                    getColor(R.color.saveContentColor),
+                    getColor(R.color.upVoteColor),
+                    getColor(R.color.downVoteColor),
+                    getColor(R.color.color_on_primary_light),
+                    getColor(R.color.color_background),
+                    getDrawable(R.drawable.ic_star_24dp)!!,
+                    getDrawable(R.drawable.ic_upvote_24dp)!!,
+                    getDrawable(R.drawable.ic_downvote_24dp)!!,
+                    getDrawable(R.drawable.ic_expand_more_black_14dp)!!,
                     object : SwipeCallback.Callback {
                         override fun extremeLeftAction(position: Int) = Unit
 
@@ -87,14 +87,13 @@ class CommentsFragment : Fragment() {
 
                         override fun extremeRightAction(position: Int) = Unit
                     }
-
             )).attachToRecyclerView(this)
         }
     }
 
-    inner class ClickHandler {
-        fun onClick(index: Int) = viewModel.toggleChildrenVisibility(index)
+    private fun getColor(@ColorRes color: Int): Int = ContextCompat.getColor(requireActivity(), color)
 
-        fun onImageClick(data: LinkData) {}
-    }
+    private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireActivity(), drawableRes)
+
+    private fun expandCollapseComment(index: Int) = viewModel.toggleChildrenVisibility(index)
 }

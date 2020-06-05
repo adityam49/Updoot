@@ -80,7 +80,7 @@ class SubredditFragment : Fragment() {
         val binding = FragmentSubredditBinding.inflate(inflater, container, false)
         val adapter = SubmissionsAdapter()
         adapter.submissionClickListener = object : SubmissionsAdapter.SubmissionClickListener {
-            override fun onSubmissionClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData))
+            override fun onSubmissionClick(linkData: LinkData) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(linkData.subredditName, linkData.id))
             override fun onThumbnailClick(imageView: View, linkData: LinkData) {
                 val extra = FragmentNavigatorExtras(imageView as ImageView to imageView.transitionName)
                 findNavController().navigate(

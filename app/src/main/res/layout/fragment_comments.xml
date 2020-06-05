@@ -1,40 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_to_refresh_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:id="@+id/swipeToRefreshLayout"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:clipToPadding="false"
+        android:paddingTop="16dp"
+        android:paddingBottom="120dp"
+        tools:listitem="@layout/comment_item" />
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:clipToPadding="false"
-            android:paddingTop="16dp"
-            android:paddingBottom="120dp"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            tools:listitem="@layout/comment_item" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="commentsViewModel"
-            type="com.ducktapedapps.updoot.ui.comments.CommentsVM" />
-
-        <variable
-            name="linkdata"
-            type="com.ducktapedapps.updoot.model.LinkData" />
-
-        <variable
-            name="clickhandler"
-            type="com.ducktapedapps.updoot.ui.comments.CommentsFragment.ClickHandler" />
-    </data>
-</layout>
