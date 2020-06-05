@@ -38,7 +38,7 @@ fun showMenuFor(
                     navController.navigate(
                             SubredditFragmentDirections
                                     .actionGoToSubreddit()
-                                    .setRSubreddit(linkData.subredditName)
+                                    .setSubreddit(linkData.subredditName)
                     )
                     Toast.makeText(context, linkData.subredditName, Toast.LENGTH_SHORT).show()
                 } else Toast.makeText(context, "You are already in $currentSubreddit", Toast.LENGTH_SHORT).show()

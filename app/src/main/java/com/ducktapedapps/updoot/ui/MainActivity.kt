@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     }
 
     private fun setSubredditTitle(arg: Bundle?) = binding.apply {
-        textToolbarTitle.text = arg?.getString("r/subreddit")
+        textToolbarTitle.text = arg?.getString("subreddit")
                 ?: "Frontpage"
     }
 

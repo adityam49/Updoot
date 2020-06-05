@@ -25,7 +25,7 @@
             app:popEnterAnim="@anim/enter_from_left"
             app:popExitAnim="@anim/exit_to_right" />
         <argument
-            android:name="r/subreddit"
+            android:name="subreddit"
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_SubredditDestination_to_SearchOverlayDestination"
             app:destination="@id/ExploreDestination" />
+        <deepLink
+            android:id="@+id/subredditDeepLink"
+            app:uri="www.reddit.com/r/{subreddit}/" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"

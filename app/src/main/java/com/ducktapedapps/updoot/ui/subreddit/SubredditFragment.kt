@@ -42,7 +42,7 @@ class SubredditFragment : Fragment() {
         setHasOptionsMenu(true)
         (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
         submissionsVM = ViewModelProvider(this@SubredditFragment,
-                SubmissionsVMFactory(args.rSubreddit ?: FRONTPAGE, appContext as UpdootApplication)
+                SubmissionsVMFactory(args.subreddit ?: FRONTPAGE, appContext as UpdootApplication)
         ).get(SubmissionsVM::class.java)
     }
 
@@ -123,7 +123,7 @@ class SubredditFragment : Fragment() {
                         override fun rightAction(position: Int) = submissionsVM.castVote(position, -1)
 
                         override fun extremeRightAction(position: Int) =
-                                showMenuFor(args.rSubreddit,
+                                showMenuFor(args.subreddit,
                                         adapter.currentList[position],
                                         this@SubredditFragment.requireContext(),
                                         binding.recyclerView.findViewHolderForAdapterPosition(position)?.itemView,

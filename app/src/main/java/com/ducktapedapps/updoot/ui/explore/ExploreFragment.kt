@@ -35,7 +35,7 @@ class ExploreFragment : Fragment() {
     private val trendingAdapter = ExploreTrendingAdapter()
     private val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
         override fun goToSubreddit(subredditName: String) =
-                findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setRSubreddit(subredditName))
+                findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
     })
     private lateinit var binding: FragmentExploreBinding
 
