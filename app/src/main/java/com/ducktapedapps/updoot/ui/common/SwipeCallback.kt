@@ -43,8 +43,8 @@ class SwipeCallback(
 
     private companion object {
         const val TAG = "SwipeCallback"
-        const val EXTREME_THRESHOLD = 0.6
-        const val THRESHOLD = 0.3
+        const val EXTREME_THRESHOLD = 0.4
+        const val THRESHOLD = 0.1
         const val THRESHOLD_ANIMATION_START = 0.25
         const val EXTREME_THRESHOLD_ANIMATION_START = 0.75
         const val ALPHA_OPAQUE = 255.0
