@@ -1,8 +1,11 @@
 package com.ducktapedapps.updoot.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+@Entity
 @JsonClass(generateAdapter = true)
 data class LinkData(
         @Json(name = "selftext_html") val selftext: String?,
@@ -18,13 +21,12 @@ data class LinkData(
         val saved: Boolean,
         @Json(name = "created_utc") val created: Long,
         @Json(name = "num_comments") val commentsCount: Int,
-        val gildings: Gildings,
-        val preview: Preview?,
         val post_hint: String?,
-        val id: String,
+        @PrimaryKey val id: String,
         val url: String,
         val isSelfTextExpanded: Boolean = false,
-        val permalink: String
+        val permalink: String,
+        val lastUpdated: Long? = null
 ) {
 
     fun vote(direction: Int): LinkData {

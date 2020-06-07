@@ -1,42 +1,53 @@
 package com.ducktapedapps.updoot.utils
 
 import androidx.room.TypeConverter
-import com.ducktapedapps.updoot.utils.SortTimePeriod.*
-import com.ducktapedapps.updoot.utils.Sorting.*
+import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
+import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 
-/**
- * Helper functions to aid in type conversion of enum to primitives and vice-versa
- * @see com.ducktapedapps.updoot.utils.Sorting
- * @see com.ducktapedapps.updoot.utils.SortTimePeriod
- * @see com.ducktapedapps.updoot.utils.SubmissionUiType
- */
 class SubredditPrefsConverter {
     @TypeConverter
-    fun sortingStringToEnum(sorting: String): Sorting = when (sorting) {
-        "hot" -> hot
-        "best" -> best
-        "top" -> top
-        "rising" -> rising
-        "new" -> new
-        else -> controversial
+    fun sortingPrimitiveToNonPrimitive(sorting: Int): SubredditSorting = when (sorting) {
+        0 -> Hot
+        1 -> Rising
+        2 -> Best
+        3 -> New
+
+        4 -> TopHour
+        5 -> TopDay
+        6 -> TopWeek
+        7 -> TopMonth
+        8 -> TopYear
+        9 -> TopAll
+
+        10 -> ControversialHour
+        11 -> ControversialDay
+        12 -> ControversialWeek
+        13 -> ControversialMonth
+        14 -> ControversialYear
+        else -> ControversialAll
     }
 
     @TypeConverter
-    fun sortingPeriodStringToEnum(period: String?): SortTimePeriod? = when (period) {
-        "hour" -> hour
-        "day" -> day
-        "week" -> week
-        "month" -> month
-        "year" -> year
-        "all" -> all
-        else -> null
+    fun sortingNonPrimitiveToPrimitive(subredditSorting: SubredditSorting): Int = when (subredditSorting) {
+        is Hot -> 0
+        is Rising -> 1
+        is Best -> 2
+        is New -> 3
+
+        is TopHour -> 4
+        is TopDay -> 5
+        is TopWeek -> 6
+        is TopMonth -> 7
+        is TopYear -> 8
+        is TopAll -> 9
+
+        is ControversialHour -> 10
+        is ControversialDay -> 11
+        is ControversialWeek -> 12
+        is ControversialMonth -> 13
+        is ControversialYear -> 14
+        else -> 15
     }
-
-    @TypeConverter
-    fun sortingPeriodEnumToString(timePeriod: SortTimePeriod?): String? = timePeriod?.name
-
-    @TypeConverter
-    fun sortingEnumToString(sorting: Sorting): String = sorting.toString()
 
     @TypeConverter
     fun viewTypeIntToEnum(viewType: Int): SubmissionUiType = when (viewType) {

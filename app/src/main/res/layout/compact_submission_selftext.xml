@@ -7,14 +7,12 @@
         android:id="@+id/submissionsView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}"
         app:cardBackgroundColor="?attr/colorSecondary">
 
         <FrameLayout
             android:id="@+id/revel_more_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:onClick="@{()->clickListener.handleExpansion(itemIndex)}"
             android:visibility="@{linkdata.selftext == null ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toTopOf="@+id/self_text_cardView"
             app:layout_constraintEnd_toEndOf="parent"
@@ -48,16 +46,15 @@
             tools:src="@drawable/ic_selftext_24dp" />
 
         <include
-            layout="@layout/layout_gilding"
             android:id="@+id/gildingView"
-            app:layout_constraintTop_toTopOf="@id/metadata"
+            layout="@layout/layout_gilding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:orientation="horizontal"
             app:layout_constraintStart_toEndOf="@id/metadata"
-            app:submissionGildings="@{linkdata.gildings}" />
+            app:layout_constraintTop_toTopOf="@id/metadata" />
 
 
         <TextView
@@ -151,10 +148,6 @@
         <variable
             name="itemIndex"
             type="Integer" />
-
-        <variable
-            name="clickListener"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

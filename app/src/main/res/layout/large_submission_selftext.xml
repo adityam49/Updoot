@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:background="?attr/colorPrimaryDark"
-        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}">
+        android:background="?attr/colorPrimaryDark">
 
         <TextView
             android:id="@+id/title_tv"
@@ -33,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:orientation="horizontal"
-            app:submissionGildings="@{linkdata.gildings}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/metadata"
             tools:visibility="visible" />
@@ -106,10 +104,6 @@
     <data>
 
         <import type="android.view.View" />
-
-        <variable
-            name="clickListener"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

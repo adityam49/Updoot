@@ -26,9 +26,8 @@
             app:popExitAnim="@anim/exit_to_right" />
         <argument
             android:name="subreddit"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/action_SubredditDestination_to_ImagePreviewDestination"
             app:destination="@id/ImagePreviewDestination" />

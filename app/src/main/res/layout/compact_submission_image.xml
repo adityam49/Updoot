@@ -7,7 +7,6 @@
         android:id="@+id/submissionsView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}"
         app:cardBackgroundColor="?attr/colorSecondary">
 
         <ImageView
@@ -17,7 +16,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:contentDescription="@string/thumbnailDescription"
-            android:onClick="@{(view)->clickListener.onThumbnailClick(view,linkdata)}"
             android:scaleType="fitStart"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -26,15 +24,13 @@
 
         <include
             android:id="@+id/gildingView"
+            layout="@layout/layout_gilding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            layout="@layout/layout_gilding"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintTop_toTopOf="@+id/metadata"
             app:layout_constraintStart_toEndOf="@id/metadata"
-            app:submissionGildings="@{linkdata.gildings}" />
-
+            app:layout_constraintTop_toTopOf="@+id/metadata" />
 
 
         <TextView
@@ -95,10 +91,6 @@
     <data>
 
         <import type="android.view.View" />
-
-        <variable
-            name="clickListener"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

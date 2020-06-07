@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:background="?attr/colorPrimaryDark"
-        android:onClick="@{()->clickListener.onSubmissionClick(linkdata)}">
+        android:background="?attr/colorPrimaryDark">
 
         <TextView
             android:id="@+id/title_tv"
@@ -27,16 +26,15 @@
             tools:text="This is a long title. This is a long title. This is a long title. This is a long title." />
 
         <include
-            layout="@layout/layout_gilding"
             android:id="@+id/gildingView"
+            layout="@layout/layout_gilding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/self_text_thumbnail"
-            app:submissionGildings="@{linkdata.gildings}" />
+            app:layout_constraintTop_toBottomOf="@+id/self_text_thumbnail" />
 
 
         <ImageView
@@ -45,14 +43,12 @@
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
             android:adjustViewBounds="true"
-            android:onClick="@{(view)->clickListener.onThumbnailClick(view,linkdata)}"
             android:scaleType="fitCenter"
-            app:thumbnailBind="@{linkdata.thumbnail}"
-            app:imageBind="@{linkdata.preview}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_tv"
             tools:src="@drawable/ic_settings_24dp" />
+        <!--            app:thumbnailBind="@{linkdata.thumbnail}"-->
 
         <TextView
             android:id="@+id/metadata"
@@ -106,9 +102,6 @@
     <data>
 
         <import type="android.view.View" />
-        <variable
-            name="clickListener"
-            type="com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickListener" />
 
         <variable
             name="linkdata"

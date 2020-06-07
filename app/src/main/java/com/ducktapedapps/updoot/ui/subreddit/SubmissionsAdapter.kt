@@ -17,8 +17,7 @@ import com.ducktapedapps.updoot.ui.subreddit.SubmissionVH.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
-class SubmissionsAdapter : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
-    lateinit var submissionClickListener: SubmissionClickListener
+class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Unit) : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
 
     lateinit var itemUi: SubmissionUiType
 
@@ -82,28 +81,36 @@ class SubmissionsAdapter : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
         when (holder) {
             is LargeSubmissionSelfTextVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickListener = submissionClickListener
+                with(getItem(position)) {
+                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                }
                 executePendingBindings()
             }
 
             is LargeSubmissionImageVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickListener = submissionClickListener
                 selfTextThumbnail.transitionName = getItem(position).thumbnail
+                with(getItem(position)) {
+                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                }
                 executePendingBindings()
             }
 
             is CompactImageVH -> holder.binding.apply {
                 linkdata = getItem(position)
-                clickListener = submissionClickListener
                 selfTextThumbnail.transitionName = getItem(position).thumbnail
+                with(getItem(position)) {
+                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                }
                 executePendingBindings()
             }
 
             is CompactSelfTextVH -> holder.binding.apply {
                 linkdata = getItem(position)
                 itemIndex = position
-                clickListener = submissionClickListener
+                with(getItem(position)) {
+                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                }
                 executePendingBindings()
             }
         }
@@ -146,13 +153,6 @@ class SubmissionsAdapter : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
     enum class PartialChanges {
         VOTE_CHANGE,
         SAVE_STATE_CHANGE
-    }
-
-
-    interface SubmissionClickListener {
-        fun onSubmissionClick(linkData: LinkData)
-        fun onThumbnailClick(imageView: View, linkData: LinkData)
-        fun handleExpansion(index: Int)
     }
 }
 

@@ -7,12 +7,14 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ducktapedapps.updoot.api.local.SubredditDB
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDB
+import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsDB
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.model.SubredditPrefs
+import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.Constants.SUBMISSIONS_DB
 import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_DB
 import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_PREFS_DB
-import com.ducktapedapps.updoot.utils.Sorting
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import dagger.Module
 import dagger.Provides
@@ -44,8 +46,7 @@ class RoomModule {
                                         //reddit's api directs to frontpage if no subreddit name is specified
                                         subredditName = FRONTPAGE,
                                         viewType = SubmissionUiType.COMPACT,
-                                        sorting = Sorting.hot,
-                                        sortTimePeriod = null
+                                        subredditSorting = SubredditSorting.Hot
                                 ))
                 }
             }
@@ -88,4 +89,14 @@ class RoomModule {
     @Provides
     fun provideSubredditDAO(db: SubredditDB) = db.subredditDAO()
 
+    @Provides
+    @Singleton
+    fun provideSubmissionsCacheDB(application: Application): SubmissionsDB = Room.databaseBuilder(
+            application,
+            SubmissionsDB::class.java,
+            SUBMISSIONS_DB
+    ).build()
+
+    @Provides
+    fun provideSubmissionsCacheDAO(db: SubmissionsDB) = db.submissionsCacheDAO()
 }
