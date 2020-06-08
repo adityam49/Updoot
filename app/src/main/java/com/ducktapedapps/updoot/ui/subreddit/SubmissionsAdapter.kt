@@ -1,39 +1,34 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.CompactSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.subreddit.SubmissionVH.*
+import com.ducktapedapps.updoot.ui.subreddit.SubmissionViewHolder.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
-class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Unit) : ListAdapter<LinkData, SubmissionVH>(CALLBACK) {
-
+class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Unit) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
     lateinit var itemUi: SubmissionUiType
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionVH {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (itemUi == COMPACT) {
             if (viewType == R.layout.compact_submission_selftext) {
-                CompactSelfTextVH(CompactSubmissionSelftextBinding.inflate(inflater, parent, false))
+                CompactSelfTextViewHolder(CompactSubmissionSelftextBinding.inflate(inflater, parent, false))
             } else {
-                CompactImageVH(CompactSubmissionImageBinding.inflate(inflater, parent, false))
+                CompactImageViewHolder(CompactSubmissionImageBinding.inflate(inflater, parent, false))
             }
         } else {
             if (viewType == R.layout.large_submission_image) {
-                LargeSubmissionImageVH(LargeSubmissionImageBinding.inflate(inflater, parent, false))
+                LargeSubmissionImageViewHolder(LargeSubmissionImageBinding.inflate(inflater, parent, false))
             } else {
-                LargeSubmissionSelfTextVH(LargeSubmissionSelftextBinding.inflate(inflater, parent, false))
+                LargeSubmissionSelfTextViewHolder(LargeSubmissionSelftextBinding.inflate(inflater, parent, false))
             }
         }
     }
@@ -56,113 +51,43 @@ class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Uni
         super.submitList(updatedList)
     }
 
-    override fun onBindViewHolder(holder: SubmissionVH, position: Int, payloads: MutableList<Any>) {
-        super.onBindViewHolder(holder, position, payloads)
-        if (payloads.isNotEmpty()) {
-            if (payloads.contains(PartialChanges.VOTE_CHANGE)) {
-                if (holder is LargeSubmissionSelfTextVH)
-                    setVotes(holder.binding.scoreTv, getItem(position).ups, getItem(position).likes)
-                if (holder is LargeSubmissionImageVH)
-                    setVotes(holder.binding.scoreTv, getItem(position).ups, getItem(position).likes)
-                if (holder is CompactSelfTextVH)
-                    setVotes(holder.binding.scoreTv, getItem(position).ups, getItem(position).likes)
-                if (holder is CompactImageVH)
-                    setVotes(holder.binding.scoreTv, getItem(position).ups, getItem(position).likes)
-            }
-            if (payloads.contains(PartialChanges.SAVE_STATE_CHANGE)) {
-                //TODO : add saved state ui indication
-                Log.i("submissionsAdapter", "save state change ")
-            }
-        }
+    override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int) {
+        holder.bind(getItem(position), actionOpenComments)
     }
 
+    private companion object {
+        val CALLBACK = object : DiffUtil.ItemCallback<LinkData>() {
+            override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
+                return oldItem.name == newItem.name
+            }
 
-    override fun onBindViewHolder(holder: SubmissionVH, position: Int) {
-        when (holder) {
-            is LargeSubmissionSelfTextVH -> holder.binding.apply {
-                linkdata = getItem(position)
-                with(getItem(position)) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+            override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
+                val voteChanged = ((oldItem.likes == null && newItem.likes == null)
+                        || (oldItem.likes != null && newItem.likes != null && oldItem.likes == newItem.likes))
+                return if (oldItem.selftext != null) {
+                    (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
+                            && voteChanged)
+                } else
+                    voteChanged
+            }
+
+            override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? {
+                val partialChanges: MutableList<Int> = mutableListOf()
+                //checking for vote change
+                if ((oldItem.likes == null && newItem.likes != null)
+                        || (oldItem.likes != null && newItem.likes == null)
+                        || (oldItem.likes != newItem.likes)) {
+                    partialChanges += VOTE_CHANGE
                 }
-                executePendingBindings()
-            }
 
-            is LargeSubmissionImageVH -> holder.binding.apply {
-                linkdata = getItem(position)
-                selfTextThumbnail.transitionName = getItem(position).thumbnail
-                with(getItem(position)) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
-                }
-                executePendingBindings()
-            }
-
-            is CompactImageVH -> holder.binding.apply {
-                linkdata = getItem(position)
-                selfTextThumbnail.transitionName = getItem(position).thumbnail
-                with(getItem(position)) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
-                }
-                executePendingBindings()
-            }
-
-            is CompactSelfTextVH -> holder.binding.apply {
-                linkdata = getItem(position)
-                itemIndex = position
-                with(getItem(position)) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
-                }
-                executePendingBindings()
-            }
-        }
-
-    }
-
-    private object CALLBACK : DiffUtil.ItemCallback<LinkData>() {
-        override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
-            return oldItem.name == newItem.name
-        }
-
-        override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
-            val voteChanged = ((oldItem.likes == null && newItem.likes == null)
-                    || (oldItem.likes != null && newItem.likes != null && oldItem.likes == newItem.likes))
-            return if (oldItem.selftext != null) {
-                (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
-                        && voteChanged)
-            } else
-                voteChanged
-        }
-
-        override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? {
-            val partialChanges: MutableList<PartialChanges> = mutableListOf()
-            //checking for vote change
-            if ((oldItem.likes == null && newItem.likes != null)
-                    || (oldItem.likes != null && newItem.likes == null)
-                    || (oldItem.likes != newItem.likes)) {
-                partialChanges += PartialChanges.VOTE_CHANGE
-            }
-
-            //checking for submission save state change
+                //checking for submission save state change
 //            if (oldItem.saved != newItem.saved) {
-//                partialChanges += PartialChanges.SAVE_STATE_CHANGE
+//                partialChanges += SAVE_STATE_CHANGE
 //            }
-            Log.i("submissionsAdapter", "changes found : ${partialChanges.size}")
-            return partialChanges
+                return partialChanges
+            }
         }
+        const val VOTE_CHANGE = 1
+        const val SAVE_STATE_CHANGE = 2
     }
-
-    enum class PartialChanges {
-        VOTE_CHANGE,
-        SAVE_STATE_CHANGE
-    }
-}
-
-sealed class SubmissionVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    class CompactImageVH(val binding: CompactSubmissionImageBinding) : SubmissionVH(binding.root)
-
-    class CompactSelfTextVH(val binding: CompactSubmissionSelftextBinding) : SubmissionVH(binding.root)
-
-    class LargeSubmissionImageVH(val binding: LargeSubmissionImageBinding) : SubmissionVH(binding.root)
-
-    class LargeSubmissionSelfTextVH(val binding: LargeSubmissionSelftextBinding) : SubmissionVH(binding.root)
 }

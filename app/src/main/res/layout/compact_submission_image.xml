@@ -1,99 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/submissionsView"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/thumbnail_image_view"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/thumbnailDescription"
+        android:scaleType="fitStart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_explore_24dp" />
+
+    <include
+        android:id="@+id/gilding_view"
+        layout="@layout/layout_gilding"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="?attr/colorSecondary">
-
-        <ImageView
-            android:id="@+id/self_text_thumbnail"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:contentDescription="@string/thumbnailDescription"
-            android:scaleType="fitStart"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:submissionThumbnailSource="@{linkdata.thumbnail}"
-            tools:src="@drawable/ic_selftext_24dp" />
-
-        <include
-            android:id="@+id/gildingView"
-            layout="@layout/layout_gilding"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toEndOf="@id/metadata"
-            app:layout_constraintTop_toTopOf="@+id/metadata" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/metadata_text_view"
+        app:layout_constraintStart_toEndOf="@id/metadata_text_view"
+        app:layout_constraintTop_toTopOf="@+id/metadata_text_view" />
 
 
-        <TextView
-            android:id="@+id/score_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/title_tv"
-            app:layout_constraintTop_toTopOf="@+id/title_tv"
-            app:submissionVotes="@{linkdata.ups}"
-            app:voteColor="@{linkdata.likes}"
-            tools:text="1" />
+    <TextView
+        android:id="@+id/score_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/title_text_view"
+        app:layout_constraintTop_toTopOf="@+id/title_text_view"
+        tools:text="1" />
 
-        <TextView
-            android:id="@+id/title_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@{linkdata.title}"
-            android:textColor="?android:textColorPrimary"
-            app:layout_constraintEnd_toStartOf="@id/score_tv"
-            app:layout_constraintStart_toEndOf="@id/self_text_thumbnail"
-            app:layout_constraintTop_toTopOf="@id/self_text_thumbnail"
-            tools:text="This is an example of a long title " />
+    <TextView
+        android:id="@+id/title_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/color_on_background"
+        app:layout_constraintBottom_toTopOf="@id/subreddit_text_view"
+        app:layout_constraintEnd_toStartOf="@id/score_text_view"
+        app:layout_constraintStart_toEndOf="@id/thumbnail_image_view"
+        app:layout_constraintTop_toTopOf="@id/thumbnail_image_view"
+        tools:text="This is an example of a long title " />
 
-        <TextView
-            android:id="@+id/metadata"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/self_text_thumbnail"
-            app:layout_constraintTop_toBottomOf="@+id/subreddit_name"
-            app:metadata="@{linkdata}"
-            tools:text="999k replies \u2022 19 hours ago" />
+    <TextView
+        android:id="@+id/metadata_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/gilding_view"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail_image_view"
+        app:layout_constraintTop_toBottomOf="@+id/subreddit_text_view"
+        tools:text="999k replies \u2022 19 hours ago" />
 
-        <TextView
-            android:id="@+id/subreddit_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@{linkdata.subredditName}"
-            app:layout_constraintStart_toEndOf="@+id/self_text_thumbnail"
-            app:layout_constraintTop_toBottomOf="@+id/title_tv"
-            tools:text="@tools:sample/lorem" />
+    <TextView
+        android:id="@+id/subreddit_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/metadata_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail_image_view"
+        app:layout_constraintTop_toBottomOf="@+id/title_text_view"
+        tools:text="@tools:sample/lorem" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="linkdata"
-            type="com.ducktapedapps.updoot.model.LinkData" />
-    </data>
-</layout>
+</androidx.constraintlayout.widget.ConstraintLayout>

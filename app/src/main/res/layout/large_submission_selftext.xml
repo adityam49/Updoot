@@ -1,75 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+
+    android:background="?attr/selectableItemBackground"
+    app:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/submissionsView"
+        android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="?attr/colorPrimaryDark">
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:id="@+id/preview_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/selftext_icon"
+            android:src="@drawable/ic_selftext_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/title_tv"
+            android:id="@+id/title_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:text="@{linkdata.title}"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/score_tv"
+            app:layout_constraintEnd_toStartOf="@id/score_text_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="This is a long title. This is a long title. This is a long title. This is a long title." />
 
         <include
+            android:id="@+id/gilding_view"
             layout="@layout/layout_gilding"
-            android:id="@+id/gildingView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/metadata"
+            app:layout_constraintTop_toTopOf="@+id/metadata_text_view"
             tools:visibility="visible" />
 
 
         <TextView
-            android:id="@+id/selfText_tv"
+            android:id="@+id/selftext_text_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:maxLines="5"
-            app:ellipsizeSelfText="@{linkdata.selftext}"
+            android:background="@drawable/border_1dp"
+            android:padding="8dp"
+            android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title_tv"
+            app:layout_constraintTop_toBottomOf="@id/title_text_view"
+            tools:maxLines="3"
             tools:text="@tools:sample/lorem/random" />
 
         <TextView
-            android:id="@+id/metadata"
+            android:id="@+id/metadata_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/gildingView"
+            app:layout_constraintEnd_toStartOf="@id/gilding_view"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/subreddit_tv"
-            app:metadata="@{linkdata}"
+            app:layout_constraintTop_toBottomOf="@+id/subreddit_text_view"
             tools:text="999k replies \u2022 8 months ago" />
 
         <TextView
-            android:id="@+id/score_tv"
+            android:id="@+id/score_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -78,35 +91,23 @@
             android:layout_marginBottom="8dp"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/selfText_tv"
+            app:layout_constraintBottom_toTopOf="@id/selftext_text_view"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/title_tv"
+            app:layout_constraintStart_toEndOf="@+id/title_text_view"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            app:submissionVotes="@{linkdata.ups}"
-            app:voteColor="@{linkdata.likes}"
             tools:text="123k" />
 
         <TextView
-            android:id="@+id/subreddit_tv"
+            android:id="@+id/subreddit_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{linkdata.subredditName}"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/selfText_tv"
+            app:layout_constraintTop_toBottomOf="@id/selftext_text_view"
             tools:text="r/some_subreddit" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="linkdata"
-            type="com.ducktapedapps.updoot.model.LinkData" />
-    </data>
-</layout>
+</com.google.android.material.card.MaterialCardView>

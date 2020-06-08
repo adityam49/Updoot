@@ -34,4 +34,6 @@
 
     <string name="reloading">Reloading…</string>
     <string name="subreddit_icon">Subreddit icon</string>
+    <string name="selftext_icon">Selftext icon</string>
+    <string name="submission_image">Submission image</string>
 </resources>
