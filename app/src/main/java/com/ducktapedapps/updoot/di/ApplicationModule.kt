@@ -1,8 +1,9 @@
 package com.ducktapedapps.updoot.di
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.work.Configuration
+import com.ducktapedapps.updoot.backgroundWork.UpdootWorkerFactory
 import com.ducktapedapps.updoot.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -13,26 +14,20 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
-class ApplicationModule(private val mApplication: Application) {
-    @Provides
-    @Singleton
-    fun application(): Application {
-        return mApplication
-    }
+class ApplicationModule {
 
     @Singleton
     @Provides
-    fun provideSharedPreferences(): SharedPreferences {
-        return mApplication.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE)
-    }
+    fun provideSharedPreferences(context: Context): SharedPreferences =
+            context.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE)
+
 
     @Provides
     @Singleton
-    fun provideMarkwon(application: Application): Markwon {
-        return Markwon.builder(application)
-                .usePlugin(LinkifyPlugin.create())
-                .build()
-    }
+    fun provideMarkwon(context: Context): Markwon = Markwon.builder(context)
+            .usePlugin(LinkifyPlugin.create())
+            .build()
+
 
     @Provides
     @Named("device_id")
@@ -47,5 +42,13 @@ class ApplicationModule(private val mApplication: Application) {
         }
         return id
     }
+
+    @Provides
+    @Singleton
+    fun provideWorkConfiguration(updootWorkerFactory: UpdootWorkerFactory): Configuration = Configuration
+            .Builder()
+            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .setWorkerFactory(updootWorkerFactory)
+            .build()
 
 }

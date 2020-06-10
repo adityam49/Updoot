@@ -24,7 +24,6 @@ data class LinkData(
         val post_hint: String?,
         @PrimaryKey val id: String,
         val url: String,
-        val isSelfTextExpanded: Boolean = false,
         val permalink: String,
         val lastUpdated: Long? = null
 ) {
@@ -62,9 +61,5 @@ data class LinkData(
 
     fun save(): LinkData {
         return this.copy(saved = !this.saved)
-    }
-
-    fun toggleSelfTextExpansion(): LinkData {
-        return this.copy(isSelfTextExpanded = !this.isSelfTextExpanded)
     }
 }

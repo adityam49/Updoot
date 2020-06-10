@@ -1,7 +1,7 @@
 package com.ducktapedapps.updoot.di
 
 import android.accounts.AccountManager
-import android.app.Application
+import android.content.Context
 import com.ducktapedapps.updoot.api.remote.AuthAPI
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import dagger.Module
@@ -20,5 +20,5 @@ class ApiModule {
     fun provideRedditAPIService(retrofit: Retrofit): RedditAPI = retrofit.create(RedditAPI::class.java)
 
     @Provides
-    fun provideAccountManager(application: Application?): AccountManager = AccountManager.get(application)
+    fun provideAccountManager(context: Context): AccountManager = AccountManager.get(context)
 }

@@ -14,6 +14,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
 import com.ducktapedapps.updoot.ui.navDrawer.OnStateChangeAction
@@ -70,8 +71,8 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         (application as UpdootApplication).updootComponent.inject(this)
+        super.onCreate(savedInstanceState)
         redditClient.attachListener(this)
         setUpViews()
         setUpStatusBarColors()
@@ -95,8 +96,9 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     }
 
     override fun onDestroy() {
-        redditClient.detachListener()
         super.onDestroy()
+        setUpWorkers()
+        redditClient.detachListener()
     }
 
     override fun currentAccountChanged() = viewModel.reloadContent()
@@ -159,5 +161,9 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
                 visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun setUpWorkers() {
+        enqueueCleanUpWork(this)
     }
 }

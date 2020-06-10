@@ -36,4 +36,9 @@
     <string name="subreddit_icon">Subreddit icon</string>
     <string name="selftext_icon">Selftext icon</string>
     <string name="submission_image">Submission image</string>
+
+    <string name="channel_name">General</string>
+    <string name="Submission_cache_cleanup">Submissions cache cleanup</string>
+    <string name="total_remove_submissions">Total :%1$d \nRemoved : %2$d \nRemaining : %3$d</string>
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>

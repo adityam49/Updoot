@@ -1,6 +1,6 @@
 package com.ducktapedapps.updoot.di
 
-import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -31,9 +31,9 @@ class RoomModule {
 
     @Singleton
     @Provides
-    fun provideSubredditPrefsDB(application: Application): SubredditPrefsDB {
+    fun provideSubredditPrefsDB(context: Context): SubredditPrefsDB {
         subredditPrefsDb = Room.databaseBuilder(
-                application,
+                context.applicationContext,
                 SubredditPrefsDB::class.java,
                 SUBREDDIT_PREFS_DB
         ).addCallback(object : RoomDatabase.Callback() {
@@ -60,9 +60,9 @@ class RoomModule {
 
     @Provides
     @Singleton
-    fun provideSubredditDB(application: Application): SubredditDB {
+    fun provideSubredditDB(context: Context): SubredditDB {
         subredditDb = Room.databaseBuilder(
-                application,
+                context.applicationContext,
                 SubredditDB::class.java,
                 SUBREDDIT_DB
         ).addCallback(object : RoomDatabase.Callback() {
@@ -91,8 +91,8 @@ class RoomModule {
 
     @Provides
     @Singleton
-    fun provideSubmissionsCacheDB(application: Application): SubmissionsDB = Room.databaseBuilder(
-            application,
+    fun provideSubmissionsCacheDB(context: Context): SubmissionsDB = Room.databaseBuilder(
+            context.applicationContext,
             SubmissionsDB::class.java,
             SUBMISSIONS_DB
     ).build()

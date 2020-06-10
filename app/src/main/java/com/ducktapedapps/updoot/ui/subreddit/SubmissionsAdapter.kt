@@ -62,13 +62,8 @@ class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Uni
             }
 
             override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
-                val voteChanged = ((oldItem.likes == null && newItem.likes == null)
+                return ((oldItem.likes == null && newItem.likes == null)
                         || (oldItem.likes != null && newItem.likes != null && oldItem.likes == newItem.likes))
-                return if (oldItem.selftext != null) {
-                    (oldItem.isSelfTextExpanded == newItem.isSelfTextExpanded
-                            && voteChanged)
-                } else
-                    voteChanged
             }
 
             override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? {

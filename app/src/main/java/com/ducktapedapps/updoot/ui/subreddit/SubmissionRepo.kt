@@ -19,6 +19,7 @@ import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SubmissionRepo(
         private val redditClient: RedditClient,
@@ -116,7 +117,10 @@ class SubmissionRepo(
                 }
         )
         fetchedSubmissions.apply {
-            submissions.forEach { submissionsCacheDAO.insertSubmissions(it.copy(lastUpdated = System.currentTimeMillis())) }
+            val calender = Calendar.getInstance()
+            submissions.forEach {
+                submissionsCacheDAO.insertSubmissions(it.copy(lastUpdated = (calender.timeInMillis / 1000)))
+            }
             nextPageKeyAndCurrentPageEntries.postValue(nextPageKeyAndCurrentPageEntries.value?.apply {
                 put(after, submissions.map { it.id })
             })
@@ -143,4 +147,5 @@ class SubmissionRepo(
         ControversialYear -> Pair(Constants.CONTROVERSIAL, Constants.THIS_YEAR)
         ControversialAll -> Pair(Constants.CONTROVERSIAL, Constants.ALL_TIME)
     }
+
 }

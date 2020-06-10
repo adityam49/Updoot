@@ -15,4 +15,7 @@ interface SubmissionsCacheDAO {
 
     @RawQuery(observedEntities = [LinkData::class])
     fun observeCachedSubmissions(query: SupportSQLiteQuery): LiveData<List<LinkData>>
+
+    @Query("SELECT * FROM LinkData")
+    suspend fun getAllCachedSubmissions(): List<LinkData>
 }
