@@ -123,6 +123,8 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
             R.id.ExploreDestination -> hidePeripheralElements()
 
+            R.id.submissionOptionsBottomSheet -> Unit
+
             else -> hidePeripheralElements()
         }
     }

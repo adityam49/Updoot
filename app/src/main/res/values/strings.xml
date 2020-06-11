@@ -41,4 +41,7 @@
     <string name="Submission_cache_cleanup">Submissions cache cleanup</string>
     <string name="total_remove_submissions">Total :%1$d \nRemoved : %2$d \nRemaining : %3$d</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="drag_handle">Drag handle</string>
+    <string name="menu_edit_button">Menu edit button</string>
+    <string name="option_icon">Option icon</string>
 </resources>

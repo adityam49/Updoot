@@ -34,7 +34,7 @@ class SubredditFragment : Fragment() {
     lateinit var viewModelFactory: SubmissionsVMFactory
     private val args: SubredditFragmentArgs by navArgs()
 
-    private val submissionsAdapter = SubmissionsAdapter(::openComments)
+    private val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions)
     private lateinit var submissionsVM: SubmissionsVM
     private lateinit var binding: FragmentSubredditBinding
 
@@ -169,6 +169,8 @@ class SubredditFragment : Fragment() {
     private fun reloadFragmentContent() = submissionsVM.reload()
 
     private fun openComments(subreddit: String, id: String) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
+
+    private fun openOptions(submissionId: String) = findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
 
     private companion object {
         const val TAG = "SubredditFragment"

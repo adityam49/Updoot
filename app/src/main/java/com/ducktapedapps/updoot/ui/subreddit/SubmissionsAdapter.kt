@@ -14,7 +14,10 @@ import com.ducktapedapps.updoot.ui.subreddit.SubmissionViewHolder.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
-class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Unit) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
+class SubmissionsAdapter(
+        private val actionOpenComments: (String, String) -> Unit,
+        private val actionOpenOptions: (String) -> Unit
+) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
     lateinit var itemUi: SubmissionUiType
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -52,7 +55,7 @@ class SubmissionsAdapter(private val actionOpenComments: (String, String) -> Uni
     }
 
     override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int) {
-        holder.bind(getItem(position), actionOpenComments)
+        holder.bind(getItem(position), actionOpenComments, actionOpenOptions)
     }
 
     private companion object {

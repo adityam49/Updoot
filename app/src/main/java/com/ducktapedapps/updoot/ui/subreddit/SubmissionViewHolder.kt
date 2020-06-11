@@ -19,13 +19,19 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit)
+    abstract fun bind(submissions: LinkData,
+                      actionOpenComments: (String, String) -> Unit,
+                      actionOpenOption: (String) -> Unit)
 
     class CompactImageViewHolder(val binding: CompactSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit) {
+        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnLongClickListener {
+                        actionOpenOption(id)
+                        true
+                    }
                     setThumbnail(thumbnailImageView, thumbnail)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
@@ -37,10 +43,14 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class CompactSelfTextViewHolder(val binding: CompactSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit) {
+        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnLongClickListener {
+                        actionOpenOption(id)
+                        true
+                    }
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     selftextTextView.text = selftext
@@ -52,10 +62,14 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class LargeSubmissionImageViewHolder(val binding: LargeSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit) {
+        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnLongClickListener {
+                        actionOpenOption(id)
+                        true
+                    }
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName
@@ -66,11 +80,15 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class LargeSubmissionSelfTextViewHolder(val binding: LargeSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit) {
+        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
 
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnLongClickListener {
+                        actionOpenOption(id)
+                        true
+                    }
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName

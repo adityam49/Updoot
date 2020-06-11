@@ -37,6 +37,9 @@
         <deepLink
             android:id="@+id/subredditDeepLink"
             app:uri="www.reddit.com/r/{subreddit}/" />
+        <action
+            android:id="@+id/action_SubredditDestination_to_submissionOptionsBottomSheet"
+            app:destination="@id/submissionOptionsBottomSheet" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
@@ -96,5 +99,14 @@
             android:id="@+id/action_ExploreDestination_to_SubredditDestination"
             app:destination="@id/SubredditDestination" />
     </fragment>
+    <dialog
+        android:id="@+id/submissionOptionsBottomSheet"
+        android:name="com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet"
+        android:label="SubmissionOptionsBottomSheet"
+        tools:layout="@layout/fragment_submission_options_bottom_sheet">
+        <argument
+            android:name="submissionsId"
+            app:argType="string" />
+    </dialog>
 
 </navigation>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Theme.MaterialComponents.BottomSheetDialog"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/drag_handle"
+        android:padding="16dp"
+        android:src="@drawable/ic_baseline_24" />
+
+    <ImageButton
+        android:id="@+id/edit_options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="@string/menu_edit_button"
+        android:padding="16dp"
+        android:src="@drawable/ic_baseline_edit_24" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="true"
+        android:paddingTop="64dp"
+        tools:listitem="@layout/submission_option_item" />
+</FrameLayout>
