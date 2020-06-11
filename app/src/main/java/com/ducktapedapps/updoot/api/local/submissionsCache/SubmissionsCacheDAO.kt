@@ -18,4 +18,7 @@ interface SubmissionsCacheDAO {
 
     @Query("SELECT * FROM LinkData")
     suspend fun getAllCachedSubmissions(): List<LinkData>
+
+    @Query("SELECT * FROM LinkData WHERE id is :id")
+    suspend fun getLinkData(id: String): LinkData
 }

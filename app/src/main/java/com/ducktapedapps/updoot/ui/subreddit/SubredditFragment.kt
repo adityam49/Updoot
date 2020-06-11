@@ -25,7 +25,6 @@ import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
-import com.ducktapedapps.updoot.utils.showMenuFor
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import javax.inject.Inject
 
@@ -113,13 +112,7 @@ class SubredditFragment : Fragment() {
 
                             override fun rightAction(position: Int) = Unit
 
-                            override fun extremeRightAction(position: Int) =
-                                    showMenuFor(args.subreddit,
-                                            submissionsAdapter.currentList[position],
-                                            this@SubredditFragment.requireContext(),
-                                            binding.recyclerView.findViewHolderForAdapterPosition(position)?.itemView,
-                                            findNavController()
-                                    )
+                            override fun extremeRightAction(position: Int) = openSubreddit(submissionsAdapter.currentList[position].subredditName)
                         }
                 )).attachToRecyclerView(this)
                 addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
@@ -171,6 +164,15 @@ class SubredditFragment : Fragment() {
     private fun openComments(subreddit: String, id: String) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
 
     private fun openOptions(submissionId: String) = findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
+
+    private fun openSubreddit(targetSubreddit: String) = if (args.subreddit != targetSubreddit) {
+        findNavController().navigate(
+                SubredditFragmentDirections
+                        .actionGoToSubreddit()
+                        .setSubreddit(targetSubreddit)
+        )
+        Toast.makeText(requireContext(), targetSubreddit, Toast.LENGTH_SHORT).show()
+    } else Toast.makeText(requireContext(), "You are already in $targetSubreddit", Toast.LENGTH_SHORT).show()
 
     private companion object {
         const val TAG = "SubredditFragment"

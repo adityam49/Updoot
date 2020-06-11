@@ -6,13 +6,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.ducktapedapps.updoot.databinding.SubmissionOptionItemBinding
 
-class OptionsAdapter : ListAdapter<SubmissionOptionUiModel, SubmissionOptionViewHolder>(CALLBACK) {
+class OptionsAdapter(private val copyLink: (link: String) -> Unit) : ListAdapter<SubmissionOptionUiModel, SubmissionOptionViewHolder>(CALLBACK) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionOptionViewHolder =
             SubmissionOptionViewHolder(SubmissionOptionItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
 
     override fun onBindViewHolder(holder: SubmissionOptionViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), copyLink)
     }
 
     private companion object {

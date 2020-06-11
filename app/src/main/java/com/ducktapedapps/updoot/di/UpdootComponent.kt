@@ -11,6 +11,7 @@ import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
 import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
+import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -36,6 +37,7 @@ interface UpdootComponent {
     fun inject(commentsFragment: CommentsFragment)
     fun inject(exploreFragment: ExploreFragment)
     fun inject(bottomNavDrawerFragment: BottomNavDrawerFragment)
+    fun inject(submissionOptionsBottomSheet: SubmissionOptionsBottomSheet)
 
     //factories
     fun inject(submissionsVMFactory: SubmissionsVMFactory)
