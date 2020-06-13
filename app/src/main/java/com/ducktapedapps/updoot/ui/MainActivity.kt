@@ -129,22 +129,14 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
         }
     }
 
-    private fun showSettingsTitle() {
-        binding.textToolbarTitle.text = getString(R.string.settings)
-    }
+    private fun showSettingsTitle() = Unit
 
-    private fun setCommentsTitle() = binding.apply {
-        textToolbarTitle.text = "0 comments"
-    }
+    private fun setCommentsTitle() = Unit
 
-    private fun setSubredditTitle(arg: Bundle?) = binding.apply {
-        textToolbarTitle.text = arg?.getString("subreddit")
-                ?: "Frontpage"
-    }
+    private fun setSubredditTitle(arg: Bundle?) = Unit
 
     private fun hidePeripheralElements() {
         binding.apply {
-            topAppBar.setExpanded(false)
             bottomAppBar.performHide()
             fab.apply {
 
@@ -156,7 +148,6 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
     private fun showPeripheralElements() {
         binding.apply {
-            topAppBar.setExpanded(true)
             bottomAppBar.performShow()
             fab.apply {
                 show()
