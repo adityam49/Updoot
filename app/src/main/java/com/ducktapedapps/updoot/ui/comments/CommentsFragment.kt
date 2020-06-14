@@ -13,6 +13,7 @@ import androidx.lifecycle.observe
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.MergeAdapter
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
@@ -25,6 +26,7 @@ class CommentsFragment : Fragment() {
     private lateinit var binding: FragmentCommentsBinding
     private lateinit var viewModel: CommentsVM
     private val commentsAdapter = CommentsAdapter(::expandCollapseComment)
+    private val linkAdapter = LinkAdapter()
     private val args: CommentsFragmentArgs by navArgs()
 
     override fun onAttach(context: Context) {
@@ -62,12 +64,13 @@ class CommentsFragment : Fragment() {
     private fun observeData() = viewModel.apply {
         allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
         isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
+        linkModel.observe(viewLifecycleOwner) { linkAdapter.linkModel = it }
     }
 
     private fun setUpRecyclerView() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = commentsAdapter
+            adapter = MergeAdapter(linkAdapter, commentsAdapter)
             ItemTouchHelper(SwipeCallback(
                     getColor(R.color.saveContentColor),
                     getColor(R.color.upVoteColor),

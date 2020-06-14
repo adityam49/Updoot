@@ -3,22 +3,56 @@ package com.ducktapedapps.updoot.ui.comments
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.linkMetaData.extractMetaData
+import com.ducktapedapps.updoot.utils.linkMetaData.fetchMetaDataFrom
+import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
+import com.ducktapedapps.updoot.utils.linkMetaData.toLinkModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class CommentsRepo @Inject constructor(val redditClient: RedditClient) {
+class CommentsRepo @Inject constructor(
+        private val redditClient: RedditClient,
+        private val submissionsCacheDAO: SubmissionsCacheDAO
+) {
 
     private val _allComments = MutableLiveData<List<BaseComment>>()
     private val _isLoading = MutableLiveData(true)
 
     val allComments: LiveData<List<BaseComment>> = _allComments
     val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _linkModel: MutableLiveData<LinkModel> = MutableLiveData()
+    val linkModel: LiveData<LinkModel> = _linkModel
+
+    suspend fun loadLinkMetaData(linkDataId: String) {
+        try {
+            withContext(Dispatchers.IO) {
+                _isLoading.postValue(true)
+                loadLinkMetaDataSuccessfully(linkDataId)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @Throws(Exception::class)
+    private suspend fun loadLinkMetaDataSuccessfully(linkDataId: String) {
+        val url = submissionsCacheDAO.getLinkData(linkDataId).url
+
+        val htmlResponse = fetchMetaDataFrom(url)
+
+        _linkModel.postValue(
+                htmlResponse.extractMetaData().toLinkModel()
+        )
+        _isLoading.postValue(false)
+    }
 
     suspend fun loadComments(subreddit: String, submission_id: String) {
         withContext(Dispatchers.IO) {
