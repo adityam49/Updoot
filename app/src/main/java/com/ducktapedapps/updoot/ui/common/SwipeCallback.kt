@@ -38,6 +38,7 @@ class SwipeCallback(
         ACTION_EXTREME_RIGHT
     }
 
+
     private var currentAction: Swipe? = null
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -61,6 +62,8 @@ class SwipeCallback(
 
     override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
         //displace viewHolder
+        if (viewHolder !is SwipeableViewHolder) return
+
         viewHolder.itemView.translationX = dX
 
         drawBackgroundColor(c, viewHolder, dX)

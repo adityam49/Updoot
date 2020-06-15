@@ -13,6 +13,7 @@ import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData
+import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
@@ -26,7 +27,7 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    class CommentHolder(val binding: CommentItemBinding) : CommentsViewHolder(binding.root) {
+    class CommentHolder(val binding: CommentItemBinding) : CommentsViewHolder(binding.root), SwipeableViewHolder {
         fun bind(data: CommentData, expandCollapseComment: (index: Int) -> Unit) {
             binding.apply {
                 indentView.setIndentLevel(data.depth)

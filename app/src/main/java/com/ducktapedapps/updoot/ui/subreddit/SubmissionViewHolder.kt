@@ -16,9 +16,10 @@ import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
-sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) , SwipeableViewHolder {
     abstract fun bind(submissions: LinkData,
                       actionOpenComments: (String, String) -> Unit,
                       actionOpenOption: (String) -> Unit)
