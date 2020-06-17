@@ -25,7 +25,7 @@ interface SubredditPrefsDAO {
 
     //TODO : if prefs not found not found insert default prefs to db
     @Query("SELECT subredditSorting FROM SubredditPrefs WHERE subredditName IS :subreddit ")
-    suspend fun getSubredditSorting(subreddit: String): SubredditSorting
+    suspend fun getSubredditSorting(subreddit: String): SubredditSorting?
 
     @Query("SELECT viewType FROM SubredditPrefs WHERE subredditName IS :subreddit")
     fun observeViewType(subreddit: String): LiveData<SubmissionUiType>

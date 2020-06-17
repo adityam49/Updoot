@@ -21,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
+private const val TAG = "SubmissionRepo"
+
 class SubmissionRepo(
         private val redditClient: RedditClient,
         private val prefsDAO: SubredditPrefsDAO,
@@ -28,20 +30,6 @@ class SubmissionRepo(
         private val subredditName: String,
         private val scope: CoroutineScope
 ) {
-    private val TAG = "SubmissionRepo"
-
-    init {
-        scope.launch(Dispatchers.IO) {
-            if (prefsDAO.getSubredditPrefs(subredditName) == null) {
-                saveDefaultSubredditPrefs(subredditName)
-            }
-        }
-    }
-
-    private suspend fun saveDefaultSubredditPrefs(subredditName: String) =
-            prefsDAO.insertSubredditPrefs(SubredditPrefs(subredditName, SubmissionUiType.COMPACT, Hot))
-
-
     private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -50,12 +38,13 @@ class SubmissionRepo(
 
     val postViewType: LiveData<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
     private val nextPageKeyAndCurrentPageEntries = MutableLiveData<MutableMap<String?, List<String>>>(mutableMapOf())
-    val allSubmissions: LiveData<List<LinkData>> = Transformations.switchMap(nextPageKeyAndCurrentPageEntries) { pageMap: Map<String?, List<String>> ->
-        if (pageMap.isNotEmpty()) {
-            Log.i(TAG, "page keys in map : ${pageMap.keys}")
-            submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(pageMap.values.flatten()))
-        } else MutableLiveData(emptyList())
-    }
+    val allSubmissions: LiveData<List<LinkData>> =
+            Transformations.switchMap(nextPageKeyAndCurrentPageEntries) { pageMap: Map<String?, List<String>> ->
+                if (pageMap.isNotEmpty()) {
+                    Log.i(TAG, "page keys in map : ${pageMap.keys}")
+                    submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(pageMap.values.flatten()))
+                } else MutableLiveData(emptyList())
+            }
 
     private fun cachedSubmissionsObserveQueryInOrderOfGivenIds(ids: List<String>): SimpleSQLiteQuery =
             SimpleSQLiteQuery(
@@ -106,7 +95,8 @@ class SubmissionRepo(
     @Throws(Exception::class)
     private suspend fun loadPageAndCacheToDbSuccessfully() {
         val redditAPI = redditClient.api()
-        val sorting = prefsDAO.getSubredditSorting(subredditName).mapSorting()
+        val sorting = (prefsDAO.getSubredditSorting(subredditName)
+                ?: createAndSaveDefaultSubredditPrefs(subredditName).subredditSorting).mapSorting()
         val fetchedSubmissions = redditAPI.getSubreddit(
                 "${if (subredditName != FRONTPAGE) "r/" else ""}$subredditName",
                 sorting.first,
@@ -126,6 +116,9 @@ class SubmissionRepo(
             })
         }
     }
+
+    private suspend fun createAndSaveDefaultSubredditPrefs(subredditName: String) =
+            SubredditPrefs(subredditName, SubmissionUiType.COMPACT, Hot).apply { prefsDAO.insertSubredditPrefs(this) }
 
     private fun SubredditSorting.mapSorting(): Pair<String, String?> = when (this) {
         Rising -> Pair(Constants.RISING, null)
@@ -147,5 +140,4 @@ class SubmissionRepo(
         ControversialYear -> Pair(Constants.CONTROVERSIAL, Constants.THIS_YEAR)
         ControversialAll -> Pair(Constants.CONTROVERSIAL, Constants.ALL_TIME)
     }
-
 }
