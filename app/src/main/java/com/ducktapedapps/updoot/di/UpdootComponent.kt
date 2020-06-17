@@ -8,7 +8,6 @@ import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
-import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
@@ -36,7 +35,6 @@ interface UpdootComponent {
     fun inject(subredditFragment: SubredditFragment)
     fun inject(commentsFragment: CommentsFragment)
     fun inject(exploreFragment: ExploreFragment)
-    fun inject(bottomNavDrawerFragment: BottomNavDrawerFragment)
     fun inject(submissionOptionsBottomSheet: SubmissionOptionsBottomSheet)
 
     //factories

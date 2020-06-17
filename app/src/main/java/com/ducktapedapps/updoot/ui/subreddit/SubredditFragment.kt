@@ -33,9 +33,9 @@ class SubredditFragment : Fragment() {
     lateinit var viewModelFactory: SubmissionsVMFactory
     private val args: SubredditFragmentArgs by navArgs()
 
-    private val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions)
     private lateinit var submissionsVM: SubmissionsVM
-    private lateinit var binding: FragmentSubredditBinding
+    private var _binding: FragmentSubredditBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,16 +79,22 @@ class SubredditFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentSubredditBinding.inflate(inflater, container, false)
+        _binding = FragmentSubredditBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setUpViews()
-        observeViewModel()
+        val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions)
+        setUpViews(submissionsAdapter)
+        observeViewModel(submissionsAdapter)
     }
 
-    private fun setUpViews() {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun setUpViews(submissionsAdapter: SubmissionsAdapter) {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         binding.apply {
             swipeToRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
@@ -124,7 +130,7 @@ class SubredditFragment : Fragment() {
 
     private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
-    private fun observeViewModel() {
+    private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
         ViewModelProvider(requireActivity()).get(ActivityVM::class.java).shouldReload.observe(viewLifecycleOwner) { shouldReload ->
             if (shouldReload.contentIfNotHandled == true) {
                 Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()

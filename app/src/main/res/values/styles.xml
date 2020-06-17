@@ -87,6 +87,12 @@
         <item name="android:background">@color/color_primary_variant</item>
     </style>
 
+    <style name="AppBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">32dp</item>
+        <item name="cornerSizeTopRight">32dp</item>
+    </style>
+
     <color name="secondary_alt">@color/color_secondary_alt</color>
 
     <style name="indentation_style">

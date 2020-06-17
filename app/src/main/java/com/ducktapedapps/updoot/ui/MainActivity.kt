@@ -4,23 +4,26 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.MergeAdapter
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
-import com.ducktapedapps.updoot.ui.navDrawer.BottomNavDrawerFragment
-import com.ducktapedapps.updoot.ui.navDrawer.OnStateChangeAction
+import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
+import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
+import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
+
 
 class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, NavController.OnDestinationChangedListener {
     @Inject
@@ -32,38 +35,21 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
     private lateinit var binding: ActivityMainBinding
     private val navController by lazy { findNavController(R.id.nav_host_fragment) }
-    private val bottomNavDrawer: BottomNavDrawerFragment by lazy {
-        (supportFragmentManager.findFragmentById(R.id.bottom_nav_drawer) as BottomNavDrawerFragment).apply {
-            addOnStateChangeAction(object : OnStateChangeAction {
-                override fun onStateChange(newState: Int) {
-                    binding.apply {
-                        when (newState) {
-                            STATE_HIDDEN -> {
-                                when (navController.currentDestination?.id) {
-                                    R.id.SubredditDestination -> bottomAppBar.replaceMenu(R.menu.subreddit_screen_menu)
-                                    R.id.CommentsDestination -> bottomAppBar.replaceMenu(R.menu.comment_screen_menu)
-                                    else -> bottomAppBar.menu.clear()
-                                }
-                                fab.show()
-                            }
-                            else -> {
-                                if (navController.currentDestination?.id != R.id.SettingsDestination)
-                                    bottomAppBar.replaceMenu(R.menu.bottom_navigation_menu)
-                                else bottomAppBar.menu.clear()
-                                fab.hide()
-                            }
-                        }
-                    }
-                }
-            })
-        }
-    }
+    private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
+
+        override fun login() = navController.navigate(R.id.loginActivity)
+
+        override fun switch(accountName: String) = viewModel.setCurrentAccount(accountName)
+
+        override fun logout(accountName: String) = viewModel.logout(accountName)
+
+        override fun toggleEntryMenu() = viewModel.expandOrCollapseAccountsMenu()
+    })
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.item_settings -> {
                 navController.navigate(R.id.SettingsDestination)
-                bottomNavDrawer.toggleState()
                 true
             }
             else -> false
@@ -73,9 +59,22 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     override fun onCreate(savedInstanceState: Bundle?) {
         (application as UpdootApplication).updootComponent.inject(this)
         super.onCreate(savedInstanceState)
-        redditClient.attachListener(this)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         setUpViews()
+
+        setUpViewModel()
+
+        redditClient.attachListener(this)
+
         setUpStatusBarColors()
+    }
+
+    private fun setUpViewModel() {
+        viewModel.accounts.observe(this) {
+            accountsAdapter.submitList(it)
+        }
     }
 
     private fun setUpStatusBarColors() {
@@ -84,15 +83,37 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
         }
     }
 
+    override fun onBackPressed() {
+        with(binding.bottomNavigationDrawer) {
+            if (isInFocus()) hide()
+            else super.onBackPressed()
+        }
+    }
+
     private fun setUpViews() {
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.apply {
-            bottomAppBar.apply {
-                setSupportActionBar(this)
-                setupWithNavController(navController)
-                setOnClickListener { this@MainActivity.bottomNavDrawer.toggleState() }
+            navController.addOnDestinationChangedListener(this@MainActivity)
+
+            scrimView.setOnClickListener { bottomNavigationDrawer.toggleState() }
+
+            bottomNavigationDrawer.apply {
+
+                addOnSlideAction(ScrimVisibilityAdjuster(scrimView))
+
+                addOnStateChangeAction(ToolbarMenuSwapper(binding.toolbar, ::getCurrentDestinationMenu))
+
+                binding.toolbar.apply {
+                    setSupportActionBar(this)
+                    setupWithNavController(navController)
+                    setOnClickListener { bottomNavigationDrawer.toggleState() }
+                }
+
+                binding.recyclerView.apply {
+                    adapter = MergeAdapter(accountsAdapter)
+                    layoutManager = LinearLayoutManager(this@MainActivity)
+                }
             }
-        }.run { findNavController(R.id.nav_host_fragment).addOnDestinationChangedListener(this@MainActivity) }
+        }
     }
 
     override fun onDestroy() {
@@ -104,59 +125,24 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     override fun currentAccountChanged() = viewModel.reloadContent()
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
-        bottomNavDrawer.hide()
-        when (destination.id) {
-            R.id.SubredditDestination -> {
-                setSubredditTitle(arguments)
-                showPeripheralElements()
-            }
-
-            R.id.CommentsDestination -> {
-                setCommentsTitle()
-                showPeripheralElements()
-            }
-
-            R.id.SettingsDestination -> {
-                showSettingsTitle()
-                hidePeripheralElements()
-            }
-
-            R.id.ExploreDestination -> hidePeripheralElements()
-
-            R.id.submissionOptionsBottomSheet -> Unit
-
-            else -> hidePeripheralElements()
+        navController.currentDestination?.label = when (destination.id) {
+            R.id.SubredditDestination -> arguments?.getString("subreddit").run { if (isNullOrEmpty()) "Updoot" else this }
+            R.id.CommentsDestination -> "Comments"
+            R.id.SettingsDestination -> "Settings"
+            R.id.ExploreDestination -> "Explore"
+            else -> "Updoot"
+        }
+        bottomNavigationDrawer.post { /*to let behaviour be initialized*/
+            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.hide()
         }
     }
 
-    private fun showSettingsTitle() = Unit
+    private fun setUpWorkers() = enqueueCleanUpWork(this)
 
-    private fun setCommentsTitle() = Unit
-
-    private fun setSubredditTitle(arg: Bundle?) = Unit
-
-    private fun hidePeripheralElements() {
-        binding.apply {
-            bottomAppBar.performHide()
-            fab.apply {
-
-                hide()
-                visibility = View.GONE
+    private fun getCurrentDestinationMenu(): Int? =
+            when (navController.currentDestination?.id) {
+                R.id.SubredditDestination -> R.menu.subreddit_screen_menu
+                R.id.CommentsDestination -> R.menu.comment_screen_menu
+                else -> null
             }
-        }
-    }
-
-    private fun showPeripheralElements() {
-        binding.apply {
-            bottomAppBar.performShow()
-            fab.apply {
-                show()
-                visibility = View.VISIBLE
-            }
-        }
-    }
-
-    private fun setUpWorkers() {
-        enqueueCleanUpWork(this)
-    }
 }
