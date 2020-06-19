@@ -1,17 +1,67 @@
-*.iml
+# Built application files
+*.apk
+*.ap_
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# User-specific configurations
+.idea/caches/
+.idea/libraries/
+.idea/shelf/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/.name
+.idea/codeStyles/
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+.idea/datasources.xml
+.idea/gradle.xml
+.idea/dataSources.ids
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+.idea/assetWizardSettings.xml
+.idea/.gitignore
+.idea/jarRepositories.xml
+.idea/navEditor.xml
+
+# Gradle files
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-/app/src/main/res/drawable/doggo.jpg
-.externalNativeBuild
-/app/build/output/apk/debug/app-dubug.apk
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+#studio specific
+/*/build/
+/*/local.properties
+/*/out
+/*/*/build
+/*/*/production
+captures/
+.navigation/
+*.ipr
+*~
+*.swp
 /app/build/release/app-release.apk
 /app/release/
+/app/build/output/apk/debug/app-dubug.apk
+
+# IntelliJ IDEA
+*.iml
+*.iws
+/out/
+
+# OS-specific files
+.DS_Store
+
+

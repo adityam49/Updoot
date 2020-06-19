@@ -21,7 +21,7 @@
         android:id="@+id/scrim_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#de000000"
+        android:background="@color/color_scrim"
         android:visibility="gone" />
 
     <com.ducktapedapps.updoot.ui.navDrawer.BottomNavigationDrawer

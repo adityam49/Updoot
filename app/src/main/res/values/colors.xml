@@ -17,10 +17,11 @@
     <color name="color_on_secondary">#000000</color>
     <color name="color_error">#F44336</color>
     <color name="color_on_error">#FFFFFF</color>
-    <color name="color_surface">#FFFFFF</color>
+    <color name="color_surface">#F5F5F5</color>
     <color name="color_on_surface">#000000</color>
     <color name="color_background">#FFFFFF</color>
     <color name="color_on_background">#000000</color>
     <color name="color_status_bar">#FFFFFF</color>
+    <color name="color_scrim">#52000000</color>
 </resources>
 

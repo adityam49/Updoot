@@ -23,10 +23,17 @@ import javax.inject.Inject
 class CommentsFragment : Fragment() {
     @Inject
     lateinit var commentsVMFactory: CommentsVMFactory
-    private lateinit var binding: FragmentCommentsBinding
     private lateinit var viewModel: CommentsVM
+
+    private var _binding: FragmentCommentsBinding? = null
+    private val binding get() = _binding!!
+
+    @Inject
+    lateinit var contentAdapter: ContentAdapter
+
     private val commentsAdapter = CommentsAdapter(::expandCollapseComment)
-    private val linkAdapter = LinkAdapter()
+    private val submissionHeaderAdapter = SubmissionMetaDataAdapter()
+
     private val args: CommentsFragmentArgs by navArgs()
 
     override fun onAttach(context: Context) {
@@ -45,7 +52,7 @@ class CommentsFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentCommentsBinding.inflate(inflater, container, false)
+        _binding = FragmentCommentsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -54,6 +61,10 @@ class CommentsFragment : Fragment() {
         observeData()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
     private fun setUpViewModel(name: String, id: String) {
         viewModel = ViewModelProvider(
                 this@CommentsFragment,
@@ -64,13 +75,14 @@ class CommentsFragment : Fragment() {
     private fun observeData() = viewModel.apply {
         allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
         isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-        linkModel.observe(viewLifecycleOwner) { linkAdapter.linkModel = it }
+        submissionData.observe(viewLifecycleOwner) { submissionHeaderAdapter.linkData = it }
+        content.observe(viewLifecycleOwner) { contentAdapter.content = it }
     }
 
     private fun setUpRecyclerView() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = MergeAdapter(linkAdapter, commentsAdapter)
+            adapter = MergeAdapter(submissionHeaderAdapter, contentAdapter, commentsAdapter)
             ItemTouchHelper(SwipeCallback(
                     getColor(R.color.saveContentColor),
                     getColor(R.color.upVoteColor),
@@ -94,9 +106,9 @@ class CommentsFragment : Fragment() {
         }
     }
 
-    private fun getColor(@ColorRes color: Int): Int = ContextCompat.getColor(requireActivity(), color)
+    private fun getColor(@ColorRes color: Int): Int = ContextCompat.getColor(requireContext(), color)
 
-    private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireActivity(), drawableRes)
+    private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
     private fun expandCollapseComment(index: Int) = viewModel.toggleChildrenVisibility(index)
 }

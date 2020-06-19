@@ -20,21 +20,19 @@ fun Document.extractMetaData(): Map<String, String> {
     return map
 }
 
-fun Map<String, String>.toLinkModel(): LinkModel {
+fun Map<String, String>.toLinkModel(url:String): LinkModel {
     var title: String? = null
-    var url: String? = null
     var icon: String? = null
     var siteName: String? = null
     var description: String? = null
     this.keys.forEach {
         when (it) {
-            "og:url" -> url = this["og:url"]
             "og:site_name" -> siteName = this["og:site_name"]
             "og:title" -> title = this["og:title"]
             "og:description" -> description = this["og:description"]
             "og:image" -> icon = this["og:image"]
         }
     }
-    return LinkModel(url!!, siteName, title, description, icon)
+    return LinkModel(url, siteName, title, description, icon)
 }
 

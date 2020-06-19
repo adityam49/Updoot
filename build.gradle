@@ -13,7 +13,7 @@ buildscript {
         room_version = '2.2.5'
         markwon_version = "4.3.1"
         work_manager_version = "2.3.4"
-        jsoup_version = "1.11.1"
+        jsoup_version = "1.11.3"
     }
     repositories {
         google()
