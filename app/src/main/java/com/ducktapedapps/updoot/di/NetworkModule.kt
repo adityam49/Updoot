@@ -3,12 +3,9 @@ package com.ducktapedapps.updoot.di
 import com.ducktapedapps.updoot.BuildConfig
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SearchAdapter
-import com.ducktapedapps.updoot.utils.SubmissionListingAdapter
 import com.ducktapedapps.updoot.utils.SubredditInfoAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import com.ducktapedapps.updoot.utils.moshiAdapters.CommentListingAdapter
-import com.ducktapedapps.updoot.utils.moshiAdapters.MoreCommentsListAdapter
-import com.ducktapedapps.updoot.utils.moshiAdapters.TrendingSubsJsonAdapter
+import com.ducktapedapps.updoot.utils.moshiAdapters.*
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -54,6 +51,7 @@ class NetworkModule {
             .add(SubmissionListingAdapter())
             .add(MoreCommentsListAdapter(markwon))
             .add(CommentListingAdapter(markwon))
+            .add(LinkDataAdapter())
             .add(TrendingSubsJsonAdapter())
             .add(SearchAdapter())
             .add(SubredditInfoAdapter())

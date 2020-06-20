@@ -21,19 +21,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/gilding_view"
-        layout="@layout/layout_gilding"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@id/metadata_text_view"
-        app:layout_constraintStart_toEndOf="@id/metadata_text_view"
-        app:layout_constraintTop_toTopOf="@id/metadata_text_view" />
-
-
     <TextView
         android:id="@+id/score_text_view"
         android:layout_width="wrap_content"
@@ -70,7 +57,6 @@
         android:textColor="@color/color_on_background"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/gilding_view"
         app:layout_constraintStart_toStartOf="@+id/title_text_view"
         app:layout_constraintTop_toBottomOf="@id/subreddit_text_view"
         tools:text="999 replies \u2022 19 Hr " />
@@ -89,6 +75,16 @@
         app:layout_constraintTop_toBottomOf="@id/metadata_text_view"
         tools:text="@tools:sample/lorem/random" />
 
+    <TextView
+        android:id="@+id/gilding_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/metadata_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/metadata_text_view"
+        app:layout_constraintTop_toTopOf="@id/metadata_text_view" />
 
     <TextView
         android:id="@+id/subreddit_text_view"

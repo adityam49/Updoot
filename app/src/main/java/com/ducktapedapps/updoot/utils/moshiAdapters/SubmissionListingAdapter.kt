@@ -1,17 +1,12 @@
-package com.ducktapedapps.updoot.utils
+package com.ducktapedapps.updoot.utils.moshiAdapters
 
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.SubmissionListing
 import com.squareup.moshi.FromJson
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-
 
 class SubmissionListingAdapter {
-    private val moshi = Moshi.Builder().build()
-    private val linkDataAdapter: JsonAdapter<LinkData> = moshi.adapter(LinkData::class.java)
-    private val mapAdapter = moshi.adapter(Map::class.java)
+    private val linkDataAdapter = LinkDataAdapter()
 
+    @Suppress("UNCHECKED_CAST")
     @FromJson
     fun fromJson(jsonMap: Map<*, *>): SubmissionListing? {
 
@@ -24,7 +19,7 @@ class SubmissionListingAdapter {
         if (children.any { it["kind"] != "t3" }) return null
 
         val submissions = children.mapNotNull {
-            if (it["data"] != null) linkDataAdapter.fromJson(mapAdapter.toJson(it["data"] as Map<*, *>)) else null
+            if (it["data"] != null) linkDataAdapter.deserializeSubmissionDetail(it["data"] as Map<*, *>) else null
         }
         return SubmissionListing(data["after"] as String?, submissions)
     }

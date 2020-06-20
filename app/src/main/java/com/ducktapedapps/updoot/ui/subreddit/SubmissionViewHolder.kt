@@ -1,9 +1,11 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
+import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -15,8 +17,11 @@ import com.ducktapedapps.updoot.databinding.CompactSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
+import com.ducktapedapps.updoot.model.Gildings
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
+import com.ducktapedapps.updoot.utils.CenteredImageSpan
+import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
@@ -33,6 +38,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         actionOpenOption(id)
                         true
                     }
+                    setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
@@ -52,6 +58,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         actionOpenOption(id)
                         true
                     }
+                    setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName
@@ -70,6 +77,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         actionOpenOption(id)
                         true
                     }
+                    setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName
@@ -89,6 +97,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         actionOpenOption(id)
                         true
                     }
+                    setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName
@@ -131,6 +140,30 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             }
         }
     }
+}
+
+private fun setGildings(textView: TextView, gildings: Gildings) {
+    val truss = Truss()
+    if (gildings.platinum != 0)
+        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_platinum_gilding_14dp, textView)))
+                .append(" ")
+                .popSpan()
+                .append("x${gildings.platinum} ")
+    if (gildings.gold != 0)
+        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_gold_gilding_14dp, textView)))
+                .append(" ")
+                .popSpan()
+                .append("x${gildings.gold} ")
+    if (gildings.silver != 0)
+        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_silver_gilding_14dp, textView)))
+                .append(" ")
+                .popSpan()
+                .append("x${gildings.silver} ")
+    textView.text = truss.build()
+}
+
+private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = ContextCompat.getDrawable(textView.context, res)!!.apply {
+    setBounds(0, 0, intrinsicHeight, intrinsicWidth)
 }
 
 private fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {

@@ -1,13 +1,12 @@
 package com.ducktapedapps.updoot.model
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ducktapedapps.updoot.ui.comments.CommentScreenContent
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 @Entity
-@JsonClass(generateAdapter = true)
 data class LinkData(
         val selftext: String?,
         val title: String,
@@ -27,7 +26,8 @@ data class LinkData(
         val url: String,
         val permalink: String,
         val over_18: Boolean,
-        val lastUpdated: Long? = null
+        @Embedded val gildings: Gildings,
+        val lastUpdated: Long
 ) : CommentScreenContent {
 
     fun vote(direction: Int): LinkData {

@@ -19,7 +19,6 @@ import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 private const val TAG = "SubmissionRepo"
 
@@ -107,10 +106,7 @@ class SubmissionRepo(
                 }
         )
         fetchedSubmissions.apply {
-            val calender = Calendar.getInstance()
-            submissions.forEach {
-                submissionsCacheDAO.insertSubmissions(it.copy(lastUpdated = (calender.timeInMillis / 1000)))
-            }
+            submissions.forEach { submissionsCacheDAO.insertSubmissions(it) }
             nextPageKeyAndCurrentPageEntries.postValue(nextPageKeyAndCurrentPageEntries.value?.apply {
                 put(after, submissions.map { it.id })
             })
