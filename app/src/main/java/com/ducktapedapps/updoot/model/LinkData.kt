@@ -26,6 +26,7 @@ data class LinkData(
         @PrimaryKey val id: String,
         val url: String,
         val permalink: String,
+        val over_18: Boolean,
         val lastUpdated: Long? = null
 ) : CommentScreenContent {
 

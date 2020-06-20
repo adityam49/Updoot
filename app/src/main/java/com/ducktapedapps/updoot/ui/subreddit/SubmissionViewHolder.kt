@@ -19,7 +19,7 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
-sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) , SwipeableViewHolder {
+sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
     abstract fun bind(submissions: LinkData,
                       actionOpenComments: (String, String) -> Unit,
                       actionOpenOption: (String) -> Unit)
@@ -33,7 +33,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         actionOpenOption(id)
                         true
                     }
-                    setThumbnail(thumbnailImageView, thumbnail)
+                    setThumbnail(thumbnailImageView, thumbnail, over_18)
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
                     subredditTextView.text = subredditName
@@ -54,7 +54,6 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     setVotes(scoreTextView, ups, likes)
                     titleTextView.text = title
-                    selftextTextView.text = selftext
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                 }
@@ -144,17 +143,20 @@ private fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {
     textView.text = getCompactCountAsString(votes.toLong())
 }
 
-private fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?) {
+private fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?, isNsfw: Boolean) {
     if (thumbnail != null) {
-        when (thumbnail) {
-            "self", "" -> thumbnailImageView.setImageResource(R.drawable.ic_selftext_24dp)
-            "default" -> thumbnailImageView.setImageResource(R.drawable.ic_link_24dp)
-            else -> Glide.with(thumbnailImageView.context)
-                    .load(thumbnail)
-                    .apply(RequestOptions.circleCropTransform())
-                    .error(R.drawable.ic_image_error_24dp)
-                    .into(thumbnailImageView)
-        }
+        Glide.with(thumbnailImageView.context)
+                .load(
+                        if (isNsfw) R.drawable.ic_nsfw_24dp
+                        else
+                            when (thumbnail) {
+                                "self" -> R.drawable.ic_selftext_24dp
+                                "default", "", null -> R.drawable.ic_link_24dp
+                                else -> thumbnail
+                            })
+                .apply(RequestOptions.circleCropTransform())
+                .error(R.drawable.ic_image_error_24dp)
+                .into(thumbnailImageView)
     } else {
         thumbnailImageView.setImageResource(R.drawable.ic_selftext_24dp)
     }
