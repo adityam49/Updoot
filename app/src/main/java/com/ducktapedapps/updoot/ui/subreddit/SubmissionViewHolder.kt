@@ -27,16 +27,26 @@ import com.ducktapedapps.updoot.utils.getCompactCountAsString
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
     abstract fun bind(submissions: LinkData,
                       actionOpenComments: (String, String) -> Unit,
-                      actionOpenOption: (String) -> Unit)
+                      actionOpenOption: (String) -> Unit,
+                      actionOpenImage: (String, String) -> Unit
+    )
 
     class CompactImageViewHolder(val binding: CompactSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
+        override fun bind(
+                submissions: LinkData,
+                actionOpenComments: (String, String) -> Unit,
+                actionOpenOption: (String) -> Unit,
+                actionOpenImage: (String, String) -> Unit
+        ) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
                         actionOpenOption(id)
                         true
+                    }
+                    if (imageSet != null) thumbnailImageView.setOnClickListener {
+                        actionOpenImage(imageSet.lowResUrl, imageSet.highResUrl)
                     }
                     setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
@@ -50,7 +60,12 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class CompactSelfTextViewHolder(val binding: CompactSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
+        override fun bind(
+                submissions: LinkData,
+                actionOpenComments: (String, String) -> Unit,
+                actionOpenOption: (String) -> Unit,
+                actionOpenImage: (String, String) -> Unit
+        ) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
@@ -69,13 +84,26 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class LargeSubmissionImageViewHolder(val binding: LargeSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
+        override fun bind(
+                submissions: LinkData,
+                actionOpenComments: (String, String) -> Unit,
+                actionOpenOption: (String) -> Unit,
+                actionOpenImage: (String, String) -> Unit
+        ) {
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
                         actionOpenOption(id)
                         true
+                    }
+                    previewImageView.apply {
+                        setOnClickListener { actionOpenImage(submissions.imageSet!!.lowResUrl, submissions.imageSet.highResUrl) }
+                        Glide.with(this)
+                                .load(submissions.imageSet?.lowResUrl)
+                                .placeholder(R.color.color_on_surface)
+                                .error(R.drawable.ic_image_error_24dp)
+                                .into(this)
                     }
                     setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
@@ -88,7 +116,12 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     }
 
     class LargeSubmissionSelfTextViewHolder(val binding: LargeSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(submissions: LinkData, actionOpenComments: (String, String) -> Unit, actionOpenOption: (String) -> Unit) {
+        override fun bind(
+                submissions: LinkData,
+                actionOpenComments: (String, String) -> Unit,
+                actionOpenOption: (String) -> Unit,
+                actionOpenImage: (String, String) -> Unit
+        ) {
 
             binding.apply {
                 with(submissions) {
@@ -103,11 +136,15 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                     selftextTextView.apply {
-                        text = selftext
-                        maxLines = 10
-                        isClickable = true
+                        if (selftext.isNullOrBlank()) visibility = View.GONE
+                        else {
+                            visibility = View.VISIBLE
+                            text = selftext
+                            maxLines = 10
+                            isClickable = true
+                            setSelfText(this)
+                        }
                     }
-                    setSelfText(selftextTextView)
                 }
             }
         }
@@ -186,7 +223,8 @@ private fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?, isNs
                                 "self" -> R.drawable.ic_selftext_24dp
                                 "default", "", null -> R.drawable.ic_link_24dp
                                 else -> thumbnail
-                            })
+                            }
+                )
                 .apply(RequestOptions.circleCropTransform())
                 .error(R.drawable.ic_image_error_24dp)
                 .into(thumbnailImageView)

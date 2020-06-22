@@ -84,7 +84,7 @@ class SubredditFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions)
+        val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions, ::openImage)
         setUpViews(submissionsAdapter)
         observeViewModel(submissionsAdapter)
     }
@@ -170,6 +170,10 @@ class SubredditFragment : Fragment() {
     private fun openComments(subreddit: String, id: String) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
 
     private fun openOptions(submissionId: String) = findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
+
+    private fun openImage(lowResImage: String, highResImage: String) = findNavController().navigate(
+            SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(lowResImage, highResImage)
+    )
 
     private fun openSubreddit(targetSubreddit: String) = if (args.subreddit != targetSubreddit) {
         findNavController().navigate(

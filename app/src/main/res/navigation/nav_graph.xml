@@ -62,7 +62,7 @@
             android:id="@+id/action_CommentsDestination_to_ImagePreviewDestination"
             app:destination="@id/ImagePreviewDestination" />
     </fragment>
-    <fragment
+    <dialog
         android:id="@+id/ImagePreviewDestination"
         android:name="com.ducktapedapps.updoot.ui.MediaPreviewFragment"
         android:label="ImagePreviewDestination"
@@ -74,7 +74,7 @@
         <argument
             android:name="mediaUrl"
             app:argType="string" />
-    </fragment>
+    </dialog>
     <action
         android:id="@+id/action_global_settingsFragment"
         app:destination="@id/SettingsDestination" />

@@ -27,6 +27,7 @@ data class LinkData(
         val permalink: String,
         val over_18: Boolean,
         @Embedded val gildings: Gildings,
+        @Embedded val imageSet: ImageSet?,
         val lastUpdated: Long
 ) : CommentScreenContent {
 

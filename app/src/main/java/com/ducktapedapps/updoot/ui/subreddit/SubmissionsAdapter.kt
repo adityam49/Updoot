@@ -16,7 +16,8 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
 class SubmissionsAdapter(
         private val actionOpenComments: (String, String) -> Unit,
-        private val actionOpenOptions: (String) -> Unit
+        private val actionOpenOptions: (String) -> Unit,
+        private val actionOpenImage: (String, String) -> Unit
 ) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
     lateinit var itemUi: SubmissionUiType
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
@@ -42,6 +43,7 @@ class SubmissionsAdapter(
             else R.layout.compact_submission_image
         } else {
             if (!getItem(position).selftext.isNullOrEmpty()) R.layout.large_submission_selftext
+            else if (getItem(position).imageSet == null) R.layout.large_submission_selftext
             else R.layout.large_submission_image
         }
     }
@@ -55,7 +57,7 @@ class SubmissionsAdapter(
     }
 
     override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int) {
-        holder.bind(getItem(position), actionOpenComments, actionOpenOptions)
+        holder.bind(getItem(position), actionOpenComments, actionOpenOptions, actionOpenImage)
     }
 
     private companion object {

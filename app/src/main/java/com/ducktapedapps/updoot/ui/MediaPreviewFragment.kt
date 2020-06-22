@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.navArgs
-import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ImagePreviewFragmentBinding
 
 
-class MediaPreviewFragment : Fragment() {
+class MediaPreviewFragment : DialogFragment() {
     private val TAG = "MediaPreviewFragment"
 
     private val args: MediaPreviewFragmentArgs by navArgs()
@@ -21,14 +21,10 @@ class MediaPreviewFragment : Fragment() {
         return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sharedElementEnterTransition = TransitionInflater.from(context).inflateTransition(android.R.transition.move)
-    }
+    override fun getTheme() = R.style.FullScreenDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.imageView.transitionName = args.placeHolderMedia
         Glide
                 .with(binding.imageView.context)
                 .load(args.mediaUrl)
