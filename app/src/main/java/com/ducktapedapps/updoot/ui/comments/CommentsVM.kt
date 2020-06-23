@@ -66,7 +66,7 @@ class CommentsVM(
     fun castVote(direction: Int, index: Int) = Unit
 
     private suspend fun loadContent(linkData: LinkData) {
-        if (!linkData.selftext.isNullOrBlank()) {
+        if (!linkData.selftext.isNullOrBlank() || linkData.imageSet != null) {
             _content.postValue(linkData)
             _contentLoading.value = false
         } else loadLinkMetaData()
@@ -87,6 +87,7 @@ class CommentsVM(
                 loadLinkMetaDataSuccessfully()
             }
         } catch (e: Exception) {
+            _contentLoading.postValue(false)
             e.printStackTrace()
         }
     }
@@ -95,9 +96,7 @@ class CommentsVM(
     private suspend fun loadLinkMetaDataSuccessfully() {
         val url = submissionData.value!!.url
         val htmlResponse = fetchMetaDataFrom(url)
-        _content.postValue(htmlResponse.extractMetaData().toLinkModel(url).also {
-            Log.d("CommentsVM", "loadLinkMetaDataSuccessfully: $it")
-        })
+        _content.postValue(htmlResponse.extractMetaData().toLinkModel(url))
         _contentLoading.postValue(false)
     }
 }

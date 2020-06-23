@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.ducktapedapps.updoot.databinding.ItemContentImageBinding
 import com.ducktapedapps.updoot.databinding.ItemContentLinkBinding
 import com.ducktapedapps.updoot.databinding.ItemContentSelftextBinding
 import com.ducktapedapps.updoot.model.LinkData
@@ -20,17 +22,29 @@ class ContentAdapter @Inject constructor(private val markwonInstance: Markwon) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
+        Log.d("OnCreateViewHolder", "onCreateViewHolder() called  with: parent = [$parent], viewType = [$viewType]")
         return when (viewType) {
             SELF_TEXT -> SelfTextViewHolder(ItemContentSelftextBinding.inflate(layoutInflater, parent, false))
             LINK -> LinkViewHolder(ItemContentLinkBinding.inflate(layoutInflater, parent, false))
+            IMAGE -> ImageViewHolder(ItemContentImageBinding.inflate(layoutInflater, parent, false))
             else -> throw  RuntimeException("Invalid view type requested : $viewType")
         }
     }
 
     override fun getItemViewType(position: Int): Int =
             when (content) {
-                is LinkData -> SELF_TEXT
                 is LinkModel -> LINK
+                is LinkData -> {
+                    when {
+                        !(content as LinkData).selftext.isNullOrBlank() -> {
+                            SELF_TEXT
+                        }
+                        (content as LinkData).imageSet != null -> {
+                            IMAGE
+                        }
+                        else -> throw RuntimeException("Invalid content type : $content")
+                    }
+                }
                 else -> throw RuntimeException("Invalid content type : $content")
             }
 
@@ -40,11 +54,13 @@ class ContentAdapter @Inject constructor(private val markwonInstance: Markwon) :
         when (holder) {
             is LinkViewHolder -> holder.bind(content as LinkModel)
             is SelfTextViewHolder -> holder.bind((content as LinkData).selftext!!, markwonInstance)
+            is ImageViewHolder -> holder.bind((content as LinkData).imageSet!!)
         }
     }
 
     private companion object {
         const val SELF_TEXT = 1
         const val LINK = 2
+        const val IMAGE = 3
     }
 }

@@ -21,7 +21,7 @@ class LinkDataAdapter {
             }
         }
         return LinkData(
-                selftext = data["selftext"] as String? ?: "",
+                selftext = data["selftext"] as? String,
                 title = data["title"] as String,
                 archived = data["archived"] as Boolean,
                 author = data["author"] as String,
