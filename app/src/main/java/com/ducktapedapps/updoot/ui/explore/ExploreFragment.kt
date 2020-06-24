@@ -31,13 +31,9 @@ class ExploreFragment : Fragment() {
     @Inject
     lateinit var vmFactory: ExploreVMFactory
     private val viewModel by lazy { ViewModelProvider(this@ExploreFragment, vmFactory).get(ExploreVM::class.java) }
-    private val exploreMergeAdapter = MergeAdapter()
-    private val trendingAdapter = ExploreTrendingAdapter()
-    private val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
-        override fun goToSubreddit(subredditName: String) =
-                findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
-    })
-    private lateinit var binding: FragmentExploreBinding
+    private var _binding: FragmentExploreBinding? = null
+    private val binding: FragmentExploreBinding
+        get() = _binding!!
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -45,13 +41,24 @@ class ExploreFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentExploreBinding.inflate(inflater, container, false)
+        _binding = FragmentExploreBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val exploreMergeAdapter = MergeAdapter()
+        val trendingAdapter = ExploreTrendingAdapter()
+        val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
+            override fun goToSubreddit(subredditName: String) =
+                    findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
+        })
         binding.apply {
-            root.post { animateSearchView() }
+            root.post { animateSearchView(searchAdapter, trendingAdapter) }
             recyclerView.apply {
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = exploreMergeAdapter.apply {
@@ -81,7 +88,7 @@ class ExploreFragment : Fragment() {
         }
     }
 
-    private fun setUpViewModels() = viewModel.apply {
+    private fun setUpViewModels(trendingAdapter: ExploreTrendingAdapter, searchAdapter: SearchAdapter) = viewModel.apply {
         trendingSubs.observe(viewLifecycleOwner) {
 
             trendingAdapter.submitList(it)
@@ -93,14 +100,14 @@ class ExploreFragment : Fragment() {
     }
 
 
-    private fun animateSearchView() {
+    private fun animateSearchView(searchAdapter: SearchAdapter, trendingAdapter: ExploreTrendingAdapter) {
         val margin = (resources.displayMetrics.density * 16).toInt()
 
         val changeBounds = ChangeBounds().apply {
             duration = 300
             addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(transition: Transition) {
-                    setUpViewModels()
+                    setUpViewModels(trendingAdapter, searchAdapter)
                 }
 
                 override fun onTransitionResume(transition: Transition) = Unit

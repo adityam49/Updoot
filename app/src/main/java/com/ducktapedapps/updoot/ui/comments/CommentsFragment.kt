@@ -26,7 +26,8 @@ class CommentsFragment : Fragment() {
     private lateinit var viewModel: CommentsVM
 
     private var _binding: FragmentCommentsBinding? = null
-    private val binding get() = _binding!!
+    private val binding: FragmentCommentsBinding
+        get() = _binding!!
 
     @Inject
     lateinit var contentAdapter: ContentAdapter
@@ -65,6 +66,7 @@ class CommentsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
     private fun setUpViewModel(name: String, id: String) {
         viewModel = ViewModelProvider(
                 this@CommentsFragment,

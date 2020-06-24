@@ -15,9 +15,12 @@ class MediaPreviewFragment : DialogFragment() {
     private val TAG = "MediaPreviewFragment"
 
     private val args: MediaPreviewFragmentArgs by navArgs()
-    private lateinit var binding: ImagePreviewFragmentBinding
+    private var _binding: ImagePreviewFragmentBinding? = null
+    private val binding: ImagePreviewFragmentBinding
+        get() = _binding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = ImagePreviewFragmentBinding.inflate(inflater, container, false)
+        _binding = ImagePreviewFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -32,5 +35,10 @@ class MediaPreviewFragment : DialogFragment() {
                         Glide.with(binding.imageView.context)
                                 .load(args.placeHolderMedia)
                 ).into(binding.imageView)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
