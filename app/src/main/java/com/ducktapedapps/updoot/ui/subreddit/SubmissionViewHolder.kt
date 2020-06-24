@@ -46,7 +46,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         true
                     }
                     if (imageSet != null) thumbnailImageView.setOnClickListener {
-                        actionOpenImage(imageSet.lowResUrl, imageSet.highResUrl)
+                        actionOpenImage(imageSet.lowResUrl!!, imageSet.highResUrl!!)
                     }
                     setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
@@ -98,9 +98,10 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         true
                     }
                     previewImageView.apply {
-                        setOnClickListener { actionOpenImage(submissions.imageSet!!.lowResUrl, submissions.imageSet.highResUrl) }
+                        setOnClickListener { actionOpenImage(submissions.imageSet!!.lowResUrl!!, submissions.imageSet.highResUrl!!) }
                         Glide.with(this)
                                 .load(submissions.imageSet?.lowResUrl)
+                                .thumbnail(Glide.with(previewImageView).load(thumbnail))
                                 .placeholder(R.color.color_on_surface)
                                 .error(R.drawable.ic_image_error_24dp)
                                 .into(this)

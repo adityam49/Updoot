@@ -37,10 +37,11 @@ sealed class ContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     //TODO
     class ImageViewHolder(val binding: ItemContentImageBinding) : ContentViewHolder(binding.root) {
-        fun bind(imageSet: ImageSet) = binding.apply {
+        fun bind(imageSet: ImageSet, thumbnailUrl: String) = binding.apply {
             Glide
                     .with(imageView)
                     .load(imageSet.lowResUrl)
+                    .thumbnail(Glide.with(imageView).load(thumbnailUrl))
                     .apply(RequestOptions().transform(CenterInside(), RoundedCorners(16)))
                     .placeholder(R.color.color_background)
                     .into(imageView)

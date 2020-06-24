@@ -35,13 +35,9 @@ class ContentAdapter @Inject constructor(private val markwonInstance: Markwon) :
             when (content) {
                 is LinkModel -> LINK
                 is LinkData -> {
-                    when {
-                        !(content as LinkData).selftext.isNullOrBlank() -> {
-                            SELF_TEXT
-                        }
-                        (content as LinkData).imageSet != null -> {
-                            IMAGE
-                        }
+                    when ((content as LinkData).post_hint) {
+                        "link", "rich:video", "hosted:video", "image" -> IMAGE
+                        "self" -> SELF_TEXT
                         else -> throw RuntimeException("Invalid content type : $content")
                     }
                 }
@@ -54,7 +50,7 @@ class ContentAdapter @Inject constructor(private val markwonInstance: Markwon) :
         when (holder) {
             is LinkViewHolder -> holder.bind(content as LinkModel)
             is SelfTextViewHolder -> holder.bind((content as LinkData).selftext!!, markwonInstance)
-            is ImageViewHolder -> holder.bind((content as LinkData).imageSet!!)
+            is ImageViewHolder -> holder.bind((content as LinkData).imageSet!!, (content as LinkData).thumbnail)
         }
     }
 

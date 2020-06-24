@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.utils.moshiAdapters
 
-import android.util.Log
 import com.ducktapedapps.updoot.model.Gildings
 import com.ducktapedapps.updoot.model.ImageSet
 import com.ducktapedapps.updoot.model.LinkData
@@ -16,12 +15,17 @@ class LinkDataAdapter {
     fun deserializeSubmissionDetail(data: Map<*, *>): LinkData {
         var imageSet: ImageSet? = null
         (data["preview"] as? Map<*, *>)?.let { preview ->
-            imageSet = getImagePreviews(preview).also {
-                Log.d(TAG, "deserializeSubmissionDetail: $it")
-            }
+            imageSet = getImagePreviews(preview)
         }
+        val url = data["url"] as String
+        val selfText = data["selftext"] as? String
+        val postHint = data["post_hint"] as? String
+                ?: if (imageSet != null) "image"
+                else "self"
+
+
         return LinkData(
-                selftext = data["selftext"] as? String,
+                selftext = selfText,
                 title = data["title"] as String,
                 archived = data["archived"] as Boolean,
                 author = data["author"] as String,
@@ -35,19 +39,19 @@ class LinkDataAdapter {
                 created = (data["created_utc"] as Double).toLong(),
                 commentsCount = (data["num_comments"] as Double).toInt(),
                 id = data["id"] as String,
-                url = data["url"] as String,
+                url = url,
                 permalink = data["permalink"] as String,
                 over_18 = data["over_18"] as Boolean,
                 gildings = getGildings(data["gildings"] as Map<String, *>),
                 imageSet = imageSet,
                 lastUpdated = System.currentTimeMillis() / 1000,
-                post_hint = data["post_hint"] as String?
+                post_hint = postHint
         )
     }
 
     //TODO : refactor this monstrosity
     @Suppress("Unchecked_cast")
-    private fun getImagePreviews(preview: Map<*, *>): ImageSet {
+    private fun getImagePreviews(preview: Map<*, *>): ImageSet? {
 
         var highRes: ImageModel? = null
         var lowRes: ImageModel? = null
@@ -56,14 +60,14 @@ class LinkDataAdapter {
                 images.first().let { allImages ->
                     (allImages["source"] as? Map<String, *>)?.let { source ->
                         highRes = ImageModel(
-                                (source["url"] as String).replace("amp;", ""),
+                                (source["url"] as String).replace("amp;", "").replace("\u0026", "&"),
                                 (source["height"] as Double).toInt(),
                                 (source["width"] as Double).toInt()
                         )
                     }
                     (allImages["resolutions"] as? List<Map<*, *>>)?.map { image ->
                         ImageModel(
-                                (image["url"] as String).replace("amp;", ""),
+                                (image["url"] as String).replace("amp;", "").replace("\u0026", "&"),
                                 (image["height"] as Double).toInt(),
                                 (image["width"] as Double).toInt()
                         )
@@ -73,15 +77,14 @@ class LinkDataAdapter {
                 }
             }
         }
-        val l: ImageModel = lowRes!!
-        val h: ImageModel = highRes!!
+        if (lowRes == null) return null
         return ImageSet(
-                lowResUrl = l.url,
-                lowResHeight = l.height,
-                lowResWidth = l.width,
-                highResHeight = h.height,
-                highResUrl = h.url,
-                highResWidth = h.width
+                lowResUrl = lowRes!!.url,
+                lowResHeight = lowRes!!.height,
+                lowResWidth = lowRes!!.width,
+                highResHeight = highRes!!.height,
+                highResUrl = highRes!!.url,
+                highResWidth = highRes!!.width
         )
     }
 

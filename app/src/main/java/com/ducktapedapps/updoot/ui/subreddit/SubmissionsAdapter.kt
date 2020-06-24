@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.CompactSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
@@ -23,29 +22,21 @@ class SubmissionsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (itemUi == COMPACT) {
-            if (viewType == R.layout.compact_submission_selftext) {
-                CompactSelfTextViewHolder(CompactSubmissionSelftextBinding.inflate(inflater, parent, false))
-            } else {
-                CompactImageViewHolder(CompactSubmissionImageBinding.inflate(inflater, parent, false))
+            when (viewType) {
+                SELF -> CompactSelfTextViewHolder(CompactSubmissionSelftextBinding.inflate(inflater, parent, false))
+                else -> CompactImageViewHolder(CompactSubmissionImageBinding.inflate(inflater, parent, false))
             }
         } else {
-            if (viewType == R.layout.large_submission_image) {
-                LargeSubmissionImageViewHolder(LargeSubmissionImageBinding.inflate(inflater, parent, false))
-            } else {
-                LargeSubmissionSelfTextViewHolder(LargeSubmissionSelftextBinding.inflate(inflater, parent, false))
+            when (viewType) {
+                SELF -> LargeSubmissionSelfTextViewHolder(LargeSubmissionSelftextBinding.inflate(inflater, parent, false))
+                else -> LargeSubmissionImageViewHolder(LargeSubmissionImageBinding.inflate(inflater, parent, false))
             }
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (itemUi == COMPACT) {
-            if (!getItem(position).selftext.isNullOrEmpty()) R.layout.compact_submission_selftext
-            else R.layout.compact_submission_image
-        } else {
-            if (!getItem(position).selftext.isNullOrEmpty()) R.layout.large_submission_selftext
-            else if (getItem(position).imageSet == null) R.layout.large_submission_selftext
-            else R.layout.large_submission_image
-        }
+    override fun getItemViewType(position: Int): Int = when (currentList[position].post_hint) {
+        "self" -> SELF
+        else -> IMAGE
     }
 
     override fun submitList(list: List<LinkData>?) {
@@ -61,6 +52,9 @@ class SubmissionsAdapter(
     }
 
     private companion object {
+        const val IMAGE = 1
+        const val LINK = 2
+        const val SELF = 3
         val CALLBACK = object : DiffUtil.ItemCallback<LinkData>() {
             override fun areItemsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
                 return oldItem.name == newItem.name
