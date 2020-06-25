@@ -39,7 +39,10 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
         override fun login() = navController.navigate(R.id.loginActivity)
 
-        override fun switch(accountName: String) = viewModel.setCurrentAccount(accountName)
+        override fun switch(accountName: String){
+            viewModel.setCurrentAccount(accountName)
+            if(bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.hide()
+        }
 
         override fun logout(accountName: String) = viewModel.logout(accountName)
 
