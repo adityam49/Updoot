@@ -20,6 +20,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
+import com.ducktapedapps.updoot.ui.LoginState
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
@@ -36,6 +37,7 @@ class SubredditFragment : Fragment() {
     private lateinit var submissionsVM: SubmissionsVM
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
+    private var isLoggedIn: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,10 +115,14 @@ class SubredditFragment : Fragment() {
                         getDrawable(R.drawable.ic_downvote_24dp)!!,
                         getDrawable(R.drawable.ic_expand_more_black_14dp)!!,
                         object : SwipeCallback.Callback {
-                            override fun extremeLeftAction(position: Int) = Unit
-                            override fun leftAction(position: Int) = Unit
+                            override fun extremeLeftAction(position: Int) =
+                                    Toast.makeText(requireContext(), if (isLoggedIn) "can save" else "please login", Toast.LENGTH_SHORT).show()
 
-                            override fun rightAction(position: Int) = Unit
+                            override fun leftAction(position: Int) =
+                                    Toast.makeText(requireContext(), if (isLoggedIn) "can upvote" else "please login", Toast.LENGTH_SHORT).show()
+
+                            override fun rightAction(position: Int) =
+                                    Toast.makeText(requireContext(), if (isLoggedIn) "can downvote" else "please login", Toast.LENGTH_SHORT).show()
 
                             override fun extremeRightAction(position: Int) = openSubreddit(submissionsAdapter.currentList[position].subredditName)
                         }
@@ -131,10 +137,18 @@ class SubredditFragment : Fragment() {
     private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
     private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
-        ViewModelProvider(requireActivity()).get(ActivityVM::class.java).shouldReload.observe(viewLifecycleOwner) { shouldReload ->
-            if (shouldReload.contentIfNotHandled == true) {
-                Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
-                reloadFragmentContent()
+        ViewModelProvider(requireActivity()).get(ActivityVM::class.java).apply {
+            shouldReload.observe(viewLifecycleOwner) { shouldReload ->
+                if (shouldReload.contentIfNotHandled == true) {
+                    Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
+                    reloadFragmentContent()
+                }
+            }
+            loginState.observe(viewLifecycleOwner) {
+                isLoggedIn = when (it) {
+                    LoginState.LoggedOut -> false
+                    is LoginState.LoggedIn -> true
+                }
             }
         }
         submissionsVM.apply {

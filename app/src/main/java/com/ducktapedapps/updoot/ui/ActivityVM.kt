@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.ui
 
 import androidx.lifecycle.*
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
+import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +16,11 @@ class ActivityVM @Inject constructor(private val redditClient: RedditClient) : V
 
     private val _accounts: MutableLiveData<List<AccountModel>> = MutableLiveData(listOf())
     private val accountEntriesExpanded = MutableLiveData(false)
+
+    val loginState: LiveData<LoginState> = Transformations.map(_accounts) {
+        if (it.first().name == Constants.ANON_USER) LoginState.LoggedOut
+        else LoginState.LoggedIn(it.first().name)
+    }
 
     val accounts = MediatorLiveData<List<AccountModel>>().apply {
         var isExpanded: Boolean
@@ -59,4 +65,9 @@ class ActivityVM @Inject constructor(private val redditClient: RedditClient) : V
     fun expandOrCollapseAccountsMenu() {
         accountEntriesExpanded.value = accountEntriesExpanded.value?.run { !this }
     }
+}
+
+sealed class LoginState() {
+    object LoggedOut : LoginState()
+    data class LoggedIn(val userName: String) : LoginState()
 }
