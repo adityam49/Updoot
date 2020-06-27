@@ -39,9 +39,9 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
         override fun login() = navController.navigate(R.id.loginActivity)
 
-        override fun switch(accountName: String){
+        override fun switch(accountName: String) {
             viewModel.setCurrentAccount(accountName)
-            if(bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.hide()
+            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.collapse()
         }
 
         override fun logout(accountName: String) = viewModel.logout(accountName)
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
     override fun onBackPressed() {
         with(binding.bottomNavigationDrawer) {
-            if (isInFocus()) hide()
+            if (isInFocus()) collapse()
             else super.onBackPressed()
         }
     }
@@ -128,15 +128,27 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     override fun currentAccountChanged() = viewModel.reloadContent()
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
-        navController.currentDestination?.label = when (destination.id) {
-            R.id.SubredditDestination -> arguments?.getString("subreddit").run { if (isNullOrEmpty()) "Updoot" else this }
-            R.id.CommentsDestination -> "Comments"
-            R.id.SettingsDestination -> "Settings"
-            R.id.ExploreDestination -> "Explore"
-            else -> "Updoot"
+        when (destination.id) {
+            R.id.SubredditDestination -> {
+                bottomNavigationDrawer.show()
+                navController.currentDestination?.label = arguments?.getString("subreddit").run { if (isNullOrEmpty()) "Updoot" else this }
+            }
+            R.id.CommentsDestination -> {
+                bottomNavigationDrawer.show()
+                navController.currentDestination?.label = "Comments"
+            }
+            R.id.SettingsDestination -> {
+                bottomNavigationDrawer.show()
+                navController.currentDestination?.label = "Settings"
+            }
+            R.id.ExploreDestination -> {
+                bottomNavigationDrawer.hide()
+                navController.currentDestination?.label = "Explore"
+            }
+            else -> navController.currentDestination?.label = "Updoot"
         }
         bottomNavigationDrawer.post { /*to let behaviour be initialized*/
-            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.hide()
+            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.collapse()
         }
     }
 

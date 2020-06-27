@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.explore
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,8 +55,10 @@ class ExploreFragment : Fragment() {
         val exploreMergeAdapter = MergeAdapter()
         val trendingAdapter = ExploreTrendingAdapter()
         val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
-            override fun goToSubreddit(subredditName: String) =
-                    findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
+            override fun goToSubreddit(subredditName: String) {
+                binding.searchView.clearFocus()
+                findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
+            }
         })
         binding.apply {
             root.post { animateSearchView(searchAdapter, trendingAdapter) }

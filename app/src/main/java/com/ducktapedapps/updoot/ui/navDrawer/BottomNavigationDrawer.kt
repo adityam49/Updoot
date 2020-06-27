@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.navDrawer
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.LinearLayout
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
@@ -19,7 +20,7 @@ class BottomNavigationDrawer @JvmOverloads constructor(
 
     private val bottomNavDrawerCallback = BottomNavDrawerCallback()
 
-    lateinit var bottomNavigationDrawerBehaviour: BottomSheetBehavior<LinearLayout>
+    private lateinit var bottomNavigationDrawerBehaviour: BottomSheetBehavior<LinearLayout>
 
     init {
         binding.root.post {
@@ -43,6 +44,13 @@ class BottomNavigationDrawer @JvmOverloads constructor(
      * public methods
      */
 
+    fun hide() {
+        collapse()
+        visibility = View.GONE
+    }
+
+    fun show() { visibility = View.VISIBLE }
+
     fun toggleState() {
         bottomNavigationDrawerBehaviour.state =
                 when (bottomNavigationDrawerBehaviour.state) {
@@ -52,9 +60,8 @@ class BottomNavigationDrawer @JvmOverloads constructor(
     }
 
     fun isInFocus() = bottomNavigationDrawerBehaviour.state != STATE_COLLAPSED
-    fun hide() {
-        bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED
-    }
+
+    fun collapse() { bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED }
 
     fun addOnSlideAction(action: OnSlideAction) = bottomNavDrawerCallback.addOnSlideAction(action)
 
