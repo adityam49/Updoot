@@ -44,4 +44,7 @@
     <string name="drag_handle">Drag handle</string>
     <string name="menu_edit_button">Menu edit button</string>
     <string name="option_icon">Option icon</string>
+    <string name="user_icon">User icon</string>
+    <string name="remove_account">Remove account</string>
+    <string name="navigation_destination_icon">Navigation destination icon</string>
 </resources>

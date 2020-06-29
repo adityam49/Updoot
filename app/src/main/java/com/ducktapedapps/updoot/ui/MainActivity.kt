@@ -20,6 +20,7 @@ import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
+import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
 
         override fun toggleEntryMenu() = viewModel.expandOrCollapseAccountsMenu()
     })
+    private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter()
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -75,8 +77,13 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
     }
 
     private fun setUpViewModel() {
-        viewModel.accounts.observe(this) {
-            accountsAdapter.submitList(it)
+        viewModel.apply {
+            accounts.observe(this@MainActivity) {
+                accountsAdapter.submitList(it)
+            }
+            navigationEntries.observe(this@MainActivity) {
+                navDrawerDestinationAdapter.submitList(it)
+            }
         }
     }
 
@@ -112,7 +119,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
                 }
 
                 binding.recyclerView.apply {
-                    adapter = MergeAdapter(accountsAdapter)
+                    adapter = MergeAdapter(accountsAdapter, navDrawerDestinationAdapter)
                     layoutManager = LinearLayoutManager(this@MainActivity)
                 }
             }

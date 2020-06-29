@@ -49,7 +49,7 @@ object Constants {
     const val ACCOUNT_LOGIN_REQUEST_CODE = 99
 
     const val UPDOOT_ACCOUNT = "updoot_account"
-    const val ADD_ACCOUNT = "add account"
+    const val ADD_ACCOUNT = "Add account"
     const val ANON_USER = "Anonymous"
 
     //DB names
