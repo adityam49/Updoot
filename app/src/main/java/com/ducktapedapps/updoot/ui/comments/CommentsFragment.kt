@@ -11,9 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
@@ -84,7 +84,7 @@ class CommentsFragment : Fragment() {
     private fun setUpRecyclerView() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = MergeAdapter(submissionHeaderAdapter, contentAdapter, commentsAdapter)
+            adapter = ConcatAdapter(submissionHeaderAdapter, contentAdapter, commentsAdapter)
             ItemTouchHelper(SwipeCallback(
                     getColor(R.color.saveContentColor),
                     getColor(R.color.upVoteColor),

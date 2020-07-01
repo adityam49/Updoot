@@ -11,8 +11,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
@@ -21,12 +21,13 @@ import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, NavController.OnDestinationChangedListener {
+class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, NavController.OnDestinationChangedListener {
     @Inject
     lateinit var redditClient: RedditClient
 
@@ -119,7 +120,7 @@ class MainActivity : AppCompatActivity(), RedditClient.AccountChangeListener, Na
                 }
 
                 binding.recyclerView.apply {
-                    adapter = MergeAdapter(accountsAdapter, navDrawerDestinationAdapter)
+                    adapter = ConcatAdapter(accountsAdapter, navDrawerDestinationAdapter)
                     layoutManager = LinearLayoutManager(this@MainActivity)
                 }
             }

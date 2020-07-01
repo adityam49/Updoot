@@ -13,8 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
@@ -51,7 +51,7 @@ class ExploreFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val exploreMergeAdapter = MergeAdapter()
+        val exploreMergeAdapter = ConcatAdapter()
         val trendingAdapter = ExploreTrendingAdapter()
         val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
             override fun goToSubreddit(subredditName: String) {

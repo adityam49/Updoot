@@ -8,13 +8,13 @@ import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerItemModel
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class ActivityVM @Inject constructor(private val redditClient: RedditClient) : ViewModel() {
+class ActivityVM @Inject constructor(private val redditClient: IRedditClient) : ViewModel() {
     private val _shouldReload: MutableLiveData<SingleLiveEvent<Boolean>> = MutableLiveData(SingleLiveEvent(false))
     val shouldReload: LiveData<SingleLiveEvent<Boolean>> = _shouldReload
 

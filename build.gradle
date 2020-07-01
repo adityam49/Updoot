@@ -7,13 +7,15 @@ buildscript {
         retrofit_version = '2.8.1'
         dagger_version = '2.27'
         glide_version = '4.11.0'
-        nav_version = '2.2.2'
+        nav_version = '2.3.0'
         kotlin_coroutines = "1.3.2"
         moshi_version = "1.9.2"
         room_version = '2.2.5'
         markwon_version = "4.3.1"
         work_manager_version = "2.3.4"
         jsoup_version = "1.11.3"
+        archTestingVersion = '2.1.0'
+        hamcrestVersion = '1.3'
     }
     repositories {
         google()

@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.remote.AuthAPI
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.Token
@@ -27,7 +26,7 @@ class RedditClient @Inject constructor(
         private val sharedPreferences: SharedPreferences,
         @Named("device_id")
         private val deviceId: String
-) {
+) : IRedditClient {
     init {
         checkAndCreateAnonAccount()
         androidAccountManager.addOnAccountsUpdatedListener({
@@ -63,23 +62,19 @@ class RedditClient @Inject constructor(
         }
     }
 
-    private var listener: AccountChangeListener? = null
+    private var listener: IRedditClient.AccountChangeListener? = null
 
-    fun attachListener(context: Context) {
-        listener = context as AccountChangeListener
+    override fun attachListener(context: Context) {
+        listener = context as IRedditClient.AccountChangeListener
     }
 
-    fun detachListener() {
+    override fun detachListener() {
         listener = null
-    }
-
-    interface AccountChangeListener {
-        fun currentAccountChanged()
     }
 
     private var token: Token? = null
 
-    suspend fun api(): RedditAPI {
+    override suspend fun api(): RedditAPI {
         token = token.run {
             if (isExpiredOrInvalid()) {
                 val currentAccount = currentUpdootAccount
@@ -107,7 +102,7 @@ class RedditClient @Inject constructor(
         token = null
     }
 
-    fun createUserAccountAndSetItAsCurrent(username: String, icon: String, token: Token) {
+    override fun createUserAccountAndSetItAsCurrent(username: String, icon: String, token: Token) {
         sharedPreferences.edit().putString(Constants.CURRENT_ACCOUNT_NAME, username).apply()
         androidAccountManager
                 .addAccountExplicitly(
@@ -137,7 +132,7 @@ class RedditClient @Inject constructor(
 
 
     @Throws(RuntimeException::class)
-    fun setCurrentAccount(name: String) {
+    override fun setCurrentAccount(name: String) {
         with(androidAccountManager) {
             if (accounts.any { it.name == name }) {
                 sharedPreferences.edit().putString(Constants.CURRENT_ACCOUNT_NAME, name).apply()
@@ -153,7 +148,7 @@ class RedditClient @Inject constructor(
                     .filter { it.name != currentUpdootAccount }
                     .map { it.name }
 
-    fun getAccountModels(): List<AccountModel> =
+    override fun getAccountModels(): List<AccountModel> =
             mutableListOf<Pair<String, Boolean>>().apply {
                 add(Pair(currentUpdootAccount,/* is current account */true))
                 getCachedAccount().forEach { add(Pair(it, false)) }
@@ -168,7 +163,7 @@ class RedditClient @Inject constructor(
         })
     }
 
-    suspend fun removeUser(accountName: String): Boolean {
+    override suspend fun removeUser(accountName: String): Boolean {
         val accountToRemove = androidAccountManager.accounts.firstOrNull { it.name == accountName }
         return if (accountToRemove == null) {
             Log.e(TAG, "removeUser: unable to remove account $accountName as it does not exist in system")
