@@ -28,7 +28,7 @@
             tools:node="remove" />
 
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:configChanges="orientation|screenSize" />
         <activity android:name=".ui.MainActivity">
             <nav-graph android:value="@navigation/nav_graph" />

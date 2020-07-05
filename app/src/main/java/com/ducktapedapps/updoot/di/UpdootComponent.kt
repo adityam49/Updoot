@@ -2,12 +2,12 @@ package com.ducktapedapps.updoot.di
 
 import android.content.Context
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.ui.LoginActivity
 import com.ducktapedapps.updoot.ui.MainActivity
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
+import com.ducktapedapps.updoot.ui.login.LoginActivity
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet

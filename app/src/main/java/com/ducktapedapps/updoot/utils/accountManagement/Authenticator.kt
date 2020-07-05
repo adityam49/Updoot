@@ -7,8 +7,7 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.ducktapedapps.updoot.ui.LoginActivity
-import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.ui.login.LoginActivity
 
 class Authenticator internal constructor(private val mContext: Context) : AbstractAccountAuthenticator(mContext) {
     override fun editProperties(response: AccountAuthenticatorResponse, accountType: String): Bundle = throw UnsupportedOperationException()
