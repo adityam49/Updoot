@@ -60,5 +60,10 @@ interface RedditAPI {
 
     @GET()
     suspend fun getTrendingSubredditNames(@Url fullUrl: String = Constants.TRENDING_API_URL): List<String>
+
+    @GET("/subreddits/mine/subscriber")
+    suspend fun getSubscribedSubreddits(
+            @Query("after") after: String?
+    ): SubredditListing
 }
 

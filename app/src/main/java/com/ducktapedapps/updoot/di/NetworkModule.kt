@@ -51,6 +51,7 @@ class NetworkModule {
             .add(SubmissionListingAdapter())
             .add(MoreCommentsListAdapter(markwon))
             .add(CommentListingAdapter(markwon))
+            .add(SubredditListingAdapter())
             .add(LinkDataAdapter())
             .add(TrendingSubsJsonAdapter())
             .add(SearchAdapter())

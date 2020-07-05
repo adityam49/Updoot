@@ -47,4 +47,6 @@
     <string name="user_icon">User icon</string>
     <string name="remove_account">Remove account</string>
     <string name="navigation_destination_icon">Navigation destination icon</string>
+    <string name="requesting_user_name">Requesting username</string>
+    <string name="subreddit_syncing">Syncing subscribed subreddits</string>
 </resources>

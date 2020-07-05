@@ -29,10 +29,10 @@ class MediaPreviewFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Glide
-                .with(binding.imageView.context)
+                .with(this)
                 .load(args.mediaUrl)
                 .thumbnail(
-                        Glide.with(binding.imageView.context)
+                        Glide.with(this)
                                 .load(args.placeHolderMedia)
                 ).into(binding.imageView)
     }
