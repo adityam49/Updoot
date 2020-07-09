@@ -11,16 +11,17 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
+import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerPagerAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
+import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionsAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
@@ -49,6 +50,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
         override fun logout(accountName: String) = viewModel.logout(accountName)
 
         override fun toggleEntryMenu() = viewModel.expandOrCollapseAccountsMenu()
+    })
+    private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
+        override fun goToSubreddit(subredditName: String) = navController.navigate(R.id.SubredditDestination)
     })
     private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter()
 
@@ -85,6 +89,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
             navigationEntries.observe(this@MainActivity) {
                 navDrawerDestinationAdapter.submitList(it)
             }
+            subredditSubscription.observe(this@MainActivity) {
+                subscriptionAdapter.submitList(it)
+            }
         }
     }
 
@@ -119,9 +126,12 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
                     setOnClickListener { bottomNavigationDrawer.toggleState() }
                 }
 
-                binding.recyclerView.apply {
-                    adapter = ConcatAdapter(accountsAdapter, navDrawerDestinationAdapter)
-                    layoutManager = LinearLayoutManager(this@MainActivity)
+                binding.viewPager.apply {
+                    orientation = ORIENTATION_HORIZONTAL
+                    adapter = NavDrawerPagerAdapter(
+                            pageOneAdapter = listOf(accountsAdapter, navDrawerDestinationAdapter),
+                            pageTwoAdapter = listOf(subscriptionAdapter)
+                    )
                 }
             }
         }

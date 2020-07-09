@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.login
 import android.net.Uri
 import androidx.lifecycle.*
 import com.ducktapedapps.updoot.api.local.SubredditDAO
+import com.ducktapedapps.updoot.api.local.SubredditSubscription
 import com.ducktapedapps.updoot.api.remote.AuthAPI
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.Account
@@ -68,7 +69,7 @@ class LoginViewModel(
         }
     }
 
-    private suspend fun loadUserSubscribedSubreddits() {
+    private suspend fun loadUserSubscribedSubreddits(userName: String) {
         try {
             _subscribedSubreddits.postValue(Initiated)
             var result = redditAPI.getSubscribedSubreddits(null)
@@ -81,7 +82,12 @@ class LoginViewModel(
                 allSubs.addAll(result.subreddits)
                 after = result.after
             }
-            allSubs.forEach { subredditDAO.insertSubreddit(it) }
+            allSubs.forEach {
+                subredditDAO.apply {
+                    insertSubreddit(it)
+                    insertSubscription(SubredditSubscription(subredditName = it.display_name, userName = userName))
+                }
+            }
             _subscribedSubreddits.postValue(Finished(allSubs.size))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -96,10 +102,10 @@ class LoginViewModel(
 
                 val account = loadUserName()
 
-                loadUserSubscribedSubreddits()
+                loadUserSubscribedSubreddits(account!!.name)
 
                 delay(2000)
-                saveAccount(account!!, fetchedToken!!)
+                saveAccount(account, fetchedToken!!)
 
                 _loginState.postValue(LoggedIn)
 

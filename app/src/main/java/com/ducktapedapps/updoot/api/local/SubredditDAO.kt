@@ -23,4 +23,10 @@ interface SubredditDAO {
 
     @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
     fun observeSubredditWithKeyword(keyword: String): LiveData<List<Subreddit>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubscription(subscription: SubredditSubscription)
+
+    @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
+    fun observeSubscribedSubredditsFor(user: String): LiveData<List<Subreddit>>
 }

@@ -29,40 +29,4 @@ data class LinkData(
         @Embedded val gildings: Gildings,
         @Embedded val imageSet: ImageSet?,
         val lastUpdated: Long
-) : CommentScreenContent {
-
-    fun vote(direction: Int): LinkData {
-        var updatedLikes: Boolean? = this.likes
-        var updatedUps = this.ups
-        when (direction) {
-            1 -> if (this.likes == null) {
-                updatedLikes = true
-                updatedUps++
-            } else if (!this.likes) {
-                updatedLikes = true
-                updatedUps += 2
-            } else {
-                updatedLikes = null
-                updatedUps--
-            }
-            -1 -> if (this.likes == null) {
-                updatedUps--
-                updatedLikes = false
-            } else if (this.likes) {
-                updatedUps -= 2
-                updatedLikes = false
-            } else {
-                updatedUps++
-                updatedLikes = null
-            }
-        }
-        return this.copy(
-                ups = updatedUps,
-                likes = updatedLikes
-        )
-    }
-
-    fun save(): LinkData {
-        return this.copy(saved = !this.saved)
-    }
-}
+) : CommentScreenContent

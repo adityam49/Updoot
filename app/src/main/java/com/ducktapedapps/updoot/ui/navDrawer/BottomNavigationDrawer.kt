@@ -5,12 +5,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import androidx.viewpager2.widget.ViewPager2
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HALF_EXPANDED
-
+import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 
 class BottomNavigationDrawer @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -23,13 +22,20 @@ class BottomNavigationDrawer @JvmOverloads constructor(
     private lateinit var bottomNavigationDrawerBehaviour: BottomSheetBehavior<LinearLayout>
 
     init {
-        binding.root.post {
-            bottomNavigationDrawerBehaviour = BottomSheetBehavior.from(binding.root as LinearLayout).apply {
-                peekHeight = context.dimensionFromAttribute(R.attr.actionBarSize)
-                isFitToContents = false
-                halfExpandedRatio = 0.4f
-                addBottomSheetCallback(bottomNavDrawerCallback)
+        binding.apply {
+            root.post {
+                bottomNavigationDrawerBehaviour = from(binding.root as LinearLayout).apply {
+                    peekHeight = context.dimensionFromAttribute(R.attr.actionBarSize)
+                    isFitToContents = false
+                    halfExpandedRatio = 0.4f
+                    addBottomSheetCallback(bottomNavDrawerCallback)
+                }
             }
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    if (position > 0) expand()
+                }
+            })
         }
     }
 
@@ -40,6 +46,7 @@ class BottomNavigationDrawer @JvmOverloads constructor(
         return dimension
     }
 
+
     /**
      * public methods
      */
@@ -49,7 +56,9 @@ class BottomNavigationDrawer @JvmOverloads constructor(
         visibility = View.GONE
     }
 
-    fun show() { visibility = View.VISIBLE }
+    fun show() {
+        visibility = View.VISIBLE
+    }
 
     fun toggleState() {
         bottomNavigationDrawerBehaviour.state =
@@ -61,7 +70,13 @@ class BottomNavigationDrawer @JvmOverloads constructor(
 
     fun isInFocus() = bottomNavigationDrawerBehaviour.state != STATE_COLLAPSED
 
-    fun collapse() { bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED }
+    fun expand() {
+        bottomNavigationDrawerBehaviour.state = STATE_EXPANDED
+    }
+
+    fun collapse() {
+        bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED
+    }
 
     fun addOnSlideAction(action: OnSlideAction) = bottomNavDrawerCallback.addOnSlideAction(action)
 

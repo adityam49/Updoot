@@ -2,6 +2,8 @@ package com.ducktapedapps.updoot.ui
 
 import androidx.lifecycle.*
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.api.local.SubredditDAO
+import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
 import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
@@ -9,12 +11,13 @@ import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerItemModel
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class ActivityVM @Inject constructor(private val redditClient: IRedditClient) : ViewModel() {
+class ActivityVM(private val redditClient: IRedditClient, private val subredditDAO: SubredditDAO) : ViewModel() {
     private val _shouldReload: MutableLiveData<SingleLiveEvent<Boolean>> = MutableLiveData(SingleLiveEvent(false))
     val shouldReload: LiveData<SingleLiveEvent<Boolean>> = _shouldReload
 
@@ -24,6 +27,15 @@ class ActivityVM @Inject constructor(private val redditClient: IRedditClient) : 
     val loginState: LiveData<LoginState> = Transformations.map(_accounts) {
         if (it.first().name == Constants.ANON_USER) LoggedOut
         else LoggedIn(it.first().name)
+    }
+
+    val subredditSubscription: LiveData<List<Subreddit>> = Transformations.switchMap(loginState) { user ->
+        subredditDAO.observeSubscribedSubredditsFor(
+                when (user) {
+                    is LoggedOut -> ""
+                    is LoggedIn -> user.name
+                }
+        )
     }
 
     val accounts = MediatorLiveData<List<AccountModel>>().apply {
@@ -85,5 +97,13 @@ class ActivityVM @Inject constructor(private val redditClient: IRedditClient) : 
 
 sealed class LoginState {
     object LoggedOut : LoginState()
-    data class LoggedIn(val userName: String) : LoginState()
+    data class LoggedIn(val name: String) : LoginState()
+}
+
+class ActivityVMFactory @Inject constructor(
+        private val redditClient: RedditClient,
+        private val subredditDAO: SubredditDAO
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T = ActivityVM(redditClient, subredditDAO) as T
 }
