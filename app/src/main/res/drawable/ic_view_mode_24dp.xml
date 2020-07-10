@@ -4,13 +4,13 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@color/color_on_surface"
+        android:fillColor="@color/color_on_nav_drawer"
         android:pathData="M15 14h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1zM3 14a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1zm0 6a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1zm0-3a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1z" />
     <path
         android:pathData="M3 2.5h6A0.5 0.5 0 0 1 9.5 3v6A0.5 0.5 0 0 1 9 9.5H3A0.5 0.5 0 0 1 2.5 9V3A0.5 0.5 0 0 1 3 2.5z"
         android:strokeWidth="1"
-        android:strokeColor="@color/color_on_surface" />
+        android:strokeColor="@color/color_on_nav_drawer" />
     <path
-        android:fillColor="@color/color_on_surface"
+        android:fillColor="@color/color_on_nav_drawer"
         android:pathData="M15 2h6a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 5h6a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM6 20h3a1 1 0 0 1 1 1 1 1 0 0 1-1 1H6a1 1 0 0 1-1-1 1 1 0 0 1 1-1zm0-6h3a1 1 0 0 1 1 1 1 1 0 0 1-1 1H6a1 1 0 0 1-1-1 1 1 0 0 1 1-1zm0 3h3a1 1 0 0 1 1 1 1 1 0 0 1-1 1H6a1 1 0 0 1-1-1 1 1 0 0 1 1-1z" />
 </vector>

@@ -49,4 +49,7 @@
     <string name="navigation_destination_icon">Navigation destination icon</string>
     <string name="requesting_user_name">Requesting username</string>
     <string name="subreddit_syncing">Syncing subscribed subreddits</string>
+    <string name="logout">Logout</string>
+    <string name="chevron">Chevron</string>
+    <string name="unsubscribe">Unsubscribe</string>
 </resources>

@@ -15,7 +15,7 @@
         <item name="android:colorBackground">@color/color_background</item>
         <item name="colorOnBackground">@color/color_on_background</item>
         <item name="android:statusBarColor">@color/color_primary_variant</item>
-        <item name="android:navigationBarColor">@color/color_primary_variant</item>
+        <item name="android:navigationBarColor">@color/nav_bar_color</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">?attr/isLightTheme</item>
         <!-- Global type attributes -->
         <item name="textAppearanceButton">@style/AppTextAppearance.Button</item>
@@ -57,6 +57,7 @@
         <item name="cornerSize">16dp</item>
     </style>
 
+
     <!-- NOTE: Chips don't seem to pick up on the theme fontFamily attributes, so these styles are necessary -->
     <!-- See: https://issuetracker.google.com/issues/127453566 -->
 
@@ -87,8 +88,10 @@
         <item name="android:background">@color/color_primary_variant</item>
     </style>
 
-    <style name="AppBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+
+    <style name="BottomNavDrawer" parent="Widget.MaterialComponents.BottomSheet">
         <item name="cornerFamily">rounded</item>
+        <item name="backgroundTint">@color/color_nav_drawer_background</item>
         <item name="cornerSizeTopLeft">32dp</item>
         <item name="cornerSizeTopRight">32dp</item>
     </style>

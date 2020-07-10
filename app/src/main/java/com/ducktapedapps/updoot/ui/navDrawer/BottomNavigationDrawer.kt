@@ -30,12 +30,11 @@ class BottomNavigationDrawer @JvmOverloads constructor(
                     halfExpandedRatio = 0.4f
                     addBottomSheetCallback(bottomNavDrawerCallback)
                 }
+                viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) = if (position > 0) expand() else Unit
+                })
             }
-            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    if (position > 0) expand()
-                }
-            })
+
         }
     }
 

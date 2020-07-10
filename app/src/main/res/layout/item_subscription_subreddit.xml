@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:padding="4dp"
+    tools:background="@color/color_nav_drawer_background">
+
+    <ImageView
+        android:id="@+id/subreddit_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/subreddit_icon"
+        android:src="@drawable/ic_subreddit_default_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/subreddit_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/color_on_nav_drawer"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/subreddit_icon"
+        app:layout_constraintEnd_toStartOf="@id/unsubscribe_button"
+        app:layout_constraintStart_toEndOf="@id/subreddit_icon"
+        app:layout_constraintTop_toTopOf="@id/subreddit_icon" />
+
+    <ImageButton
+        android:id="@+id/unsubscribe_button"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/unsubscribe"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:src="@drawable/ic_baseline_remove_24"
+        app:layout_constraintBottom_toBottomOf="@+id/subreddit_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/subreddit_info"
+        app:layout_constraintTop_toTopOf="@+id/subreddit_info" />
+</androidx.constraintlayout.widget.ConstraintLayout>

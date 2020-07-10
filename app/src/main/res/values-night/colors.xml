@@ -15,4 +15,8 @@
     <color name="color_background">#202124</color>
     <color name="color_on_background">#FFFFFF</color>
     <color name="color_scrim">#de000000</color>
+    <color name="color_nav_drawer_background">@color/color_surface</color>
+    <color name="nav_bar_color">@color/color_surface</color>
+    <color name="color_on_nav_drawer">@color/color_on_surface</color>
+    <color name="color_on_nav_drawer_variant">@android:color/darker_gray</color>
 </resources>

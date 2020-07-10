@@ -23,3 +23,11 @@ fun getCompactDateAsString(date: Long): String =
             in 31L..364L -> "${(days / 30).toInt()}M ago"
             else -> "${(days / 365).toInt()}Y ago"
         }
+
+fun getCompactAge(date: Long): String = when (val days = (System.currentTimeMillis() - date * 1000) / 86400000) {
+    0L -> "Created Today"
+    1L -> "1D Old"
+    in 2L..30L -> "${days}D old"
+    in 31L..364L -> "${(days / 30).toInt()}M old"
+    else -> "${(days / 365).toInt()}Y old"
+}

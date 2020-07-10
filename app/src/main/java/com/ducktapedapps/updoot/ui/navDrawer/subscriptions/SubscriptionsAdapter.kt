@@ -1,19 +1,24 @@
 package com.ducktapedapps.updoot.ui.navDrawer.subscriptions
 
+import android.graphics.Typeface
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.databinding.SubredditItemBinding
+import com.ducktapedapps.updoot.databinding.ItemSubscriptionSubredditBinding
 import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.utils.Truss
+import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import com.ducktapedapps.updoot.utils.getCompactDateAsString
 
 class SubscriptionsAdapter(private val clickHandler: ClickHandler) : ListAdapter<Subreddit, SubredditViewHolder>(CALLBACK) {
     interface ClickHandler {
@@ -31,7 +36,7 @@ class SubscriptionsAdapter(private val clickHandler: ClickHandler) : ListAdapter
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubredditViewHolder = SubredditViewHolder(
-            SubredditItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemSubscriptionSubredditBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     )
 
     override fun onBindViewHolder(holder: SubredditViewHolder, position: Int) {
@@ -39,11 +44,19 @@ class SubscriptionsAdapter(private val clickHandler: ClickHandler) : ListAdapter
     }
 }
 
-class SubredditViewHolder(val binding: SubredditItemBinding) : RecyclerView.ViewHolder(binding.root) {
+class SubredditViewHolder(val binding: ItemSubscriptionSubredditBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(subreddit: Subreddit, clickHandler: SubscriptionsAdapter.ClickHandler) = binding.apply {
-        bindSubscriberCount(subscriberCountTv, subreddit.subscribers)
-        bindSubredditTitle(subredditTitleTv, subreddit.display_name, subreddit.created)
         bindIcon(subredditIcon, subreddit.community_icon)
+        subredditInfo.text = Truss()
+                .pushSpan(StyleSpan(Typeface.BOLD))
+                .append(subreddit.display_name)
+                .popSpan()
+                .append(" \u2022 ")
+                .pushSpan(RelativeSizeSpan(0.8f))
+                .pushSpan(ForegroundColorSpan(ContextCompat.getColor(binding.root.context, R.color.color_on_nav_drawer_variant)))
+                .append(getCompactAge(subreddit.created))
+                .append("\n\n${getCompactCountAsString(subreddit.subscribers)} subscribers")
+                .build()
         root.setOnClickListener { clickHandler.goToSubreddit(subreddit.display_name) }
     }
 
@@ -53,12 +66,4 @@ class SubredditViewHolder(val binding: SubredditItemBinding) : RecyclerView.View
                     .placeholder(R.drawable.ic_subreddit_default_24dp)
                     .apply(RequestOptions.circleCropTransform())
                     .into(view)
-
-    private fun bindSubredditTitle(view: TextView, subredditName: String, subredditAge: Long) {
-        view.text = String.format("%s \u25CF %s", subredditName, getCompactDateAsString(subredditAge))
-    }
-
-    private fun bindSubscriberCount(view: TextView, subscriberCount: Long) {
-        view.text = String.format("%s subscribers", getCompactCountAsString(subscriberCount))
-    }
 }
