@@ -16,12 +16,15 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
+import com.ducktapedapps.updoot.ui.comments.CommentsFragmentDirections
 import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerPagerAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionsAdapter
+import com.ducktapedapps.updoot.ui.settings.SettingsFragmentDirections
+import com.ducktapedapps.updoot.ui.subreddit.SubredditFragmentDirections
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
@@ -52,7 +55,14 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
         override fun toggleEntryMenu() = viewModel.expandOrCollapseAccountsMenu()
     })
     private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
-        override fun goToSubreddit(subredditName: String) = navController.navigate(R.id.SubredditDestination)
+        override fun goToSubreddit(subredditName: String) {
+            val action = when (navController.currentDestination?.id) {
+                R.id.SubredditDestination -> SubredditFragmentDirections.actionGoToSubreddit().apply { subreddit = subredditName }
+                R.id.CommentsDestination -> CommentsFragmentDirections.actionGoToSubreddit().apply { subreddit = subredditName }
+                else -> null
+            }
+            action?.let { navController.navigate(it) }
+        }
     })
     private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter()
 

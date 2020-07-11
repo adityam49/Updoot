@@ -86,6 +86,7 @@ class SubredditFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions, ::openImage)
         setUpViews(submissionsAdapter)
         observeViewModel(submissionsAdapter)
