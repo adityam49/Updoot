@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.ui.comments
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.utils.linkMetaData.extractMetaData
 import com.ducktapedapps.updoot.utils.linkMetaData.fetchMetaDataFrom

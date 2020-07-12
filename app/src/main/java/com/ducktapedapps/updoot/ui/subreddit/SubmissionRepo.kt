@@ -6,8 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.SubredditPrefs
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*

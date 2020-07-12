@@ -2,8 +2,8 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import javax.inject.Inject
 

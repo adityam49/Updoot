@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.api.local.submissionsCache
+package com.ducktapedapps.updoot.api.local
 
 import androidx.lifecycle.LiveData
 import androidx.room.*

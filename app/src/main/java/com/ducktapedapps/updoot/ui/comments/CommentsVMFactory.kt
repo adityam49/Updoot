@@ -2,8 +2,7 @@ package com.ducktapedapps.updoot.ui.comments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import javax.inject.Inject
 
 class CommentsVMFactory @Inject constructor(

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.utils.createNotification
 import java.util.*
 
@@ -30,7 +30,7 @@ class SubmissionsCacheCleanUpWorker(
         submissionsCacheDAO.getAllCachedSubmissions().apply {
             totalSubmissions = size
             forEach {
-                if (isStale(it.lastUpdated ?: 0L, currentTimeInSeconds)) {
+                if (isStale(it.lastUpdated, currentTimeInSeconds)) {
                     submissionsCacheDAO.deleteSubmission(it.id, it.subredditName)
                     submissionsRemoved++
                 }

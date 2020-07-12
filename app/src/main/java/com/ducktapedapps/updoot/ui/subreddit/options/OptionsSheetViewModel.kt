@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

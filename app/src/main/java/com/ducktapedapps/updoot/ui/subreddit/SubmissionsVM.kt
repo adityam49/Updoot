@@ -3,8 +3,8 @@ package com.ducktapedapps.updoot.ui.subreddit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
-import com.ducktapedapps.updoot.api.local.submissionsCache.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
