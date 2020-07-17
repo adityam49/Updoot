@@ -27,5 +27,6 @@
     <color name="nav_bar_color">@color/color_nav_drawer_background</color>
     <color name="color_on_nav_drawer">#FFFFFF</color>
     <color name="color_on_nav_drawer_variant">#808097</color>
+    <color name="sticky_post_color">#388E3C</color>
 </resources>
 

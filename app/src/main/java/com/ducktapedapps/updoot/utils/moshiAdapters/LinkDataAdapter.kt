@@ -45,7 +45,8 @@ class LinkDataAdapter {
                 gildings = getGildings(data["gildings"] as Map<String, *>),
                 imageSet = imageSet,
                 lastUpdated = System.currentTimeMillis() / 1000,
-                post_hint = postHint
+                post_hint = postHint,
+                stickied = data["stickied"] as Boolean
         )
     }
 

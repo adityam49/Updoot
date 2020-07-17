@@ -28,5 +28,6 @@ data class LinkData(
         val over_18: Boolean,
         @Embedded val gildings: Gildings,
         @Embedded val imageSet: ImageSet?,
-        val lastUpdated: Long
+        val lastUpdated: Long,
+        val stickied: Boolean
 ) : CommentScreenContent

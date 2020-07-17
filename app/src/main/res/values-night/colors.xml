@@ -19,4 +19,5 @@
     <color name="nav_bar_color">@color/color_surface</color>
     <color name="color_on_nav_drawer">@color/color_on_surface</color>
     <color name="color_on_nav_drawer_variant">@android:color/darker_gray</color>
+    <color name="sticky_post_color">#69F0AE</color>
 </resources>

@@ -51,7 +51,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
                     setVotes(scoreTextView, ups, likes)
-                    titleTextView.text = title
+                    setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                 }
@@ -75,7 +75,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
-                    titleTextView.text = title
+                    setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                 }
@@ -108,7 +108,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
-                    titleTextView.text = title
+                    setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                 }
@@ -133,7 +133,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     setGildings(gildingTextView, gildings)
                     setVotes(scoreTextView, ups, likes)
-                    titleTextView.text = title
+                    setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                     selftextTextView.apply {
@@ -178,6 +178,14 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             }
         }
     }
+}
+
+private fun setTitle(isSticky: Boolean, title: String, textView: TextView) = textView.apply {
+    setTextColor(ContextCompat.getColor(context,
+            if (isSticky) R.color.sticky_post_color
+            else R.color.color_on_surface
+    ))
+    text = title
 }
 
 private fun setGildings(textView: TextView, gildings: Gildings) {
