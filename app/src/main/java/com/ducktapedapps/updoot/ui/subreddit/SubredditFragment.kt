@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
@@ -20,12 +22,14 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.LoginState
+import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
+import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.InfiniteScrollListener
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
+import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import javax.inject.Inject
 
@@ -34,6 +38,10 @@ class SubredditFragment : Fragment() {
     lateinit var viewModelFactory: SubmissionsVMFactory
     private val args: SubredditFragmentArgs by navArgs()
 
+    @Inject
+    lateinit var markwon: Markwon
+
+    private val activityVM by lazy { ViewModelProvider(requireActivity()).get(ActivityVM::class.java) }
     private lateinit var submissionsVM: SubmissionsVM
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -57,7 +65,7 @@ class SubredditFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.view_type_item -> submissionsVM.toggleUi()
+            R.id.side_bar_item -> binding.root.openDrawer(GravityCompat.END)
             R.id.hot_item -> submissionsVM.changeSort(Hot)
             R.id.rising_item -> submissionsVM.changeSort(Rising)
             R.id.new_item -> submissionsVM.changeSort(New)
@@ -74,7 +82,6 @@ class SubredditFragment : Fragment() {
             R.id.controversial_month_item -> submissionsVM.changeSort(ControversialMonth)
             R.id.controversial_year_item -> submissionsVM.changeSort(ControversialYear)
             R.id.controversial_all_time_item -> submissionsVM.changeSort(ControversialAll)
-            R.id.search_item -> findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSearchOverlayDestination())
             else -> return false
         }
         return true
@@ -100,6 +107,17 @@ class SubredditFragment : Fragment() {
     private fun setUpViews(submissionsAdapter: SubmissionsAdapter) {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         binding.apply {
+            sideBar.binding.viewTypeSwapButton.setOnClickListener { submissionsVM.toggleUi() }
+            root.addDrawerListener(object : DrawerLayout.DrawerListener {
+                override fun onDrawerClosed(drawerView: View) = Unit
+                override fun onDrawerOpened(drawerView: View) = Unit
+                override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                    activityVM.setBottomNavDrawerVisibilityRatio(slideOffset)
+                    binding.swipeToRefreshLayout
+                }
+
+                override fun onDrawerStateChanged(newState: Int) = Unit
+            })
             swipeToRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
             recyclerView.apply {
                 adapter = submissionsAdapter
@@ -138,7 +156,7 @@ class SubredditFragment : Fragment() {
     private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
     private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
-        ViewModelProvider(requireActivity()).get(ActivityVM::class.java).apply {
+        activityVM.apply {
             shouldReload.observe(viewLifecycleOwner) { shouldReload ->
                 if (shouldReload.contentIfNotHandled == true) {
                     Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
@@ -147,8 +165,8 @@ class SubredditFragment : Fragment() {
             }
             loginState.observe(viewLifecycleOwner) {
                 isLoggedIn = when (it) {
-                    LoginState.LoggedOut -> false
-                    is LoginState.LoggedIn -> true
+                    is LoggedOut -> false
+                    is LoggedIn -> true
                 }
             }
         }
@@ -170,6 +188,7 @@ class SubredditFragment : Fragment() {
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             }
             isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
+            binding.sideBar.setSideBarContent(requireContext(), viewLifecycleOwner, subredditInfo, markwon)
         }
     }
 

@@ -7,8 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.model.SubredditPrefs
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.Constants
@@ -27,7 +29,8 @@ class SubmissionRepo(
         private val prefsDAO: SubredditPrefsDAO,
         private val submissionsCacheDAO: SubmissionsCacheDAO,
         private val subredditName: String,
-        private val scope: CoroutineScope
+        private val scope: CoroutineScope,
+        private val subredditDAO: SubredditDAO
 ) {
     private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -44,6 +47,21 @@ class SubmissionRepo(
                     submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(pageMap.values.flatten()))
                 } else MutableLiveData(emptyList())
             }
+
+    val subredditInfo: LiveData<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
+
+    init {
+        loadAndSaveSubredditInfo()
+    }
+
+    private fun loadAndSaveSubredditInfo() {
+        if (subredditName != FRONTPAGE)
+            scope.launch(Dispatchers.IO) {
+                val api = redditClient.api()
+                val result = api.getSubredditInfo(subredditName)
+                subredditDAO.insertSubreddit(result)
+            }
+    }
 
     private fun cachedSubmissionsObserveQueryInOrderOfGivenIds(ids: List<String>): SimpleSQLiteQuery =
             SimpleSQLiteQuery(

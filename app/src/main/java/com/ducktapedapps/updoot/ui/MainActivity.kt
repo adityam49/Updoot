@@ -23,7 +23,6 @@ import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionsAdapter
-import com.ducktapedapps.updoot.ui.settings.SettingsFragmentDirections
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragmentDirections
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
@@ -64,7 +63,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
             action?.let { navController.navigate(it) }
         }
     })
-    private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter()
+    private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
+        override fun openExplore() = navController.navigate(SubredditFragmentDirections.actionGlobalExploreDestination())
+    })
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -101,6 +102,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
             }
             subredditSubscription.observe(this@MainActivity) {
                 subscriptionAdapter.submitList(it)
+            }
+            navDrawerVisibility.observe(this@MainActivity) { ratio ->
+                if (ratio <= 1f) bottomNavigationDrawer.setVisibilityRatio(ratio)
             }
         }
     }

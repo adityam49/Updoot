@@ -41,7 +41,8 @@ class RoomModule {
                                     public_description = "The front page of the internet",
                                     created = 1137566705,
                                     lastUpdated = System.currentTimeMillis(),
-                                    isTrending = 0
+                                    isTrending = 0,
+                                    description = ""
                             )
                     )
                     subredditDb.subredditPrefsDAO().insertSubredditPrefs(

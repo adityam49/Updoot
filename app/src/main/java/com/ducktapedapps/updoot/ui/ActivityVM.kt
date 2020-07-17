@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui
 
+import androidx.annotation.FloatRange
 import androidx.lifecycle.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.local.SubredditDAO
@@ -23,6 +24,9 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
 
     private val _accounts: MutableLiveData<List<AccountModel>> = MutableLiveData(listOf())
     private val accountEntriesExpanded = MutableLiveData(false)
+
+    private val _navDrawerVisible = MutableLiveData<Float>(2f)
+    val navDrawerVisibility = _navDrawerVisible
 
     val loginState: LiveData<LoginState> = Transformations.map(_accounts) {
         if (it.first().name == Constants.ANON_USER) LoggedOut
@@ -92,6 +96,10 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
 
     fun expandOrCollapseAccountsMenu() {
         accountEntriesExpanded.value = accountEntriesExpanded.value?.run { !this }
+    }
+
+    fun setBottomNavDrawerVisibilityRatio(@FloatRange(from = 0.0, to = 1.0) ratio: Float) {
+        viewModelScope.launch(Dispatchers.Main) { _navDrawerVisible.value = ratio }
     }
 }
 

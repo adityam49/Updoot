@@ -8,6 +8,7 @@ import com.ducktapedapps.updoot.utils.Constants
 import dagger.Module
 import dagger.Provides
 import io.noties.markwon.Markwon
+import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 import java.util.*
 import javax.inject.Named
@@ -26,6 +27,7 @@ class ApplicationModule {
     @Singleton
     fun provideMarkwon(context: Context): Markwon = Markwon.builder(context)
             .usePlugin(LinkifyPlugin.create())
+            .usePlugin(TablePlugin.create(context))
             .build()
 
 

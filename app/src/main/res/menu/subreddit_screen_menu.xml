@@ -81,13 +81,8 @@
         </menu>
     </item>
     <item
-        android:id="@+id/search_item"
-        android:icon="@drawable/ic_search_24dp"
-        android:title="@string/search"
-        app:showAsAction="always" />
-    <item
-        android:id="@+id/view_type_item"
-        android:icon="@drawable/ic_view_mode_24dp"
-        android:title="@string/viewType"
+        android:id="@+id/side_bar_item"
+        android:icon="@drawable/ic_side_bar"
+        android:title="@string/sidebar"
         app:showAsAction="always" />
 </menu>

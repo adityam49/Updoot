@@ -52,4 +52,6 @@
     <string name="logout">Logout</string>
     <string name="chevron">Chevron</string>
     <string name="unsubscribe">Unsubscribe</string>
+    <string name="sidebar">Sidebar</string>
+    <string name="view_type_change">View Type change</string>
 </resources>

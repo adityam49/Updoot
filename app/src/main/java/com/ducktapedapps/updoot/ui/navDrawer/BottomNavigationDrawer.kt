@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import androidx.annotation.FloatRange
 import androidx.viewpager2.widget.ViewPager2
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
@@ -21,6 +22,7 @@ class BottomNavigationDrawer @JvmOverloads constructor(
 
     private lateinit var bottomNavigationDrawerBehaviour: BottomSheetBehavior<LinearLayout>
 
+    private var peekTop = 0f
     init {
         binding.apply {
             root.post {
@@ -33,6 +35,7 @@ class BottomNavigationDrawer @JvmOverloads constructor(
                 viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) = if (position > 0) expand() else Unit
                 })
+                peekTop = this@BottomNavigationDrawer.y
             }
 
         }
@@ -59,6 +62,15 @@ class BottomNavigationDrawer @JvmOverloads constructor(
         visibility = View.VISIBLE
     }
 
+    fun setVisibilityRatio(@FloatRange(from = 0.0, to = 1.0) ratio: Float) {
+        val deltaY = (context?.dimensionFromAttribute(R.attr.actionBarSize) ?: 0) * (ratio)
+        translationY = if (peekTop >= y) {
+            -deltaY
+        } else {
+            deltaY
+        }
+    }
+
     fun toggleState() {
         bottomNavigationDrawerBehaviour.state =
                 when (bottomNavigationDrawerBehaviour.state) {
@@ -82,6 +94,6 @@ class BottomNavigationDrawer @JvmOverloads constructor(
     fun addOnStateChangeAction(action: OnStateChangeAction) = bottomNavDrawerCallback.addOnStateChangeAction(action)
 
     private companion object {
-        const val TAG = "NavDrawerFragment"
+        const val TAG = "BottomNavDrawer"
     }
 }

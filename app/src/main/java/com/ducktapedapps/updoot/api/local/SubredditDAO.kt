@@ -21,6 +21,9 @@ interface SubredditDAO {
     @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
     suspend fun getSubreddit(name: String): Subreddit?
 
+    @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
+    fun observeSubredditInfo(name: String): LiveData<Subreddit?>
+
     @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
     fun observeSubredditWithKeyword(keyword: String): LiveData<List<Subreddit>>
 

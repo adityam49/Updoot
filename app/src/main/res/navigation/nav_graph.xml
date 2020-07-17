@@ -31,9 +31,6 @@
         <action
             android:id="@+id/action_SubredditDestination_to_ImagePreviewDestination"
             app:destination="@id/ImagePreviewDestination" />
-        <action
-            android:id="@+id/action_SubredditDestination_to_SearchOverlayDestination"
-            app:destination="@id/ExploreDestination" />
         <deepLink
             android:id="@+id/subredditDeepLink"
             app:uri="www.reddit.com/r/{subreddit}/" />
@@ -108,5 +105,8 @@
             android:name="submissionsId"
             app:argType="string" />
     </dialog>
+    <action
+        android:id="@+id/action_global_ExploreDestination"
+        app:destination="@id/ExploreDestination" />
 
 </navigation>
