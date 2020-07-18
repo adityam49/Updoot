@@ -36,13 +36,19 @@ import javax.inject.Inject
 class SubredditFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: SubmissionsVMFactory
-    private val args: SubredditFragmentArgs by navArgs()
 
     @Inject
     lateinit var markwon: Markwon
 
+    private val args: SubredditFragmentArgs by navArgs()
+
     private val activityVM by lazy { ViewModelProvider(requireActivity()).get(ActivityVM::class.java) }
-    private lateinit var submissionsVM: SubmissionsVM
+    private val submissionsVM by lazy {
+        ViewModelProvider(
+                this@SubredditFragment,
+                viewModelFactory.apply { setSubreddit(args.subreddit) }
+        ).get(SubmissionsVM::class.java)
+    }
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
     private var isLoggedIn: Boolean = false
@@ -50,7 +56,6 @@ class SubredditFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        setUpViewModel()
     }
 
     override fun onAttach(context: Context) {
@@ -108,16 +113,26 @@ class SubredditFragment : Fragment() {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         binding.apply {
             sideBar.binding.viewTypeSwapButton.setOnClickListener { submissionsVM.toggleUi() }
-            root.addDrawerListener(object : DrawerLayout.DrawerListener {
-                override fun onDrawerClosed(drawerView: View) = Unit
-                override fun onDrawerOpened(drawerView: View) = Unit
-                override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-                    activityVM.setBottomNavDrawerVisibilityRatio(slideOffset)
-                    binding.swipeToRefreshLayout
-                }
+            root.apply {
+                setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                addDrawerListener(object : DrawerLayout.DrawerListener {
+                    override fun onDrawerClosed(drawerView: View) {
+                        setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    }
 
-                override fun onDrawerStateChanged(newState: Int) = Unit
-            })
+                    override fun onDrawerOpened(drawerView: View) {
+                        setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                        loadSideBarInfo()
+                    }
+
+                    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                        activityVM.setBottomNavDrawerVisibilityRatio(slideOffset)
+                        binding.swipeToRefreshLayout
+                    }
+
+                    override fun onDrawerStateChanged(newState: Int) = Unit
+                })
+            }
             swipeToRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
             recyclerView.apply {
                 adapter = submissionsAdapter
@@ -188,16 +203,13 @@ class SubredditFragment : Fragment() {
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             }
             isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-            binding.sideBar.setSideBarContent(requireContext(), viewLifecycleOwner, subredditInfo, markwon)
+            subredditInfo.observe(viewLifecycleOwner) { subreddit -> subreddit?.let { binding.sideBar.loadSubredditIconAndTitle(it) } }
         }
     }
 
-    private fun setUpViewModel() {
-        submissionsVM = ViewModelProvider(
-                this@SubredditFragment,
-                viewModelFactory.apply { setSubreddit(args.subreddit) }
-        ).get(SubmissionsVM::class.java)
-    }
+    private fun loadSideBarInfo() =
+            binding.sideBar.setSideBarContent(viewLifecycleOwner, submissionsVM.subredditInfo, markwon)
+
 
     private fun reloadFragmentContent() = submissionsVM.reload()
 
