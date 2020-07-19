@@ -3,34 +3,45 @@ package com.ducktapedapps.updoot.ui.subreddit
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.text.style.AbsoluteSizeSpan
 import android.view.*
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.LayoutRes
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.TransitionManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
 import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
-import com.ducktapedapps.updoot.utils.InfiniteScrollListener
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import com.ducktapedapps.updoot.utils.SubmissionUiType
+import com.ducktapedapps.updoot.utils.*
 import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SubredditFragment : Fragment() {
@@ -112,17 +123,20 @@ class SubredditFragment : Fragment() {
     private fun setUpViews(submissionsAdapter: SubmissionsAdapter) {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         binding.apply {
-            sideBar.binding.viewTypeSwapButton.setOnClickListener { submissionsVM.toggleUi() }
+            sideBar.apply {
+                subredditViewTypeIcon.setOnClickListener { submissionsVM.toggleUi() }
+                controlsBackground.setOnClickListener { expandControls() }
+                sideBarInfo.setOnClickListener { expandInfo() }
+            }
             root.apply {
                 setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 addDrawerListener(object : DrawerLayout.DrawerListener {
-                    override fun onDrawerClosed(drawerView: View) {
-                        setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                    }
+                    override fun onDrawerClosed(drawerView: View) =
+                            setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
                     override fun onDrawerOpened(drawerView: View) {
                         setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-                        loadSideBarInfo()
+                        setSideBarContent()
                     }
 
                     override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -203,13 +217,10 @@ class SubredditFragment : Fragment() {
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             }
             isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-            subredditInfo.observe(viewLifecycleOwner) { subreddit -> subreddit?.let { binding.sideBar.loadSubredditIconAndTitle(it) } }
+
+            subredditInfo.observe(viewLifecycleOwner) { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } }
         }
     }
-
-    private fun loadSideBarInfo() =
-            binding.sideBar.setSideBarContent(viewLifecycleOwner, submissionsVM.subredditInfo, markwon)
-
 
     private fun reloadFragmentContent() = submissionsVM.reload()
 
@@ -230,7 +241,56 @@ class SubredditFragment : Fragment() {
         Toast.makeText(requireContext(), targetSubreddit, Toast.LENGTH_SHORT).show()
     } else Toast.makeText(requireContext(), "You are already in $targetSubreddit", Toast.LENGTH_SHORT).show()
 
-    private companion object {
-        const val TAG = "SubredditFragment"
+    private fun expandInfo() = updateConstraints(R.layout.side_bar_info)
+
+    private fun expandControls() = updateConstraints(R.layout.side_bar_controls)
+
+    private fun updateConstraints(@LayoutRes id: Int) = ConstraintSet().apply {
+        clone(requireContext(), id)
+        applyTo(binding.sideBar.root)
+        TransitionManager.beginDelayedTransition(binding.sideBar.root)
+    }
+
+    private fun loadSubredditIconAndTitle(subreddit: Subreddit) {
+        binding.apply {
+            val placeHolder = ContextCompat.getDrawable(requireContext(), R.drawable.ic_subreddit_default_24dp)?.apply {
+                setTint(ContextCompat.getColor(requireContext(), R.color.color_on_surface))
+            }
+            Glide.with(this@SubredditFragment)
+                    .load(subreddit.community_icon)
+                    .placeholder(placeHolder)
+                    .error(placeHolder)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(binding.sideBar.subredditIcon)
+            binding.sideBar.subredditHeader.text = Truss()
+                    .pushSpan(AbsoluteSizeSpan(18, true))
+                    .append(subreddit.display_name)
+                    .popSpan()
+                    .pushSpan(AbsoluteSizeSpan(12, true))
+                    .append("\n\n${getCompactCountAsString(subreddit.subscribers)} Users / ${getCompactCountAsString(subreddit.active_user_count)} Active now")
+                    .build()
+        }
+    }
+
+    private fun setSideBarContent() {
+        submissionsVM.subredditInfo.observe(viewLifecycleOwner) {
+            it?.let {
+                binding.apply {
+                    if (binding.sideBar.sideBarInfo.text.isNullOrEmpty()) {
+                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
+                            val spannedText = markwon.toMarkdown(it.description.replace("(#+)".toRegex(), "$1 "))
+                            withContext(Dispatchers.Main) {
+                                binding.sideBar.sideBarInfo.apply {
+                                    text = spannedText
+                                    movementMethod = LinkMovementMethod.getInstance()
+                                    delay(50)
+                                    expandControls()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

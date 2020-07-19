@@ -24,8 +24,9 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.ducktapedapps.updoot.ui.subreddit.ViewSideBar
+    <include
         android:id="@+id/side_bar"
+        layout="@layout/side_bar_info"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="end" />

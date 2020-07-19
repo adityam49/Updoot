@@ -54,4 +54,5 @@
     <string name="unsubscribe">Unsubscribe</string>
     <string name="sidebar">Sidebar</string>
     <string name="view_type_change">View Type change</string>
+    <string name="join">Join</string>
 </resources>
