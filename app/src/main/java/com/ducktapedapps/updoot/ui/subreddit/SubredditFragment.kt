@@ -36,6 +36,8 @@ import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.*
+import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
+import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
 import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.Dispatchers
@@ -124,7 +126,14 @@ class SubredditFragment : Fragment() {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         binding.apply {
             sideBar.apply {
-                subredditViewTypeIcon.setOnClickListener { submissionsVM.toggleUi() }
+                viewTypeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                    if (isChecked)
+                        when (checkedId) {
+                            R.id.view_type_card_button -> submissionsVM.setPostViewType(LARGE)
+                            R.id.view_type_list_button -> submissionsVM.setPostViewType(COMPACT)
+                        }
+
+                }
                 controlsBackground.setOnClickListener { expandControls() }
                 sideBarInfo.setOnClickListener { expandInfo() }
             }
@@ -203,9 +212,17 @@ class SubredditFragment : Fragment() {
             postViewType.observe(viewLifecycleOwner) { postViewType: SubmissionUiType? ->
                 postViewType?.let {
                     submissionsAdapter.itemUi = it
-                    binding.recyclerView.apply {
-                        adapter = null
-                        adapter = submissionsAdapter
+                    binding.apply {
+                        recyclerView.apply {
+                            adapter = null
+                            adapter = submissionsAdapter
+                        }
+                        sideBar.viewTypeGroup.check(
+                                when (it) {
+                                    COMPACT -> R.id.view_type_list_button
+                                    LARGE -> R.id.view_type_card_button
+                                }
+                        )
                     }
                 }
             }

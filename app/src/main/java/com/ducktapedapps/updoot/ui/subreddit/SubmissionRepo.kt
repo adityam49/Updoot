@@ -77,12 +77,8 @@ class SubmissionRepo(
 
     fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value?.keys?.last() != null
 
-    fun togglePostViewType() = scope.launch(Dispatchers.IO) {
-        prefsDAO.apply {
-            if (postViewType.value == SubmissionUiType.COMPACT)
-                setUIType(SubmissionUiType.LARGE, subredditName)
-            else setUIType(SubmissionUiType.COMPACT, subredditName)
-        }
+    fun setPostViewType(type: SubmissionUiType) = scope.launch(Dispatchers.IO) {
+        prefsDAO.setUIType(type, subredditName)
     }
 
     fun changeSort(newSort: SubredditSorting) {

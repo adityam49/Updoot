@@ -45,7 +45,7 @@ class SubmissionsVM constructor(
         loadPage()
     }
 
-    fun toggleUi() = submissionRepo.togglePostViewType()
+    fun setPostViewType(type: SubmissionUiType) = submissionRepo.setPostViewType(type)
 
     fun changeSort(newSubredditSorting: SubredditSorting) = submissionRepo.changeSort(newSubredditSorting)
 

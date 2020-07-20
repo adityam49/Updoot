@@ -55,4 +55,5 @@
     <string name="sidebar">Sidebar</string>
     <string name="view_type_change">View Type change</string>
     <string name="join">Join</string>
+    <string name="post_view_type">Post View Type</string>
 </resources>
