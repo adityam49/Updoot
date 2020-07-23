@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -25,28 +26,22 @@ import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
-    abstract fun bind(submissions: LinkData,
-                      actionOpenComments: (String, String) -> Unit,
-                      actionOpenOption: (String) -> Unit,
-                      actionOpenImage: (String, String) -> Unit
-    )
+    abstract fun bind(submissions: LinkData)
 
-    class CompactImageViewHolder(val binding: CompactSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(
-                submissions: LinkData,
-                actionOpenComments: (String, String) -> Unit,
-                actionOpenOption: (String) -> Unit,
-                actionOpenImage: (String, String) -> Unit
-        ) {
+    class CompactImageViewHolder(
+            private val binding: CompactSubmissionImageBinding,
+            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+    ) : SubmissionViewHolder(binding.root) {
+        override fun bind(submissions: LinkData) {
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
-                        actionOpenOption(id)
+                        clickHandler.actionOpenOption(id)
                         true
                     }
-                    if (imageSet != null) thumbnailImageView.setOnClickListener {
-                        actionOpenImage(imageSet.lowResUrl!!, imageSet.highResUrl!!)
+                    thumbnailImageView.setOnClickListener {
+                        clickHandler.performAction(this)
                     }
                     setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
@@ -59,18 +54,16 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
         }
     }
 
-    class CompactSelfTextViewHolder(val binding: CompactSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(
-                submissions: LinkData,
-                actionOpenComments: (String, String) -> Unit,
-                actionOpenOption: (String) -> Unit,
-                actionOpenImage: (String, String) -> Unit
-        ) {
+    class CompactSelfTextViewHolder(
+            private val binding: CompactSubmissionSelftextBinding,
+            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+    ) : SubmissionViewHolder(binding.root) {
+        override fun bind(submissions: LinkData) {
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
-                        actionOpenOption(id)
+                        clickHandler.actionOpenOption(id)
                         true
                     }
                     setGildings(gildingTextView, gildings)
@@ -83,22 +76,20 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
         }
     }
 
-    class LargeSubmissionImageViewHolder(val binding: LargeSubmissionImageBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(
-                submissions: LinkData,
-                actionOpenComments: (String, String) -> Unit,
-                actionOpenOption: (String) -> Unit,
-                actionOpenImage: (String, String) -> Unit
-        ) {
+    class LargeSubmissionImageViewHolder(
+            private val binding: LargeSubmissionImageBinding,
+            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+    ) : SubmissionViewHolder(binding.root) {
+        override fun bind(submissions: LinkData) {
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
-                        actionOpenOption(id)
+                        clickHandler.actionOpenOption(id)
                         true
                     }
                     previewImageView.apply {
-                        setOnClickListener { actionOpenImage(submissions.imageSet!!.lowResUrl!!, submissions.imageSet.highResUrl!!) }
+                        setOnClickListener { clickHandler.performAction(this@with) }
                         Glide.with(this)
                                 .load(submissions.imageSet?.lowResUrl)
                                 .thumbnail(Glide.with(previewImageView).load(thumbnail))
@@ -116,19 +107,16 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
         }
     }
 
-    class LargeSubmissionSelfTextViewHolder(val binding: LargeSubmissionSelftextBinding) : SubmissionViewHolder(binding.root) {
-        override fun bind(
-                submissions: LinkData,
-                actionOpenComments: (String, String) -> Unit,
-                actionOpenOption: (String) -> Unit,
-                actionOpenImage: (String, String) -> Unit
-        ) {
-
+    class LargeSubmissionSelfTextViewHolder(
+            private val binding: LargeSubmissionSelftextBinding,
+            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+    ) : SubmissionViewHolder(binding.root) {
+        override fun bind(submissions: LinkData) {
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
                     root.setOnLongClickListener {
-                        actionOpenOption(id)
+                        clickHandler.actionOpenOption(id)
                         true
                     }
                     setGildings(gildingTextView, gildings)
@@ -210,6 +198,20 @@ private fun setGildings(textView: TextView, gildings: Gildings) {
 
 private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = ContextCompat.getDrawable(textView.context, res)!!.apply {
     setBounds(0, 0, intrinsicHeight, intrinsicWidth)
+}
+
+private fun SubmissionsAdapter.SubmissionClickHandler.performAction(linkData: LinkData) {
+    with(linkData) {
+        when (post_hint) {
+            "image" ->
+                if (imageSet != null) actionOpenImage(imageSet.lowResUrl!!, imageSet.highResUrl!!)
+                else Log.e("SubmissionViewHolder", "performAction: content type image has not image attached :$this ")
+
+            "link" -> actionOpenLink(url)
+
+            else -> Log.e("SubmissionViewHolder", "unsupported content type :$post_hint")
+        }
+    }
 }
 
 private fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {

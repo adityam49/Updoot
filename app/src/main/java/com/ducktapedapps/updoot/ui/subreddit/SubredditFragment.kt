@@ -1,7 +1,10 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.ACTION_VIEW
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.text.style.AbsoluteSizeSpan
@@ -112,7 +115,15 @@ class SubredditFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val submissionsAdapter = SubmissionsAdapter(::openComments, ::openOptions, ::openImage)
+        val submissionsAdapter = SubmissionsAdapter(object : SubmissionsAdapter.SubmissionClickHandler {
+            override fun actionOpenComments(linkDataId: String, commentId: String) = openComments(linkDataId, commentId)
+
+            override fun actionOpenOption(linkDataId: String) = openOptions(linkDataId)
+
+            override fun actionOpenImage(lowResUrl: String, highResUrl: String) = openImage(lowResUrl, highResUrl)
+
+            override fun actionOpenLink(link: String) = openLink(link)
+        })
         setUpViews(submissionsAdapter)
         observeViewModel(submissionsAdapter)
     }
@@ -132,7 +143,6 @@ class SubredditFragment : Fragment() {
                             R.id.view_type_card_button -> submissionsVM.setPostViewType(LARGE)
                             R.id.view_type_list_button -> submissionsVM.setPostViewType(COMPACT)
                         }
-
                 }
                 controlsBackground.setOnClickListener { expandControls() }
                 sideBarInfo.setOnClickListener { expandInfo() }
@@ -244,6 +254,11 @@ class SubredditFragment : Fragment() {
     private fun openComments(subreddit: String, id: String) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
 
     private fun openOptions(submissionId: String) = findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
+
+    private fun openLink(link: String) = startActivity(Intent().apply {
+        action = ACTION_VIEW
+        data = Uri.parse(link)
+    })
 
     private fun openImage(lowResImage: String, highResImage: String) = findNavController().navigate(
             SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(lowResImage, highResImage)

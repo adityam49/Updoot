@@ -13,23 +13,26 @@ import com.ducktapedapps.updoot.ui.subreddit.SubmissionViewHolder.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
-class SubmissionsAdapter(
-        private val actionOpenComments: (String, String) -> Unit,
-        private val actionOpenOptions: (String) -> Unit,
-        private val actionOpenImage: (String, String) -> Unit
-) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
+class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : ListAdapter<LinkData, SubmissionViewHolder>(CALLBACK) {
+    interface SubmissionClickHandler {
+        fun actionOpenComments(linkDataId: String, commentId: String)
+        fun actionOpenOption(linkDataId: String)
+        fun actionOpenImage(lowResUrl: String, highResUrl: String)
+        fun actionOpenLink(link: String)
+    }
+
     lateinit var itemUi: SubmissionUiType
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (itemUi == COMPACT) {
             when (viewType) {
-                SELF -> CompactSelfTextViewHolder(CompactSubmissionSelftextBinding.inflate(inflater, parent, false))
-                else -> CompactImageViewHolder(CompactSubmissionImageBinding.inflate(inflater, parent, false))
+                SELF -> CompactSelfTextViewHolder(CompactSubmissionSelftextBinding.inflate(inflater, parent, false), clickHandler)
+                else -> CompactImageViewHolder(CompactSubmissionImageBinding.inflate(inflater, parent, false), clickHandler)
             }
         } else {
             when (viewType) {
-                SELF -> LargeSubmissionSelfTextViewHolder(LargeSubmissionSelftextBinding.inflate(inflater, parent, false))
-                else -> LargeSubmissionImageViewHolder(LargeSubmissionImageBinding.inflate(inflater, parent, false))
+                SELF -> LargeSubmissionSelfTextViewHolder(LargeSubmissionSelftextBinding.inflate(inflater, parent, false), clickHandler)
+                else -> LargeSubmissionImageViewHolder(LargeSubmissionImageBinding.inflate(inflater, parent, false), clickHandler)
             }
         }
     }
@@ -48,7 +51,7 @@ class SubmissionsAdapter(
     }
 
     override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int) {
-        holder.bind(getItem(position), actionOpenComments, actionOpenOptions, actionOpenImage)
+        holder.bind(getItem(position))
     }
 
     private companion object {
