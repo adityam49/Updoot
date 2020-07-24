@@ -8,19 +8,17 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.databinding.ImagePreviewFragmentBinding
+import com.ducktapedapps.updoot.databinding.FragmentImagePreviewBinding
 
 
-class MediaPreviewFragment : DialogFragment() {
-    private val TAG = "MediaPreviewFragment"
-
-    private val args: MediaPreviewFragmentArgs by navArgs()
-    private var _binding: ImagePreviewFragmentBinding? = null
-    private val binding: ImagePreviewFragmentBinding
+class ImagePreviewFragment : DialogFragment() {
+    private val args: ImagePreviewFragmentArgs by navArgs()
+    private var _binding: FragmentImagePreviewBinding? = null
+    private val binding: FragmentImagePreviewBinding
         get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = ImagePreviewFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentImagePreviewBinding.inflate(inflater, container, false)
         return binding.root
     }
 

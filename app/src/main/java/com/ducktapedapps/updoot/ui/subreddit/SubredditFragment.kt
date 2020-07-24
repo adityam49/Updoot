@@ -123,6 +123,8 @@ class SubredditFragment : Fragment() {
             override fun actionOpenImage(lowResUrl: String, highResUrl: String) = openImage(lowResUrl, highResUrl)
 
             override fun actionOpenLink(link: String) = openLink(link)
+
+            override fun actionOpenVideo(videoUrl: String) = openVideo(videoUrl)
         })
         setUpViews(submissionsAdapter)
         observeViewModel(submissionsAdapter)
@@ -251,18 +253,22 @@ class SubredditFragment : Fragment() {
 
     private fun reloadFragmentContent() = submissionsVM.reload()
 
-    private fun openComments(subreddit: String, id: String) = findNavController().navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
+    private fun openComments(subreddit: String, id: String) = findNavController()
+            .navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
 
-    private fun openOptions(submissionId: String) = findNavController().navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
+    private fun openOptions(submissionId: String) = findNavController()
+            .navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
 
     private fun openLink(link: String) = startActivity(Intent().apply {
         action = ACTION_VIEW
         data = Uri.parse(link)
     })
 
-    private fun openImage(lowResImage: String, highResImage: String) = findNavController().navigate(
-            SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(lowResImage, highResImage)
-    )
+    private fun openImage(lowResImage: String, highResImage: String) = findNavController()
+            .navigate(SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(lowResImage, highResImage))
+
+    private fun openVideo(videoUrl: String) = findNavController()
+            .navigate(SubredditFragmentDirections.actionSubredditDestinationToVideoPreviewFragment(videoUrl))
 
     private fun openSubreddit(targetSubreddit: String) = if (args.subreddit != targetSubreddit) {
         findNavController().navigate(

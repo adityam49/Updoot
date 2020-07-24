@@ -19,6 +19,7 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
         fun actionOpenOption(linkDataId: String)
         fun actionOpenImage(lowResUrl: String, highResUrl: String)
         fun actionOpenLink(link: String)
+        fun actionOpenVideo(videoUrl: String)
     }
 
     lateinit var itemUi: SubmissionUiType

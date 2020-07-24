@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.di
 import android.content.Context
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.ui.MainActivity
+import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
@@ -36,6 +37,7 @@ interface UpdootComponent {
     fun inject(commentsFragment: CommentsFragment)
     fun inject(exploreFragment: ExploreFragment)
     fun inject(submissionOptionsBottomSheet: SubmissionOptionsBottomSheet)
+    fun inject(videoPreviewFragment: VideoPreviewFragment)
 
     //factories
     fun inject(submissionsVMFactory: SubmissionsVMFactory)

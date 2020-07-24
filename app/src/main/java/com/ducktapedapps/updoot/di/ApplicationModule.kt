@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import androidx.work.Configuration
 import com.ducktapedapps.updoot.backgroundWork.UpdootWorkerFactory
 import com.ducktapedapps.updoot.utils.Constants
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.Module
 import dagger.Provides
 import io.noties.markwon.Markwon
@@ -53,4 +55,7 @@ class ApplicationModule {
             .setWorkerFactory(updootWorkerFactory)
             .build()
 
+    @Provides
+    @Singleton
+    fun provideExoPlayer(context: Context): ExoPlayer = SimpleExoPlayer.Builder(context).build()
 }

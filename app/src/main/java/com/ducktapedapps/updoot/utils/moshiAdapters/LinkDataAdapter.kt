@@ -22,7 +22,11 @@ class LinkDataAdapter {
         val postHint = data["post_hint"] as? String
                 ?: if (imageSet != null) "image"
                 else "self"
-
+        val videoUrl = (data["secure_media"] as? Map<String, *>)?.run {
+            (this["reddit_video"] as? Map<String, *>)?.run {
+                this["dash_url"] as? String?
+            }
+        }
 
         return LinkData(
                 selftext = selfText,
@@ -46,7 +50,8 @@ class LinkDataAdapter {
                 imageSet = imageSet,
                 lastUpdated = System.currentTimeMillis() / 1000,
                 post_hint = postHint,
-                stickied = data["stickied"] as Boolean
+                stickied = data["stickied"] as Boolean,
+                videoUrl = videoUrl
         )
     }
 

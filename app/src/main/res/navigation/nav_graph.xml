@@ -37,6 +37,9 @@
         <action
             android:id="@+id/action_SubredditDestination_to_submissionOptionsBottomSheet"
             app:destination="@id/submissionOptionsBottomSheet" />
+        <action
+            android:id="@+id/action_SubredditDestination_to_videoPreviewFragment"
+            app:destination="@id/videoPreviewDestination" />
     </fragment>
     <fragment
         android:id="@+id/CommentsDestination"
@@ -61,9 +64,9 @@
     </fragment>
     <dialog
         android:id="@+id/ImagePreviewDestination"
-        android:name="com.ducktapedapps.updoot.ui.MediaPreviewFragment"
+        android:name="com.ducktapedapps.updoot.ui.ImagePreviewFragment"
         android:label="ImagePreviewDestination"
-        tools:layout="@layout/image_preview_fragment">
+        tools:layout="@layout/fragment_image_preview">
         <argument
             android:name="placeHolderMedia"
             app:argType="string"
@@ -108,5 +111,15 @@
     <action
         android:id="@+id/action_global_ExploreDestination"
         app:destination="@id/ExploreDestination" />
+    <dialog
+        android:id="@+id/videoPreviewDestination"
+        android:name="com.ducktapedapps.updoot.ui.VideoPreviewFragment"
+        android:label="VideoPreviewFragment"
+        tools:layout="@layout/fragment_video_preview">
+        <argument
+            android:name="videoUrl"
+            app:argType="string"
+            app:nullable="false" />
+    </dialog>
 
 </navigation>

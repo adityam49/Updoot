@@ -21,6 +21,7 @@ import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
 import com.ducktapedapps.updoot.model.Gildings
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
+import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickHandler
 import com.ducktapedapps.updoot.utils.CenteredImageSpan
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
@@ -30,7 +31,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
 
     class CompactImageViewHolder(
             private val binding: CompactSubmissionImageBinding,
-            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+            private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
             binding.apply {
@@ -56,7 +57,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
 
     class CompactSelfTextViewHolder(
             private val binding: CompactSubmissionSelftextBinding,
-            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+            private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
             binding.apply {
@@ -78,7 +79,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
 
     class LargeSubmissionImageViewHolder(
             private val binding: LargeSubmissionImageBinding,
-            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+            private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
             binding.apply {
@@ -109,7 +110,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
 
     class LargeSubmissionSelfTextViewHolder(
             private val binding: LargeSubmissionSelftextBinding,
-            private val clickHandler: SubmissionsAdapter.SubmissionClickHandler
+            private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
             binding.apply {
@@ -200,7 +201,7 @@ private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = C
     setBounds(0, 0, intrinsicHeight, intrinsicWidth)
 }
 
-private fun SubmissionsAdapter.SubmissionClickHandler.performAction(linkData: LinkData) {
+private fun SubmissionClickHandler.performAction(linkData: LinkData) {
     with(linkData) {
         when (post_hint) {
             "image" ->
@@ -208,6 +209,8 @@ private fun SubmissionsAdapter.SubmissionClickHandler.performAction(linkData: Li
                 else Log.e("SubmissionViewHolder", "performAction: content type image has not image attached :$this ")
 
             "link" -> actionOpenLink(url)
+
+            "rich:video", "hosted:video" -> videoUrl?.let { actionOpenVideo(it) }
 
             else -> Log.e("SubmissionViewHolder", "unsupported content type :$post_hint")
         }
