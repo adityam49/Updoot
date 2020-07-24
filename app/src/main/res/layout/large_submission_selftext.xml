@@ -5,10 +5,10 @@
     android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     android:background="?attr/selectableItemBackground"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout"
