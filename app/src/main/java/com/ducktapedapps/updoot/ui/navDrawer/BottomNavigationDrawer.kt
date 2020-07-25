@@ -82,11 +82,11 @@ class BottomNavigationDrawer @JvmOverloads constructor(
     fun isInFocus() = bottomNavigationDrawerBehaviour.state != STATE_COLLAPSED
 
     fun expand() {
-        bottomNavigationDrawerBehaviour.state = STATE_EXPANDED
+        post { bottomNavigationDrawerBehaviour.state = STATE_EXPANDED }
     }
 
     fun collapse() {
-        bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED
+        post { bottomNavigationDrawerBehaviour.state = STATE_COLLAPSED }
     }
 
     fun addOnSlideAction(action: OnSlideAction) = bottomNavDrawerCallback.addOnSlideAction(action)

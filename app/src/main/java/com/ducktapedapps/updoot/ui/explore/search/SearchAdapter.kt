@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -53,7 +54,7 @@ class SearchAdapter(private val resultAction: ResultAction) : ListAdapter<Explor
             override fun areContentsTheSame(oldItem: ExploreUiModel, newItem: ExploreUiModel): Boolean =
                     if (oldItem is Subreddit && newItem is Subreddit) {
                         //TODO : equality check without cast gives lint error?
-                        oldItem  as Subreddit == newItem as Subreddit
+                        oldItem == newItem
                     } else if (oldItem is HeaderUiModel && newItem is HeaderUiModel) {
                         oldItem.title == newItem.title
                     } else false
@@ -74,12 +75,17 @@ sealed class VH(view: View) : RecyclerView.ViewHolder(view) {
             root.setOnClickListener { resultAction.goToSubreddit(subreddit.display_name) }
         }
 
-        private fun bindIcon(view: ImageView, url: String?) =
-                Glide.with(view)
-                        .load(url)
-                        .placeholder(R.drawable.ic_subreddit_default_24dp)
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(view)
+        private fun bindIcon(view: ImageView, url: String?) {
+            val drawable = ContextCompat.getDrawable(view.context, R.drawable.ic_subreddit_default_24dp)?.apply {
+                setTint(ContextCompat.getColor(view.context, R.color.color_on_background))
+            }
+            Glide.with(view)
+                    .load(url)
+                    .placeholder(drawable)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(view)
+
+        }
 
         private fun bindSubredditTitle(view: TextView, subredditName: String, subredditAge: Long) {
             view.text = String.format("%s \u25CF %s", subredditName, getCompactDateAsString(subredditAge))
