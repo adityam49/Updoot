@@ -21,8 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
@@ -34,10 +32,14 @@ import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.ActivityVM
+import com.ducktapedapps.updoot.ui.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
 import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
+import com.ducktapedapps.updoot.ui.VideoPreviewFragment
+import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
+import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
 import com.ducktapedapps.updoot.utils.*
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
@@ -50,19 +52,24 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SubredditFragment : Fragment() {
+    companion object {
+        private const val SUBREDDIT_KEY = "subreddit_key"
+        fun newInstance(subreddit: String) = SubredditFragment().apply {
+            arguments = Bundle().apply { putString(SUBREDDIT_KEY, subreddit) }
+        }
+    }
+
     @Inject
     lateinit var viewModelFactory: SubmissionsVMFactory
 
     @Inject
     lateinit var markwon: Markwon
 
-    private val args: SubredditFragmentArgs by navArgs()
-
     private val activityVM by lazy { ViewModelProvider(requireActivity()).get(ActivityVM::class.java) }
     private val submissionsVM by lazy {
         ViewModelProvider(
                 this@SubredditFragment,
-                viewModelFactory.apply { setSubreddit(args.subreddit) }
+                viewModelFactory.apply { setSubreddit(requireArguments().getString(SUBREDDIT_KEY)!!) }
         ).get(SubmissionsVM::class.java)
     }
     private var _binding: FragmentSubredditBinding? = null
@@ -126,8 +133,8 @@ class SubredditFragment : Fragment() {
 
             override fun actionOpenVideo(videoUrl: String) = openVideo(videoUrl)
         })
-        setUpViews(submissionsAdapter)
         observeViewModel(submissionsAdapter)
+        setUpViews(submissionsAdapter)
     }
 
     override fun onDestroyView() {
@@ -152,20 +159,22 @@ class SubredditFragment : Fragment() {
             root.apply {
                 setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 addDrawerListener(object : DrawerLayout.DrawerListener {
-                    override fun onDrawerClosed(drawerView: View) =
-                            setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    override fun onDrawerClosed(drawerView: View) {
+                        setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                        activityVM.showBottomNavDrawer()
+                    }
 
                     override fun onDrawerOpened(drawerView: View) {
                         setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                         setSideBarContent()
+                        activityVM.hideBottomNavDrawer()
                     }
 
-                    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-                        activityVM.setBottomNavDrawerVisibilityRatio(slideOffset)
-                        binding.swipeToRefreshLayout
-                    }
+                    override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
 
-                    override fun onDrawerStateChanged(newState: Int) = Unit
+                    override fun onDrawerStateChanged(newState: Int) {
+                        binding.root.isDrawerOpen(binding.root)
+                    }
                 })
             }
             swipeToRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
@@ -253,31 +262,30 @@ class SubredditFragment : Fragment() {
 
     private fun reloadFragmentContent() = submissionsVM.reload()
 
-    private fun openComments(subreddit: String, id: String) = findNavController()
-            .navigate(SubredditFragmentDirections.actionGoToComments(subreddit, id))
+    private fun openComments(subreddit: String, id: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id)).commit()
+    }
 
-    private fun openOptions(submissionId: String) = findNavController()
-            .navigate(SubredditFragmentDirections.actionSubredditDestinationToSubmissionOptionsBottomSheet(submissionId))
+    private fun openOptions(submissionId: String) {
+        SubmissionOptionsBottomSheet.newInstance(submissionId).show(requireActivity().supportFragmentManager, null)
+    }
 
     private fun openLink(link: String) = startActivity(Intent().apply {
         action = ACTION_VIEW
         data = Uri.parse(link)
     })
 
-    private fun openImage(lowResImage: String, highResImage: String) = findNavController()
-            .navigate(SubredditFragmentDirections.actionSubredditDestinationToImagePreviewDestination(lowResImage, highResImage))
+    private fun openImage(lowResImage: String, highResImage: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(highResImage, lowResImage)).commit()
+    }
 
-    private fun openVideo(videoUrl: String) = findNavController()
-            .navigate(SubredditFragmentDirections.actionSubredditDestinationToVideoPreviewFragment(videoUrl))
+    private fun openVideo(videoUrl: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, VideoPreviewFragment.newInstance(videoUrl)).commit()
+    }
 
-    private fun openSubreddit(targetSubreddit: String) = if (args.subreddit != targetSubreddit) {
-        findNavController().navigate(
-                SubredditFragmentDirections
-                        .actionGoToSubreddit()
-                        .setSubreddit(targetSubreddit)
-        )
-        Toast.makeText(requireContext(), targetSubreddit, Toast.LENGTH_SHORT).show()
-    } else Toast.makeText(requireContext(), "You are already in $targetSubreddit", Toast.LENGTH_SHORT).show()
+    private fun openSubreddit(targetSubreddit: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, newInstance(targetSubreddit)).commit()
+    }
 
     private fun expandInfo() = updateConstraints(R.layout.side_bar_info)
 

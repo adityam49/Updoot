@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +20,17 @@ import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import javax.inject.Inject
 
 class CommentsFragment : Fragment() {
+    companion object {
+        private const val SUBREDDIT_KEY = "subreddit_key"
+        private const val COMMENTS_KEY = "comments_key"
+        fun newInstance(subreddit: String, commentsId: String) = CommentsFragment().apply {
+            arguments = Bundle().apply {
+                putString(SUBREDDIT_KEY, subreddit)
+                putString(COMMENTS_KEY, commentsId)
+            }
+        }
+    }
+
     @Inject
     lateinit var commentsVMFactory: CommentsVMFactory
     private lateinit var viewModel: CommentsVM
@@ -35,12 +45,12 @@ class CommentsFragment : Fragment() {
     private val commentsAdapter = CommentsAdapter(::expandCollapseComment)
     private val submissionHeaderAdapter = SubmissionMetaDataAdapter()
 
-    private val args: CommentsFragmentArgs by navArgs()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (activity?.application as UpdootApplication).updootComponent.inject(this@CommentsFragment)
-        setUpViewModel(args.subreddit, args.id)
+        with(requireArguments()) {
+            setUpViewModel(getString(SUBREDDIT_KEY, null)!!, getString(COMMENTS_KEY, null)!!)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

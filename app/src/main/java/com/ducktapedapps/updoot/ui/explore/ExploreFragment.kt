@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.ChangeBounds
@@ -23,6 +22,7 @@ import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
 import com.ducktapedapps.updoot.ui.explore.search.SearchAdapter
 import com.ducktapedapps.updoot.ui.explore.trending.ExploreTrendingAdapter
+import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,7 +56,7 @@ class ExploreFragment : Fragment() {
         val searchAdapter = SearchAdapter(object : SearchAdapter.ResultAction {
             override fun goToSubreddit(subredditName: String) {
                 binding.searchView.clearFocus()
-                findNavController().navigate(ExploreFragmentDirections.actionExploreDestinationToSubredditDestination().setSubreddit(subredditName))
+                openSubreddit(subredditName)
             }
         })
         binding.apply {
@@ -87,6 +87,10 @@ class ExploreFragment : Fragment() {
                 })
             }
         }
+    }
+
+    private fun openSubreddit(subredditName: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName)).commit()
     }
 
     private fun setUpViewModels(trendingAdapter: ExploreTrendingAdapter, searchAdapter: SearchAdapter) = viewModel.apply {

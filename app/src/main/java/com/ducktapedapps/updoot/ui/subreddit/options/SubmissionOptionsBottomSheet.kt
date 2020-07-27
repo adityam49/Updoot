@@ -10,8 +10,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubmissionOptionsBottomSheetBinding
@@ -20,16 +18,25 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import javax.inject.Inject
 
 class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
+    companion object {
+        private const val SUBMISSION_ID_KEY = "submission_id_key"
+        fun newInstance(id: String) = SubmissionOptionsBottomSheet().apply {
+            arguments = Bundle().apply { putString(SUBMISSION_ID_KEY, id) }
+        }
+    }
+
     @Inject
     lateinit var vmFactory: OptionsSheetVMFactory
     private val viewModel: OptionsSheetViewModel by lazy {
-        ViewModelProvider(this, vmFactory.apply { setSubmissionId(args.submissionsId) }).get(OptionsSheetViewModel::class.java)
+        ViewModelProvider(
+                this,
+                vmFactory.apply { setSubmissionId(requireArguments().getString(SUBMISSION_ID_KEY)!!) }
+        ).get(OptionsSheetViewModel::class.java)
     }
     private val clipboardManager by lazy {
         requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     }
     private lateinit var binding: FragmentSubmissionOptionsBottomSheetBinding
-    private val args: SubmissionOptionsBottomSheetArgs by navArgs()
 
     private val optionsAdapter = OptionsAdapter(::copyLink)
 
@@ -40,6 +47,7 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSubmissionOptionsBottomSheetBinding.inflate(inflater, container, false)
+        setUpViewModel()
         return binding.root
     }
 
@@ -51,7 +59,6 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
                 adapter = optionsAdapter
             }
         }
-        setUpViewModel()
     }
 
     private fun setUpViewModel() =
@@ -60,6 +67,6 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
     private fun copyLink(link: String) {
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", Constants.BASE_URL + link))
         Toast.makeText(requireContext(), "Link copied !", Toast.LENGTH_SHORT).show()
-        findNavController().popBackStack()
+        dismiss()
     }
 }

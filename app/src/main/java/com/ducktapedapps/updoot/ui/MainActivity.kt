@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.ui
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -7,30 +8,30 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
-import com.ducktapedapps.updoot.ui.comments.CommentsFragmentDirections
+import com.ducktapedapps.updoot.ui.comments.CommentsFragment
+import com.ducktapedapps.updoot.ui.explore.ExploreFragment
+import com.ducktapedapps.updoot.ui.login.LoginActivity
 import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerPagerAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionsAdapter
-import com.ducktapedapps.updoot.ui.subreddit.SubredditFragmentDirections
+import com.ducktapedapps.updoot.ui.settings.SettingsFragment
+import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
+import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, NavController.OnDestinationChangedListener {
+class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
     lateinit var redditClient: RedditClient
 
@@ -39,10 +40,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
     private val viewModel by lazy { ViewModelProvider(this@MainActivity, activityVMFactory).get(ActivityVM::class.java) }
 
     private lateinit var binding: ActivityMainBinding
-    private val navController by lazy { findNavController(R.id.nav_host_fragment) }
     private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
 
-        override fun login() = navController.navigate(R.id.loginActivity)
+        override fun login() = startActivity(Intent(this@MainActivity, LoginActivity::class.java))
 
         override fun switch(accountName: String) {
             viewModel.setCurrentAccount(accountName)
@@ -55,22 +55,20 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
     })
     private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
         override fun goToSubreddit(subredditName: String) {
-            val action = when (navController.currentDestination?.id) {
-                R.id.SubredditDestination -> SubredditFragmentDirections.actionGoToSubreddit().apply { subreddit = subredditName }
-                R.id.CommentsDestination -> CommentsFragmentDirections.actionGoToSubreddit().apply { subreddit = subredditName }
-                else -> null
-            }
-            action?.let { navController.navigate(it) }
+            supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName)).commit()
+            binding.bottomNavigationDrawer.collapse()
         }
     })
     private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
-        override fun openExplore() = navController.navigate(SubredditFragmentDirections.actionGlobalExploreDestination())
+        override fun openExplore() {
+            supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, ExploreFragment()).commit()
+        }
     })
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.item_settings -> {
-                navController.navigate(R.id.SettingsDestination)
+                openSettings()
                 true
             }
             else -> false
@@ -82,6 +80,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setUpFragments()
+
+        observeScreen()
 
         setUpViews()
 
@@ -103,8 +105,11 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
             subredditSubscription.observe(this@MainActivity) {
                 subscriptionAdapter.submitList(it)
             }
-            navDrawerVisibility.observe(this@MainActivity) { ratio ->
-                if (ratio <= 1f) bottomNavigationDrawer.setVisibilityRatio(ratio)
+            navDrawerVisibility.observe(this@MainActivity) { visibile ->
+                binding.bottomNavigationDrawer.apply {
+                    if (visibile) show()
+                    else hide()
+                }
             }
         }
     }
@@ -122,10 +127,18 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
         }
     }
 
+    private fun setUpFragments() {
+        with(supportFragmentManager) {
+            if (findFragmentById(R.id.fragment_container) == null) {
+                beginTransaction()
+                        .add(R.id.fragment_container, SubredditFragment.newInstance(FRONTPAGE))
+                        .commit()
+            }
+        }
+    }
+
     private fun setUpViews() {
         binding.apply {
-            navController.addOnDestinationChangedListener(this@MainActivity)
-
             scrimView.setOnClickListener { bottomNavigationDrawer.toggleState() }
 
             bottomNavigationDrawer.apply {
@@ -136,7 +149,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
 
                 binding.toolbar.apply {
                     setSupportActionBar(this)
-                    setupWithNavController(navController)
                     setOnClickListener { bottomNavigationDrawer.toggleState() }
                 }
 
@@ -151,45 +163,40 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener, N
         }
     }
 
+    private fun observeScreen() {
+        with(supportFragmentManager) {
+            addOnBackStackChangedListener {
+                when (findFragmentById(R.id.fragment_container)?.javaClass?.simpleName) {
+                    SubredditFragment::class.java.simpleName,
+                    CommentsFragment::class.java.simpleName -> viewModel.showBottomNavDrawer()
+
+                    SettingsFragment::class.java.simpleName,
+                    VideoPreviewFragment::class.java.simpleName,
+                    ImagePreviewFragment::class.java.simpleName,
+                    ExploreFragment::class.java.simpleName -> viewModel.hideBottomNavDrawer()
+                }
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         setUpWorkers()
         redditClient.detachListener()
     }
 
-    override fun currentAccountChanged() = viewModel.reloadContent()
-
-    override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
-        when (destination.id) {
-            R.id.SubredditDestination -> {
-                bottomNavigationDrawer.show()
-                navController.currentDestination?.label = arguments?.getString("subreddit").run { if (isNullOrEmpty()) "Updoot" else this }
-            }
-            R.id.CommentsDestination -> {
-                bottomNavigationDrawer.show()
-                navController.currentDestination?.label = "Comments"
-            }
-            R.id.SettingsDestination -> {
-                bottomNavigationDrawer.show()
-                navController.currentDestination?.label = "Settings"
-            }
-            R.id.ExploreDestination -> {
-                bottomNavigationDrawer.hide()
-                navController.currentDestination?.label = "Explore"
-            }
-            else -> navController.currentDestination?.label = "Updoot"
-        }
-        bottomNavigationDrawer.post { /*to let behaviour be initialized*/
-            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.collapse()
-        }
+    private fun openSettings() {
+        supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SettingsFragment()).commit()
     }
+
+    override fun currentAccountChanged() = viewModel.reloadContent()
 
     private fun setUpWorkers() = enqueueCleanUpWork(this)
 
     private fun getCurrentDestinationMenu(): Int? =
-            when (navController.currentDestination?.id) {
-                R.id.SubredditDestination -> R.menu.subreddit_screen_menu
-                R.id.CommentsDestination -> R.menu.comment_screen_menu
+            when (supportFragmentManager.findFragmentById(R.id.fragment_container)?.javaClass?.simpleName) {
+                SubredditFragment::class.java.simpleName -> R.menu.subreddit_screen_menu
+                CommentsFragment::class.java.simpleName -> R.menu.comment_screen_menu
                 else -> null
             }
 }

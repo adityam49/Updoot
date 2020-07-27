@@ -4,15 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.FragmentImagePreviewBinding
 
 
-class ImagePreviewFragment : DialogFragment() {
-    private val args: ImagePreviewFragmentArgs by navArgs()
+class ImagePreviewFragment : Fragment() {
+    companion object {
+        private const val IMAGE_URL_KEY = "image_url_key"
+        private const val PLACEHOLDER_URL_KEY = "place_holder_key"
+        fun newInstance(imageUrl: String, placeHolderUrl: String) = ImagePreviewFragment().apply {
+            arguments = Bundle().apply {
+                putString(IMAGE_URL_KEY, imageUrl)
+                putString(PLACEHOLDER_URL_KEY, placeHolderUrl)
+            }
+        }
+    }
+
     private var _binding: FragmentImagePreviewBinding? = null
     private val binding: FragmentImagePreviewBinding
         get() = _binding!!
@@ -22,16 +30,14 @@ class ImagePreviewFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun getTheme() = R.style.FullScreenDialog
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Glide
                 .with(this)
-                .load(args.mediaUrl)
+                .load(requireArguments().getString(IMAGE_URL_KEY))
                 .thumbnail(
                         Glide.with(this)
-                                .load(args.placeHolderMedia)
+                                .load(requireArguments().getString(PLACEHOLDER_URL_KEY))
                 ).into(binding.imageView)
     }
 
