@@ -31,6 +31,7 @@ class SubmissionsVM constructor(
     private val TAG = "SubmissionsVM"
     override val isLoading = submissionRepo.isLoading
 
+    var lastScrollPosition: Int = 0
     val postViewType: LiveData<SubmissionUiType> = submissionRepo.postViewType
     val allSubmissions = submissionRepo.allSubmissions
     val toastMessage: LiveData<SingleLiveEvent<String?>> = submissionRepo.toastMessage

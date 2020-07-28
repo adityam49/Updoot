@@ -18,11 +18,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -37,12 +39,17 @@ import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
 import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
+import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
+import com.ducktapedapps.updoot.ui.common.ScrollPositionListener
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
-import com.ducktapedapps.updoot.utils.*
+import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
+import com.ducktapedapps.updoot.utils.Truss
+import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.Dispatchers
@@ -117,11 +124,6 @@ class SubredditFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentSubredditBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val submissionsAdapter = SubmissionsAdapter(object : SubmissionsAdapter.SubmissionClickHandler {
             override fun actionOpenComments(linkDataId: String, commentId: String) = openComments(linkDataId, commentId)
 
@@ -132,9 +134,10 @@ class SubredditFragment : Fragment() {
             override fun actionOpenLink(link: String) = openLink(link)
 
             override fun actionOpenVideo(videoUrl: String) = openVideo(videoUrl)
-        })
+        }).apply { stateRestorationPolicy = PREVENT_WHEN_EMPTY }
         observeViewModel(submissionsAdapter)
         setUpViews(submissionsAdapter)
+        return binding.root
     }
 
     override fun onDestroyView() {
@@ -172,9 +175,7 @@ class SubredditFragment : Fragment() {
 
                     override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
 
-                    override fun onDrawerStateChanged(newState: Int) {
-                        binding.root.isDrawerOpen(binding.root)
-                    }
+                    override fun onDrawerStateChanged(newState: Int) = Unit
                 })
             }
             swipeToRefreshLayout.setOnRefreshListener { reloadFragmentContent() }
@@ -206,6 +207,7 @@ class SubredditFragment : Fragment() {
                         }
                 )).attachToRecyclerView(this)
                 addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
+                addOnScrollListener(ScrollPositionListener(linearLayoutManager, submissionsVM))
             }
         }
     }
@@ -237,6 +239,7 @@ class SubredditFragment : Fragment() {
                         recyclerView.apply {
                             adapter = null
                             adapter = submissionsAdapter
+                            scrollToPosition(lastScrollPosition)
                         }
                         sideBar.viewTypeGroup.check(
                                 when (it) {
@@ -263,7 +266,7 @@ class SubredditFragment : Fragment() {
     private fun reloadFragmentContent() = submissionsVM.reload()
 
     private fun openComments(subreddit: String, id: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id)).commit()
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id)).commit()
     }
 
     private fun openOptions(submissionId: String) {
@@ -284,7 +287,8 @@ class SubredditFragment : Fragment() {
     }
 
     private fun openSubreddit(targetSubreddit: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, newInstance(targetSubreddit)).commit()
+        if (targetSubreddit != requireArguments().getString(SUBREDDIT_KEY))
+            requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).replace(R.id.fragment_container, newInstance(targetSubreddit)).commit()
     }
 
     private fun expandInfo() = updateConstraints(R.layout.side_bar_info)

@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.utils
+package com.ducktapedapps.updoot.ui.common
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
