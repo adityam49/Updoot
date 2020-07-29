@@ -23,7 +23,7 @@
     <color name="color_background">#FFFFFF</color>
     <color name="color_on_background">#000000</color>
     <color name="color_status_bar">#FFFFFF</color>
-    <color name="color_scrim">#52000000</color>
+    <color name="color_scrim">#80000000</color>
     <color name="color_nav_drawer_background">@color/color_primary</color>
     <color name="nav_bar_color">@color/color_nav_drawer_background</color>
     <color name="color_on_nav_drawer">#FFFFFF</color>
