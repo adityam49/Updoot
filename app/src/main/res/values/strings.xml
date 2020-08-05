@@ -17,20 +17,12 @@
     <string name="this_year">This Year</string>
     <string name="all_time">All Time</string>
 
-    <string name="home">Home</string>
-    <string name="accounts">Accounts</string>
-    <string name="login">Login</string>
-    <string name="explore">Explore</string>
 
     <string name="thumbnailDescription">Submission Thumbnail</string>
-    <string name="search">Search</string>
     <string name="sorting_mode">Sorting Mode</string>
-    <string name="viewType">View Type</string>
     <string name="settings">Settings</string>
 
-    <string name="Comments">Comments</string>
     <string name="submission_link">Copy Link</string>
-    <string name="save_offline">Save offline</string>
 
     <string name="reloading">Reloading…</string>
     <string name="subreddit_icon">Subreddit icon</string>
@@ -53,7 +45,8 @@
     <string name="chevron">Chevron</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="sidebar">Sidebar</string>
-    <string name="view_type_change">View Type change</string>
     <string name="join">Join</string>
     <string name="post_view_type">Post View Type</string>
+    <string name="subreddit_cache_removed">Subreddit cache removed</string>
+    <string name="subreddit_removed_count">Removed :%1$d cached subreddits</string>
 </resources>

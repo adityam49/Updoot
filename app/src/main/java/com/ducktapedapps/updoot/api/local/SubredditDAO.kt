@@ -32,4 +32,11 @@ interface SubredditDAO {
 
     @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
     fun observeSubscribedSubredditsFor(user: String): LiveData<List<Subreddit>>
+
+    @Query("SELECT * FROM subreddit WHERE display_name NOT IN (SELECT subredditName from SubredditSubscription)")
+    suspend fun getNonSubscribedSubreddits(): List<Subreddit>
+
+    @Query("DELETE  FROM subreddit WHERE display_name is :name")
+    suspend fun deleteSubreddit(name: String)
+
 }

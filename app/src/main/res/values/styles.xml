@@ -96,8 +96,6 @@
         <item name="cornerSizeTopRight">32dp</item>
     </style>
 
-    <color name="secondary_alt">@color/color_secondary_alt</color>
-
     <style name="indentation_style">
         <item name="singleThreadMode">false</item>
         <item name="threadColor">@color/color_on_primary_light</item>
