@@ -1,10 +1,14 @@
 package com.ducktapedapps.updoot.ui.navDrawer
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import androidx.viewpager2.widget.ViewPager2
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
@@ -19,9 +23,13 @@ class BottomNavigationDrawer @JvmOverloads constructor(
 
     private val bottomNavDrawerCallback = BottomNavDrawerCallback()
 
+    private var animator: ObjectAnimator? = null
+
     private lateinit var bottomNavigationDrawerBehaviour: BottomSheetBehavior<LinearLayout>
 
     private var peekTop = 0f
+    private var isVisible = true
+
     init {
         binding.apply {
             root.post {
@@ -51,14 +59,31 @@ class BottomNavigationDrawer @JvmOverloads constructor(
     /**
      * public methods
      */
-
-    fun hide() {
-        collapse()
-        visibility = View.GONE
+    fun hideWithAnimation() {
+        if (!isVisible) return
+        animator?.cancel()
+        animator = ObjectAnimator.ofFloat(this, View.TRANSLATION_Y, binding.toolbar.top.toFloat(), binding.toolbar.bottom.toFloat()).apply {
+            doOnStart { collapse() }
+            duration = 150
+            interpolator = AccelerateInterpolator()
+            start()
+            doOnEnd {
+                visibility = GONE
+                isVisible = false
+            }
+        }
     }
 
-    fun show() {
-        visibility = View.VISIBLE
+    fun showWihAnimation() {
+        if (isVisible) return
+        animator?.cancel()
+        animator = ObjectAnimator.ofFloat(this, View.TRANSLATION_Y, binding.toolbar.bottom.toFloat(), binding.toolbar.top.toFloat()).apply {
+            doOnStart { visibility = VISIBLE }
+            duration = 150
+            interpolator = AccelerateInterpolator()
+            start()
+            doOnEnd { isVisible = true }
+        }
     }
 
     fun toggleState() {

@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
             }
             navDrawerVisibility.observe(this@MainActivity) { visibile ->
                 binding.bottomNavigationDrawer.apply {
-                    if (visibile) show() else hide()
+                    if (visibile) showWihAnimation() else hideWithAnimation()
                 }
             }
         }
