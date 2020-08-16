@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
 import com.ducktapedapps.updoot.R
@@ -28,9 +29,11 @@ import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 
+@ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
     lateinit var redditClient: RedditClient
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
         override fun logout(accountName: String) = viewModel.logout(accountName)
 
-        override fun toggleEntryMenu() = viewModel.expandOrCollapseAccountsMenu()
+        override fun toggleEntryMenu() = viewModel.toggleAccountsMenuList()
     })
     private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
         override fun goToSubreddit(subredditName: String) {
@@ -96,19 +99,18 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private fun setUpViewModel() {
         viewModel.apply {
-            accounts.observe(this@MainActivity) {
+            accounts.asLiveData().observe(this@MainActivity) {
                 accountsAdapter.submitList(it)
             }
-            navigationEntries.observe(this@MainActivity) {
+            navigationEntries.asLiveData().observe(this@MainActivity) {
                 navDrawerDestinationAdapter.submitList(it)
             }
-            subredditSubscription.observe(this@MainActivity) {
+            subredditSubscription.asLiveData().observe(this@MainActivity) {
                 subscriptionAdapter.submitList(it)
             }
             navDrawerVisibility.observe(this@MainActivity) { visibile ->
                 binding.bottomNavigationDrawer.apply {
-                    if (visibile) show()
-                    else hide()
+                    if (visibile) show() else hide()
                 }
             }
         }

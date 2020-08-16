@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,9 +10,12 @@ import com.ducktapedapps.updoot.ui.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 
+@ExperimentalCoroutinesApi
 class SubmissionsVM constructor(
         redditClient: RedditClient,
         prefsDAO: SubredditPrefsDAO,
@@ -32,9 +34,9 @@ class SubmissionsVM constructor(
     override val isLoading = submissionRepo.isLoading
 
     var lastScrollPosition: Int = 0
-    val postViewType: LiveData<SubmissionUiType> = submissionRepo.postViewType
+    val postViewType = submissionRepo.postViewType
     val allSubmissions = submissionRepo.allSubmissions
-    val toastMessage: LiveData<SingleLiveEvent<String?>> = submissionRepo.toastMessage
+    val toastMessage: StateFlow<SingleLiveEvent<String?>> = submissionRepo.toastMessage
     val subredditInfo = submissionRepo.subredditInfo
 
     override fun loadPage() = submissionRepo.loadPage()
@@ -52,6 +54,7 @@ class SubmissionsVM constructor(
 
 }
 
+@ExperimentalCoroutinesApi
 class SubmissionsVMFactory @Inject constructor(
         private val redditClient: RedditClient,
         private val prefsDAO: SubredditPrefsDAO,

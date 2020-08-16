@@ -1,11 +1,11 @@
 package com.ducktapedapps.updoot.api.local
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ducktapedapps.updoot.model.Subreddit
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SubredditDAO {
@@ -13,7 +13,7 @@ interface SubredditDAO {
     suspend fun insertSubreddit(subreddit: Subreddit)
 
     @Query("SELECT * FROM Subreddit WHERE isTrending = 1")
-    fun observeTrendingSubs(): LiveData<List<Subreddit>>
+    fun observeTrendingSubs(): Flow<List<Subreddit>>
 
     @Query("SELECT * FROM Subreddit WHERE isTrending = 1")
     suspend fun getTrendingSubs(): List<Subreddit>
@@ -22,16 +22,16 @@ interface SubredditDAO {
     suspend fun getSubreddit(name: String): Subreddit?
 
     @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
-    fun observeSubredditInfo(name: String): LiveData<Subreddit?>
+    fun observeSubredditInfo(name: String): Flow<Subreddit?>
 
     @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
-    fun observeSubredditWithKeyword(keyword: String): LiveData<List<Subreddit>>
+    fun observeSubredditWithKeyword(keyword: String): List<Subreddit>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubredditSubscription)
 
     @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
-    fun observeSubscribedSubredditsFor(user: String): LiveData<List<Subreddit>>
+    fun observeSubscribedSubredditsFor(user: String): List<Subreddit>
 
     @Query("SELECT * FROM subreddit WHERE display_name NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<Subreddit>

@@ -6,6 +6,7 @@ import android.content.Intent.ACTION_VIEW
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannedString
 import android.text.method.LinkMovementMethod
 import android.text.style.AbsoluteSizeSpan
 import android.view.*
@@ -20,6 +21,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -52,12 +54,10 @@ import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 class SubredditFragment : Fragment() {
     companion object {
         private const val SUBREDDIT_KEY = "subreddit_key"
@@ -218,13 +218,13 @@ class SubredditFragment : Fragment() {
 
     private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
         activityVM.apply {
-            shouldReload.observe(viewLifecycleOwner) { shouldReload ->
+            shouldReload.asLiveData().observe(viewLifecycleOwner) { shouldReload ->
                 if (shouldReload.contentIfNotHandled == true) {
                     Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
                     reloadFragmentContent()
                 }
             }
-            loginState.observe(viewLifecycleOwner) {
+            loginState.asLiveData().observe(viewLifecycleOwner) {
                 isLoggedIn = when (it) {
                     is LoggedOut -> false
                     is LoggedIn -> true
@@ -232,7 +232,7 @@ class SubredditFragment : Fragment() {
             }
         }
         submissionsVM.apply {
-            postViewType.observe(viewLifecycleOwner) { postViewType: SubmissionUiType? ->
+            postViewType.asLiveData().observe(viewLifecycleOwner) { postViewType: SubmissionUiType? ->
                 postViewType?.let {
                     submissionsAdapter.itemUi = it
                     binding.apply {
@@ -251,15 +251,15 @@ class SubredditFragment : Fragment() {
                 }
             }
 
-            allSubmissions.observe(viewLifecycleOwner) { things: List<LinkData> -> submissionsAdapter.submitList(things) }
+            allSubmissions.asLiveData().observe(viewLifecycleOwner) { things: List<LinkData> -> submissionsAdapter.submitList(things) }
 
-            toastMessage.observe(viewLifecycleOwner) { toastMessage: SingleLiveEvent<String?> ->
+            toastMessage.asLiveData().observe(viewLifecycleOwner) { toastMessage: SingleLiveEvent<String?> ->
                 val toast = toastMessage.contentIfNotHandled
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             }
-            isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
+            isLoading.asLiveData().observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
 
-            subredditInfo.observe(viewLifecycleOwner) { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } }
+            subredditInfo.asLiveData().observe(viewLifecycleOwner) { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } }
         }
     }
 
@@ -323,7 +323,7 @@ class SubredditFragment : Fragment() {
     }
 
     private fun setSideBarContent() {
-        submissionsVM.subredditInfo.observe(viewLifecycleOwner) {
+        submissionsVM.subredditInfo.asLiveData().observe(viewLifecycleOwner) {
             it?.let {
                 binding.apply {
                     if (binding.sideBar.sideBarInfo.text.isNullOrEmpty()) {
@@ -336,6 +336,7 @@ class SubredditFragment : Fragment() {
                                     delay(50)
                                     expandControls()
                                 }
+                                binding.sideBar.sideBarInfo.text = SpannedString(binding.sideBar.sideBarInfo.text)
                             }
                         }
                     }

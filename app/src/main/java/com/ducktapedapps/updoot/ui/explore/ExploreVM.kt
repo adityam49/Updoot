@@ -1,17 +1,18 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 class ExploreVM(private val exploreRepo: ExploreRepo) : ViewModel() {
 
     private var currentSearchJob: Job? = null
     val isLoading = exploreRepo.isLoading
     val searchResults = exploreRepo.results
-    val trendingSubs: LiveData<List<ExploreUiModel>> = exploreRepo.trendingSubs
+    val trendingSubs = exploreRepo.trendingSubs
 
     init {
         viewModelScope.launch {

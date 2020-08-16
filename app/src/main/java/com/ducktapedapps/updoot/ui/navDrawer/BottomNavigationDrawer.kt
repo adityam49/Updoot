@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-import androidx.annotation.FloatRange
 import androidx.viewpager2.widget.ViewPager2
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
@@ -60,15 +59,6 @@ class BottomNavigationDrawer @JvmOverloads constructor(
 
     fun show() {
         visibility = View.VISIBLE
-    }
-
-    fun setVisibilityRatio(@FloatRange(from = 0.0, to = 1.0) ratio: Float) {
-        val deltaY = (context?.dimensionFromAttribute(R.attr.actionBarSize) ?: 0) * (ratio)
-        translationY = if (peekTop >= y) {
-            -deltaY
-        } else {
-            deltaY
-        }
     }
 
     fun toggleState() {

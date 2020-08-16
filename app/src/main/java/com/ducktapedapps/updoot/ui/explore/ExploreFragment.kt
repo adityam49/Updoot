@@ -5,11 +5,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ConcatAdapter
@@ -23,10 +26,12 @@ import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
 import com.ducktapedapps.updoot.ui.explore.search.SearchAdapter
 import com.ducktapedapps.updoot.ui.explore.trending.ExploreTrendingAdapter
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 class ExploreFragment : Fragment() {
     @Inject
     lateinit var vmFactory: ExploreVMFactory
@@ -93,16 +98,12 @@ class ExploreFragment : Fragment() {
         requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName)).commit()
     }
 
-    private fun setUpViewModels(trendingAdapter: ExploreTrendingAdapter, searchAdapter: SearchAdapter) = viewModel.apply {
-        trendingSubs.observe(viewLifecycleOwner) {
-
-            trendingAdapter.submitList(it)
-        }
-        searchResults.observe(viewLifecycleOwner) {
-            searchAdapter.submitList(it)
-        }
-        isLoading.observe(viewLifecycleOwner) { binding.progressCircular.visibility = if (it) View.VISIBLE else View.GONE }
-    }
+    private fun setUpViewModels(trendingAdapter: ExploreTrendingAdapter, searchAdapter: SearchAdapter) =
+            viewModel.apply {
+                trendingSubs.asLiveData().observe(viewLifecycleOwner) { trendingAdapter.submitList(it) }
+                searchResults.asLiveData().observe(viewLifecycleOwner) { searchAdapter.submitList(it) }
+                isLoading.asLiveData().observe(viewLifecycleOwner) { binding.progressCircular.visibility = if (it) VISIBLE else GONE }
+            }
 
 
     private fun animateSearchView(searchAdapter: SearchAdapter, trendingAdapter: ExploreTrendingAdapter) {

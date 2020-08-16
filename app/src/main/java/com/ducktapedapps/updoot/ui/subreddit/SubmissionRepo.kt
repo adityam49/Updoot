@@ -1,10 +1,6 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.text.TextUtils
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditDAO
@@ -20,10 +16,13 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 private const val TAG = "SubmissionRepo"
 
+@ExperimentalCoroutinesApi
 class SubmissionRepo(
         private val redditClient: RedditClient,
         private val prefsDAO: SubredditPrefsDAO,
@@ -32,23 +31,21 @@ class SubmissionRepo(
         private val scope: CoroutineScope,
         private val subredditDAO: SubredditDAO
 ) {
-    private val _isLoading = MutableLiveData(true)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _toastMessage = MutableLiveData(SingleLiveEvent<String?>(null))
-    val toastMessage: LiveData<SingleLiveEvent<String?>> = _toastMessage
+    private val _toastMessage = MutableStateFlow(SingleLiveEvent<String?>(null))
+    val toastMessage: StateFlow<SingleLiveEvent<String?>> = _toastMessage
 
-    val postViewType: LiveData<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
-    private val nextPageKeyAndCurrentPageEntries = MutableLiveData<MutableMap<String?, List<String>>>(mutableMapOf())
-    val allSubmissions: LiveData<List<LinkData>> =
-            Transformations.switchMap(nextPageKeyAndCurrentPageEntries) { pageMap: Map<String?, List<String>> ->
-                if (pageMap.isNotEmpty()) {
-                    Log.i(TAG, "page keys in map : ${pageMap.keys}")
-                    submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(pageMap.values.flatten()))
-                } else MutableLiveData(emptyList())
-            }
+    val postViewType: Flow<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
+    private val nextPageKeyAndCurrentPageEntries = MutableStateFlow<Map<String?, List<String>>>(mapOf())
+    val allSubmissions: Flow<List<LinkData>> = nextPageKeyAndCurrentPageEntries.flatMapLatest {
+        if (it.keys.isNotEmpty())
+            submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(it.values.flatten())).distinctUntilChanged()
+        else flow { emit(emptyList()) }
+    }
 
-    val subredditInfo: LiveData<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
+    val subredditInfo: Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
 
     init {
         loadAndSaveSubredditInfo()
@@ -75,7 +72,7 @@ class SubmissionRepo(
                         append(" END")
                     }.toString(), null)
 
-    fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value?.keys?.last() != null
+    fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value.keys.last() != null
 
     fun setPostViewType(type: SubmissionUiType) = scope.launch(Dispatchers.IO) {
         prefsDAO.setUIType(type, subredditName)
@@ -83,24 +80,26 @@ class SubmissionRepo(
 
     fun changeSort(newSort: SubredditSorting) {
         clearSubmissions()
-        scope.launch(Dispatchers.IO) { prefsDAO.setSorting(newSort, subredditName) }
-        loadPage()
+        scope.launch(Dispatchers.IO) {
+            prefsDAO.setSorting(newSort, subredditName)
+            loadPage()
+        }
     }
 
     fun clearSubmissions() {
-        nextPageKeyAndCurrentPageEntries.value = mutableMapOf()
+        nextPageKeyAndCurrentPageEntries.value = emptyMap()
     }
 
     fun loadPage() {
         scope.launch(Dispatchers.IO) {
             try {
-                _isLoading.postValue(true)
+                _isLoading.value = true
                 loadPageAndCacheToDbSuccessfully()
             } catch (e: Exception) {
                 e.printStackTrace()
-                _toastMessage.postValue(SingleLiveEvent("Something went wrong! try again later some later"))
+                _toastMessage.value = SingleLiveEvent("Something went wrong! try again later some later")
             } finally {
-                _isLoading.postValue(false)
+                _isLoading.value = false
             }
         }
     }
@@ -114,16 +113,13 @@ class SubmissionRepo(
                 "${if (subredditName != FRONTPAGE) "r/" else ""}$subredditName",
                 sorting.first,
                 sorting.second,
-                nextPageKeyAndCurrentPageEntries.value.run {
-                    if (!this.isNullOrEmpty()) keys.last()
-                    else null
-                }
+                nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()
         )
         fetchedSubmissions.apply {
             submissions.forEach { submissionsCacheDAO.insertSubmissions(it) }
-            nextPageKeyAndCurrentPageEntries.postValue(nextPageKeyAndCurrentPageEntries.value?.apply {
-                put(after, submissions.map { it.id })
-            })
+            nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
+                    .toMutableMap()
+                    .apply { put(after, submissions.map { it.id }) }
         }
     }
 

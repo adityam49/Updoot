@@ -1,39 +1,38 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.explore.trending.TrendingUiModel
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 class ExploreRepo @Inject constructor(
         private val redditClient: RedditClient,
         private val subredditDAO: SubredditDAO
 ) {
 
-    private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val query: MutableLiveData<String> = MutableLiveData("")
-    val results: LiveData<List<Subreddit>> = Transformations.switchMap(query) { queryString ->
-        if (queryString.isNullOrBlank()) MutableLiveData<List<Subreddit>>(emptyList())
-        else subredditDAO.observeSubredditWithKeyword(queryString)
-    }
+    private val query: MutableStateFlow<String> = MutableStateFlow("")
+    val results: Flow<List<Subreddit>> = query.map { queryKeyword ->
+        if (queryKeyword.isBlank()) emptyList<Subreddit>()
+        else subredditDAO.observeSubredditWithKeyword(queryKeyword)
+    }.flowOn(Dispatchers.IO)
 
-    val trendingSubs: LiveData<List<ExploreUiModel>> = Transformations.map(subredditDAO.observeTrendingSubs()) {
-        if (it.isEmpty()) listOf()
-        else it.mapToTrendingModel()
+    val trendingSubs: Flow<List<ExploreUiModel>> = subredditDAO.observeTrendingSubs().distinctUntilChanged().map {
+        if (it.isNotEmpty()) it.mapToTrendingModel()
+        else emptyList()
     }
 
     suspend fun loadTrendingSubs() {
-        _isLoading.postValue(true)
+        _isLoading.value = true
         withContext(Dispatchers.IO) {
             try {
                 subredditDAO.getTrendingSubs().apply {
@@ -47,7 +46,7 @@ class ExploreRepo @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                _isLoading.postValue(false)
+                _isLoading.value = false
             }
         }
     }
@@ -73,9 +72,9 @@ class ExploreRepo @Inject constructor(
             TrendingUiModel(this))
 
     suspend fun searchSubreddit(queryString: String) {
-        _isLoading.postValue(true)
+        _isLoading.value = true
         withContext(Dispatchers.IO) {
-            query.postValue(queryString)
+            query.value = queryString
             if (queryString.isNotBlank())
                 try {
                     val redditAPI = redditClient.api()
@@ -84,7 +83,7 @@ class ExploreRepo @Inject constructor(
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 } finally {
-                    _isLoading.postValue(false)
+                    _isLoading.value = false
                 }
         }
     }

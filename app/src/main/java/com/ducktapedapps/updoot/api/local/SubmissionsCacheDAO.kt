@@ -1,9 +1,9 @@
 package com.ducktapedapps.updoot.api.local
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.ducktapedapps.updoot.model.LinkData
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SubmissionsCacheDAO {
@@ -14,7 +14,7 @@ interface SubmissionsCacheDAO {
     suspend fun deleteSubmission(id: String, subreddit: String)
 
     @RawQuery(observedEntities = [LinkData::class])
-    fun observeCachedSubmissions(query: SupportSQLiteQuery): LiveData<List<LinkData>>
+    fun observeCachedSubmissions(query: SupportSQLiteQuery): Flow<List<LinkData>>
 
     @Query("SELECT * FROM LinkData")
     suspend fun getAllCachedSubmissions(): List<LinkData>
