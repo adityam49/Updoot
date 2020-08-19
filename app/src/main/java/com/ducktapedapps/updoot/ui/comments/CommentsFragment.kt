@@ -106,13 +106,10 @@ class CommentsFragment : Fragment() {
                     getDrawable(R.drawable.ic_downvote_24dp)!!,
                     getDrawable(R.drawable.ic_expand_more_black_14dp)!!,
                     object : SwipeCallback.Callback {
-                        override fun extremeLeftAction(position: Int) = Unit
-
-                        override fun leftAction(position: Int) = viewModel.castVote(position, 1)
-
-                        override fun rightAction(position: Int) = viewModel.castVote(position, -1)
-
-                        override fun extremeRightAction(position: Int) = Unit
+                        override fun onExtremeLeftSwipe(swipedThingData: String?) = Unit
+                        override fun onLeftSwipe(swipedThingData: String?) = viewModel.castVote(-1, -1)
+                        override fun onRightSwipe(swipedThingData: String?) = viewModel.castVote(1, -1)
+                        override fun onExtremeRightSwipe(swipedThingData: String?) = Unit
                     }
             )).attachToRecyclerView(this)
         }

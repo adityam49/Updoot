@@ -25,10 +25,10 @@ class SwipeCallback(
 ) : ItemTouchHelper.SimpleCallback(0, LEFT or RIGHT) {
 
     interface Callback {
-        fun extremeLeftAction(position: Int)
-        fun leftAction(position: Int)
-        fun rightAction(position: Int)
-        fun extremeRightAction(position: Int)
+        fun onExtremeLeftSwipe(swipedThingData: String?)
+        fun onLeftSwipe(swipedThingData: String?)
+        fun onRightSwipe(swipedThingData: String?)
+        fun onExtremeRightSwipe(swipedThingData: String?)
     }
 
     private enum class Swipe {
@@ -84,10 +84,10 @@ class SwipeCallback(
         //save action performed
         if (isCurrentlyActive) //is user actively manipulating swipe
             currentAction = when (dX / viewHolder.itemView.width) {
-                in -Double.MAX_VALUE..-EXTREME_THRESHOLD -> ACTION_EXTREME_RIGHT
-                in -EXTREME_THRESHOLD..-THRESHOLD -> ACTION_RIGHT
-                in THRESHOLD..EXTREME_THRESHOLD -> ACTION_LEFT
-                in EXTREME_THRESHOLD..Double.MAX_VALUE -> ACTION_EXTREME_LEFT
+                in -Double.MAX_VALUE..-EXTREME_THRESHOLD -> ACTION_EXTREME_LEFT
+                in -EXTREME_THRESHOLD..-THRESHOLD -> ACTION_LEFT
+                in THRESHOLD..EXTREME_THRESHOLD -> ACTION_RIGHT
+                in EXTREME_THRESHOLD..Double.MAX_VALUE -> ACTION_EXTREME_RIGHT
                 else -> null
             }
     }
@@ -112,14 +112,14 @@ class SwipeCallback(
         }
     }
 
-    private fun interpolate(inputStart: Double, inputEnd: Double, progress: Double, outputStart: Double, outputEnd: Double): Double =
+    private fun scale(inputStart: Double, inputEnd: Double, progress: Double, outputStart: Double, outputEnd: Double): Double =
             outputStart + (progress - inputStart) / (inputEnd - inputStart) * (outputEnd - outputStart)
 
     private fun drawDrawable(left: Int, top: Int, right: Int, bottom: Int, canvas: Canvas, dX: Float, itemWidth: Int, drawable: Drawable) {
         drawable.apply {
             when (val swipeProgress = abs(dX) / itemWidth) {
                 in THRESHOLD..THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START -> {
-                    val displacedTop = interpolate(
+                    val displacedTop = scale(
                             inputStart = THRESHOLD, inputEnd = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START,
                             progress = (swipeProgress).toDouble(),
                             outputStart = (bottom - intrinsicHeight).toDouble(), outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
@@ -130,7 +130,7 @@ class SwipeCallback(
                             if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
                             displacedTop + intrinsicHeight
                     )
-                    alpha = interpolate(
+                    alpha = scale(
                             inputEnd = THRESHOLD, inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * THRESHOLD_ANIMATION_START,
                             progress = (swipeProgress).toDouble(),
                             outputEnd = ALPHA_TRANSPARENT, outputStart = ALPHA_OPAQUE
@@ -146,7 +146,7 @@ class SwipeCallback(
                     alpha = ALPHA_OPAQUE.toInt()
                 }
                 else -> {
-                    val displacedTop = interpolate(
+                    val displacedTop = scale(
                             inputStart = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START, inputEnd = EXTREME_THRESHOLD,
                             progress = (swipeProgress).toDouble(),
                             outputEnd = top.toDouble(), outputStart = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
@@ -157,7 +157,7 @@ class SwipeCallback(
                             if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
                             displacedTop + intrinsicHeight
                     )
-                    alpha = interpolate(
+                    alpha = scale(
                             inputEnd = THRESHOLD + (EXTREME_THRESHOLD - THRESHOLD) * EXTREME_THRESHOLD_ANIMATION_START, inputStart = EXTREME_THRESHOLD,
                             progress = (swipeProgress).toDouble(),
                             outputStart = ALPHA_TRANSPARENT, outputEnd = ALPHA_OPAQUE
@@ -173,7 +173,7 @@ class SwipeCallback(
         drawable.apply {
             when (val swipeProgress = abs(dX) / itemWidth) {
                 in EXTREME_THRESHOLD..EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START -> {
-                    val displacedTop = interpolate(
+                    val displacedTop = scale(
                             inputStart = EXTREME_THRESHOLD, inputEnd = EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START,
                             progress = (abs(dX) / itemWidth).toDouble(),
                             outputStart = (bottom - intrinsicHeight).toDouble(), outputEnd = (top + (bottom - top) / 2 - intrinsicHeight / 2).toDouble()
@@ -184,7 +184,7 @@ class SwipeCallback(
                             if (dX > 0) left + intrinsicWidth * 2 else right - intrinsicWidth,
                             displacedTop + intrinsicHeight
                     )
-                    alpha = interpolate(
+                    alpha = scale(
                             inputStart = EXTREME_THRESHOLD, inputEnd = EXTREME_THRESHOLD + EXTREME_THRESHOLD * THRESHOLD_ANIMATION_START,
                             progress = (swipeProgress).toDouble(),
                             outputEnd = ALPHA_OPAQUE, outputStart = ALPHA_TRANSPARENT
@@ -207,12 +207,13 @@ class SwipeCallback(
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        when (currentAction) {
-            ACTION_LEFT -> callback.leftAction(viewHolder.adapterPosition)
-            ACTION_EXTREME_LEFT -> callback.extremeLeftAction(viewHolder.adapterPosition)
-            ACTION_RIGHT -> callback.rightAction(viewHolder.adapterPosition)
-            ACTION_EXTREME_RIGHT -> callback.extremeRightAction(viewHolder.adapterPosition)
-        }
+        if (viewHolder is SwipeableViewHolder)
+            when (currentAction) {
+                ACTION_LEFT -> callback.onLeftSwipe(viewHolder.getLeftSwipeData())
+                ACTION_EXTREME_LEFT -> callback.onExtremeLeftSwipe(viewHolder.getExtremeLeftSwipeData())
+                ACTION_RIGHT -> callback.onRightSwipe(viewHolder.getRightSwipeData())
+                ACTION_EXTREME_RIGHT -> callback.onExtremeRightSwipe(viewHolder.getExtremeRightSwipeData())
+            }
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit

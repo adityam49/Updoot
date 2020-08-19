@@ -20,13 +20,13 @@ interface RedditAPI {
     @POST("/api/save")
     suspend fun save(
             @Field("id") id: String
-    ): String
+    ): retrofit2.Response<Unit>
 
     @FormUrlEncoded
     @POST("/api/unsave")
-    suspend fun unsave(
+    suspend fun unSave(
             @Field("id") id: String
-    ): String
+    ): retrofit2.Response<Unit>
 
     @GET("r/{subreddit}/comments/{id}")
     suspend fun getComments(
@@ -46,7 +46,7 @@ interface RedditAPI {
     suspend fun castVote(
             @Field("id") thing_id: String,
             @Field("dir") vote_direction: Int
-    ): String
+    ): retrofit2.Response<Unit>
 
     @GET("/subreddits/search")
     suspend fun search(

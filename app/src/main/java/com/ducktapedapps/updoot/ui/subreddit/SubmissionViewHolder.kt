@@ -24,16 +24,38 @@ import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickHandler
 import com.ducktapedapps.updoot.utils.CenteredImageSpan
 import com.ducktapedapps.updoot.utils.Truss
-import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
     abstract fun bind(submissions: LinkData)
+    abstract fun updateVote(submissions: LinkData)
+
+    //TODO : implement save indication changed on submission
+    fun updateSaveState(submissions: LinkData) = Unit
+
+    private var extremeLeftSwipeDataValue: String? = null
+    private var leftSwipeDataValue: String? = null
+    private var rightSwipeDataValue: String? = null
+    private var extremeRightSwipeDataValue: String? = null
+
+    override fun getExtremeLeftSwipeData(): String? = extremeLeftSwipeDataValue
+    override fun getLeftSwipeData(): String? = leftSwipeDataValue
+    override fun getRightSwipeData(): String? = rightSwipeDataValue
+    override fun getExtremeRightSwipeData(): String? = extremeRightSwipeDataValue
+
+    private fun setSwipeData(linkData: LinkData) {
+        extremeLeftSwipeDataValue = linkData.subredditName
+        leftSwipeDataValue = linkData.id
+        rightSwipeDataValue = linkData.id
+        extremeRightSwipeDataValue = linkData.id
+    }
 
     class CompactImageViewHolder(
             private val binding: CompactSubmissionImageBinding,
             private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
+
         override fun bind(submissions: LinkData) {
+            super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
@@ -46,13 +68,25 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     setGildings(gildingTextView, gildings)
                     setThumbnail(thumbnailImageView, thumbnail, over_18)
-                    setVotes(scoreTextView, ups, likes)
+                    scoreView.setData(ups, likes)
                     setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
                 }
             }
         }
+
+        override fun updateVote(submissions: LinkData) {
+            binding.scoreView.apply {
+                when (submissions.likes) {
+                    true -> upVote(submissions.ups)
+                    false -> downVote(submissions.ups)
+                    null -> unVote(submissions.ups)
+                }
+            }
+        }
+
+
     }
 
     class CompactSelfTextViewHolder(
@@ -60,6 +94,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
+            super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
@@ -68,10 +103,20 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         true
                     }
                     setGildings(gildingTextView, gildings)
-                    setVotes(scoreTextView, ups, likes)
+                    scoreView.setData(ups, likes)
                     setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
+                }
+            }
+        }
+
+        override fun updateVote(submissions: LinkData) {
+            binding.scoreView.apply {
+                when (submissions.likes) {
+                    true -> upVote(submissions.ups)
+                    false -> downVote(submissions.ups)
+                    null -> unVote(submissions.ups)
                 }
             }
         }
@@ -82,6 +127,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
+            super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
@@ -99,10 +145,20 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                                 .into(this)
                     }
                     setGildings(gildingTextView, gildings)
-                    setVotes(scoreTextView, ups, likes)
+                    scoreView.setData(ups, likes)
                     setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
+                }
+            }
+        }
+
+        override fun updateVote(submissions: LinkData) {
+            binding.scoreView.apply {
+                when (submissions.likes) {
+                    true -> upVote(submissions.ups)
+                    false -> downVote(submissions.ups)
+                    null -> unVote(submissions.ups)
                 }
             }
         }
@@ -113,6 +169,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             private val clickHandler: SubmissionClickHandler
     ) : SubmissionViewHolder(binding.root) {
         override fun bind(submissions: LinkData) {
+            super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
                     root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
@@ -121,7 +178,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         true
                     }
                     setGildings(gildingTextView, gildings)
-                    setVotes(scoreTextView, ups, likes)
+                    scoreView.setData(ups, likes)
                     setTitle(stickied, title, titleTextView)
                     subredditTextView.text = subredditName
                     setMetadata(metadataTextView, submissions)
@@ -135,6 +192,16 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                             setSelfText(this)
                         }
                     }
+                }
+            }
+        }
+
+        override fun updateVote(submissions: LinkData) {
+            binding.scoreView.apply {
+                when (submissions.likes) {
+                    true -> upVote(submissions.ups)
+                    false -> downVote(submissions.ups)
+                    null -> unVote(submissions.ups)
                 }
             }
         }
@@ -178,23 +245,20 @@ private fun setTitle(isSticky: Boolean, title: String, textView: TextView) = tex
 }
 
 private fun setGildings(textView: TextView, gildings: Gildings) {
-    val truss = Truss()
-    if (gildings.platinum != 0)
-        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_platinum_gilding_14dp, textView)))
+    textView.text = Truss().apply {
+        if (gildings.platinum != 0) pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_platinum_gilding_14dp, textView)))
                 .append(" ")
                 .popSpan()
                 .append("x${gildings.platinum} ")
-    if (gildings.gold != 0)
-        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_gold_gilding_14dp, textView)))
+        if (gildings.gold != 0) pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_gold_gilding_14dp, textView)))
                 .append(" ")
                 .popSpan()
                 .append("x${gildings.gold} ")
-    if (gildings.silver != 0)
-        truss.pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_silver_gilding_14dp, textView)))
+        if (gildings.silver != 0) pushSpan(CenteredImageSpan(getDrawable(R.drawable.ic_silver_gilding_14dp, textView)))
                 .append(" ")
                 .popSpan()
                 .append("x${gildings.silver} ")
-    textView.text = truss.build()
+    }.build()
 }
 
 private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = ContextCompat.getDrawable(textView.context, res)!!.apply {
@@ -217,15 +281,6 @@ private fun SubmissionClickHandler.performAction(linkData: LinkData) {
     }
 }
 
-private fun setVotes(textView: TextView, votes: Int, likes: Boolean?) {
-    when {
-        likes == null -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.color_on_background))
-        likes -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.upVoteColor))
-        else -> textView.setTextColor(ContextCompat.getColor(textView.context, R.color.downVoteColor))
-    }
-
-    textView.text = getCompactCountAsString(votes.toLong())
-}
 
 private fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?, isNsfw: Boolean) {
     if (thumbnail != null) {

@@ -194,16 +194,10 @@ class SubredditFragment : Fragment() {
                         getDrawable(R.drawable.ic_downvote_24dp)!!,
                         getDrawable(R.drawable.ic_expand_more_black_14dp)!!,
                         object : SwipeCallback.Callback {
-                            override fun extremeLeftAction(position: Int) =
-                                    Toast.makeText(requireContext(), if (isLoggedIn) "can save" else "please login", Toast.LENGTH_SHORT).show()
-
-                            override fun leftAction(position: Int) =
-                                    Toast.makeText(requireContext(), if (isLoggedIn) "can upvote" else "please login", Toast.LENGTH_SHORT).show()
-
-                            override fun rightAction(position: Int) =
-                                    Toast.makeText(requireContext(), if (isLoggedIn) "can downvote" else "please login", Toast.LENGTH_SHORT).show()
-
-                            override fun extremeRightAction(position: Int) = openSubreddit(submissionsAdapter.currentList[position].subredditName)
+                            override fun onExtremeLeftSwipe(swipedThingData: String?) = openSubreddit(swipedThingData!!)
+                            override fun onLeftSwipe(swipedThingData: String?) = submissionsVM.downVote(swipedThingData!!)
+                            override fun onRightSwipe(swipedThingData: String?) = submissionsVM.upVote(swipedThingData!!)
+                            override fun onExtremeRightSwipe(swipedThingData: String?) = submissionsVM.save(swipedThingData!!)
                         }
                 )).attachToRecyclerView(this)
                 addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))

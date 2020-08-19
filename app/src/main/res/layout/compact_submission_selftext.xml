@@ -21,18 +21,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/score_text_view"
+    <com.ducktapedapps.updoot.ui.common.ScoreView
+        android:id="@+id/score_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:textSize="14sp"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/title_text_view"
-        app:layout_constraintTop_toTopOf="@+id/title_text_view"
-        tools:text="1" />
+        app:layout_constraintTop_toTopOf="@+id/title_text_view" />
 
     <TextView
         android:id="@+id/title_text_view"
@@ -42,7 +39,7 @@
         android:layout_marginTop="16dp"
         android:textColor="@color/color_on_background"
         app:layout_constraintBottom_toTopOf="@id/subreddit_text_view"
-        app:layout_constraintEnd_toStartOf="@id/score_text_view"
+        app:layout_constraintEnd_toStartOf="@id/score_view"
         app:layout_constraintStart_toEndOf="@id/preview_image_view"
         app:layout_constraintTop_toTopOf="parent"
 

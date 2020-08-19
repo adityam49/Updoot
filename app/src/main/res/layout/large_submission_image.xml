@@ -25,7 +25,7 @@
             android:layout_marginEnd="8dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/score_text_view"
+            app:layout_constraintEnd_toStartOf="@id/score_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="This is a long title. This is a long title. This is a long title. This is a long title." />
@@ -33,7 +33,6 @@
 
         <ImageView
             android:id="@+id/preview_image_view"
-
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
@@ -59,22 +58,19 @@
             app:layout_constraintTop_toBottomOf="@+id/subreddit_text_view"
             tools:text="999k replies \u2022 8 months ago" />
 
-        <TextView
-            android:id="@+id/score_text_view"
+        <com.ducktapedapps.updoot.ui.common.ScoreView
+            android:id="@+id/score_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/preview_image_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/title_text_view"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:text="123k" />
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/subreddit_text_view"

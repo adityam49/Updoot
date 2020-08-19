@@ -52,6 +52,11 @@ class SubmissionsVM constructor(
 
     fun changeSort(newSubredditSorting: SubredditSorting) = submissionRepo.changeSort(newSubredditSorting)
 
+    fun upVote(name: String) = submissionRepo.vote(name, 1)
+
+    fun downVote(name: String) = submissionRepo.vote(name, -1)
+
+    fun save(id: String) = submissionRepo.save(id)
 }
 
 @ExperimentalCoroutinesApi

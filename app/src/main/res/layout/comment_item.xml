@@ -50,22 +50,20 @@
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
-        app:layout_constraintEnd_toStartOf="@id/text_score"
+        app:layout_constraintEnd_toStartOf="@id/score_view"
         app:layout_constraintStart_toEndOf="@id/text_view_comment_header"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="+12" />
 
-    <TextView
-        android:id="@+id/text_score"
+    <com.ducktapedapps.updoot.ui.common.ScoreView
+        android:id="@+id/score_view"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/text_view_comment_body"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/text_view_children_count"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="32" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

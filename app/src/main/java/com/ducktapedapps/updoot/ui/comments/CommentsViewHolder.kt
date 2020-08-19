@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.ui.comments
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -13,6 +14,7 @@ import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData
+import com.ducktapedapps.updoot.ui.common.ScoreView
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
@@ -28,12 +30,27 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 
     class CommentHolder(val binding: CommentItemBinding) : CommentsViewHolder(binding.root), SwipeableViewHolder {
+        private var extremeLeftSwipeDataValue: String? = null
+        private var leftSwipeDataValue: String? = null
+        private var rightSwipeDataValue: String? = null
+        private var extremeRightSwipeDataValue: String? = null
+
+        override fun getExtremeLeftSwipeData(): String? = extremeLeftSwipeDataValue
+        override fun getLeftSwipeData(): String? = leftSwipeDataValue
+        override fun getRightSwipeData(): String? = rightSwipeDataValue
+        override fun getExtremeRightSwipeData(): String? = extremeRightSwipeDataValue
+
         fun bind(data: CommentData, expandCollapseComment: (index: Int) -> Unit) {
+            leftSwipeDataValue = data.name
+            rightSwipeDataValue = data.name
+            extremeRightSwipeDataValue = data.name
+            extremeLeftSwipeDataValue = data.name
+
             binding.apply {
                 indentView.setIndentLevel(data.depth)
                 textViewCommentHeader.bindHeader(data, expandCollapseComment)
                 textViewCommentBody.bindCommentBody(data, expandCollapseComment)
-                textScore.bindScore(data)
+                scoreView.bindScore(data)
                 textViewChildrenCount.bindChildCount(data.repliesExpanded, data.replies.size)
             }
         }
@@ -61,14 +78,15 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             movementMethod = LinkMovementMethod.getInstance()
         }
 
-        private fun TextView.bindScore(data: CommentData) = apply {
-            setTextColor(getColor(when (data.likes) {
-                true -> R.color.upVoteColor
-                false -> R.color.downVoteColor
-                else -> R.color.color_on_primary
-            }))
-            text = data.ups?.let { getCompactCountAsString(it.toLong()) }
-                    ?: "[score hidden]"
+        private fun ScoreView.bindScore(data: CommentData) = apply {
+            setText(Truss().apply {
+                pushSpan(ForegroundColorSpan(when (data.likes) {
+                    true -> R.color.upVoteColor
+                    false -> R.color.downVoteColor
+                    null -> R.color.color_on_primary
+                }))
+                append(data.ups?.let { getCompactCountAsString(it.toLong()) } ?: "[score hidden]")
+            }.build())
         }
 
         private fun TextView.bindHeader(data: CommentData, expandCollapseComment: (index: Int) -> Unit) = apply {

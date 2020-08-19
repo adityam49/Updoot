@@ -10,6 +10,8 @@ import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionViewHolder.*
+import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.Companion.PayLoad.SaveChange
+import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.Companion.PayLoad.VoteChange
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 
@@ -51,6 +53,19 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
         super.submitList(updatedList)
     }
 
+    private val TAG = "SubmissionAdapter"
+
+    @Suppress("UNCHECKED_CAST")
+    override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) onBindViewHolder(holder, position)
+        else (payloads as List<List<PayLoad>>).first().forEach {
+            when (it) {
+                is VoteChange -> holder.updateVote(getItem(position))
+                is SaveChange -> holder.updateSaveState(getItem(position))
+            }
+        }
+    }
+
     override fun onBindViewHolder(holder: SubmissionViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
@@ -67,25 +82,18 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
             override fun areContentsTheSame(oldItem: LinkData, newItem: LinkData): Boolean {
                 return ((oldItem.likes == null && newItem.likes == null)
                         || (oldItem.likes != null && newItem.likes != null && oldItem.likes == newItem.likes))
+                        && (oldItem.saved == newItem.saved)
             }
 
-            override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? {
-                val partialChanges: MutableList<Int> = mutableListOf()
-                //checking for vote change
-                if ((oldItem.likes == null && newItem.likes != null)
-                        || (oldItem.likes != null && newItem.likes == null)
-                        || (oldItem.likes != newItem.likes)) {
-                    partialChanges += VOTE_CHANGE
-                }
-
-                //checking for submission save state change
-//            if (oldItem.saved != newItem.saved) {
-//                partialChanges += SAVE_STATE_CHANGE
-//            }
-                return partialChanges
+            override fun getChangePayload(oldItem: LinkData, newItem: LinkData): Any? = mutableListOf<PayLoad>().apply {
+                if (oldItem.likes != newItem.likes) add(VoteChange)
+                if (oldItem.saved != newItem.saved) add(SaveChange)
             }
         }
-        const val VOTE_CHANGE = 1
-        const val SAVE_STATE_CHANGE = 2
+
+        sealed class PayLoad {
+            object VoteChange : PayLoad()
+            object SaveChange : PayLoad()
+        }
     }
 }

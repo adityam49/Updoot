@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ItemPostHeaderBinding
 import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.ui.comments.SubmissionMetaDataAdapter.*
+import com.ducktapedapps.updoot.ui.comments.SubmissionMetaDataAdapter.PostHeaderViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
@@ -34,7 +34,7 @@ class SubmissionMetaDataAdapter : Adapter<PostHeaderViewHolder>() {
     class PostHeaderViewHolder(private val binding: ItemPostHeaderBinding) : ViewHolder(binding.root) {
         fun bind(model: LinkData) = binding.apply {
             submissionTitleTextView.text = model.title
-            scoreTextView.text = getCompactCountAsString(model.ups.toLong())
+            scoreView.text = getCompactCountAsString(model.ups.toLong())
             userName.text = Truss()
                     .pushSpan(RoundedBackgroundSpan(
                             ContextCompat.getColor(userName.context, R.color.color_secondary),

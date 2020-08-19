@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.text.TextUtils
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditDAO
@@ -83,6 +84,80 @@ class SubmissionRepo(
         scope.launch(Dispatchers.IO) {
             prefsDAO.setSorting(newSort, subredditName)
             loadPage()
+        }
+    }
+
+    fun vote(id: String, direction: Int) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val cachedSubmission = submissionsCacheDAO.getLinkData(id)
+                if (cachedSubmission.archived)
+                    _toastMessage.value = SingleLiveEvent("Can't vote on archived submission")
+                else {
+                    val api = redditClient.api()
+                    val updatedSubmission = cachedSubmission.withUpdatedVote(direction)
+                    val result = api.castVote(cachedSubmission.name, when (updatedSubmission.likes) {
+                        true -> 1
+                        false -> -1
+                        null -> 0
+                    })
+                    when (result.code()) {
+                        200 -> submissionsCacheDAO.insertSubmissions(updatedSubmission)
+                        429 -> _toastMessage.value = SingleLiveEvent("Too many vote requests!")
+                        else -> Log.e(TAG, result.message())
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun LinkData.withUpdatedVote(direction: Int): LinkData {
+        var updatedLikes: Boolean? = likes
+        var updatedUps = ups
+        when (direction) {
+            1 -> if (likes == null) {
+                updatedLikes = true
+                updatedUps++
+            } else if (!likes) {
+                updatedLikes = true
+                updatedUps += 2
+            } else {
+                updatedLikes = null
+                updatedUps--
+            }
+            -1 -> when {
+                likes == null -> {
+                    updatedUps--
+                    updatedLikes = false
+                }
+                likes -> {
+                    updatedUps -= 2
+                    updatedLikes = false
+                }
+                else -> {
+                    updatedUps++
+                    updatedLikes = null
+                }
+            }
+        }
+        return copy(ups = updatedUps, likes = updatedLikes)
+    }
+
+    fun save(id: String) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val api = redditClient.api()
+                val cachedSubmission = submissionsCacheDAO.getLinkData(id)
+                val result = api.run { if (cachedSubmission.saved) unSave(cachedSubmission.name) else save(cachedSubmission.name) }
+                when (result.code()) {
+                    200 -> submissionsCacheDAO.insertSubmissions(cachedSubmission.copy(saved = !cachedSubmission.saved))
+                    else -> Log.e(TAG, result.message())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

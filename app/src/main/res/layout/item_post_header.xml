@@ -22,7 +22,7 @@
         tools:text=" u/dumbusername \u00b7 author flair" />
 
     <TextView
-        android:id="@+id/score_text_view"
+        android:id="@+id/score_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -53,7 +53,7 @@
         android:layout_margin="8dp"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/user_name"
-        app:layout_constraintEnd_toStartOf="@id/score_text_view"
+        app:layout_constraintEnd_toStartOf="@id/score_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:maxLines="5"
