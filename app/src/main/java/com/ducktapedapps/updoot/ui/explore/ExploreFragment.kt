@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -17,9 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.ChangeBounds
-import androidx.transition.Transition
-import androidx.transition.TransitionManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
@@ -64,8 +59,8 @@ class ExploreFragment : Fragment() {
                 openSubreddit(subredditName)
             }
         })
+        setUpViewModels(trendingAdapter, searchAdapter)
         binding.apply {
-            root.post { animateSearchView(searchAdapter, trendingAdapter) }
             recyclerView.apply {
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = exploreMergeAdapter.apply {
@@ -104,47 +99,4 @@ class ExploreFragment : Fragment() {
                 searchResults.asLiveData().observe(viewLifecycleOwner) { searchAdapter.submitList(it) }
                 isLoading.asLiveData().observe(viewLifecycleOwner) { binding.progressCircular.visibility = if (it) VISIBLE else GONE }
             }
-
-
-    private fun animateSearchView(searchAdapter: SearchAdapter, trendingAdapter: ExploreTrendingAdapter) {
-        val margin = (resources.displayMetrics.density * 16).toInt()
-
-        val changeBounds = ChangeBounds().apply {
-            duration = 300
-            addListener(object : Transition.TransitionListener {
-                override fun onTransitionEnd(transition: Transition) {
-                    setUpViewModels(trendingAdapter, searchAdapter)
-                }
-
-                override fun onTransitionResume(transition: Transition) = Unit
-
-                override fun onTransitionPause(transition: Transition) = Unit
-
-                override fun onTransitionCancel(transition: Transition) = Unit
-
-                override fun onTransitionStart(transition: Transition) {
-                    ObjectAnimator.ofFloat(
-                            binding.cardView,
-                            "radius",
-                            0f,
-                            16f
-                    ).apply {
-                        duration = 300
-                        start()
-                    }
-                }
-            })
-        }
-        TransitionManager.beginDelayedTransition(binding.root, changeBounds)
-
-        ConstraintSet().apply {
-            clone(binding.root)
-            setMargin(R.id.card_view, ConstraintSet.START, margin)
-            setMargin(R.id.card_view, ConstraintSet.END, margin)
-            setMargin(R.id.card_view, ConstraintSet.TOP, margin)
-            setMargin(R.id.card_view, ConstraintSet.BOTTOM, margin)
-            applyTo(binding.root)
-        }
-    }
-
 }

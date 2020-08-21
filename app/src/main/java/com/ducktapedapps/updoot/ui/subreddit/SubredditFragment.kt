@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
@@ -260,7 +259,12 @@ class SubredditFragment : Fragment() {
     private fun reloadFragmentContent() = submissionsVM.reload()
 
     private fun openComments(subreddit: String, id: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id)).commit()
+        requireActivity().supportFragmentManager
+                .beginTransaction()
+                .addToBackStack(null)
+                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
+                .replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id))
+                .commit()
     }
 
     private fun openOptions(submissionId: String) {
@@ -282,7 +286,13 @@ class SubredditFragment : Fragment() {
 
     private fun openSubreddit(targetSubreddit: String) {
         if (targetSubreddit != requireArguments().getString(SUBREDDIT_KEY))
-            requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).replace(R.id.fragment_container, newInstance(targetSubreddit)).commit()
+            requireActivity()
+                    .supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
+                    .replace(R.id.fragment_container, newInstance(targetSubreddit))
+                    .commit()
     }
 
     private fun expandInfo() = updateConstraints(R.layout.side_bar_info)

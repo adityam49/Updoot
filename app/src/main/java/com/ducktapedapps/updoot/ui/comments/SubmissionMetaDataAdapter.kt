@@ -12,7 +12,6 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.SubmissionMetaDataAdapter.PostHeaderViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
-import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.ducktapedapps.updoot.utils.getCompactDateAsString
 
 class SubmissionMetaDataAdapter : Adapter<PostHeaderViewHolder>() {
@@ -34,7 +33,7 @@ class SubmissionMetaDataAdapter : Adapter<PostHeaderViewHolder>() {
     class PostHeaderViewHolder(private val binding: ItemPostHeaderBinding) : ViewHolder(binding.root) {
         fun bind(model: LinkData) = binding.apply {
             submissionTitleTextView.text = model.title
-            scoreView.text = getCompactCountAsString(model.ups.toLong())
+            scoreView.setData(model.ups, model.likes)
             userName.text = Truss()
                     .pushSpan(RoundedBackgroundSpan(
                             ContextCompat.getColor(userName.context, R.color.color_secondary),

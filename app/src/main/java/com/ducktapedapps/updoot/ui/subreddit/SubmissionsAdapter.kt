@@ -24,7 +24,7 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
         fun actionOpenVideo(videoUrl: String)
     }
 
-    lateinit var itemUi: SubmissionUiType
+    var itemUi: SubmissionUiType = COMPACT
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return if (itemUi == COMPACT) {

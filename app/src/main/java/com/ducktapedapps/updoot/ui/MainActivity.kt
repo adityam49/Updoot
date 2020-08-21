@@ -1,11 +1,11 @@
 package com.ducktapedapps.updoot.ui
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
@@ -58,13 +58,23 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     })
     private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
         override fun goToSubreddit(subredditName: String) {
-            supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName)).commit()
+            supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
+                    .replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName))
+                    .commit()
             binding.bottomNavigationDrawer.collapse()
         }
     })
     private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
         override fun openExplore() {
-            supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, ExploreFragment()).commit()
+            supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
+                    .replace(R.id.fragment_container, ExploreFragment())
+                    .commit()
         }
     })
 
@@ -118,7 +128,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private fun setUpStatusBarColors() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            window.statusBarColor = Color.BLACK
+            window.statusBarColor = ContextCompat.getColor(this, R.color.color_primary)
         }
     }
 
@@ -188,7 +198,12 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     }
 
     private fun openSettings() {
-        supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SettingsFragment()).commit()
+        supportFragmentManager
+                .beginTransaction()
+                .addToBackStack(null)
+                .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
+                .replace(R.id.fragment_container, SettingsFragment())
+                .commit()
     }
 
     override fun currentAccountChanged() = viewModel.reloadContent()
