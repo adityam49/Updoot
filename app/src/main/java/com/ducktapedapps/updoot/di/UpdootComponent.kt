@@ -9,13 +9,18 @@ import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
 import com.ducktapedapps.updoot.ui.login.LoginActivity
+import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Singleton
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 @Singleton
 @Component(modules = [NetworkModule::class, ApiModule::class, ApplicationModule::class, RoomModule::class])
 interface UpdootComponent {
@@ -38,6 +43,7 @@ interface UpdootComponent {
     fun inject(exploreFragment: ExploreFragment)
     fun inject(submissionOptionsBottomSheet: SubmissionOptionsBottomSheet)
     fun inject(videoPreviewFragment: VideoPreviewFragment)
+    fun inject(subscriptionFragment: SubscriptionFragment)
 
     //factories
     fun inject(submissionsVMFactory: SubmissionsVMFactory)

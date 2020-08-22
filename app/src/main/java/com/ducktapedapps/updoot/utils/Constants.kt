@@ -4,9 +4,6 @@ import com.ducktapedapps.updoot.BuildConfig
 
 object Constants {
     const val SHARED_PREFS = "shared_prefs"
-    const val TRENDING_SUBS_KEY = "trending_subs_key"
-    const val LAST_TRENDING_UPDATED_KEY = "last_trending_updated_key"
-    const val TOKEN_SHARED_PREFS_KEY = "tokenSharedPrefKey"
     const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
     const val USER_ICON_KEY: String = "user_icon_key"
 
@@ -46,20 +43,17 @@ object Constants {
 
     const val FRONTPAGE = ""
 
-    const val ACCOUNT_LOGIN_REQUEST_CODE = 99
-
     const val UPDOOT_ACCOUNT = "updoot_account"
     const val ADD_ACCOUNT = "Add account"
     const val ANON_USER = "Anonymous"
 
-    //DB names
-    const val SUBREDDIT_PREFS_DB = "subreddit_prefs_db"
     const val SUBREDDIT_DB = "subreddit_db"
-    const val SUBMISSIONS_DB = "submissions_db"
 
     const val THEME_KEY = "theme_key"
 
     //notification
     const val NOTIFICATION_CHANNEL_ID = "com.ducktapedapps.updoot.notification"
+
+    const val DEBOUNCE_TIME_OUT = 400L
 }
 

@@ -20,12 +20,6 @@ class ExploreRepo @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val query: MutableStateFlow<String> = MutableStateFlow("")
-    val results: Flow<List<Subreddit>> = query.map { queryKeyword ->
-        if (queryKeyword.isBlank()) emptyList<Subreddit>()
-        else subredditDAO.observeSubredditWithKeyword(queryKeyword)
-    }.flowOn(Dispatchers.IO)
-
     val trendingSubs: Flow<List<ExploreUiModel>> = subredditDAO.observeTrendingSubs().distinctUntilChanged().map {
         if (it.isNotEmpty()) it.mapToTrendingModel()
         else emptyList()
@@ -70,23 +64,6 @@ class ExploreRepo @Inject constructor(
     private fun List<Subreddit>.mapToTrendingModel(): List<ExploreUiModel> = listOf(
             HeaderUiModel("Trending today ", R.drawable.ic_baseline_trending_up_24),
             TrendingUiModel(this))
-
-    suspend fun searchSubreddit(queryString: String) {
-        _isLoading.value = true
-        withContext(Dispatchers.IO) {
-            query.value = queryString
-            if (queryString.isNotBlank())
-                try {
-                    val redditAPI = redditClient.api()
-                    val results = redditAPI.search(query = queryString)
-                    results!!.children.forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                } finally {
-                    _isLoading.value = false
-                }
-        }
-    }
 
     companion object {
         private const val TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS = 12

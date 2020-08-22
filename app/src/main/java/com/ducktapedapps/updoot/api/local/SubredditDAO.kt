@@ -25,13 +25,13 @@ interface SubredditDAO {
     fun observeSubredditInfo(name: String): Flow<Subreddit?>
 
     @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
-    fun observeSubredditWithKeyword(keyword: String): List<Subreddit>
+    fun observeSubredditWithKeyword(keyword: String): Flow<List<Subreddit>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubredditSubscription)
 
     @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
-    fun observeSubscribedSubredditsFor(user: String): List<Subreddit>
+    fun observeSubscribedSubredditsFor(user: String): Flow<List<Subreddit>>
 
     @Query("SELECT * FROM subreddit WHERE display_name NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<Subreddit>

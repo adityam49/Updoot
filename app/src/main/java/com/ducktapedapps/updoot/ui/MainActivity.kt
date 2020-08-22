@@ -1,13 +1,11 @@
 package com.ducktapedapps.updoot.ui
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
 import com.ducktapedapps.updoot.R
@@ -16,23 +14,20 @@ import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
-import com.ducktapedapps.updoot.ui.login.LoginActivity
 import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerPagerAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
-import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerDestinationAdapter
-import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionsAdapter
 import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
@@ -43,40 +38,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     private val viewModel by lazy { ViewModelProvider(this@MainActivity, activityVMFactory).get(ActivityVM::class.java) }
 
     private lateinit var binding: ActivityMainBinding
-    private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
-
-        override fun login() = startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-
-        override fun switch(accountName: String) {
-            viewModel.setCurrentAccount(accountName)
-            if (bottomNavigationDrawer.isInFocus()) bottomNavigationDrawer.collapse()
-        }
-
-        override fun logout(accountName: String) = viewModel.logout(accountName)
-
-        override fun toggleEntryMenu() = viewModel.toggleAccountsMenuList()
-    })
-    private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
-        override fun goToSubreddit(subredditName: String) {
-            supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
-                    .replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName))
-                    .commit()
-            binding.bottomNavigationDrawer.collapse()
-        }
-    })
-    private val navDrawerDestinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
-        override fun openExplore() {
-            supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
-                    .replace(R.id.fragment_container, ExploreFragment())
-                    .commit()
-        }
-    })
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -109,15 +70,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private fun setUpViewModel() {
         viewModel.apply {
-            accounts.asLiveData().observe(this@MainActivity) {
-                accountsAdapter.submitList(it)
-            }
-            navigationEntries.asLiveData().observe(this@MainActivity) {
-                navDrawerDestinationAdapter.submitList(it)
-            }
-            subredditSubscription.asLiveData().observe(this@MainActivity) {
-                subscriptionAdapter.submitList(it)
-            }
             navDrawerVisibility.observe(this@MainActivity) { visibile ->
                 binding.bottomNavigationDrawer.apply {
                     if (visibile) showWihAnimation() else hideWithAnimation()
@@ -166,10 +118,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
                 binding.viewPager.apply {
                     orientation = ORIENTATION_HORIZONTAL
-                    adapter = NavDrawerPagerAdapter(
-                            pageOneAdapter = listOf(accountsAdapter, navDrawerDestinationAdapter),
-                            pageTwoAdapter = listOf(subscriptionAdapter)
-                    )
+                    adapter = NavDrawerPagerAdapter(this@MainActivity)
                 }
             }
         }
@@ -205,6 +154,8 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                 .replace(R.id.fragment_container, SettingsFragment())
                 .commit()
     }
+
+    fun collapseBottomNavDrawer() = binding.bottomNavigationDrawer.collapse()
 
     override fun currentAccountChanged() = viewModel.reloadContent()
 

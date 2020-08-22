@@ -56,6 +56,7 @@ import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 class SubredditFragment : Fragment() {
     companion object {
@@ -332,7 +333,8 @@ class SubredditFragment : Fragment() {
                 binding.apply {
                     if (binding.sideBar.sideBarInfo.text.isNullOrEmpty()) {
                         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
-                            val spannedText = markwon.toMarkdown(it.description.replace("(#+)".toRegex(), "$1 "))
+                            val spannedText = markwon.toMarkdown(it.description?.replace("(#+)".toRegex(), "$1 ")
+                                    ?: "")
                             withContext(Dispatchers.Main) {
                                 binding.sideBar.sideBarInfo.apply {
                                     text = spannedText

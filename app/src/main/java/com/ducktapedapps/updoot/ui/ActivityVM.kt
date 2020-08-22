@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
 import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
@@ -37,15 +36,6 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
         if (it.first().name == Constants.ANON_USER) LoggedOut
         else LoggedIn(it.first().name)
     }
-
-    val subredditSubscription: Flow<List<Subreddit>> = loginState.map { user ->
-        subredditDAO.observeSubscribedSubredditsFor(
-                when (user) {
-                    is LoggedOut -> ""
-                    is LoggedIn -> user.userName
-                }
-        )
-    }.flowOn(Dispatchers.IO)
 
     val accounts: Flow<List<AccountModel>> = accountEntriesExpanded.combine(_accounts) { expanded, accounts: List<AccountModel> ->
         if (expanded) accounts
