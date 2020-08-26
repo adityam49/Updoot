@@ -63,7 +63,9 @@ class SubredditViewHolder(val binding: ItemSubscriptionSubredditBinding) : Recyc
     private fun bindIcon(view: ImageView, url: String?) =
             Glide.with(view)
                     .load(url)
-                    .placeholder(R.drawable.ic_subreddit_default_24dp)
+                    .placeholder(ContextCompat.getDrawable(view.context, R.drawable.ic_subreddit_default_24dp)?.apply {
+                        setTint(ContextCompat.getColor(view.context, R.color.color_on_nav_drawer))
+                    })
                     .apply(RequestOptions.circleCropTransform())
                     .into(view)
 }

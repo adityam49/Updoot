@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="?attr/selectableItemBackground"
     android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
     android:orientation="horizontal">
 
     <ImageView
@@ -12,14 +13,13 @@
         android:layout_height="24dp"
         android:layout_marginStart="18dp"
         android:layout_marginTop="12dp"
-        android:tint="@color/color_on_nav_drawer"
         android:layout_marginBottom="12dp"
         android:contentDescription="@string/navigation_destination_icon"
         android:gravity="center"
+        app:tint="@color/color_on_nav_drawer"
         tools:src="@drawable/ic_baseline_inbox_24" />
 
     <TextView
-        android:textColor="@color/color_on_nav_drawer"
         android:id="@+id/title_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
