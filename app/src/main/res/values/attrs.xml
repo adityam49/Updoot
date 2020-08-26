@@ -7,5 +7,6 @@
         <attr name="indentLevel" format="integer" />
         <attr name="threadWidth" format="dimension" />
         <attr name="indentSpace" format="dimension" />
+        <attr name="singleThreadColor" format="boolean" />
     </declare-styleable>
 </resources>

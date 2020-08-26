@@ -29,5 +29,17 @@
     <color name="color_on_nav_drawer">#FFFFFF</color>
     <color name="color_on_nav_drawer_variant">#808097</color>
     <color name="sticky_post_color">#388E3C</color>
+
+    <color name="thread_violet">#7b1fa2</color>
+    <color name="thread_indigo">#303f9f</color>
+    <color name="thread_blue">#1976d2</color>
+    <color name="thread_green">#388e3c</color>
+    <color name="thread_light_green">#689f38</color>
+    <color name="thread_lime">#afb42b</color>
+    <color name="thread_yellow">#fbc02d</color>
+    <color name="thread_orange">#f57c00</color>
+    <color name="thread_deep_orange">#e64a19</color>
+    <color name="thread_pink">#c2185b</color>
+    <color name="thread_red">#d32f2f</color>
 </resources>
 

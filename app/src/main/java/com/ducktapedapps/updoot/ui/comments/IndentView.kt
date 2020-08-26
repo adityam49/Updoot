@@ -22,6 +22,22 @@ class IndentView @JvmOverloads constructor(
     private var threadWidth = 0f
     private var threadSeparationSpace = 0f
     private var singleThreadMode = false
+    private var singleThreadColor = true
+    private val colorArray by lazy {
+        listOf(
+                ContextCompat.getColor(context, R.color.thread_violet),
+                ContextCompat.getColor(context, R.color.thread_indigo),
+                ContextCompat.getColor(context, R.color.thread_blue),
+                ContextCompat.getColor(context, R.color.thread_green),
+                ContextCompat.getColor(context, R.color.thread_light_green),
+                ContextCompat.getColor(context, R.color.thread_lime),
+                ContextCompat.getColor(context, R.color.thread_yellow),
+                ContextCompat.getColor(context, R.color.thread_orange),
+                ContextCompat.getColor(context, R.color.thread_deep_orange),
+                ContextCompat.getColor(context, R.color.thread_red),
+                ContextCompat.getColor(context, R.color.thread_pink)
+        )
+    }
 
     init {
         if (attrs != null) {
@@ -30,10 +46,11 @@ class IndentView @JvmOverloads constructor(
                             attrs,
                             R.styleable.IndentView
                     )
+            singleThreadColor = ta.getBoolean(R.styleable.IndentView_singleThreadColor, false)
             singleThreadMode = ta.getBoolean(R.styleable.IndentView_singleThreadMode, false)
             threadSeparationSpace =
-                    ta.getDimension(R.styleable.IndentView_threadSeparationSpace, 3f).toDP()
-            threadWidth = ta.getDimension(R.styleable.IndentView_threadWidth, 1f).toDP()
+                    ta.getDimension(R.styleable.IndentView_threadSeparationSpace, 3f)
+            threadWidth = ta.getDimension(R.styleable.IndentView_threadWidth, 1f)
             threadPaint = Paint().apply {
                 color = ta.getColor(
                         R.styleable.IndentView_threadColor,
@@ -71,7 +88,7 @@ class IndentView @JvmOverloads constructor(
                         top.toFloat(),
                         paddingLeft + (indentLevel - 1) * (threadSeparationSpace) + (indentLevel + 1) * threadWidth,
                         bottom.toFloat(),
-                        threadPaint
+                        threadPaint.apply { if (!singleThreadColor) color = colorArray.first() }
                 )
             else
                 for (i in 1..indentLevel)
@@ -80,7 +97,7 @@ class IndentView @JvmOverloads constructor(
                             top.toFloat(),
                             paddingLeft + (i - 1) * (threadSeparationSpace) + threadWidth * (i + 1),
                             bottom.toFloat(),
-                            threadPaint
+                            threadPaint.apply { if (!singleThreadColor) color = colorArray[i] }
                     )
 
         }
@@ -90,6 +107,4 @@ class IndentView @JvmOverloads constructor(
         indentLevel = newLevel
         requestLayout()
     }
-
-    private fun Float.toDP() = resources.displayMetrics.density * this
 }
