@@ -9,17 +9,20 @@ import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
 import com.ducktapedapps.updoot.model.MoreCommentData
-import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.*
+import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.CommentHolder
+import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.MoreCommentHolder
 
 
 class CommentsAdapter(
-        private val expandCollapseComment: (index: Int) -> Unit
+        private val expandCollapseComment: (index: Int) -> Unit,
+        private val singleThreadMode: Boolean,
+        private val singleThreadColorMode: Boolean
 ) : ListAdapter<BaseComment, CommentsViewHolder>(CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentsViewHolder =
             when (viewType) {
-                COMMENT -> CommentHolder(CommentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-                MORE_COMMENT -> MoreCommentHolder(MoreCommentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+                COMMENT -> CommentHolder(CommentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false), singleThreadMode, singleThreadColorMode)
+                MORE_COMMENT -> MoreCommentHolder(MoreCommentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false), singleThreadMode, singleThreadColorMode)
                 else -> throw IllegalArgumentException("invalid view holder requested :$viewType")
             }
 

@@ -5,16 +5,14 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.utils.Constants
 
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preference, rootKey)
-        val dropDownPreference: ListPreference? = findPreference(Constants.THEME_KEY)
+        val dropDownPreference: ListPreference? = findPreference(getString(R.string.theme_key))
         dropDownPreference?.setOnPreferenceChangeListener { _, newValue ->
             AppCompatDelegate.setDefaultNightMode(Integer.parseInt(newValue as String))
             true
         }
     }
-
 }

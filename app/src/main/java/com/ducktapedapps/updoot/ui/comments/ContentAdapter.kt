@@ -11,9 +11,8 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.*
 import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
 import io.noties.markwon.Markwon
-import javax.inject.Inject
 
-class ContentAdapter @Inject constructor(private val markwonInstance: Markwon) : RecyclerView.Adapter<ContentViewHolder>() {
+class ContentAdapter(private val markwonInstance: Markwon) : RecyclerView.Adapter<ContentViewHolder>() {
     var content: CommentScreenContent? = null
         set(value) {
             field = value

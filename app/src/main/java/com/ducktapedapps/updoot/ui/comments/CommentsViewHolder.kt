@@ -20,14 +20,28 @@ import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 
 sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    class MoreCommentHolder(val binding: MoreCommentItemBinding) : CommentsViewHolder(binding.root) {
+    class MoreCommentHolder(val binding: MoreCommentItemBinding, singleThreadMode: Boolean, singleThreadColorMode: Boolean) : CommentsViewHolder(binding.root) {
+        init {
+            binding.indentView.apply {
+                this.singleThreadMode = singleThreadMode
+                this.singleThreadColor = singleThreadColorMode
+            }
+        }
+
         fun bind(data: MoreCommentData) = binding.apply {
             indentView.setIndentLevel(data.depth)
             moreCommentCountTv.text = String.format("Load %d more %s", data.children.size, if (data.children.size == 1) "comment" else "comments")
         }
     }
 
-    class CommentHolder(val binding: CommentItemBinding) : CommentsViewHolder(binding.root), SwipeableViewHolder {
+    class CommentHolder(val binding: CommentItemBinding, singleThreadMode: Boolean, singleThreadColorMode: Boolean) : CommentsViewHolder(binding.root), SwipeableViewHolder {
+        init {
+            binding.indentView.apply {
+                this.singleThreadMode = singleThreadMode
+                this.singleThreadColor = singleThreadColorMode
+            }
+        }
+
         private var extremeLeftSwipeDataValue: String? = null
         private var leftSwipeDataValue: String? = null
         private var rightSwipeDataValue: String? = null

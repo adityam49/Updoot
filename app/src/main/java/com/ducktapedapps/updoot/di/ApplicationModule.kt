@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import androidx.work.Configuration
 import com.ducktapedapps.updoot.backgroundWork.UpdootWorkerFactory
 import com.ducktapedapps.updoot.utils.Constants
@@ -24,6 +25,10 @@ class ApplicationModule {
     fun provideSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE)
 
+    @Provides
+    @Named("Prefs")
+    fun providePrefsManager(context: Context): SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(context)
 
     @Provides
     @Singleton

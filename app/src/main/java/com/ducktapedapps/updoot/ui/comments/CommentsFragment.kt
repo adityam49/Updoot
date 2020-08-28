@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
@@ -17,8 +18,14 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
+import io.noties.markwon.Markwon
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
+import javax.inject.Named
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 class CommentsFragment : Fragment() {
     companion object {
         private const val SUBREDDIT_KEY = "subreddit_key"
@@ -32,6 +39,10 @@ class CommentsFragment : Fragment() {
     }
 
     @Inject
+    @Named("Prefs")
+    lateinit var sharedPrefs: SharedPreferences
+
+    @Inject
     lateinit var commentsVMFactory: CommentsVMFactory
     private lateinit var viewModel: CommentsVM
 
@@ -40,10 +51,7 @@ class CommentsFragment : Fragment() {
         get() = _binding!!
 
     @Inject
-    lateinit var contentAdapter: ContentAdapter
-
-    private val commentsAdapter = CommentsAdapter(::expandCollapseComment)
-    private val submissionHeaderAdapter = SubmissionMetaDataAdapter()
+    lateinit var markwon: Markwon
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -68,12 +76,21 @@ class CommentsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setUpRecyclerView()
-        observeData()
+        super.onViewCreated(view, savedInstanceState)
+        val contentAdapter = ContentAdapter(markwon)
+        val commentsAdapter = CommentsAdapter(
+                ::expandCollapseComment,
+                sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_count_key), true),
+                sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_color_key), true)
+        )
+        val submissionHeaderAdapter = SubmissionMetaDataAdapter()
+        setUpRecyclerView(submissionHeaderAdapter, contentAdapter, commentsAdapter)
+        observeData(submissionHeaderAdapter, contentAdapter, commentsAdapter)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.recyclerView.adapter = null
         _binding = null
     }
 
@@ -84,14 +101,14 @@ class CommentsFragment : Fragment() {
         ).get(CommentsVM::class.java)
     }
 
-    private fun observeData() = viewModel.apply {
+    private fun observeData(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) = viewModel.apply {
         allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
         isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
         submissionData.observe(viewLifecycleOwner) { submissionHeaderAdapter.linkData = it }
         content.observe(viewLifecycleOwner) { contentAdapter.content = it }
     }
 
-    private fun setUpRecyclerView() {
+    private fun setUpRecyclerView(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = ConcatAdapter(submissionHeaderAdapter, contentAdapter, commentsAdapter)

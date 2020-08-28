@@ -4,6 +4,20 @@
         android:entries="@array/Theme_Entries"
         android:entryValues="@array/Theme_Values"
         android:icon="@drawable/ic_theme_icon_24dp"
-        android:key="theme_key"
+        android:key="@string/theme_key"
         android:title="Theme" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="@string/comment_thread_indicator_count_key"
+        android:summaryOff="@string/using_multiple_threads"
+        android:summaryOn="@string/using_single_thread"
+        android:title="@string/single_thread_indicator" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="@string/comment_thread_indicator_color_key"
+        android:summaryOff="@string/using_multiple_color_thread"
+        android:summaryOn="@string/using_single_color_thread"
+        android:title="@string/single_color_thread_indicator" />
 </PreferenceScreen>

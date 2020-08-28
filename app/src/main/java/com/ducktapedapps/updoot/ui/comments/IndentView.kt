@@ -21,8 +21,8 @@ class IndentView @JvmOverloads constructor(
     private var indentLevel = 0
     private var threadWidth = 0f
     private var threadSeparationSpace = 0f
-    private var singleThreadMode = false
-    private var singleThreadColor = true
+    var singleThreadMode = true
+    var singleThreadColor = true
     private val colorArray by lazy {
         listOf(
                 ContextCompat.getColor(context, R.color.thread_violet),
@@ -88,7 +88,7 @@ class IndentView @JvmOverloads constructor(
                         top.toFloat(),
                         paddingLeft + (indentLevel - 1) * (threadSeparationSpace) + (indentLevel + 1) * threadWidth,
                         bottom.toFloat(),
-                        threadPaint.apply { if (!singleThreadColor) color = colorArray.first() }
+                        threadPaint.apply { if (!singleThreadColor) color = colorArray[indentLevel] }
                 )
             else
                 for (i in 1..indentLevel)

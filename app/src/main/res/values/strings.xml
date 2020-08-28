@@ -49,4 +49,10 @@
     <string name="post_view_type">Post View Type</string>
     <string name="subreddit_cache_removed">Subreddit cache removed</string>
     <string name="subreddit_removed_count">Removed :%1$d cached subreddits</string>
+    <string name="single_thread_indicator">Single thread indicator</string>
+    <string name="using_single_thread">Comments use single thread indicator</string>
+    <string name="using_multiple_threads">Comments use multiple thread indicators</string>
+    <string name="single_color_thread_indicator">Single color thread indicator</string>
+    <string name="using_single_color_thread">Comments use single color thread</string>
+    <string name="using_multiple_color_thread">Comments use multiple color threads</string>
 </resources>

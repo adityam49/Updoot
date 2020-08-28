@@ -49,8 +49,6 @@ object Constants {
 
     const val SUBREDDIT_DB = "subreddit_db"
 
-    const val THEME_KEY = "theme_key"
-
     //notification
     const val NOTIFICATION_CHANNEL_ID = "com.ducktapedapps.updoot.notification"
 
