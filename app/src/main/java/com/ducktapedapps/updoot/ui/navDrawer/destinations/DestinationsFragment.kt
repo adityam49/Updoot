@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.navDrawer.destinations
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,7 @@ import com.ducktapedapps.updoot.databinding.FragmentDestinationsBinding
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.MainActivity
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
-import com.ducktapedapps.updoot.ui.login.LoginActivity
+import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountsAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -41,7 +40,15 @@ class DestinationsFragment : Fragment() {
 
     private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
 
-        override fun login() = startActivity(Intent(requireActivity(), LoginActivity::class.java))
+        override fun login() {
+            requireActivity()
+                    .supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
+                    .replace(R.id.fragment_container, LoginFragment())
+                    .commit()
+        }
 
         override fun switch(accountName: String) {
             activityVM.setCurrentAccount(accountName)

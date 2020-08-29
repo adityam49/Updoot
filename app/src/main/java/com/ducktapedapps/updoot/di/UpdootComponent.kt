@@ -8,7 +8,7 @@ import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsVMFactory
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreVMFactory
-import com.ducktapedapps.updoot.ui.login.LoginActivity
+import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.subscriptions.SubscriptionFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
@@ -30,22 +30,18 @@ interface UpdootComponent {
         fun create(@BindsInstance context: Context): UpdootComponent
     }
 
-    //Application Class
     fun inject(application: UpdootApplication)
 
-    //Activity
     fun inject(mainActivity: MainActivity)
-    fun inject(loginActivity: LoginActivity)
 
-    //fragments
     fun inject(subredditFragment: SubredditFragment)
     fun inject(commentsFragment: CommentsFragment)
     fun inject(exploreFragment: ExploreFragment)
     fun inject(submissionOptionsBottomSheet: SubmissionOptionsBottomSheet)
     fun inject(videoPreviewFragment: VideoPreviewFragment)
     fun inject(subscriptionFragment: SubscriptionFragment)
+    fun inject(loginFragment: LoginFragment)
 
-    //factories
     fun inject(submissionsVMFactory: SubmissionsVMFactory)
     fun inject(commentsVMFactory: CommentsVMFactory)
     fun inject(exploreVMFactory: ExploreVMFactory)

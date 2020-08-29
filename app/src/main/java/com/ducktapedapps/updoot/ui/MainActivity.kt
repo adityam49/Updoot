@@ -14,6 +14,7 @@ import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
+import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerPagerAdapter
 import com.ducktapedapps.updoot.ui.navDrawer.ScrimVisibilityAdjuster
 import com.ducktapedapps.updoot.ui.navDrawer.ToolbarMenuSwapper
@@ -131,6 +132,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                     SubredditFragment::class.java.simpleName,
                     CommentsFragment::class.java.simpleName -> viewModel.showBottomNavDrawer()
 
+                    LoginFragment::class.java.simpleName,
                     SettingsFragment::class.java.simpleName,
                     VideoPreviewFragment::class.java.simpleName,
                     ImagePreviewFragment::class.java.simpleName,
