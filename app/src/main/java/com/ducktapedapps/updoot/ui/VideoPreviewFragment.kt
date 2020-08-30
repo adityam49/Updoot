@@ -8,6 +8,8 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
@@ -15,10 +17,15 @@ import com.ducktapedapps.updoot.databinding.FragmentVideoPreviewBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 class VideoPreviewFragment : Fragment() {
 
     companion object {
@@ -82,8 +89,33 @@ class VideoPreviewFragment : Fragment() {
 
     private fun getMediaSource(): MediaSource {
         val dataSourceFactory = DefaultDataSourceFactory(this.context, resources.getString(R.string.app_name))
-        return DashMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(requireArguments().getString(KEY_VIDEO_URL)))
+        val uri = Uri.parse(requireArguments().getString(KEY_VIDEO_URL))
+        return when {
+            uri.authority?.contains("redd") == true -> DashMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(uri)
+            uri.authority?.contains("imgur") == true -> {
+                ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(uri)
+            }
+            else -> {
+                Toast.makeText(requireContext(), "${uri.authority} not supported yet!", Toast.LENGTH_SHORT).show()
+                throw Exception("unknown url! $uri")
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.window?.apply {
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_scrim)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activity?.window?.apply {
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_primary_variant)
+        }
     }
 
     override fun onDestroyView() {

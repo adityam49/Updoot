@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
@@ -23,7 +24,9 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickHandler
 import com.ducktapedapps.updoot.utils.CenteredImageSpan
+import com.ducktapedapps.updoot.utils.ImgurResult
 import com.ducktapedapps.updoot.utils.Truss
+import com.ducktapedapps.updoot.utils.getImgurMedia
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
     abstract fun bind(submissions: LinkData)
@@ -272,7 +275,11 @@ private fun SubmissionClickHandler.performAction(linkData: LinkData) {
                 if (imageSet != null) actionOpenImage(imageSet.lowResUrl!!, imageSet.highResUrl!!)
                 else Log.e("SubmissionViewHolder", "performAction: content type image has not image attached :$this ")
 
-            "link" -> actionOpenLink(url)
+            "link" -> when (val imgurResource = Uri.parse(url).getImgurMedia()) {
+                is ImgurResult.Image -> actionOpenImage(imageSet?.lowResUrl!!, imgurResource.url)
+                is ImgurResult.Video -> actionOpenVideo(imgurResource.url)
+                ImgurResult.NonImgurResource -> actionOpenLink(url)
+            }
 
             "rich:video", "hosted:video" -> videoUrl?.let { actionOpenVideo(it) }
 
