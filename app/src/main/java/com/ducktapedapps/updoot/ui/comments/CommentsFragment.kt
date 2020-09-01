@@ -10,6 +10,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,11 +19,9 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
-import io.noties.markwon.Markwon
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
-import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -39,7 +38,6 @@ class CommentsFragment : Fragment() {
     }
 
     @Inject
-    @Named("Prefs")
     lateinit var sharedPrefs: SharedPreferences
 
     @Inject
@@ -49,9 +47,6 @@ class CommentsFragment : Fragment() {
     private var _binding: FragmentCommentsBinding? = null
     private val binding: FragmentCommentsBinding
         get() = _binding!!
-
-    @Inject
-    lateinit var markwon: Markwon
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -77,7 +72,7 @@ class CommentsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val contentAdapter = ContentAdapter(markwon)
+        val contentAdapter = ContentAdapter()
         val commentsAdapter = CommentsAdapter(
                 ::expandCollapseComment,
                 sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_count_key), true),
@@ -104,8 +99,8 @@ class CommentsFragment : Fragment() {
     private fun observeData(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) = viewModel.apply {
         allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
         isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-        submissionData.observe(viewLifecycleOwner) { submissionHeaderAdapter.linkData = it }
-        content.observe(viewLifecycleOwner) { contentAdapter.content = it }
+        submissionData.asLiveData().observe(viewLifecycleOwner) { submissionHeaderAdapter.linkData = it }
+        content.asLiveData().observe(viewLifecycleOwner) { contentAdapter.submitList(listOf(it)) }
     }
 
     private fun setUpRecyclerView(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) {

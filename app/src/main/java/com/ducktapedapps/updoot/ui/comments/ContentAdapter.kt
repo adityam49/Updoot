@@ -3,21 +3,17 @@ package com.ducktapedapps.updoot.ui.comments
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import android.widget.FrameLayout
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.ducktapedapps.updoot.databinding.ItemContentImageBinding
 import com.ducktapedapps.updoot.databinding.ItemContentLinkBinding
 import com.ducktapedapps.updoot.databinding.ItemContentSelftextBinding
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.*
-import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
-import io.noties.markwon.Markwon
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 
-class ContentAdapter(private val markwonInstance: Markwon) : RecyclerView.Adapter<ContentViewHolder>() {
-    var content: CommentScreenContent? = null
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+class ContentAdapter : ListAdapter<SubmissionContent, ContentViewHolder>(CALLBACK) {
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -26,36 +22,43 @@ class ContentAdapter(private val markwonInstance: Markwon) : RecyclerView.Adapte
             SELF_TEXT -> SelfTextViewHolder(ItemContentSelftextBinding.inflate(layoutInflater, parent, false))
             LINK -> LinkViewHolder(ItemContentLinkBinding.inflate(layoutInflater, parent, false))
             IMAGE -> ImageViewHolder(ItemContentImageBinding.inflate(layoutInflater, parent, false))
+            PLACEHOLDER -> PlaceHolder(FrameLayout(parent.context, null))
             else -> throw  RuntimeException("Invalid view type requested : $viewType")
         }
     }
 
     override fun getItemViewType(position: Int): Int =
-            when (content) {
-                is LinkModel -> LINK
-                is LinkData -> {
-                    when ((content as LinkData).post_hint) {
-                        "link", "rich:video", "hosted:video", "image" -> IMAGE
-                        "self" -> SELF_TEXT
-                        else -> throw RuntimeException("Invalid content type : $content")
-                    }
-                }
-                else -> throw RuntimeException("Invalid content type : $content")
+            when (currentList[position]) {
+                is Image -> IMAGE
+                is Video -> PLACEHOLDER
+                is SelfText -> SELF_TEXT
+                is Link -> LINK
+                JustTitle -> PLACEHOLDER
             }
 
-    override fun getItemCount() = if (content == null) 0 else 1
 
     override fun onBindViewHolder(holder: ContentViewHolder, position: Int) {
         when (holder) {
-            is LinkViewHolder -> holder.bind(content as LinkModel)
-            is SelfTextViewHolder -> holder.bind((content as LinkData).selftext!!, markwonInstance)
-            is ImageViewHolder -> holder.bind((content as LinkData).imageSet!!, (content as LinkData).thumbnail)
+            is LinkViewHolder -> holder.bind((currentList[0] as Link).linkModel)
+            is SelfTextViewHolder -> holder.bind((currentList[0] as SelfText).parsedMarkdown)
+            is ImageViewHolder -> holder.bind((currentList[0] as Image).data.lowResUrl, (currentList[0] as Image).data.highResUrl)
         }
     }
 
     private companion object {
+        val CALLBACK = object : DiffUtil.ItemCallback<SubmissionContent>() {
+            override fun areItemsTheSame(oldItem: SubmissionContent, newItem: SubmissionContent): Boolean =
+                    oldItem is Link && newItem is Link
+                            || oldItem is Image && newItem is Image
+                            || oldItem is Video && newItem is Video
+                            || oldItem is SelfText && newItem is SelfText
+                            || oldItem is JustTitle && newItem is JustTitle
+
+            override fun areContentsTheSame(oldItem: SubmissionContent, newItem: SubmissionContent): Boolean = true
+        }
         const val SELF_TEXT = 1
         const val LINK = 2
         const val IMAGE = 3
+        const val PLACEHOLDER = 4
     }
 }

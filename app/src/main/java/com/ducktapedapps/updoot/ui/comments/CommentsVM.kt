@@ -1,59 +1,73 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.util.Log
-import androidx.lifecycle.*
+import android.text.Spanned
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
+import com.ducktapedapps.updoot.utils.Media
+import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
 import com.ducktapedapps.updoot.utils.linkMetaData.extractMetaData
 import com.ducktapedapps.updoot.utils.linkMetaData.fetchMetaDataFrom
 import com.ducktapedapps.updoot.utils.linkMetaData.toLinkModel
+import com.ducktapedapps.updoot.utils.toMedia
+import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.net.URI
+import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 class CommentsVM(
         private val repo: CommentsRepo,
-        private val submissionsCacheDAO: SubmissionsCacheDAO,
-        val id: String,
-        subreddit_name: String
+        submissionsCacheDAO: SubmissionsCacheDAO,
+        private val markwon: Markwon,
+        private val id: String,
+        private val subreddit_name: String
 ) : ViewModel() {
     val allComments = repo.allComments
 
-    private val _contentLoading = MutableLiveData(true)
-    private val _content = MutableLiveData<CommentScreenContent>()
-    val content: LiveData<CommentScreenContent> = _content
+    private val _contentLoading = MutableStateFlow(true)
 
-    private val _submissionData = MutableLiveData<LinkData>()
-    val submissionData: LiveData<LinkData> = _submissionData
+    val submissionData: Flow<LinkData> = submissionsCacheDAO
+            .observeLinkData(id)
+            .distinctUntilChanged()
+            .flowOn(Dispatchers.IO)
 
-    val isLoading = MediatorLiveData<Boolean>().apply {
-        var commentsLoading = false
-        var contentLoading = false
-        addSource(repo.commentsAreLoading) {
-            commentsLoading = it
-            postValue(commentsLoading || contentLoading)
-        }
-        addSource(_contentLoading) {
-            contentLoading = it
-            postValue(commentsLoading || contentLoading)
-        }
+    val content: Flow<SubmissionContent> = submissionData.transform {
+        emit(
+                when (val data = it.toMedia()) {
+                    is Media.SelfText -> SelfText(markwon.toMarkdown(data.text))
+                    is Media.Image -> Image(data)
+                    is Media.Video -> Video(data)
+                    is Media.Link ->
+                        try {
+                            URI.create(data.url).getMetaData()
+                        } catch (e: Exception) {
+                            JustTitle
+                        } finally {
+                            _contentLoading.value = false
+                        }
+                    Media.JustTitle -> JustTitle
+                }
+
+        )
     }
+
+
+    val isLoading = repo.commentsAreLoading
 
     init {
-        viewModelScope.apply {
-            async {
-                loadSubmissionData()
-                submissionData.value?.let { loadContent(it) }
-            }
-            async { loadComments(subreddit_name, id) }
-
-        }
+        loadComments()
     }
 
-    private fun loadComments(subreddit: String, submission_id: String) {
+    private fun loadComments() {
         viewModelScope.launch {
-            repo.loadComments(subreddit, submission_id)
+            repo.loadComments(subreddit_name, id)
         }
     }
 
@@ -65,39 +79,38 @@ class CommentsVM(
 
     fun castVote(direction: Int, index: Int) = Unit
 
-    private suspend fun loadContent(linkData: LinkData) {
-        if (!linkData.selftext.isNullOrBlank() || linkData.imageSet != null) {
-            _content.postValue(linkData)
-            _contentLoading.value = false
-        } else loadLinkMetaData()
-    }
-
-    private suspend fun loadSubmissionData() {
-        withContext(Dispatchers.IO) {
-            _submissionData.postValue(submissionsCacheDAO.getLinkData(id).also {
-                Log.d("CommentsVM", "loadSubmissionData: $it")
-            })
-        }
-    }
-
-    private suspend fun loadLinkMetaData() {
-        try {
-            withContext(Dispatchers.IO) {
-                _contentLoading.postValue(true)
-                loadLinkMetaDataSuccessfully()
-            }
-        } catch (e: Exception) {
-            _contentLoading.postValue(false)
-            e.printStackTrace()
-        }
-    }
 
     @Throws(Exception::class)
-    private suspend fun loadLinkMetaDataSuccessfully() {
-        val url = submissionData.value!!.url
-        val htmlResponse = fetchMetaDataFrom(url)
-        _content.postValue(htmlResponse.extractMetaData().toLinkModel(url))
-        _contentLoading.postValue(false)
+    private suspend fun URI.getMetaData(): Link {
+        _contentLoading.value = true
+        val htmlResponse = fetchMetaDataFrom(this.toString())
+        return Link(htmlResponse.extractMetaData().toLinkModel(this.toString()))
     }
 }
 
+sealed class SubmissionContent {
+    data class Image(val data: Media.Image) : SubmissionContent()
+    data class Video(val data: Media.Video) : SubmissionContent()
+    data class SelfText(val parsedMarkdown: Spanned) : SubmissionContent()
+    data class Link(val linkModel: LinkModel) : SubmissionContent()
+    object JustTitle : SubmissionContent()
+}
+
+@ExperimentalCoroutinesApi
+class CommentsVMFactory @Inject constructor(
+        private val commentsRepo: CommentsRepo,
+        private val submissionsCacheDAO: SubmissionsCacheDAO,
+        private val markwon: Markwon
+) : ViewModelProvider.Factory {
+    private lateinit var subredditName: String
+    private lateinit var id: String
+
+    fun setSubredditAndId(name: String, id: String) {
+        subredditName = name
+        this.id = id
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
+            CommentsVM(commentsRepo, submissionsCacheDAO, markwon, id, subredditName) as T
+}

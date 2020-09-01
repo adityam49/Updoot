@@ -21,4 +21,7 @@ interface SubmissionsCacheDAO {
 
     @Query("SELECT * FROM LinkData WHERE id is :id")
     suspend fun getLinkData(id: String): LinkData
+
+    @Query("SELECT * FROM LinkData WHERE id is :id")
+    fun observeLinkData(id: String): Flow<LinkData>
 }

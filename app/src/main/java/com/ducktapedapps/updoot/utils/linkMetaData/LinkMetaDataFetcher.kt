@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.utils.linkMetaData
 
+import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -20,14 +21,14 @@ fun Document.extractMetaData(): Map<String, String> {
     return map
 }
 
-fun Map<String, String>.toLinkModel(url:String): LinkModel {
+fun Map<String, String>.toLinkModel(url: String): LinkModel {
     var title: String? = null
     var icon: String? = null
     var siteName: String? = null
     var description: String? = null
     this.keys.forEach {
+        siteName = Uri.parse(url).authority
         when (it) {
-            "og:site_name" -> siteName = this["og:site_name"]
             "og:title" -> title = this["og:title"]
             "og:description" -> description = this["og:description"]
             "og:image" -> icon = this["og:image"]

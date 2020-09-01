@@ -3,7 +3,6 @@ package com.ducktapedapps.updoot.model
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ducktapedapps.updoot.ui.comments.CommentScreenContent
 import com.squareup.moshi.Json
 
 @Entity
@@ -21,7 +20,6 @@ data class LinkData(
         val saved: Boolean,
         @Json(name = "created_utc") val created: Long,
         @Json(name = "num_comments") val commentsCount: Int,
-        val post_hint: String?,
         @PrimaryKey val id: String,
         val url: String,
         val permalink: String,
@@ -31,4 +29,4 @@ data class LinkData(
         val lastUpdated: Long,
         val stickied: Boolean,
         val videoUrl: String?
-) : CommentScreenContent
+)

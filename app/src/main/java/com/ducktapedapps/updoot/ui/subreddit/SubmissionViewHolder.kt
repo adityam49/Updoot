@@ -1,9 +1,7 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -24,9 +22,9 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.SubmissionClickHandler
 import com.ducktapedapps.updoot.utils.CenteredImageSpan
-import com.ducktapedapps.updoot.utils.ImgurResult
+import com.ducktapedapps.updoot.utils.Media.*
 import com.ducktapedapps.updoot.utils.Truss
-import com.ducktapedapps.updoot.utils.getImgurMedia
+import com.ducktapedapps.updoot.utils.toMedia
 
 sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), SwipeableViewHolder {
     abstract fun bind(submissions: LinkData)
@@ -140,12 +138,15 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                     }
                     previewImageView.apply {
                         setOnClickListener { clickHandler.performAction(this@with) }
-                        Glide.with(this)
-                                .load(submissions.imageSet?.lowResUrl)
-                                .thumbnail(Glide.with(previewImageView).load(thumbnail))
-                                .placeholder(R.color.color_on_surface)
-                                .error(R.drawable.ic_image_error_24dp)
-                                .into(this)
+                        imageSet?.lowResUrl?.let {
+                            Glide.with(this)
+                                    .load(it)
+                                    .thumbnail(Glide.with(previewImageView).load(thumbnail))
+                                    .placeholder(R.color.color_on_surface)
+                                    .error(R.drawable.ic_image_error_24dp)
+                                    .into(this)
+
+                        }
                     }
                     setGildings(gildingTextView, gildings)
                     scoreView.setData(ups, likes)
@@ -269,22 +270,11 @@ private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = C
 }
 
 private fun SubmissionClickHandler.performAction(linkData: LinkData) {
-    with(linkData) {
-        when (post_hint) {
-            "image" ->
-                if (imageSet != null) actionOpenImage(imageSet.lowResUrl!!, imageSet.highResUrl!!)
-                else Log.e("SubmissionViewHolder", "performAction: content type image has not image attached :$this ")
-
-            "link" -> when (val imgurResource = Uri.parse(url).getImgurMedia()) {
-                is ImgurResult.Image -> actionOpenImage(imageSet?.lowResUrl!!, imgurResource.url)
-                is ImgurResult.Video -> actionOpenVideo(imgurResource.url)
-                ImgurResult.NonImgurResource -> actionOpenLink(url)
-            }
-
-            "rich:video", "hosted:video" -> videoUrl?.let { actionOpenVideo(it) }
-
-            else -> Log.e("SubmissionViewHolder", "unsupported content type :$post_hint")
-        }
+    when (val media = linkData.toMedia()) {
+        is SelfText, JustTitle -> actionOpenComments(linkData.subredditName, linkData.id)
+        is Image -> actionOpenImage(media.lowResUrl!!, media.highResUrl)
+        is Video -> actionOpenVideo(media.url)
+        is Link -> actionOpenLink(media.url)
     }
 }
 

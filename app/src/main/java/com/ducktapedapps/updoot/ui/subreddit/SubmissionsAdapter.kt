@@ -40,8 +40,8 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
         }
     }
 
-    override fun getItemViewType(position: Int): Int = when (currentList[position].post_hint) {
-        "self" -> SELF
+    override fun getItemViewType(position: Int): Int = when {
+        !currentList[position].selftext.isNullOrBlank() -> SELF
         else -> IMAGE
     }
 
