@@ -9,11 +9,14 @@ import androidx.recyclerview.widget.ListAdapter
 import com.ducktapedapps.updoot.databinding.ItemContentImageBinding
 import com.ducktapedapps.updoot.databinding.ItemContentLinkBinding
 import com.ducktapedapps.updoot.databinding.ItemContentSelftextBinding
-import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.*
+import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.LinkViewHolder
+import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.SelfTextViewHolder
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 
-class ContentAdapter : ListAdapter<SubmissionContent, ContentViewHolder>(CALLBACK) {
-
+class ContentAdapter(private val clickHandler: ClickHandler) : ListAdapter<SubmissionContent, ContentViewHolder>(CALLBACK) {
+    interface ClickHandler {
+        fun onClick(content: SubmissionContent)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -32,29 +35,28 @@ class ContentAdapter : ListAdapter<SubmissionContent, ContentViewHolder>(CALLBAC
                 is Image -> IMAGE
                 is Video -> PLACEHOLDER
                 is SelfText -> SELF_TEXT
-                is Link -> LINK
+                is LinkState.LoadingLink -> LINK
+                is LinkState.LoadedLink -> LINK
                 JustTitle -> PLACEHOLDER
             }
 
 
     override fun onBindViewHolder(holder: ContentViewHolder, position: Int) {
-        when (holder) {
-            is LinkViewHolder -> holder.bind((currentList[0] as Link).linkModel)
-            is SelfTextViewHolder -> holder.bind((currentList[0] as SelfText).parsedMarkdown)
-            is ImageViewHolder -> holder.bind((currentList[0] as Image).data.lowResUrl, (currentList[0] as Image).data.highResUrl)
-        }
+        holder.bind(currentList[0], clickHandler)
     }
 
     private companion object {
         val CALLBACK = object : DiffUtil.ItemCallback<SubmissionContent>() {
             override fun areItemsTheSame(oldItem: SubmissionContent, newItem: SubmissionContent): Boolean =
-                    oldItem is Link && newItem is Link
+                    oldItem is LinkState.LoadingLink && newItem is LinkState.LoadingLink
+                            || oldItem is LinkState.LoadedLink && newItem is LinkState.LoadedLink
                             || oldItem is Image && newItem is Image
                             || oldItem is Video && newItem is Video
                             || oldItem is SelfText && newItem is SelfText
                             || oldItem is JustTitle && newItem is JustTitle
 
             override fun areContentsTheSame(oldItem: SubmissionContent, newItem: SubmissionContent): Boolean = true
+
         }
         const val SELF_TEXT = 1
         const val LINK = 2

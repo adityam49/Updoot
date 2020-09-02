@@ -22,8 +22,6 @@
     <string name="sorting_mode">Sorting Mode</string>
     <string name="settings">Settings</string>
 
-    <string name="submission_link">Copy Link</string>
-
     <string name="reloading">Reloading…</string>
     <string name="subreddit_icon">Subreddit icon</string>
     <string name="selftext_icon">Selftext icon</string>
@@ -55,4 +53,5 @@
     <string name="single_color_thread_indicator">Single color thread indicator</string>
     <string name="using_single_color_thread">Comments use single color thread</string>
     <string name="using_multiple_color_thread">Comments use multiple color threads</string>
+    <string name="link_preview_icon">Link preview icon</string>
 </resources>

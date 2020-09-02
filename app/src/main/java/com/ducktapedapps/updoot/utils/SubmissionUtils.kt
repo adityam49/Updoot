@@ -12,32 +12,9 @@ sealed class Media {
     object JustTitle : Media()
 }
 
-fun LinkData.getImgurMedia(): Media = with(URI.create(url)) {
-    when {
-        (path.run {
-            endsWith(".jpg") || endsWith(".png") || endsWith("gif")
-        }) -> {
-            Image(thumbnail, url)
-        }
-        path.endsWith(".gifv") -> {
-            Video(url.replace(".gifv", ".mp4"))
-        }
-        else -> if (!videoUrl.isNullOrBlank()) Video(videoUrl) else Link(url)
-    }
-}
-
-fun LinkData.getRedditMedia(): Media = with(URI.create(url)) {
-    when {
-        (path.run {
-            endsWith(".jpg") || endsWith(".png") || endsWith("gif")
-        }) -> Image(thumbnail, url)
-        authority.startsWith("v.") -> Video(if (!videoUrl.isNullOrBlank()) videoUrl else url)
-        else -> Link(url)
-    }
-}
-
 fun LinkData.toMedia(): Media = with(URI.create(url)) {
     when {
+        authority == null -> JustTitle
         authority.contains("reddit") ->
             if (!selftext.isNullOrBlank()) SelfText(selftext)
             else JustTitle
@@ -46,3 +23,28 @@ fun LinkData.toMedia(): Media = with(URI.create(url)) {
         else -> Link(toString())
     }
 }
+
+private fun LinkData.getImgurMedia(): Media = with(URI.create(url)) {
+    when {
+        path.hasImageExtension() -> Image(thumbnail, url)
+        path.hasVideoExtension() -> Video(url.replace(".gifv", ".mp4"))
+        else -> if (!videoUrl.isNullOrBlank()) Video(videoUrl) else Link(url)
+    }
+}
+
+private fun LinkData.getRedditMedia(): Media = with(URI.create(url)) {
+    when {
+        path.hasImageExtension() -> Image(imageSet?.lowResUrl ?: thumbnail, url)
+        authority.startsWith("v.") -> Video(if (!videoUrl.isNullOrBlank()) videoUrl else url)
+        else -> Link(url)
+    }
+}
+
+private fun String.hasImageExtension(): Boolean =
+        endsWith("jpg", true)
+                || endsWith("jpeg", true)
+                || endsWith("png", true)
+                || endsWith("gif", true)
+
+private fun String.hasVideoExtension(): Boolean =
+        endsWith("mp4", true) || endsWith("gifv", true)

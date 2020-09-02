@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.LoadedLink
 import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
 import com.ducktapedapps.updoot.utils.linkMetaData.extractMetaData
@@ -16,7 +17,10 @@ import com.ducktapedapps.updoot.utils.toMedia
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import java.net.URI
 import javax.inject.Inject
@@ -31,14 +35,13 @@ class CommentsVM(
 ) : ViewModel() {
     val allComments = repo.allComments
 
-    private val _contentLoading = MutableStateFlow(true)
 
     val submissionData: Flow<LinkData> = submissionsCacheDAO
             .observeLinkData(id)
             .distinctUntilChanged()
             .flowOn(Dispatchers.IO)
 
-    val content: Flow<SubmissionContent> = submissionData.transform {
+    val content: Flow<SubmissionContent> = submissionData.transformLatest {
         emit(
                 when (val data = it.toMedia()) {
                     is Media.SelfText -> SelfText(markwon.toMarkdown(data.text))
@@ -46,17 +49,15 @@ class CommentsVM(
                     is Media.Video -> Video(data)
                     is Media.Link ->
                         try {
+                            emit(LinkState.LoadingLink(it.url))
                             URI.create(data.url).getMetaData()
                         } catch (e: Exception) {
-                            JustTitle
-                        } finally {
-                            _contentLoading.value = false
+                            LoadedLink(LinkModel(data.url, data.url, null, null, null))
                         }
                     Media.JustTitle -> JustTitle
                 }
-
         )
-    }
+    }.distinctUntilChanged()
 
 
     val isLoading = repo.commentsAreLoading
@@ -81,10 +82,9 @@ class CommentsVM(
 
 
     @Throws(Exception::class)
-    private suspend fun URI.getMetaData(): Link {
-        _contentLoading.value = true
+    private suspend fun URI.getMetaData(): LoadedLink {
         val htmlResponse = fetchMetaDataFrom(this.toString())
-        return Link(htmlResponse.extractMetaData().toLinkModel(this.toString()))
+        return LoadedLink(htmlResponse.extractMetaData().toLinkModel(this.toString()))
     }
 }
 
@@ -92,7 +92,11 @@ sealed class SubmissionContent {
     data class Image(val data: Media.Image) : SubmissionContent()
     data class Video(val data: Media.Video) : SubmissionContent()
     data class SelfText(val parsedMarkdown: Spanned) : SubmissionContent()
-    data class Link(val linkModel: LinkModel) : SubmissionContent()
+    sealed class LinkState : SubmissionContent() {
+        data class LoadedLink(val linkModel: LinkModel) : LinkState()
+        data class LoadingLink(val url: String) : LinkState()
+    }
+
     object JustTitle : SubmissionContent()
 }
 

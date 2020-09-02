@@ -43,7 +43,7 @@ class SubmissionRepo(
     val allSubmissions: Flow<List<LinkData>> = nextPageKeyAndCurrentPageEntries.flatMapLatest {
         if (it.keys.isNotEmpty())
             submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(it.values.flatten())).distinctUntilChanged()
-        else flow { emit(emptyList()) }
+        else flow { emit(emptyList<LinkData>()) }
     }
 
     val subredditInfo: Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)

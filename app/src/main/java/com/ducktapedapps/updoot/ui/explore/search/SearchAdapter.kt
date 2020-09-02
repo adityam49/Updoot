@@ -54,7 +54,7 @@ class SearchAdapter(private val resultAction: ResultAction) : ListAdapter<Explor
             override fun areContentsTheSame(oldItem: ExploreUiModel, newItem: ExploreUiModel): Boolean =
                     if (oldItem is Subreddit && newItem is Subreddit) {
                         //TODO : equality check without cast gives lint error?
-                        oldItem == newItem
+                        oldItem.display_name == newItem.display_name
                     } else if (oldItem is HeaderUiModel && newItem is HeaderUiModel) {
                         oldItem.title == newItem.title
                     } else false

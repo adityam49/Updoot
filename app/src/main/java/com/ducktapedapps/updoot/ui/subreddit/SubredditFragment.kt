@@ -278,7 +278,7 @@ class SubredditFragment : Fragment() {
     })
 
     private fun openImage(lowResImage: String, highResImage: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(highResImage, lowResImage)).commit()
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(lowResImage, highResImage)).commit()
     }
 
     private fun openVideo(videoUrl: String) {

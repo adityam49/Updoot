@@ -15,7 +15,7 @@ class ImagePreviewFragment : Fragment() {
     companion object {
         private const val IMAGE_URL_KEY = "image_url_key"
         private const val PLACEHOLDER_URL_KEY = "place_holder_key"
-        fun newInstance(imageUrl: String, placeHolderUrl: String) = ImagePreviewFragment().apply {
+        fun newInstance(placeHolderUrl: String?, imageUrl: String) = ImagePreviewFragment().apply {
             arguments = Bundle().apply {
                 putString(IMAGE_URL_KEY, imageUrl)
                 putString(PLACEHOLDER_URL_KEY, placeHolderUrl)

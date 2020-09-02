@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.annotation.ColorRes
@@ -18,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
+import com.ducktapedapps.updoot.ui.ImagePreviewFragment
+import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -72,7 +76,18 @@ class CommentsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val contentAdapter = ContentAdapter()
+        val contentAdapter = ContentAdapter(object : ContentAdapter.ClickHandler {
+            override fun onClick(content: SubmissionContent) {
+                when (content) {
+                    is SubmissionContent.Image -> openImage(content.data.lowResUrl, content.data.highResUrl)
+                    is SubmissionContent.Video -> openVideo(content.data.url)
+                    is SubmissionContent.SelfText -> Unit
+                    is SubmissionContent.LinkState.LoadedLink -> openLink(content.linkModel.url)
+                    is SubmissionContent.LinkState.LoadingLink -> openLink(content.url)
+                    SubmissionContent.JustTitle -> Unit
+                }
+            }
+        })
         val commentsAdapter = CommentsAdapter(
                 ::expandCollapseComment,
                 sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_count_key), true),
@@ -132,4 +147,17 @@ class CommentsFragment : Fragment() {
     private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
     private fun expandCollapseComment(index: Int) = viewModel.toggleChildrenVisibility(index)
+
+    private fun openLink(link: String) = startActivity(Intent().apply {
+        action = Intent.ACTION_VIEW
+        data = Uri.parse(link)
+    })
+
+    private fun openImage(lowResImage: String?, highResImage: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(lowResImage, highResImage)).commit()
+    }
+
+    private fun openVideo(videoUrl: String) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, VideoPreviewFragment.newInstance(videoUrl)).commit()
+    }
 }
