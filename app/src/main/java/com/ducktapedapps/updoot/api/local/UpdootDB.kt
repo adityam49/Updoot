@@ -18,9 +18,8 @@ abstract class SubredditDB : RoomDatabase() {
     abstract fun submissionsCacheDAO(): SubmissionsCacheDAO
 }
 
-@Entity
+@Entity(primaryKeys = ["subredditName", "userName"])
 data class SubredditSubscription(
-        @PrimaryKey(autoGenerate = true) val id: Int = 0,
         @ForeignKey(entity = Subreddit::class, parentColumns = ["subredditName"], childColumns = ["display_name"], onDelete = ForeignKey.NO_ACTION)
         val subredditName: String,
         val userName: String

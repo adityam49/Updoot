@@ -103,6 +103,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
                         clickHandler.actionOpenOption(id)
                         true
                     }
+                    setThumbnail(previewImageView, thumbnail, over_18)
                     setGildings(gildingTextView, gildings)
                     scoreView.setData(ups, likes)
                     setTitle(stickied, title, titleTextView)
@@ -280,23 +281,16 @@ private fun SubmissionClickHandler.performAction(linkData: LinkData) {
 
 
 private fun setThumbnail(thumbnailImageView: ImageView, thumbnail: String?, isNsfw: Boolean) {
-    if (thumbnail != null) {
-        Glide.with(thumbnailImageView.context)
-                .load(
-                        if (isNsfw) R.drawable.ic_nsfw_24dp
-                        else
-                            when (thumbnail) {
-                                "self" -> R.drawable.ic_selftext_24dp
-                                "default", "", null -> R.drawable.ic_link_24dp
-                                else -> thumbnail
-                            }
-                )
-                .apply(RequestOptions.circleCropTransform())
-                .error(R.drawable.ic_image_error_24dp)
-                .into(thumbnailImageView)
-    } else {
-        thumbnailImageView.setImageResource(R.drawable.ic_selftext_24dp)
-    }
+    Glide.with(thumbnailImageView.context).load(
+            if (isNsfw) R.drawable.ic_nsfw_24dp
+            else when (thumbnail) {
+                "self" -> ContextCompat.getDrawable(thumbnailImageView.context, R.drawable.ic_selftext_24dp)
+                "default", "", null -> ContextCompat.getDrawable(thumbnailImageView.context, R.drawable.ic_link_24dp)
+                else -> thumbnail
+            })
+            .apply(RequestOptions.circleCropTransform())
+            .error(R.drawable.ic_image_error_24dp)
+            .into(thumbnailImageView)
 }
 
 private fun setMetadata(textView: TextView, data: LinkData) {

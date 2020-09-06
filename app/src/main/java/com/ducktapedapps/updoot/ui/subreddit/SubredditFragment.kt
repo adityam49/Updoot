@@ -22,7 +22,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
@@ -36,8 +35,8 @@ import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.ImagePreviewFragment
-import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
-import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
+import com.ducktapedapps.updoot.ui.User.LoggedIn
+import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
@@ -212,48 +211,50 @@ class SubredditFragment : Fragment() {
 
     private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
         activityVM.apply {
-            shouldReload.asLiveData().observe(viewLifecycleOwner) { shouldReload ->
+            shouldReload.asLiveData().observe(viewLifecycleOwner, { shouldReload ->
                 if (shouldReload.contentIfNotHandled == true) {
                     Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
                     reloadFragmentContent()
                 }
-            }
-            loginState.asLiveData().observe(viewLifecycleOwner) {
+            })
+            user.asLiveData().observe(viewLifecycleOwner, {
                 isLoggedIn = when (it) {
                     is LoggedOut -> false
                     is LoggedIn -> true
                 }
-            }
+            })
         }
         submissionsVM.apply {
-            postViewType.asLiveData().observe(viewLifecycleOwner) { postViewType: SubmissionUiType? ->
-                postViewType?.let {
-                    submissionsAdapter.itemUi = it
-                    binding.apply {
-                        recyclerView.apply {
-                            adapter = null
-                            adapter = submissionsAdapter
-                            scrollToPosition(lastScrollPosition)
-                        }
-                        sideBar.viewTypeGroup.check(
-                                when (it) {
-                                    COMPACT -> R.id.view_type_list_button
-                                    LARGE -> R.id.view_type_card_button
+            postViewType.asLiveData().observe(viewLifecycleOwner,
+                    { postViewType: SubmissionUiType? ->
+                        postViewType?.let {
+                            submissionsAdapter.itemUi = it
+                            binding.apply {
+                                recyclerView.apply {
+                                    adapter = null
+                                    adapter = submissionsAdapter
+                                    scrollToPosition(lastScrollPosition)
                                 }
-                        )
+                                sideBar.viewTypeGroup.check(
+                                        when (it) {
+                                            COMPACT -> R.id.view_type_list_button
+                                            LARGE -> R.id.view_type_card_button
+                                        }
+                                )
+                            }
+                        }
                     }
-                }
-            }
+            )
+            allSubmissions.asLiveData().observe(viewLifecycleOwner, { things: List<LinkData> -> submissionsAdapter.submitList(things) })
 
-            allSubmissions.asLiveData().observe(viewLifecycleOwner) { things: List<LinkData> -> submissionsAdapter.submitList(things) }
-
-            toastMessage.asLiveData().observe(viewLifecycleOwner) { toastMessage: SingleLiveEvent<String?> ->
+            toastMessage.asLiveData().observe(viewLifecycleOwner, { toastMessage: SingleLiveEvent<String?> ->
                 val toast = toastMessage.contentIfNotHandled
                 if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
             }
-            isLoading.asLiveData().observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
+            )
+            isLoading.asLiveData().observe(viewLifecycleOwner, { binding.swipeToRefreshLayout.isRefreshing = it })
 
-            subredditInfo.asLiveData().observe(viewLifecycleOwner) { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } }
+            subredditInfo.asLiveData().observe(viewLifecycleOwner, { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } })
         }
     }
 

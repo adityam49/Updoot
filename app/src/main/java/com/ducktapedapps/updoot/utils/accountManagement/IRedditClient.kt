@@ -3,7 +3,7 @@ package com.ducktapedapps.updoot.utils.accountManagement
 import android.content.Context
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.Token
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
+import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
 
 interface IRedditClient {
     fun attachListener(context: Context)

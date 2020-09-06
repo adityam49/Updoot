@@ -4,7 +4,7 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@color/color_on_nav_drawer"
+        android:fillColor="@color/color_on_surface"
         android:pathData="M7 9c0-0.552 0.448-1 1-1h6c0.552 0 1 0.448 1 1v1c0 0.552-0.448 1-1 1H8c-0.552 0-1-0.448-1-1V9zm0 5c0-0.552 0.448-1 1-1h11c0.552 0 1 0.448 1 1v1c0 0.552-0.448 1-1 1H8c-0.552 0-1-0.448-1-1v-1zM8 3h14a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM2 2h1a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm5 18a2 2 0 1 1 4 0 2 2 0 1 1-4 0m12 0a2 2 0 1 1 4 0 2 2 0 1 1-4 0" />
     <path
         android:fillAlpha="0.75"

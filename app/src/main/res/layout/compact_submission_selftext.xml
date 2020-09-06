@@ -16,8 +16,6 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
         android:contentDescription="@string/thumbnailDescription"
-        android:scaleType="fitStart"
-        android:src="@drawable/ic_selftext_24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

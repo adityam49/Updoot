@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
-    android:padding="4dp">
+    android:padding="4dp"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp">
 
     <ImageView
         android:id="@+id/subreddit_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:contentDescription="@string/subreddit_icon"
         android:src="@drawable/ic_subreddit_default_24dp"
         app:layout_constraintBottom_toBottomOf="parent"

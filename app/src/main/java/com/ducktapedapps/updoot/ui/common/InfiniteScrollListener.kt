@@ -2,8 +2,9 @@ package com.ducktapedapps.updoot.ui.common
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ducktapedapps.updoot.ui.InfiniteScrollVM
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 class InfiniteScrollListener(private val layoutManager: LinearLayoutManager, private val viewModel: InfiniteScrollVM) : RecyclerView.OnScrollListener() {
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -13,7 +14,7 @@ class InfiniteScrollListener(private val layoutManager: LinearLayoutManager, pri
             if (layoutManager.itemCount <= 10) return // condition for no more pages
 
             if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 10) {
-                if (viewModel.isLoading.value == false && viewModel.hasNextPage()) {
+                if (!viewModel.isLoading.value && viewModel.hasNextPage()) {
                     viewModel.loadPage()
                 }
             }

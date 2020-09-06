@@ -91,7 +91,6 @@
 
     <style name="BottomNavDrawer" parent="Widget.MaterialComponents.BottomSheet">
         <item name="cornerFamily">rounded</item>
-        <item name="backgroundTint">@color/color_nav_drawer_background</item>
         <item name="cornerSizeTopLeft">32dp</item>
         <item name="cornerSizeTopRight">32dp</item>
     </style>

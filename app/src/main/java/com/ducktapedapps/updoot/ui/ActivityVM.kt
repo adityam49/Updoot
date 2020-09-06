@@ -4,23 +4,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.ui.LoginState.LoggedIn
-import com.ducktapedapps.updoot.ui.LoginState.LoggedOut
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
-import com.ducktapedapps.updoot.ui.navDrawer.destinations.NavDrawerItemModel
+import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.ui.User.LoggedIn
+import com.ducktapedapps.updoot.ui.User.LoggedOut
+import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
+import com.ducktapedapps.updoot.ui.navDrawer.AllNavigationEntries
+import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 class ActivityVM(private val redditClient: IRedditClient, private val subredditDAO: SubredditDAO) : ViewModel() {
     private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
@@ -29,10 +28,10 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
     private val _accounts: MutableStateFlow<List<AccountModel>> = MutableStateFlow(redditClient.getAccountModels())
     private val accountEntriesExpanded = MutableStateFlow(false)
 
-    private val _navDrawerVisible = MutableLiveData<Boolean>(true)
+    private val _navDrawerVisible = MutableLiveData(true)
     val navDrawerVisibility = _navDrawerVisible
 
-    val loginState: Flow<LoginState> = _accounts.map {
+    val user: Flow<User> = _accounts.map {
         if (it.first().name == Constants.ANON_USER) LoggedOut
         else LoggedIn(it.first().name)
     }
@@ -86,24 +85,45 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
         _navDrawerVisible.value = false
     }
 
-    val navigationEntries: Flow<List<NavDrawerItemModel>> = loginState.map { account ->
-        mutableListOf<NavDrawerItemModel>().apply {
-            add(NavDrawerItemModel("Explore", R.drawable.ic_explore_24dp))
-            if (account is LoggedIn) {
-                add(NavDrawerItemModel("Create Post", R.drawable.ic_baseline_edit_24))
-                add(NavDrawerItemModel("Inbox", R.drawable.ic_baseline_inbox_24))
-                add(NavDrawerItemModel("Profile", R.drawable.ic_account_circle_24dp))
-            }
-            add(NavDrawerItemModel("History", R.drawable.ic_baseline_history_24))
+    val navigationEntries: Flow<List<NavigationDestination>> = combine(flow { emit(AllNavigationEntries) }, user) { allEntries, loginState ->
+        when (loginState) {
+            is LoggedOut -> allEntries.filterNot { it.isUserSpecific }
+            is LoggedIn -> allEntries
+        }
+    }
+
+    private val query: MutableStateFlow<String> = MutableStateFlow("")
+    private var currentSearchJob: Job? = null
+
+    val results: Flow<List<Subreddit>> = query.combine(user) { keyWord: String, user: User ->
+        subredditDAO.run {
+            if (keyWord.isNotBlank()) observeSubredditWithKeyword(keyWord).distinctUntilChanged()
+            else observeSubscribedSubredditsFor(user.name).distinctUntilChanged()
+        }
+    }.flattenMerge()
+
+    fun searchSubreddit(queryString: String) {
+        currentSearchJob?.cancel()
+        currentSearchJob = viewModelScope.launch(Dispatchers.IO) {
+            query.value = queryString
+            if (queryString.isNotBlank())
+                try {
+                    val redditAPI = redditClient.api()
+                    val results = redditAPI.search(query = queryString)
+                    results!!.children.forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
         }
     }
 }
 
-sealed class LoginState {
-    object LoggedOut : LoginState()
-    data class LoggedIn(val userName: String) : LoginState()
+sealed class User(val name: String) {
+    object LoggedOut : User(Constants.ANON_USER)
+    data class LoggedIn(val userName: String) : User(userName)
 }
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 class ActivityVMFactory @Inject constructor(
         private val redditClient: RedditClient,

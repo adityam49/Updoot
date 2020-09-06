@@ -16,7 +16,7 @@ fun enqueueCleanUpWork(context: Context) {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) constraints.setRequiresDeviceIdle(true)
 
-    val cleanUpWorkRequest = PeriodicWorkRequestBuilder<CacheCleanUpWorker>(10, TimeUnit.MINUTES)
+    val cleanUpWorkRequest = PeriodicWorkRequestBuilder<CacheCleanUpWorker>(1, TimeUnit.DAYS)
             .addTag(CACHED_SUBMISSIONS_CLEANUP_WORKER_TAG)
             .setConstraints(constraints.build())
             .build()

@@ -4,6 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground">
 
@@ -26,7 +28,7 @@
         android:layout_marginStart="16dp"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/user_icon"
         app:layout_constraintStart_toEndOf="@id/user_icon"
         app:layout_constraintTop_toTopOf="@+id/user_icon"
         tools:text="@tools:sample/lorem" />
@@ -51,7 +53,6 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/chevron"
         android:padding="8dp"
-        android:tint="@color/color_on_nav_drawer"
         android:src="@drawable/ic_baseline_chevron_down_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

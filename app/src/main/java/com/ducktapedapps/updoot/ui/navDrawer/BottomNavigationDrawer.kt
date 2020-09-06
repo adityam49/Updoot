@@ -9,7 +9,6 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
-import androidx.viewpager2.widget.ViewPager2
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ViewBottomNavDrawerBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,9 +38,6 @@ class BottomNavigationDrawer @JvmOverloads constructor(
                     halfExpandedRatio = 0.4f
                     addBottomSheetCallback(bottomNavDrawerCallback)
                 }
-                viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                    override fun onPageSelected(position: Int) = if (position > 0) expand() else Unit
-                })
                 peekTop = this@BottomNavigationDrawer.y
             }
 

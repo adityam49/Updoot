@@ -10,8 +10,8 @@ import android.util.Log
 import com.ducktapedapps.updoot.api.remote.AuthAPI
 import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.Token
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel
-import com.ducktapedapps.updoot.ui.navDrawer.accounts.AccountModel.UserModel
+import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
+import com.ducktapedapps.updoot.ui.navDrawer.AccountModel.*
 import com.ducktapedapps.updoot.utils.Constants
 import javax.inject.Inject
 import javax.inject.Named
@@ -156,8 +156,8 @@ class RedditClient @Inject constructor(
             }.map { it.toAccountModel() }
 
     private fun Pair<String, Boolean>.toAccountModel(): AccountModel = when (this.first) {
-        Constants.ANON_USER -> AccountModel.AnonymousAccount(this.second)
-        Constants.ADD_ACCOUNT -> AccountModel.AddAccount
+        Constants.ANON_USER -> AnonymousAccount(this.second)
+        Constants.ADD_ACCOUNT -> AddAccount
         else -> UserModel(this.first, this.second, with(androidAccountManager) {
             getUserData(accounts.first { it.name == this@toAccountModel.first }, Constants.USER_ICON_KEY)
         })

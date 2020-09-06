@@ -5,29 +5,25 @@
     <color name="downVoteColor">#9494FF</color>
     <color name="saveContentColor">#FFB100</color>
 
-
     <!--light theme colors-->
-    <color name="color_primary">#212329</color>
+    <color name="color_primary">#FFFFFF</color>
     <color name="color_primary_variant">#FAFAFA</color>
     <color name="color_on_primary">#000000</color>
     <color name="color_on_primary_light">#dbe2ef</color>
-    <color name="color_secondary">#9e47ff</color>
+    <color name="color_secondary">#2979FF</color>
     <color name="color_secondary_alt">#ffd700</color>
-    <color name="color_secondary_variant">#6200ee</color>
+    <color name="color_secondary_variant">#42A5F5</color>
     <color name="color_on_secondary">#000000</color>
     <color name="color_error">#F44336</color>
     <color name="color_on_error">#FFFFFF</color>
-    <color name="color_surface">#FFFFFF</color>
-    <!--    #F5F5F5-->
+    <color name="color_surface">#F8F8F8</color>
+    <color name="color_active_account">#DCDCDC</color>
     <color name="color_on_surface">#000000</color>
     <color name="color_background">#FFFFFF</color>
     <color name="color_on_background">#000000</color>
     <color name="color_status_bar">#FFFFFF</color>
     <color name="color_scrim">#80000000</color>
-    <color name="color_nav_drawer_background">@color/color_primary</color>
-    <color name="nav_bar_color">@color/color_nav_drawer_background</color>
-    <color name="color_on_nav_drawer">#FFFFFF</color>
-    <color name="color_on_nav_drawer_variant">#808097</color>
+    <color name="nav_bar_color">@color/color_surface</color>
     <color name="sticky_post_color">#388E3C</color>
 
     <color name="thread_violet">#7b1fa2</color>
@@ -42,4 +38,3 @@
     <color name="thread_pink">#c2185b</color>
     <color name="thread_red">#d32f2f</color>
 </resources>
-

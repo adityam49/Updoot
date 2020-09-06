@@ -5,13 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp"
     android:background="?attr/selectableItemBackground">
     <!--TODO : Extract image dimensions (24dp) to dimens.xml-->
     <ImageView
         android:id="@+id/user_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginStart="18dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
         android:contentDescription="@string/user_icon"
@@ -24,9 +25,9 @@
         android:id="@+id/user_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/user_icon"
         app:layout_constraintTop_toTopOf="parent"

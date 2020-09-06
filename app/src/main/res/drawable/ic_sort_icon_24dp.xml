@@ -6,7 +6,7 @@
     <group>
         <clip-path android:pathData="M0 0h24v24H0z" />
         <path
-            android:fillColor="@color/color_on_nav_drawer"
+            android:fillColor="@color/color_on_surface"
             android:pathData="M6.134 2.5c0.385-0.667 1.347-0.667 1.732 0l4.33 7.5c0.385 0.667-0.096 1.5-0.866 1.5H2.67c-0.77 0-1.251-0.833-0.866-1.5l4.33-7.5zm11.732 19c-0.385 0.667-1.347 0.667-1.732 0l-4.33-7.5c-0.385-0.667 0.096-1.5 0.866-1.5h8.66c0.77 0 1.251 0.833 0.866 1.5l-4.33 7.5z" />
     </group>
 </vector>

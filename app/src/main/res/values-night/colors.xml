@@ -15,11 +15,9 @@
     <color name="color_background">#202124</color>
     <color name="color_on_background">#FFFFFF</color>
     <color name="color_scrim">#de000000</color>
-    <color name="color_nav_drawer_background">@color/color_surface</color>
     <color name="nav_bar_color">@color/color_surface</color>
-    <color name="color_on_nav_drawer">@color/color_on_surface</color>
-    <color name="color_on_nav_drawer_variant">@android:color/darker_gray</color>
     <color name="sticky_post_color">#69F0AE</color>
+    <color name="color_active_account">#262626</color>
 
     <color name="thread_violet">#b39ddb</color>
     <color name="thread_indigo">#9fa8da</color>

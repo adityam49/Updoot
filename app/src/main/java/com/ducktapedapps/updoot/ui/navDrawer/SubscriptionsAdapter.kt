@@ -1,9 +1,6 @@
-package com.ducktapedapps.updoot.ui.navDrawer.subscriptions
+package com.ducktapedapps.updoot.ui.navDrawer
 
-import android.graphics.Typeface
-import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -48,12 +45,9 @@ class SubredditViewHolder(val binding: ItemSubscriptionSubredditBinding) : Recyc
     fun bind(subreddit: Subreddit, clickHandler: SubscriptionsAdapter.ClickHandler) = binding.apply {
         bindIcon(subredditIcon, subreddit.community_icon)
         subredditInfo.text = Truss()
-                .pushSpan(StyleSpan(Typeface.BOLD))
                 .append(subreddit.display_name)
-                .popSpan()
                 .append(" \u2022 ")
                 .pushSpan(RelativeSizeSpan(0.8f))
-                .pushSpan(ForegroundColorSpan(ContextCompat.getColor(binding.root.context, R.color.color_on_nav_drawer_variant)))
                 .append(getCompactAge(subreddit.created))
                 .append("\n\n${getCompactCountAsString(subreddit.subscribers)} subscribers")
                 .build()
@@ -64,7 +58,7 @@ class SubredditViewHolder(val binding: ItemSubscriptionSubredditBinding) : Recyc
             Glide.with(view)
                     .load(url)
                     .placeholder(ContextCompat.getDrawable(view.context, R.drawable.ic_subreddit_default_24dp)?.apply {
-                        setTint(ContextCompat.getColor(view.context, R.color.color_on_nav_drawer))
+                        setTint(ContextCompat.getColor(view.context, R.color.color_on_surface))
                     })
                     .apply(RequestOptions.circleCropTransform())
                     .into(view)
