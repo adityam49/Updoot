@@ -19,9 +19,6 @@ interface SubredditDAO {
     suspend fun getTrendingSubs(): List<Subreddit>
 
     @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
-    suspend fun getSubreddit(name: String): Subreddit?
-
-    @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
     fun observeSubredditInfo(name: String): Flow<Subreddit?>
 
     @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
@@ -32,6 +29,9 @@ interface SubredditDAO {
 
     @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
     fun observeSubscribedSubredditsFor(user: String): Flow<List<Subreddit>>
+
+    @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
+    fun subscribedSubredditsFor(user: String): List<Subreddit>
 
     @Query("SELECT * FROM subreddit WHERE display_name NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<Subreddit>

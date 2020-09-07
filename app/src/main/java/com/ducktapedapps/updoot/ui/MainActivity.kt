@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.enqueueCleanUpWork
+import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
+import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
@@ -215,7 +216,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     override fun currentAccountChanged() = viewModel.reloadContent()
 
-    private fun setUpWorkers() = enqueueCleanUpWork(this)
+    private fun setUpWorkers() {
+        enqueueSubscriptionSyncWork()
+        enqueueCleanUpWork()
+    }
 
     private fun getCurrentDestinationMenu(): Int? =
             when (supportFragmentManager.findFragmentById(R.id.fragment_container)?.javaClass?.simpleName) {

@@ -3,16 +3,18 @@ package com.ducktapedapps.updoot.backgroundWork
 import androidx.work.DelegatingWorkerFactory
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.backgroundWork.cacheCleanUp.CacheCleanUpWorkerFactory
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UpdootWorkerFactory @Inject constructor(
         submissionsCacheDAO: SubmissionsCacheDAO,
-        subredditDAO: SubredditDAO
+        subredditDAO: SubredditDAO,
+        redditClient: RedditClient
 ) : DelegatingWorkerFactory() {
     init {
-        addFactory(CacheCleanUpWorkerFactory(submissionsCacheDAO, subredditDAO))
+        addFactory(SubscriptionSyncWorkerFactory(subredditDAO,redditClient))
+        addFactory(CacheCleanUpWorkerFactory(submissionsCacheDAO,subredditDAO))
     }
 }

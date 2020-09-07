@@ -8,13 +8,14 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ducktapedapps.updoot.R
+import kotlin.random.Random
 
 
-fun createNotification(title: String, message: String, context: Context) {
+fun createNotification(title: String, message: String, context: Context,id:Int=Random.nextInt()) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         createNotificationChannel(context)
     }
-    buildNotificationAndShow(title, message, context)
+    buildNotificationAndShow(title, message, context,id)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -29,12 +30,12 @@ private fun createNotificationChannel(context: Context) {
     }
 }
 
-private fun buildNotificationAndShow(title: String, message: String, context: Context) {
+private fun buildNotificationAndShow(title: String, message: String, context: Context,id:Int) {
     val builder = NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-    NotificationManagerCompat.from(context).notify(1, builder.build())
+    NotificationManagerCompat.from(context).notify(id, builder.build())
 }
