@@ -93,13 +93,13 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
     }
 
     private val query: MutableStateFlow<String> = MutableStateFlow("")
+    private val _searchQueryLoading = MutableStateFlow(false)
+    val searchQueryLoading: StateFlow<Boolean> = _searchQueryLoading
     private var currentSearchJob: Job? = null
 
-    val results: Flow<List<Subreddit>> = query.combine(user) { keyWord: String, user: User ->
-        subredditDAO.run {
-            if (keyWord.isNotBlank()) observeSubredditWithKeyword(keyWord).distinctUntilChanged()
-            else observeSubscribedSubredditsFor(user.name).distinctUntilChanged()
-        }
+    val results: Flow<List<Subreddit>> = query.combineTransform(user) { keyWord: String, user: User ->
+        if (keyWord.isNotBlank()) emit(subredditDAO.observeSubredditWithKeyword(keyWord).distinctUntilChanged())
+        else emit(subredditDAO.observeSubscribedSubredditsFor(user.name).distinctUntilChanged())
     }.flattenMerge()
 
     fun searchSubreddit(queryString: String) {
@@ -108,11 +108,14 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
             query.value = queryString
             if (queryString.isNotBlank())
                 try {
+                    _searchQueryLoading.value = true
                     val redditAPI = redditClient.api()
                     val results = redditAPI.search(query = queryString)
                     results!!.children.forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
+                } finally {
+                    _searchQueryLoading.value = false
                 }
         }
     }

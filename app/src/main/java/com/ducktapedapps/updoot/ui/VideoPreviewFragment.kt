@@ -107,14 +107,18 @@ class VideoPreviewFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_scrim)
+            ContextCompat.getColor(requireContext(), R.color.color_scrim).let {
+                statusBarColor = it
+                navigationBarColor = it
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
         activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_primary_variant)
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_status_bar)
+            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.nav_bar_color)
         }
     }
 

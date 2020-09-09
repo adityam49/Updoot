@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -32,6 +34,7 @@ import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,6 +52,65 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private lateinit var binding: ActivityMainBinding
     private val bottomNavBinding by lazy { binding.bottomNavigationDrawer.binding }
+
+    private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
+        override fun goToSubreddit(subredditName: String) {
+            supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
+                    .replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName))
+                    .commit()
+            bottomNavBinding.apply {
+                searchView.clearFocus()
+                root.post { collapseBottomNavDrawer() }
+            }
+        }
+    })
+
+    private val destinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
+        override fun openDestination(destination: NavigationDestination) {
+            when (destination) {
+                Search -> bottomNavBinding.searchView.apply {
+                    expandBottomNavDrawer()
+                    visibility = VISIBLE
+                    requestFocus()
+                    showKeyBoard(this.findFocus())
+                }
+                Explore -> {
+                    supportFragmentManager
+                            .beginTransaction()
+                            .addToBackStack(null)
+                            .setCustomAnimations(R.anim.enter_from_top, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_top)
+                            .replace(R.id.fragment_container, ExploreFragment())
+                            .commit()
+                }
+                History, Inbox, CreatePost -> Unit
+            }
+        }
+    })
+
+    private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
+        override fun login() {
+            supportFragmentManager
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
+                    .replace(R.id.fragment_container, LoginFragment())
+                    .commit()
+        }
+
+        override fun switch(accountName: String) {
+            viewModel.setCurrentAccount(accountName)
+            collapseBottomNavDrawer()
+        }
+
+        override fun logout(accountName: String) = viewModel.logout(accountName)
+
+        override fun toggleEntryMenu() = viewModel.toggleAccountsMenuList()
+    })
+
+    private val concatAdapter = ConcatAdapter(accountsAdapter, destinationAdapter)
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -81,13 +143,20 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private fun setUpViewModel() = viewModel.apply {
         accounts.asLiveData().observe(this@MainActivity, { accountsAdapter.submitList(it) })
-        navigationEntries.asLiveData().observe(this@MainActivity, { destinationAdapter.submitList(it) })
-        results.asLiveData().observe(this@MainActivity, { subscriptionAdapter.submitList(it) })
-        navDrawerVisibility.observe(this@MainActivity, { visible ->
-            binding.bottomNavigationDrawer.apply {
-                if (visible) showWihAnimation() else hideWithAnimation()
-            }
-        })
+        lifecycleScope.launch {
+            delay(2_000)
+            searchQueryLoading.asLiveData().observe(this@MainActivity, { loading ->
+                bottomNavBinding.loadingIndicator.visibility =
+                        if (loading) VISIBLE else GONE
+            })
+            navigationEntries.asLiveData().observe(this@MainActivity, { destinationAdapter.submitList(it) })
+            results.asLiveData().observe(this@MainActivity, { subscriptionAdapter.submitList(it) })
+            navDrawerVisibility.observe(this@MainActivity, { visible ->
+                binding.bottomNavigationDrawer.apply {
+                    if (visible) showWihAnimation() else hideWithAnimation()
+                }
+            })
+        }
     }
 
     private fun setUpStatusBarColors() {
@@ -151,7 +220,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                     removeAdapter(subscriptionAdapter)
                     addAdapter(accountsAdapter)
                     addAdapter(destinationAdapter)
-                    view.visibility = View.GONE
+                    view.visibility = GONE
                 }
             }
         }
@@ -227,61 +296,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                 CommentsFragment::class.java.simpleName -> R.menu.comment_screen_menu
                 else -> null
             }
-
-    private val subscriptionAdapter = SubscriptionsAdapter(object : SubscriptionsAdapter.ClickHandler {
-        override fun goToSubreddit(subredditName: String) {
-            supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
-                    .replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName))
-                    .commit()
-            collapseBottomNavDrawer()
-            bottomNavBinding.searchView.clearFocus()
-        }
-    })
-    private val destinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
-        override fun openDestination(destination: NavigationDestination) {
-            when (destination) {
-                Search -> bottomNavBinding.searchView.apply {
-                    expandBottomNavDrawer()
-                    visibility = View.VISIBLE
-                    requestFocus()
-                    showKeyBoard(this.findFocus())
-                }
-                Explore -> {
-                    supportFragmentManager
-                            .beginTransaction()
-                            .addToBackStack(null)
-                            .setCustomAnimations(R.anim.enter_from_top, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_top)
-                            .replace(R.id.fragment_container, ExploreFragment())
-                            .commit()
-                }
-                History, Inbox, CreatePost -> Unit
-            }
-        }
-    })
-    private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
-        override fun login() {
-            supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
-                    .replace(R.id.fragment_container, LoginFragment())
-                    .commit()
-        }
-
-        override fun switch(accountName: String) {
-            viewModel.setCurrentAccount(accountName)
-            collapseBottomNavDrawer()
-        }
-
-        override fun logout(accountName: String) = viewModel.logout(accountName)
-
-        override fun toggleEntryMenu() = viewModel.toggleAccountsMenuList()
-    })
-    private val concatAdapter = ConcatAdapter(accountsAdapter, destinationAdapter)
-
 
     private fun showKeyBoard(focusView: View) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

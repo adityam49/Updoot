@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.FragmentImagePreviewBinding
 
 
@@ -34,16 +33,12 @@ class ImagePreviewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_scrim)
-        }
+        requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     override fun onPause() {
         super.onPause()
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.color_primary_variant)
-        }
+        requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

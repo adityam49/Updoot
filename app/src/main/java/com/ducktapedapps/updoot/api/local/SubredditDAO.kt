@@ -21,7 +21,7 @@ interface SubredditDAO {
     @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
     fun observeSubredditInfo(name: String): Flow<Subreddit?>
 
-    @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' ORDER BY  subscribers DESC")
+    @Query("SELECT * FROM Subreddit WHERE display_name LIKE  '%' || :keyword ||'%' LIMIT 30")
     fun observeSubredditWithKeyword(keyword: String): Flow<List<Subreddit>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -38,5 +38,4 @@ interface SubredditDAO {
 
     @Query("DELETE  FROM subreddit WHERE display_name is :name")
     suspend fun deleteSubreddit(name: String)
-
 }

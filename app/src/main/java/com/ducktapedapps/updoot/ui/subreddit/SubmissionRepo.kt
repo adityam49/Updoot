@@ -15,11 +15,10 @@ import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "SubmissionRepo"
 
@@ -29,7 +28,6 @@ class SubmissionRepo(
         private val prefsDAO: SubredditPrefsDAO,
         private val submissionsCacheDAO: SubmissionsCacheDAO,
         private val subredditName: String,
-        private val scope: CoroutineScope,
         private val subredditDAO: SubredditDAO
 ) {
     private val _isLoading = MutableStateFlow(true)
@@ -48,16 +46,17 @@ class SubmissionRepo(
 
     val subredditInfo: Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
 
-    init {
-        loadAndSaveSubredditInfo()
-    }
-
-    private fun loadAndSaveSubredditInfo() {
+    suspend fun loadAndSaveSubredditInfo() {
         if (subredditName != FRONTPAGE)
-            scope.launch(Dispatchers.IO) {
-                val api = redditClient.api()
-                val result = api.getSubredditInfo(subredditName)
-                subredditDAO.insertSubreddit(result)
+            withContext(Dispatchers.IO) {
+                try {
+                    val api = redditClient.api()
+                    val result = api.getSubredditInfo(subredditName)
+                    subredditDAO.insertSubreddit(result)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _toastMessage.value = SingleLiveEvent("Unable to fetch $subredditName metadata : ${e.message}")
+                }
             }
     }
 
@@ -75,20 +74,20 @@ class SubmissionRepo(
 
     fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value.keys.last() != null
 
-    fun setPostViewType(type: SubmissionUiType) = scope.launch(Dispatchers.IO) {
+    suspend fun setPostViewType(type: SubmissionUiType) = withContext(Dispatchers.IO) {
         prefsDAO.setUIType(type, subredditName)
     }
 
-    fun changeSort(newSort: SubredditSorting) {
+    suspend fun changeSort(newSort: SubredditSorting) {
         clearSubmissions()
-        scope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             prefsDAO.setSorting(newSort, subredditName)
             loadPage()
         }
     }
 
-    fun vote(id: String, direction: Int) {
-        scope.launch(Dispatchers.IO) {
+    suspend fun vote(id: String, direction: Int) {
+        withContext(Dispatchers.IO) {
             try {
                 val cachedSubmission = submissionsCacheDAO.getLinkData(id)
                 if (cachedSubmission.archived)
@@ -145,8 +144,8 @@ class SubmissionRepo(
         return copy(ups = updatedUps, likes = updatedLikes)
     }
 
-    fun save(id: String) {
-        scope.launch(Dispatchers.IO) {
+    suspend fun save(id: String) {
+        withContext(Dispatchers.IO) {
             try {
                 val api = redditClient.api()
                 val cachedSubmission = submissionsCacheDAO.getLinkData(id)
@@ -165,8 +164,8 @@ class SubmissionRepo(
         nextPageKeyAndCurrentPageEntries.value = emptyMap()
     }
 
-    fun loadPage() {
-        scope.launch(Dispatchers.IO) {
+    suspend fun loadPage() {
+        withContext(Dispatchers.IO) {
             try {
                 _isLoading.value = true
                 loadPageAndCacheToDbSuccessfully()
@@ -191,10 +190,12 @@ class SubmissionRepo(
                 nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()
         )
         fetchedSubmissions.apply {
-            submissions.forEach { submissionsCacheDAO.insertSubmissions(it) }
-            nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
-                    .toMutableMap()
-                    .apply { put(after, submissions.map { it.id }) }
+            if (submissions.isNotEmpty()) {
+                submissions.forEach { submissionsCacheDAO.insertSubmissions(it) }
+                nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
+                        .toMutableMap()
+                        .apply { put(after, submissions.map { it.id }) }
+            }
         }
     }
 

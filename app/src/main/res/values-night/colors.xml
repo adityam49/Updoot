@@ -16,6 +16,7 @@
     <color name="color_on_background">#FFFFFF</color>
     <color name="color_scrim">#de000000</color>
     <color name="nav_bar_color">@color/color_surface</color>
+    <color name="color_status_bar">@color/color_surface</color>
     <color name="sticky_post_color">#69F0AE</color>
     <color name="color_active_account">#262626</color>
 

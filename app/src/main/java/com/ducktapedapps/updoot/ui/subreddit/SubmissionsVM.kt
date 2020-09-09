@@ -12,25 +12,21 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @ExperimentalCoroutinesApi
 class SubmissionsVM constructor(
-        redditClient: RedditClient,
-        prefsDAO: SubredditPrefsDAO,
-        submissionsCacheDAO: SubmissionsCacheDAO,
-        subredditName: String,
-        subredditDAO: SubredditDAO
+        private val submissionRepo: SubmissionRepo
 ) : ViewModel(), InfiniteScrollVM {
-    private val submissionRepo =
-            SubmissionRepo(redditClient, prefsDAO, submissionsCacheDAO, subredditName, viewModelScope, subredditDAO)
-
     init {
+        viewModelScope.launch {
+            submissionRepo.loadAndSaveSubredditInfo()
+        }
         loadPage()
     }
 
-    private val TAG = "SubmissionsVM"
     override val isLoading = submissionRepo.isLoading
 
     var lastScrollPosition: Int = 0
@@ -39,7 +35,9 @@ class SubmissionsVM constructor(
     val toastMessage: StateFlow<SingleLiveEvent<String?>> = submissionRepo.toastMessage
     val subredditInfo = submissionRepo.subredditInfo
 
-    override fun loadPage() = submissionRepo.loadPage()
+    override fun loadPage() {
+        viewModelScope.launch { submissionRepo.loadPage() }
+    }
 
     override fun hasNextPage() = submissionRepo.hasNextPage()
 
@@ -48,15 +46,25 @@ class SubmissionsVM constructor(
         loadPage()
     }
 
-    fun setPostViewType(type: SubmissionUiType) = submissionRepo.setPostViewType(type)
+    fun setPostViewType(type: SubmissionUiType) {
+        viewModelScope.launch { submissionRepo.setPostViewType(type) }
+    }
 
-    fun changeSort(newSubredditSorting: SubredditSorting) = submissionRepo.changeSort(newSubredditSorting)
+    fun changeSort(newSubredditSorting: SubredditSorting) {
+        viewModelScope.launch { submissionRepo.changeSort(newSubredditSorting) }
+    }
 
-    fun upVote(name: String) = submissionRepo.vote(name, 1)
+    fun upVote(name: String) {
+        viewModelScope.launch { submissionRepo.vote(name, 1) }
+    }
 
-    fun downVote(name: String) = submissionRepo.vote(name, -1)
+    fun downVote(name: String) {
+        viewModelScope.launch { submissionRepo.vote(name, -1) }
+    }
 
-    fun save(id: String) = submissionRepo.save(id)
+    fun save(id: String) {
+        viewModelScope.launch { submissionRepo.save(id) }
+    }
 }
 
 @ExperimentalCoroutinesApi
@@ -73,5 +81,6 @@ class SubmissionsVMFactory @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = SubmissionsVM(redditClient, prefsDAO, submissionsCacheDAO, subreddit, subredditDAO) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            SubmissionsVM(SubmissionRepo(redditClient, prefsDAO, submissionsCacheDAO, subreddit, subredditDAO)) as T
 }

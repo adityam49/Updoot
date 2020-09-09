@@ -21,7 +21,7 @@
     <color name="color_on_surface">#000000</color>
     <color name="color_background">#FFFFFF</color>
     <color name="color_on_background">#000000</color>
-    <color name="color_status_bar">#FFFFFF</color>
+    <color name="color_status_bar">@color/color_surface</color>
     <color name="color_scrim">#80000000</color>
     <color name="nav_bar_color">@color/color_surface</color>
     <color name="sticky_post_color">#388E3C</color>
