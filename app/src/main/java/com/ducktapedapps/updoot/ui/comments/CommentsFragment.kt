@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -112,10 +111,10 @@ class CommentsFragment : Fragment() {
     }
 
     private fun observeData(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) = viewModel.apply {
-        allComments.observe(viewLifecycleOwner) { commentsAdapter.submitList(it) }
-        isLoading.observe(viewLifecycleOwner) { binding.swipeToRefreshLayout.isRefreshing = it }
-        submissionData.asLiveData().observe(viewLifecycleOwner) { submissionHeaderAdapter.linkData = it }
-        content.asLiveData().observe(viewLifecycleOwner) { contentAdapter.submitList(listOf(it)) }
+        allComments.observe(viewLifecycleOwner, { commentsAdapter.submitList(it) })
+        isLoading.observe(viewLifecycleOwner, { binding.swipeToRefreshLayout.isRefreshing = it })
+        submissionData.asLiveData().observe(viewLifecycleOwner, { submissionHeaderAdapter.linkData = it })
+        content.asLiveData().observe(viewLifecycleOwner, { contentAdapter.submitList(listOf(it)) })
     }
 
     private fun setUpRecyclerView(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) {

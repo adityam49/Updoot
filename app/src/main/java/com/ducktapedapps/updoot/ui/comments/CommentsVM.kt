@@ -5,24 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.api.remote.LinkModel
+import com.ducktapedapps.updoot.api.remote.fetchMetaDataFrom
 import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
-import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.LoadedLink
 import com.ducktapedapps.updoot.utils.Media
-import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
-import com.ducktapedapps.updoot.utils.linkMetaData.extractMetaData
-import com.ducktapedapps.updoot.utils.linkMetaData.fetchMetaDataFrom
-import com.ducktapedapps.updoot.utils.linkMetaData.toLinkModel
 import com.ducktapedapps.updoot.utils.toMedia
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.net.URI
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -35,30 +28,20 @@ class CommentsVM(
 ) : ViewModel() {
     val allComments = repo.allComments
 
-
     val submissionData: Flow<LinkData> = submissionsCacheDAO
             .observeLinkData(id)
             .distinctUntilChanged()
             .flowOn(Dispatchers.IO)
 
     val content: Flow<SubmissionContent> = submissionData.transformLatest {
-        emit(
-                when (val data = it.toMedia()) {
-                    is Media.SelfText -> SelfText(markwon.toMarkdown(data.text))
-                    is Media.Image -> Image(data)
-                    is Media.Video -> Video(data)
-                    is Media.Link ->
-                        try {
-                            emit(LinkState.LoadingLink(it.url))
-                            URI.create(data.url).getMetaData()
-                        } catch (e: Exception) {
-                            LoadedLink(LinkModel(data.url, data.url, null, null, null))
-                        }
-                    Media.JustTitle -> JustTitle
-                }
-        )
+        when (val data = it.toMedia()) {
+            is Media.SelfText -> emit(SelfText(markwon.toMarkdown(data.text)))
+            is Media.Image -> emit(Image(data))
+            is Media.Video -> emit(Video(data))
+            is Media.Link -> emitAll(getMetaDataFor(data.url))
+            is Media.JustTitle -> emit(JustTitle)
+        }
     }.distinctUntilChanged()
-
 
     val isLoading = repo.commentsAreLoading
 
@@ -80,11 +63,11 @@ class CommentsVM(
 
     fun castVote(direction: Int, index: Int) = Unit
 
-
-    @Throws(Exception::class)
-    private suspend fun URI.getMetaData(): LoadedLink {
-        val htmlResponse = fetchMetaDataFrom(this.toString())
-        return LoadedLink(htmlResponse.extractMetaData().toLinkModel(this.toString()))
+    private fun getMetaDataFor(url: String): Flow<LinkState> = flow {
+        emit(LinkState.LoadingLink(url))
+        emitAll(fetchMetaDataFrom(url)
+                .catch { error -> emit(LinkState.NoMetaDataLink(url, error.message ?: "")) }
+                .map { LinkState.LoadedLink(it) })
     }
 }
 
@@ -95,8 +78,8 @@ sealed class SubmissionContent {
     sealed class LinkState : SubmissionContent() {
         data class LoadedLink(val linkModel: LinkModel) : LinkState()
         data class LoadingLink(val url: String) : LinkState()
+        data class NoMetaDataLink(val url: String, val errorReason: String) : LinkState()
     }
-
     object JustTitle : SubmissionContent()
 }
 

@@ -2,10 +2,12 @@ package com.ducktapedapps.updoot.ui.comments
 
 import android.text.method.LinkMovementMethod
 import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
 import android.text.style.URLSpan
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterInside
@@ -59,6 +61,21 @@ sealed class ContentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                             progressCircular.visibility = View.VISIBLE
                             thumbnailImageView.visibility = View.GONE
                             titleTextView.text = content.url
+                        }
+                        is LinkState.NoMetaDataLink -> {
+                            titleTextView.text = Truss()
+                                    .append(content.url)
+                                    .append("\n\n")
+                                    .pushSpan(ForegroundColorSpan(ContextCompat.getColor(this.root.context, R.color.color_error)))
+                                    .append(content.errorReason).build()
+                            progressCircular.visibility = View.INVISIBLE
+                            thumbnailImageView.apply {
+                                visibility = View.VISIBLE
+                                Glide
+                                        .with(this)
+                                        .load(R.drawable.ic_image_error_24dp)
+                                        .into(this)
+                            }
                         }
                     }
                     titleTextView.apply {

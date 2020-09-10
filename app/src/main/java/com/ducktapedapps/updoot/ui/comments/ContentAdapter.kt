@@ -12,6 +12,8 @@ import com.ducktapedapps.updoot.databinding.ItemContentSelftextBinding
 import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.LinkViewHolder
 import com.ducktapedapps.updoot.ui.comments.ContentViewHolder.SelfTextViewHolder
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.LoadedLink
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.LoadingLink
 
 class ContentAdapter(private val clickHandler: ClickHandler) : ListAdapter<SubmissionContent, ContentViewHolder>(CALLBACK) {
     interface ClickHandler {
@@ -35,8 +37,7 @@ class ContentAdapter(private val clickHandler: ClickHandler) : ListAdapter<Submi
                 is Image -> IMAGE
                 is Video -> PLACEHOLDER
                 is SelfText -> SELF_TEXT
-                is LinkState.LoadingLink -> LINK
-                is LinkState.LoadedLink -> LINK
+                is LinkState -> LINK
                 JustTitle -> PLACEHOLDER
             }
 
@@ -48,8 +49,8 @@ class ContentAdapter(private val clickHandler: ClickHandler) : ListAdapter<Submi
     private companion object {
         val CALLBACK = object : DiffUtil.ItemCallback<SubmissionContent>() {
             override fun areItemsTheSame(oldItem: SubmissionContent, newItem: SubmissionContent): Boolean =
-                    oldItem is LinkState.LoadingLink && newItem is LinkState.LoadingLink
-                            || oldItem is LinkState.LoadedLink && newItem is LinkState.LoadedLink
+                    oldItem is LoadingLink && newItem is LoadingLink
+                            || oldItem is LoadedLink && newItem is LoadedLink
                             || oldItem is Image && newItem is Image
                             || oldItem is Video && newItem is Video
                             || oldItem is SelfText && newItem is SelfText

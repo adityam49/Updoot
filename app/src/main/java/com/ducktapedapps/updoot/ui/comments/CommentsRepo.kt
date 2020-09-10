@@ -3,12 +3,9 @@ package com.ducktapedapps.updoot.ui.comments
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.api.remote.RedditAPI
 import com.ducktapedapps.updoot.model.BaseComment
 import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.MoreCommentData
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.linkMetaData.LinkModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
