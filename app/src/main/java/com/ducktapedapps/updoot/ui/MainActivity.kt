@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                             .commit()
                 }
                 History, Inbox, CreatePost -> Unit
+                Exit -> showExitDialog()
             }
         }
     })
@@ -170,7 +171,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
             if (isInFocus()) {
                 if (binding.searchView.hasFocus()) clearFocus()
                 else collapse()
-            } else super.onBackPressed()
+            } else {
+                if (onBackPressedDispatcher.hasEnabledCallbacks()) super.onBackPressed()
+                else showExitDialog()
+            }
         }
     }
 
@@ -250,15 +254,15 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     private fun observeScreen() {
         with(supportFragmentManager) {
             addOnBackStackChangedListener {
-                when (findFragmentById(R.id.fragment_container)?.javaClass?.simpleName) {
-                    SubredditFragment::class.java.simpleName,
-                    CommentsFragment::class.java.simpleName -> viewModel.showBottomNavDrawer()
+                when (findFragmentById(R.id.fragment_container)) {
+                    is SubredditFragment,
+                    is CommentsFragment -> viewModel.showBottomNavDrawer()
 
-                    LoginFragment::class.java.simpleName,
-                    SettingsFragment::class.java.simpleName,
-                    VideoPreviewFragment::class.java.simpleName,
-                    ImagePreviewFragment::class.java.simpleName,
-                    ExploreFragment::class.java.simpleName -> viewModel.hideBottomNavDrawer()
+                    is LoginFragment,
+                    is SettingsFragment,
+                    is VideoPreviewFragment,
+                    is ImagePreviewFragment,
+                    is ExploreFragment -> viewModel.hideBottomNavDrawer()
                 }
             }
         }
@@ -291,9 +295,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     }
 
     private fun getCurrentDestinationMenu(): Int? =
-            when (supportFragmentManager.findFragmentById(R.id.fragment_container)?.javaClass?.simpleName) {
-                SubredditFragment::class.java.simpleName -> R.menu.subreddit_screen_menu
-                CommentsFragment::class.java.simpleName -> R.menu.comment_screen_menu
+            when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
+                is SubredditFragment -> R.menu.subreddit_screen_menu
+                is CommentsFragment -> R.menu.comment_screen_menu
                 else -> null
             }
 
@@ -301,4 +305,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(focusView, 0)
     }
+
+    private fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)
 }

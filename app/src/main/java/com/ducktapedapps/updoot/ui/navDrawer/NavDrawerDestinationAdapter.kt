@@ -48,6 +48,7 @@ sealed class NavigationDestination(val title: String, @DrawableRes val icon: Int
     object CreatePost : NavigationDestination("Create Post", R.drawable.ic_baseline_edit_24, true)
     object Inbox : NavigationDestination("Inbox", R.drawable.ic_baseline_inbox_24, true)
     object History : NavigationDestination("History", R.drawable.ic_baseline_history_24, false)
+    object Exit : NavigationDestination("Exit", R.drawable.ic_baseline_exit_to_app_24, false)
 }
 
 val AllNavigationEntries = listOf(
@@ -55,5 +56,6 @@ val AllNavigationEntries = listOf(
         Explore,
         CreatePost,
         Inbox,
-        History
+        History,
+        Exit
 )

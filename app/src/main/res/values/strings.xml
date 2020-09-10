@@ -54,4 +54,5 @@
     <string name="using_single_color_thread">Comments use single color thread</string>
     <string name="using_multiple_color_thread">Comments use multiple color threads</string>
     <string name="link_preview_icon">Link preview icon</string>
+    <string name="exit_app">Exit the app?</string>
 </resources>
