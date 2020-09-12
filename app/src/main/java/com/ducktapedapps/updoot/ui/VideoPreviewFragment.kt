@@ -88,8 +88,10 @@ class VideoPreviewFragment : Fragment() {
     }
 
     private fun getMediaSource(): MediaSource {
+        val url = requireArguments().getString(KEY_VIDEO_URL) ?: ""
+        Toast.makeText(requireContext(), "video : $url", Toast.LENGTH_LONG).show()
         val dataSourceFactory = DefaultDataSourceFactory(this.context, resources.getString(R.string.app_name))
-        val uri = Uri.parse(requireArguments().getString(KEY_VIDEO_URL))
+        val uri = Uri.parse(url)
         return when {
             uri.authority?.contains("redd") == true -> DashMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(uri)

@@ -3,9 +3,9 @@ package com.ducktapedapps.updoot.ui.subreddit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
-import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
+import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType

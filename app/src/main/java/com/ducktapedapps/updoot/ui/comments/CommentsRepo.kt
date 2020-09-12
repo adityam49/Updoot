@@ -1,11 +1,13 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.model.BaseComment
-import com.ducktapedapps.updoot.model.CommentData
+import com.ducktapedapps.updoot.data.local.model.BaseComment
+import com.ducktapedapps.updoot.data.local.model.CommentData
+import com.ducktapedapps.updoot.data.local.model.MoreCommentData
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.asCommentPage
+import com.ducktapedapps.updoot.utils.mapToRepliesModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,11 +26,9 @@ class CommentsRepo @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 val redditAPI = redditClient.api()
-                val response = redditAPI.getComments(subreddit, submission_id).comments
-                if (response.isNotEmpty()) {
-                    _allComments.postValue(response)
-                } else
-                    Log.e(this.javaClass.simpleName, "response from retrofit is empty")
+                val response = (redditAPI.getComments(subreddit, submission_id))
+                val allComments = response.asCommentPage().component2()
+                _allComments.postValue(allComments)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             } finally {
@@ -43,16 +43,21 @@ class CommentsRepo @Inject constructor(
                 val list = it.toMutableList()
                 val parentComment = list[index]
                 if (parentComment is CommentData) {
-                    if (!parentComment.replies.isNullOrEmpty()) {
+                    val replies = parentComment.replies.mapToRepliesModel()
+                    if (replies.isNotEmpty()) {
                         list[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
                         if (!parentComment.repliesExpanded) {
-                            list.addAll(index + 1, recursiveChildrenExpansion(parentComment.replies))
+                            list.addAll(index + 1, recursiveChildrenExpansion(replies))
                         } else {
-                            if (parentComment.replies.isNotEmpty()) {
+                            if (!replies.isNullOrEmpty()) {
                                 val commentsToBeRemoved = mutableListOf<BaseComment>()
                                 for (i in index + 1 until list.size) {
-                                    if (list[i].depth > parentComment.depth) commentsToBeRemoved.add(list[i])
-                                    else break
+                                    when (val comment = list[i]) {
+                                        is CommentData -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
+                                        else break
+                                        is MoreCommentData -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
+                                        else break
+                                    }
                                 }
                                 list.removeAll(commentsToBeRemoved)
                             }
@@ -69,7 +74,8 @@ class CommentsRepo @Inject constructor(
                 list.forEach {
                     if (it is CommentData) {
                         this += it.copy(repliesExpanded = !it.repliesExpanded)
-                        if (it.replies.isNotEmpty()) this += recursiveChildrenExpansion(it.replies)
+                        val replies = it.replies.mapToRepliesModel()
+                        if (replies.isNotEmpty()) this += recursiveChildrenExpansion(replies)
                     } else this += it
                 }
             }

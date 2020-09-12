@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.ducktapedapps.updoot.api.local.SubredditDB
-import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.model.SubredditPrefs
+import com.ducktapedapps.updoot.data.local.SubredditDB
+import com.ducktapedapps.updoot.data.local.SubredditPrefs
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Constants.SUBREDDIT_DB

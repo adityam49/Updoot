@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.databinding.ItemSubscriptionSubredditBinding
-import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
@@ -49,7 +49,7 @@ class SubredditViewHolder(val binding: ItemSubscriptionSubredditBinding) : Recyc
                 .append(" \u2022 ")
                 .pushSpan(RelativeSizeSpan(0.8f))
                 .append(getCompactAge(subreddit.created))
-                .append("\n\n${getCompactCountAsString(subreddit.subscribers)} subscribers")
+                .append("\n\n${getCompactCountAsString(subreddit.subscribers ?: 0)} subscribers")
                 .build()
         root.setOnClickListener { clickHandler.goToSubreddit(subreddit.display_name) }
     }

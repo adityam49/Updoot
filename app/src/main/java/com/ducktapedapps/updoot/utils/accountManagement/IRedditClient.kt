@@ -1,8 +1,8 @@
 package com.ducktapedapps.updoot.utils.accountManagement
 
 import android.content.Context
-import com.ducktapedapps.updoot.api.remote.RedditAPI
-import com.ducktapedapps.updoot.model.Token
+import com.ducktapedapps.updoot.data.local.model.Token
+import com.ducktapedapps.updoot.data.remote.RedditAPI
 import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
 
 interface IRedditClient {

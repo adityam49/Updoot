@@ -7,8 +7,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.databinding.ItemPostHeaderBinding
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.SubmissionMetaDataAdapter.PostHeaderViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
