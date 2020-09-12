@@ -3,13 +3,16 @@ package com.ducktapedapps.updoot.backgroundWork
 import android.accounts.AccountManager
 import android.content.Context
 import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.api.local.SubredditDAO
 import com.ducktapedapps.updoot.api.local.SubredditSubscription
 import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.createNotification
+import com.ducktapedapps.updoot.utils.createNotificationChannel
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.random.Random
@@ -22,10 +25,10 @@ class SubscriptionSyncWorker(
 ) : CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = try {
         val accounts = findAllLoggedInUsers()
-        createNotification("Found ${accounts.size} accounts", "names are :$accounts", context)
-        accounts.forEach { user ->
+        buildNotificationAndShow("Found ${accounts.size} accounts", "names are :$accounts", context)
+        accounts.reversed().forEach { user ->
             val notificationId = Random.nextInt()
-            createNotification("Syncing $user's subreddits", "Found ${getSubredditCount(user)}'s subreddits", context, notificationId)
+            buildNotificationAndShow("Syncing $user's subreddits", "Found ${getSubredditCount(user)}'s subreddits", context, notificationId)
             val subs = loadUserSubscribedSubreddits(user)
             subs.forEach { subreddit ->
                 subredditDAO.apply {
@@ -33,7 +36,7 @@ class SubscriptionSyncWorker(
                     insertSubscription(SubredditSubscription(subreddit.display_name, user))
                 }
             }
-            createNotification("Finished syncing $user's subreddits", "Updated ${subs.size} subreddits", context, notificationId)
+            buildNotificationAndShow("Finished syncing $user's subreddits", "Updated ${subs.size} subreddits", context, notificationId)
         }
         Result.success()
     } catch (e: Exception) {
@@ -68,6 +71,17 @@ class SubscriptionSyncWorker(
     private fun getSubredditCount(user: String) =
             subredditDAO.subscribedSubredditsFor(user).size
 
+    private fun buildNotificationAndShow(title: String, message: String, context: Context, id: Int = Random.nextInt()) {
+        context.createNotificationChannel()
+        val builder = NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_subreddit_default_24dp)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+        NotificationManagerCompat.from(context).notify(id, builder.build())
+    }
+
     companion object {
         const val SUBSCRIPTION_SYNC_TAG = "sub_sync_tag"
     }
@@ -89,6 +103,7 @@ fun Context.enqueueSubscriptionSyncWork() {
             .setRequiresBatteryNotLow(true)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) constraints.setRequiresDeviceIdle(true)
     val workRequest = PeriodicWorkRequestBuilder<SubscriptionSyncWorker>(1, TimeUnit.DAYS)
+            .addTag(SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG)
             .setConstraints(constraints.build()).build()
 
     WorkManager
