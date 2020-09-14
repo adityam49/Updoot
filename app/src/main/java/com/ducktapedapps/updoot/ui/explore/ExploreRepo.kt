@@ -1,13 +1,14 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.ui.explore.trending.TrendingUiModel
+import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -20,10 +21,7 @@ class ExploreRepo @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    val trendingSubs: Flow<List<ExploreUiModel>> = subredditDAO.observeTrendingSubs().distinctUntilChanged().map {
-        if (it.isNotEmpty()) it.mapToTrendingModel()
-        else emptyList()
-    }
+    val trendingSubs: Flow<List<Subreddit>> = subredditDAO.observeTrendingSubs().distinctUntilChanged()
 
     suspend fun loadTrendingSubs() {
         _isLoading.value = true
@@ -48,9 +46,9 @@ class ExploreRepo @Inject constructor(
     @Throws(Exception::class)
     private suspend fun fetchNewTrendingSubs() {
         val api = redditClient.api()
-        val subs = api.getTrendingSubredditNames()
-        subs.forEach {
-            api.getSubredditInfo(it).apply {
+        val result = api.getTrendingSubredditNames()
+        result.subreddit_names.forEach {
+            (api.getSubredditInfo(it).data as? Subreddit)?.apply {
                 subredditDAO.insertSubreddit(copy(lastUpdated = System.currentTimeMillis(), isTrending = 1))
             }
         }
@@ -60,10 +58,6 @@ class ExploreRepo @Inject constructor(
         (System.currentTimeMillis() - (it.lastUpdated
                 ?: 0L) > TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS * 60 * 60 * 1000)
     }
-
-    private fun List<Subreddit>.mapToTrendingModel(): List<ExploreUiModel> = listOf(
-            HeaderUiModel("Trending today ", R.drawable.ic_baseline_trending_up_24),
-            TrendingUiModel(this))
 
     companion object {
         private const val TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS = 12

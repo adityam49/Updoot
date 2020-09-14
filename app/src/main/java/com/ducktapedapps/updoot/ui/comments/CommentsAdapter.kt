@@ -4,11 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.ducktapedapps.updoot.data.local.model.BaseComment
+import com.ducktapedapps.updoot.data.local.model.CommentData
+import com.ducktapedapps.updoot.data.local.model.MoreCommentData
 import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
-import com.ducktapedapps.updoot.model.BaseComment
-import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.MoreCommentData
 import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.CommentHolder
 import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.MoreCommentHolder
 

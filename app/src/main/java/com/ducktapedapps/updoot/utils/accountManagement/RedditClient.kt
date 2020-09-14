@@ -7,9 +7,9 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import com.ducktapedapps.updoot.api.remote.AuthAPI
-import com.ducktapedapps.updoot.api.remote.RedditAPI
-import com.ducktapedapps.updoot.model.Token
+import com.ducktapedapps.updoot.data.local.model.Token
+import com.ducktapedapps.updoot.data.remote.AuthAPI
+import com.ducktapedapps.updoot.data.remote.RedditAPI
 import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
 import com.ducktapedapps.updoot.ui.navDrawer.AccountModel.*
 import com.ducktapedapps.updoot.utils.Constants

@@ -24,6 +24,8 @@
         android:id="@+id/thumbnail_image_view"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         android:layout_margin="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

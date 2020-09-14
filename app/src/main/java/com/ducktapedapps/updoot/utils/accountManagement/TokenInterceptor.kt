@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.utils.accountManagement
 
 import android.util.Log
-import com.ducktapedapps.updoot.model.Token
 import com.ducktapedapps.updoot.utils.Constants
 import okhttp3.Interceptor
 import okhttp3.Response

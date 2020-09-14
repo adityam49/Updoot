@@ -7,11 +7,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.api.local.SubredditSubscription
-import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.SubredditSubscription
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.asSubredditPage
 import com.ducktapedapps.updoot.utils.createNotificationChannel
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -51,18 +52,17 @@ class SubscriptionSyncWorker(
         try {
             redditClient.setCurrentAccount(user)
             val redditAPI = redditClient.api()
-            var result = redditAPI.getSubscribedSubreddits(null)
-            val fetchedSubs = mutableListOf<Subreddit>().apply {
-                addAll(result.subreddits)
+            var result = redditAPI.getSubscribedSubreddits(null).asSubredditPage()
+            val allSubs = mutableListOf<Subreddit>().apply {
+                addAll(result.component1())
             }
-
-            var after: String? = result.after
+            var after: String? = result.component2()
             while (after != null) {
-                result = redditAPI.getSubscribedSubreddits(after)
-                fetchedSubs.addAll(result.subreddits)
-                after = result.after
+                result = redditAPI.getSubscribedSubreddits(after).asSubredditPage()
+                allSubs.addAll(result.component1())
+                after = result.component2()
             }
-            return fetchedSubs
+            return allSubs
         } catch (e: Exception) {
             throw Exception("Unable to fetch subscription for user $user", e)
         }

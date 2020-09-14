@@ -1,16 +1,15 @@
 package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.BuildConfig
+import com.ducktapedapps.updoot.data.local.moshiAdapters.ImageJsonAdapterFactory
+import com.ducktapedapps.updoot.data.local.moshiAdapters.ThingFactory
+import com.ducktapedapps.updoot.data.local.moshiAdapters.VideoJsonAdapterFactory
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.SearchAdapter
-import com.ducktapedapps.updoot.utils.SubredditInfoAdapter
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import com.ducktapedapps.updoot.utils.moshiAdapters.*
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.Reusable
-import io.noties.markwon.Markwon
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -46,16 +45,11 @@ class NetworkModule {
 
     @Reusable
     @Provides
-    fun provideMoshi(markwon: Markwon): Moshi = Moshi
+    fun provideMoshi(): Moshi = Moshi
             .Builder()
-            .add(SubmissionListingAdapter())
-            .add(MoreCommentsListAdapter(markwon))
-            .add(CommentListingAdapter(markwon))
-            .add(SubredditListingAdapter())
-            .add(LinkDataAdapter())
-            .add(TrendingSubsJsonAdapter())
-            .add(SearchAdapter())
-            .add(SubredditInfoAdapter())
+            .add(VideoJsonAdapterFactory())
+            .add(ImageJsonAdapterFactory())
+            .add(ThingFactory())
             .build()
 
     @Singleton

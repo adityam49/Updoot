@@ -9,14 +9,15 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.data.local.model.CommentData
+import com.ducktapedapps.updoot.data.local.model.MoreCommentData
 import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
-import com.ducktapedapps.updoot.model.CommentData
-import com.ducktapedapps.updoot.model.MoreCommentData
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
+import com.ducktapedapps.updoot.utils.mapToRepliesModel
 
 
 sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -30,7 +31,7 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(data: MoreCommentData) = binding.apply {
             indentView.setIndentLevel(data.depth)
-            moreCommentCountTv.text = String.format("Load %d more %s", data.children.size, if (data.children.size == 1) "comment" else "comments")
+            moreCommentCountTv.text = String.format("Load %d more %s", 1, "comments")
         }
     }
 
@@ -63,7 +64,7 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 textViewCommentHeader.bindHeader(data, expandCollapseComment)
                 textViewCommentBody.bindCommentBody(data, expandCollapseComment)
                 scoreView.setData(data.ups ?: 0, data.likes)
-                textViewChildrenCount.bindChildCount(data.repliesExpanded, data.replies.size)
+                textViewChildrenCount.bindChildCount(data.repliesExpanded, data.replies.mapToRepliesModel().size)
             }
         }
 
@@ -100,7 +101,7 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                         )
                         append(data.author)
                         popSpan()
-                        append(if (!data.author_flair_text.isBlank()) String.format(" · %s ", data.author_flair_text) else "")
+                        append(if (!data.author_flair_text.isNullOrBlank()) String.format(" · %s ", data.author_flair_text) else "")
                     }.build(), TextView.BufferType.SPANNABLE)
         }
 

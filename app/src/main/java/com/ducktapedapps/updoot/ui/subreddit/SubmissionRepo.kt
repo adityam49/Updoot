@@ -3,18 +3,19 @@ package com.ducktapedapps.updoot.ui.subreddit
 import android.text.TextUtils
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
-import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.api.local.SubredditPrefsDAO
-import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.model.Subreddit
-import com.ducktapedapps.updoot.model.SubredditPrefs
+import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.SubredditPrefs
+import com.ducktapedapps.updoot.data.local.SubredditPrefsDAO
+import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.asSubmissionsPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -52,7 +53,7 @@ class SubmissionRepo(
                 try {
                     val api = redditClient.api()
                     val result = api.getSubredditInfo(subredditName)
-                    subredditDAO.insertSubreddit(result)
+                    (result.data as? Subreddit)!!.let { subredditDAO.insertSubreddit(it) }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _toastMessage.value = SingleLiveEvent("Unable to fetch $subredditName metadata : ${e.message}")
@@ -183,19 +184,18 @@ class SubmissionRepo(
         val redditAPI = redditClient.api()
         val sorting = (prefsDAO.getSubredditSorting(subredditName)
                 ?: createAndSaveDefaultSubredditPrefs(subredditName).subredditSorting).mapSorting()
-        val fetchedSubmissions = redditAPI.getSubreddit(
+        val fetchedData = redditAPI.getSubreddit(
                 "${if (subredditName != FRONTPAGE) "r/" else ""}$subredditName",
                 sorting.first,
                 sorting.second,
                 nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()
         )
-        fetchedSubmissions.apply {
-            if (submissions.isNotEmpty()) {
-                submissions.forEach { submissionsCacheDAO.insertSubmissions(it) }
-                nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
-                        .toMutableMap()
-                        .apply { put(after, submissions.map { it.id }) }
-            }
+        val page = fetchedData.asSubmissionsPage()
+        page.component1().forEach { submission -> submissionsCacheDAO.insertSubmissions(submission) }
+        if (page.component1().isNotEmpty()) {
+            nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
+                    .toMutableMap()
+                    .apply { put(page.component2(), page.component1().map { linkData -> linkData.id }) }
         }
     }
 

@@ -4,11 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.databinding.CompactSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.LargeSubmissionSelftextBinding
-import com.ducktapedapps.updoot.model.LinkData
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionViewHolder.*
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.Companion.PayLoad.SaveChange
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsAdapter.Companion.PayLoad.VoteChange

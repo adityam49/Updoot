@@ -1,6 +1,6 @@
 package com.ducktapedapps.updoot.utils
 
-import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.utils.Media.*
 import java.net.URI
 
@@ -28,14 +28,14 @@ private fun LinkData.getImgurMedia(): Media = with(URI.create(url)) {
     when {
         path.hasImageExtension() -> Image(thumbnail, url)
         path.hasVideoExtension() -> Video(url.replace(".gifv", ".mp4"))
-        else -> if (!videoUrl.isNullOrBlank()) Video(videoUrl) else Link(url)
+        else -> if (video != null) Video(video.dash_url) else Link(url)
     }
 }
 
 private fun LinkData.getRedditMedia(): Media = with(URI.create(url)) {
     when {
-        path.hasImageExtension() -> Image(imageSet?.lowResUrl ?: thumbnail, url)
-        authority.startsWith("v.") -> Video(if (!videoUrl.isNullOrBlank()) videoUrl else url)
+        path.hasImageExtension() -> Image(preview?.lowResUrl ?: thumbnail, url)
+        authority.startsWith("v.") -> Video(video?.dash_url ?: url)
         else -> Link(url)
     }
 }

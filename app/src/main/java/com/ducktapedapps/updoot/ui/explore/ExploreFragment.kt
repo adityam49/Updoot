@@ -4,19 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.observe
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentExploreBinding
-import com.ducktapedapps.updoot.ui.explore.trending.ExploreTrendingAdapter
-import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
@@ -47,23 +39,6 @@ class ExploreFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val trendingAdapter = ExploreTrendingAdapter()
-        setUpViewModels(trendingAdapter)
-        binding.apply {
-            recyclerView.apply {
-                layoutManager = LinearLayoutManager(requireContext())
-                adapter = trendingAdapter
-            }
-        }
-    }
 
-    private fun openSubreddit(subredditName: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, SubredditFragment.newInstance(subredditName)).commit()
     }
-
-    private fun setUpViewModels(trendingAdapter: ExploreTrendingAdapter) =
-            viewModel.apply {
-                trendingSubs.asLiveData().observe(viewLifecycleOwner) { trendingAdapter.submitList(it) }
-                isLoading.asLiveData().observe(viewLifecycleOwner) { binding.progressCircular.visibility = if (it) VISIBLE else GONE }
-            }
 }

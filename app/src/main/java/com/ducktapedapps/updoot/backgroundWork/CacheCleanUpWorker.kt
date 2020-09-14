@@ -6,10 +6,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
-import com.ducktapedapps.updoot.api.local.SubredditDAO
-import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.model.Subreddit
+import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.createNotificationChannel

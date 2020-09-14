@@ -30,11 +30,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
-import com.ducktapedapps.updoot.model.LinkData
-import com.ducktapedapps.updoot.model.Subreddit
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.User.LoggedIn
 import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
@@ -42,6 +41,7 @@ import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
 import com.ducktapedapps.updoot.ui.common.ScrollPositionListener
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
+import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
@@ -323,7 +323,7 @@ class SubredditFragment : Fragment() {
                     .append(subreddit.display_name)
                     .popSpan()
                     .pushSpan(AbsoluteSizeSpan(12, true))
-                    .append("\n\n${getCompactCountAsString(subreddit.subscribers)} Users / ${getCompactCountAsString(subreddit.active_user_count)} Active now")
+                    .append("\n\n${getCompactCountAsString(subreddit.subscribers ?: 0)} Users / ${getCompactCountAsString(subreddit.active_user_count ?: 0)} Active now")
                     .build()
         }
     }

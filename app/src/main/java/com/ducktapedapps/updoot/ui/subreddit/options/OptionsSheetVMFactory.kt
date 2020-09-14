@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.ui.subreddit.options
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
 import javax.inject.Inject
 
 class OptionsSheetVMFactory @Inject constructor(

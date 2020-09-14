@@ -4,10 +4,10 @@ import android.text.Spanned
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.api.local.SubmissionsCacheDAO
-import com.ducktapedapps.updoot.api.remote.LinkModel
-import com.ducktapedapps.updoot.api.remote.fetchMetaDataFrom
-import com.ducktapedapps.updoot.model.LinkData
+import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.remote.LinkModel
+import com.ducktapedapps.updoot.data.remote.fetchMetaDataFrom
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.toMedia

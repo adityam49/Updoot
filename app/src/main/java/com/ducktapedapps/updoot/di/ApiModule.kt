@@ -2,8 +2,8 @@ package com.ducktapedapps.updoot.di
 
 import android.accounts.AccountManager
 import android.content.Context
-import com.ducktapedapps.updoot.api.remote.AuthAPI
-import com.ducktapedapps.updoot.api.remote.RedditAPI
+import com.ducktapedapps.updoot.data.remote.AuthAPI
+import com.ducktapedapps.updoot.data.remote.RedditAPI
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
