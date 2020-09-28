@@ -4,10 +4,11 @@ import android.text.Spanned
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.remote.LinkModel
-import com.ducktapedapps.updoot.data.remote.fetchMetaDataFrom
+import com.ducktapedapps.updoot.data.remote.fetchMetaData
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.toMedia
@@ -24,7 +25,8 @@ class CommentsVM(
         submissionsCacheDAO: SubmissionsCacheDAO,
         private val markwon: Markwon,
         private val id: String,
-        private val subreddit_name: String
+        private val subreddit_name: String,
+        private val linkMetaDataDAO: LinkMetaDataDAO
 ) : ViewModel() {
     val allComments = repo.allComments
 
@@ -65,7 +67,8 @@ class CommentsVM(
 
     private fun getMetaDataFor(url: String): Flow<LinkState> = flow {
         emit(LinkState.LoadingLink(url))
-        emitAll(fetchMetaDataFrom(url)
+        emitAll(url
+                .fetchMetaData(linkMetaDataDAO)
                 .catch { error -> emit(LinkState.NoMetaDataLink(url, error.message ?: "")) }
                 .map { LinkState.LoadedLink(it) })
     }
@@ -80,6 +83,7 @@ sealed class SubmissionContent {
         data class LoadingLink(val url: String) : LinkState()
         data class NoMetaDataLink(val url: String, val errorReason: String) : LinkState()
     }
+
     object JustTitle : SubmissionContent()
 }
 
@@ -87,7 +91,8 @@ sealed class SubmissionContent {
 class CommentsVMFactory @Inject constructor(
         private val commentsRepo: CommentsRepo,
         private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val markwon: Markwon
+        private val markwon: Markwon,
+        private val linkMetaDataDAO: LinkMetaDataDAO
 ) : ViewModelProvider.Factory {
     private lateinit var subredditName: String
     private lateinit var id: String
@@ -99,5 +104,5 @@ class CommentsVMFactory @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T =
-            CommentsVM(commentsRepo, submissionsCacheDAO, markwon, id, subredditName) as T
+            CommentsVM(commentsRepo, submissionsCacheDAO, markwon, id, subredditName, linkMetaDataDAO) as T
 }

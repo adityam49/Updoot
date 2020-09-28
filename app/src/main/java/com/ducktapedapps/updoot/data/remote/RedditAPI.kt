@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.data.remote
 
 import com.ducktapedapps.updoot.data.local.model.Account
 import com.ducktapedapps.updoot.data.local.model.TrendingSubredditNames
-import com.ducktapedapps.updoot.data.local.moshiAdapters.Thing
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.Thing
 import com.ducktapedapps.updoot.utils.Constants
 import retrofit2.http.*
 

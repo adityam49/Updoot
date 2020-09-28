@@ -1,9 +1,9 @@
 package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.BuildConfig
-import com.ducktapedapps.updoot.data.local.moshiAdapters.ImageJsonAdapterFactory
-import com.ducktapedapps.updoot.data.local.moshiAdapters.ThingFactory
-import com.ducktapedapps.updoot.data.local.moshiAdapters.VideoJsonAdapterFactory
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.ImageJsonAdapterFactory
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.ThingFactory
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.VideoJsonAdapterFactory
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.squareup.moshi.Moshi

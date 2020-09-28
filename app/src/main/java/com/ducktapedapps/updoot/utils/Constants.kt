@@ -46,7 +46,7 @@ object Constants {
     const val ADD_ACCOUNT = "Add account"
     const val ANON_USER = "Anonymous"
 
-    const val SUBREDDIT_DB = "subreddit_db"
+    const val UPDOOT_DB = "updoot_db"
 
     //notification
     const val NOTIFICATION_CHANNEL_ID = "com.ducktapedapps.updoot.notification"

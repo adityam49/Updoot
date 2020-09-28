@@ -4,7 +4,7 @@ import com.ducktapedapps.updoot.data.local.model.BaseComment
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.local.model.ListingThing
 import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.data.local.moshiAdapters.Thing
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.Thing
 
 fun Thing?.mapToRepliesModel(): List<BaseComment> =
         (this?.data as? ListingThing)

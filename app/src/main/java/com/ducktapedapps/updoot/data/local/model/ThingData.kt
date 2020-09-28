@@ -3,7 +3,7 @@ package com.ducktapedapps.updoot.data.local.model
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ducktapedapps.updoot.data.local.moshiAdapters.Thing
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.Thing
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

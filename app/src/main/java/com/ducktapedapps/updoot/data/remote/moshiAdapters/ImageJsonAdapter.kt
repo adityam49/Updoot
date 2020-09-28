@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.data.local.moshiAdapters
+package com.ducktapedapps.updoot.data.remote.moshiAdapters
 
 import com.ducktapedapps.updoot.data.local.model.ImageVariants
 import com.squareup.moshi.*
