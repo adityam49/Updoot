@@ -35,12 +35,8 @@
     <string name="menu_edit_button">Menu edit button</string>
     <string name="option_icon">Option icon</string>
     <string name="user_icon">User icon</string>
-    <string name="remove_account">Remove account</string>
-    <string name="navigation_destination_icon">Navigation destination icon</string>
     <string name="requesting_user_name">Requesting username</string>
     <string name="subreddit_syncing">Syncing subscribed subreddits</string>
-    <string name="logout">Logout</string>
-    <string name="chevron">Chevron</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="sidebar">Sidebar</string>
     <string name="join">Join</string>

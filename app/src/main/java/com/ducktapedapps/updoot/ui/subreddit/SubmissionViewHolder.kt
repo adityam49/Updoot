@@ -45,7 +45,7 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
     override fun getRightSwipeData(): String? = rightSwipeDataValue
     override fun getExtremeRightSwipeData(): String? = extremeRightSwipeDataValue
 
-    private fun setSwipeData(linkData: LinkData) {
+     fun setSwipeData(linkData: LinkData) {
         extremeLeftSwipeDataValue = linkData.subredditName
         leftSwipeDataValue = linkData.id
         rightSwipeDataValue = linkData.id
