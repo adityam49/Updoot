@@ -41,7 +41,7 @@ class CacheCleanUpWorker(
         submissionsCacheDAO.getAllCachedSubmissions().also { totalSubmissions = it.size }
                 .filter { it.isStale(currentTimeInSeconds) }
                 .also { submissionsRemoved = it.size }
-                .forEach { submissionsCacheDAO.deleteSubmission(it.id, it.subredditName) }
+                .forEach { submissionsCacheDAO.deleteSubmission(it.name, it.subredditName) }
         showSubmissionsRemovedNotification(totalSubmissions, submissionsRemoved)
     }
 

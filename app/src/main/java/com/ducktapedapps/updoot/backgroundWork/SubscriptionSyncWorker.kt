@@ -12,7 +12,6 @@ import com.ducktapedapps.updoot.data.local.SubredditSubscription
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.asSubredditPage
 import com.ducktapedapps.updoot.utils.createNotificationChannel
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -52,15 +51,15 @@ class SubscriptionSyncWorker(
         try {
             redditClient.setCurrentAccount(user)
             val redditAPI = redditClient.api()
-            var result = redditAPI.getSubscribedSubreddits(null).asSubredditPage()
+            var result = redditAPI.getSubscribedSubreddits(null)
             val allSubs = mutableListOf<Subreddit>().apply {
-                addAll(result.component1())
+                addAll(result.children)
             }
-            var after: String? = result.component2()
+            var after: String? = result.after
             while (after != null) {
-                result = redditAPI.getSubscribedSubreddits(after).asSubredditPage()
-                allSubs.addAll(result.component1())
-                after = result.component2()
+                result = redditAPI.getSubscribedSubreddits(after)
+                allSubs.addAll(result.children)
+                after = result.after
             }
             return allSubs
         } catch (e: Exception) {

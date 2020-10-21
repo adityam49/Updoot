@@ -48,7 +48,7 @@ class ExploreRepo @Inject constructor(
         val api = redditClient.api()
         val result = api.getTrendingSubredditNames()
         result.subreddit_names.forEach {
-            (api.getSubredditInfo(it).data as? Subreddit)?.apply {
+            (api.getSubredditInfo(it)).apply {
                 subredditDAO.insertSubreddit(copy(lastUpdated = System.currentTimeMillis(), isTrending = 1))
             }
         }

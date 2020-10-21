@@ -19,9 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentCommentsBinding
-import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
+import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
@@ -78,17 +79,19 @@ class CommentsFragment : Fragment() {
         val contentAdapter = ContentAdapter(object : ContentAdapter.ClickHandler {
             override fun onClick(content: SubmissionContent) {
                 when (content) {
-                    is SubmissionContent.Image -> openImage(content.data.lowResUrl, content.data.highResUrl)
-                    is SubmissionContent.Video -> openVideo(content.data.url)
-                    is SubmissionContent.SelfText -> Unit
-                    is SubmissionContent.LinkState.LoadedLink -> openLink(content.linkModel.url)
-                    is SubmissionContent.LinkState.LoadingLink -> openLink(content.url)
-                    SubmissionContent.JustTitle -> Unit
+                    is Image -> openImage(content.data.lowResUrl, content.data.highResUrl)
+                    is Video -> openVideo(content.data.url)
+                    is LinkState.LoadedLink -> openLink(content.linkModel.url)
+                    is LinkState.LoadingLink -> openLink(content.url)
+                    is LinkState.NoMetaDataLink -> openLink(content.url)
+                    is SelfText -> Unit
+                    is JustTitle -> Unit
                 }
             }
         })
         val commentsAdapter = CommentsAdapter(
-                ::expandCollapseComment,
+                viewModel::toggleChildrenVisibility,
+                viewModel::loadMoreComment,
                 sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_count_key), true),
                 sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_color_key), true)
         )
@@ -111,10 +114,12 @@ class CommentsFragment : Fragment() {
     }
 
     private fun observeData(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) = viewModel.apply {
-        allComments.observe(viewLifecycleOwner, { commentsAdapter.submitList(it) })
         isLoading.observe(viewLifecycleOwner, { binding.swipeToRefreshLayout.isRefreshing = it })
         submissionData.asLiveData().observe(viewLifecycleOwner, { submissionHeaderAdapter.linkData = it })
         content.asLiveData().observe(viewLifecycleOwner, { contentAdapter.submitList(listOf(it)) })
+        allComments.asLiveData().observe(viewLifecycleOwner) {
+            commentsAdapter.submitList(it)
+        }
     }
 
     private fun setUpRecyclerView(submissionHeaderAdapter: SubmissionMetaDataAdapter, contentAdapter: ContentAdapter, commentsAdapter: CommentsAdapter) {
@@ -145,7 +150,6 @@ class CommentsFragment : Fragment() {
 
     private fun getDrawable(@DrawableRes drawableRes: Int): Drawable? = ContextCompat.getDrawable(requireContext(), drawableRes)
 
-    private fun expandCollapseComment(index: Int) = viewModel.toggleChildrenVisibility(index)
 
     private fun openLink(link: String) = startActivity(Intent().apply {
         action = Intent.ACTION_VIEW

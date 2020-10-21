@@ -10,8 +10,8 @@ interface SubmissionsCacheDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubmissions(data: LinkData)
 
-    @Query("DELETE FROM LinkData WHERE id IS :id AND subredditName IS :subreddit")
-    suspend fun deleteSubmission(id: String, subreddit: String)
+    @Query("DELETE FROM LinkData WHERE name IS :name AND subredditName IS :subreddit")
+    suspend fun deleteSubmission(name: String, subreddit: String)
 
     @RawQuery(observedEntities = [LinkData::class])
     fun observeCachedSubmissions(query: SupportSQLiteQuery): Flow<List<LinkData>>
@@ -19,9 +19,9 @@ interface SubmissionsCacheDAO {
     @Query("SELECT * FROM LinkData")
     suspend fun getAllCachedSubmissions(): List<LinkData>
 
-    @Query("SELECT * FROM LinkData WHERE id is :id")
-    suspend fun getLinkData(id: String): LinkData
+    @Query("SELECT * FROM LinkData WHERE name is :name")
+    suspend fun getLinkData(name: String): LinkData
 
-    @Query("SELECT * FROM LinkData WHERE id is :id")
-    fun observeLinkData(id: String): Flow<LinkData>
+    @Query("SELECT * FROM LinkData WHERE name is :name")
+    fun observeLinkData(name: String): Flow<LinkData>
 }

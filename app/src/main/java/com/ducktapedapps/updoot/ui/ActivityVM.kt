@@ -15,7 +15,6 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.asSubredditPage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -111,8 +110,8 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
                 try {
                     _searchQueryLoading.value = true
                     val redditAPI = redditClient.api()
-                    val results = redditAPI.search(query = queryString).asSubredditPage()
-                    results.component1().forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
+                    val results = redditAPI.search(query = queryString)
+                    results.children.forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 } finally {

@@ -14,7 +14,6 @@ import com.ducktapedapps.updoot.ui.login.ResultState.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import com.ducktapedapps.updoot.utils.asSubredditPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,15 +72,15 @@ class LoginViewModel(
     private suspend fun loadUserSubscribedSubreddits(userName: String) {
         try {
             _subscribedSubreddits.postValue(Initiated)
-            var result = redditAPI.getSubscribedSubreddits(null).asSubredditPage()
+            var result = redditAPI.getSubscribedSubreddits(null)
             val allSubs = mutableListOf<Subreddit>().apply {
-                addAll(result.component1())
+                addAll(result.children)
             }
-            var after: String? = result.component2()
+            var after: String? = result.after
             while (after != null) {
-                result = redditAPI.getSubscribedSubreddits(after).asSubredditPage()
-                allSubs.addAll(result.component1())
-                after = result.component2()
+                result = redditAPI.getSubscribedSubreddits(after)
+                allSubs.addAll(result.children)
+                after = result.after
             }
             allSubs.forEach {
                 subredditDAO.apply {

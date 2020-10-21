@@ -47,9 +47,9 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
 
     private fun setSwipeData(linkData: LinkData) {
         extremeLeftSwipeDataValue = linkData.subredditName
-        leftSwipeDataValue = linkData.id
-        rightSwipeDataValue = linkData.id
-        extremeRightSwipeDataValue = linkData.id
+        leftSwipeDataValue = linkData.name
+        rightSwipeDataValue = linkData.name
+        extremeRightSwipeDataValue = linkData.name
     }
 
     class CompactImageViewHolder(
@@ -61,9 +61,9 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, name) }
                     root.setOnLongClickListener {
-                        clickHandler.actionOpenOption(id)
+                        clickHandler.actionOpenOption(name)
                         true
                     }
                     thumbnailImageView.setOnClickListener {
@@ -100,9 +100,9 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, name) }
                     root.setOnLongClickListener {
-                        clickHandler.actionOpenOption(id)
+                        clickHandler.actionOpenOption(name)
                         true
                     }
                     setThumbnail(previewImageView, thumbnail, over_18)
@@ -134,9 +134,9 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, name) }
                     root.setOnLongClickListener {
-                        clickHandler.actionOpenOption(id)
+                        clickHandler.actionOpenOption(name)
                         true
                     }
                     previewImageView.apply {
@@ -181,9 +181,9 @@ sealed class SubmissionViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             super.setSwipeData(submissions)
             binding.apply {
                 with(submissions) {
-                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, id) }
+                    root.setOnClickListener { clickHandler.actionOpenComments(subredditName, name) }
                     root.setOnLongClickListener {
-                        clickHandler.actionOpenOption(id)
+                        clickHandler.actionOpenOption(name)
                         true
                     }
                     setGildings(gildingTextView, gildings)
@@ -276,7 +276,7 @@ private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = C
 
 private fun SubmissionClickHandler.performAction(linkData: LinkData) {
     when (val media = linkData.toMedia()) {
-        is SelfText, JustTitle -> actionOpenComments(linkData.subredditName, linkData.id)
+        is SelfText, JustTitle -> actionOpenComments(linkData.subredditName, linkData.name)
         is Image -> actionOpenImage(media.lowResUrl!!, media.highResUrl)
         is Video -> actionOpenVideo(media.url)
         is Link -> actionOpenLink(media.url)
