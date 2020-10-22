@@ -18,8 +18,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
-import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
@@ -118,6 +116,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         return when (item.itemId) {
             R.id.item_settings -> {
                 openSettings()
+                true
+            }
+            R.id.item_sync_subscriptions -> {
+                viewModel.enqueueSubscriptionSyncWork()
                 true
             }
             else -> false
@@ -271,7 +273,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        setUpWorkers()
         redditClient.detachListener()
     }
 
@@ -289,11 +290,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     fun expandBottomNavDrawer() = binding.bottomNavigationDrawer.expand()
 
     override fun currentAccountChanged() = viewModel.reloadContent()
-
-    private fun setUpWorkers() {
-        enqueueSubscriptionSyncWork()
-        enqueueCleanUpWork()
-    }
 
     private fun getCurrentDestinationMenu(): Int? =
             when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {

@@ -1,9 +1,10 @@
 package com.ducktapedapps.updoot.ui
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
+import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
+import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User.LoggedIn
@@ -21,7 +22,11 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class ActivityVM(private val redditClient: IRedditClient, private val subredditDAO: SubredditDAO) : ViewModel() {
+class ActivityVM(
+        private val application: UpdootApplication,
+        private val redditClient: IRedditClient,
+        private val subredditDAO: SubredditDAO
+) : AndroidViewModel(application) {
     private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
     val shouldReload: StateFlow<SingleLiveEvent<Boolean>> = _shouldReload
 
@@ -119,6 +124,23 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
                 }
         }
     }
+
+    fun enqueueSubscriptionSyncWork() {
+        val currentLoggedIn = _accounts.value.first()
+        application.enqueueOneOffSubscriptionsSyncFor(currentLoggedIn.name)
+    }
+
+    private fun enqueuePeriodicWork() {
+        application.apply {
+            enqueueSubscriptionSyncWork()
+            enqueueCleanUpWork()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        enqueuePeriodicWork()
+    }
 }
 
 sealed class User(val name: String) {
@@ -130,8 +152,10 @@ sealed class User(val name: String) {
 @ExperimentalCoroutinesApi
 class ActivityVMFactory @Inject constructor(
         private val redditClient: RedditClient,
-        private val subredditDAO: SubredditDAO
-) : ViewModelProvider.Factory {
+        private val subredditDAO: SubredditDAO,
+        private val application: UpdootApplication
+) : ViewModelProvider.AndroidViewModelFactory(application) {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T = ActivityVM(redditClient, subredditDAO) as T
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
+            ActivityVM(application, redditClient, subredditDAO) as T
 }

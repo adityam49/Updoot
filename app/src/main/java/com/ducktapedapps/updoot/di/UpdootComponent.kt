@@ -25,9 +25,11 @@ import javax.inject.Singleton
 @Component(modules = [NetworkModule::class, ApiModule::class, ApplicationModule::class, RoomModule::class])
 interface UpdootComponent {
 
-    @Component.Factory
-    interface Factory {
-        fun create(@BindsInstance context: Context): UpdootComponent
+    @Component.Builder
+    interface Builder {
+        fun bindApplicationContext(@BindsInstance appContext: Context): Builder
+        fun bindApplication(@BindsInstance application: UpdootApplication): Builder
+        fun build(): UpdootComponent
     }
 
     fun inject(application: UpdootApplication)

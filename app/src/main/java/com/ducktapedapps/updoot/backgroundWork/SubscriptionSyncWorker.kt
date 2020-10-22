@@ -24,12 +24,20 @@ class SubscriptionSyncWorker(
         private val context: Context
 ) : CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = try {
-        val accounts = findAllLoggedInUsers()
-        buildNotificationAndShow("Found ${accounts.size} accounts", "names are :$accounts", context)
-        accounts.reversed().forEach { user ->
+        val accountsToSync = mutableListOf<String>().apply {
+            val accountSyncRequestedFor = inputData.getString(ACCOUNT_NAME_KEY)
+            this += if (accountSyncRequestedFor == null)
+                findAllLoggedInUsers()
+            else
+                listOf(accountSyncRequestedFor)
+        }
+        buildNotificationAndShow("Found ${accountsToSync.size} accounts", "names are :$accountsToSync", context)
+        var count = 0
+        accountsToSync.reversed().forEach { user ->
             val notificationId = Random.nextInt()
             buildNotificationAndShow("Syncing $user's subreddits", "Found ${getSubredditCount(user)}'s subreddits", context, notificationId)
             val subs = loadUserSubscribedSubreddits(user)
+            count += subs.size
             subs.forEach { subreddit ->
                 subredditDAO.apply {
                     insertSubreddit(subreddit)
@@ -38,7 +46,7 @@ class SubscriptionSyncWorker(
             }
             buildNotificationAndShow("Finished syncing $user's subreddits", "Updated ${subs.size} subreddits", context, notificationId)
         }
-        Result.success()
+        Result.success(workDataOf(SYNC_UPDATED_COUNT_KEY to count))
     } catch (e: Exception) {
         Result.failure()
     }
@@ -82,7 +90,10 @@ class SubscriptionSyncWorker(
     }
 
     companion object {
+        const val ACCOUNT_NAME_KEY = "account_name_key"
+        const val ONE_OFF_SYNC_JOB = "one_off_sync_job"
         const val SUBSCRIPTION_SYNC_TAG = "sub_sync_tag"
+        const val SYNC_UPDATED_COUNT_KEY = "sync_update_count_key"
     }
 }
 
@@ -110,6 +121,22 @@ fun Context.enqueueSubscriptionSyncWork() {
             .enqueueUniquePeriodicWork(
                     SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG,
                     ExistingPeriodicWorkPolicy.KEEP,
+                    workRequest
+            )
+}
+
+fun Context.enqueueOneOffSubscriptionsSyncFor(account: String) {
+    val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+    val workRequest = OneTimeWorkRequestBuilder<SubscriptionSyncWorker>()
+            .addTag(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
+            .setInputData(workDataOf(SubscriptionSyncWorker.ACCOUNT_NAME_KEY to account))
+            .setConstraints(constraints.build()).build()
+    WorkManager
+            .getInstance(this)
+            .enqueueUniqueWork(
+                    SubscriptionSyncWorker.ONE_OFF_SYNC_JOB,
+                    ExistingWorkPolicy.REPLACE,
                     workRequest
             )
 }

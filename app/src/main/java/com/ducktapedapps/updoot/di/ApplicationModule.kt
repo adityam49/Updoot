@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.work.Configuration
+import androidx.work.WorkManager
+import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.UpdootWorkerFactory
 import com.ducktapedapps.updoot.utils.Constants
 import com.google.android.exoplayer2.ExoPlayer
@@ -13,10 +15,14 @@ import dagger.Provides
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import java.util.*
 import javax.inject.Named
 import javax.inject.Singleton
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 @Module
 class ApplicationModule {
     @Provides
@@ -52,6 +58,9 @@ class ApplicationModule {
             .setMinimumLoggingLevel(android.util.Log.DEBUG)
             .setWorkerFactory(updootWorkerFactory)
             .build()
+
+    @Provides
+    fun provideWorkManager(application: UpdootApplication): WorkManager = WorkManager.getInstance(application)
 
     @Provides
     @Singleton

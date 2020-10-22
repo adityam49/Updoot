@@ -1,57 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.login.LoginFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/user_name_status_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/user_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/user_name_status"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/user_name_status_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/user_name_status_icon"
+        app:layout_constraintTop_toTopOf="@+id/user_name_status_icon"
+        tools:visibility="visible" />
 
-        <ImageView
-            android:id="@+id/user_name_status_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="16dp"
-            android:contentDescription="@string/user_icon"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
-        <TextView
-            android:id="@+id/user_name_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="16dp"
-            android:visibility="gone"
-            tools:visibility="visible" />
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/subreddit_status_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/subreddit_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_name_status_icon" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/subreddit_status_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="16dp"
-            android:contentDescription="@string/subreddit_icon"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/subreddit_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="16dp"
-            android:visibility="gone"
-            tools:visibility="visible" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/subreddit_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/subreddit_status_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/subreddit_status_icon"
+        app:layout_constraintTop_toTopOf="@id/subreddit_status_icon"
+        tools:visibility="visible" />
 
     <WebView
         android:id="@+id/webView"
@@ -59,4 +56,4 @@
         android:layout_height="match_parent"
         android:visibility="visible"
         tools:visibility="gone" />
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
