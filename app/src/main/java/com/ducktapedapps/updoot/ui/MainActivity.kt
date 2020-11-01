@@ -4,15 +4,13 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
-import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
-import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
-import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.NavDrawerScreen
@@ -46,6 +44,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         return when (item.itemId) {
             R.id.item_settings -> {
                 openSettings()
+                true
+            }
+            R.id.item_sync_subscriptions -> {
+                viewModel.enqueueSubscriptionSyncWork()
                 true
             }
             else -> false
@@ -87,8 +89,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     override fun onBackPressed() {
         with(binding.bottomNavigationDrawer) {
-            if (isInFocus()) collapse()
-            else {
+            if (isInFocus()) {
+                if (!viewModel.drawerScreenCanGoBack()) collapse()
+            } else {
                 if (onBackPressedDispatcher.hasEnabledCallbacks()) super.onBackPressed()
                 else showExitDialog()
             }
@@ -126,15 +129,16 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     private fun setUpBottomNavViews() = bottomNavBinding.apply {
         composeView.setContent {
-            UpdootTheme {
+            UpdootTheme(isDarkTheme = isSystemInDarkTheme()) {
+
                 NavDrawerScreen(
-                        viewModel = viewModel,
+                        activityVM = viewModel,
                         onLogin = ::openLoginScreen,
                         onRemoveAccount = ::logout,
                         onSwitchAccount = ::switchAccount,
                         onToggleAccountMenu = viewModel::toggleAccountsMenuList,
                         onExit = ::showExitDialog,
-                        onExplore = ::openExplore
+                        openSubreddit = ::openSubreddit
                 )
             }
         }
@@ -150,8 +154,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                     is LoginFragment,
                     is SettingsFragment,
                     is VideoPreviewFragment,
-                    is ImagePreviewFragment,
-                    is ExploreFragment -> viewModel.hideBottomNavDrawer()
+                    is ImagePreviewFragment -> viewModel.hideBottomNavDrawer()
                 }
             }
         }
@@ -159,7 +162,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        setUpWorkers()
         redditClient.detachListener()
     }
 
@@ -175,11 +177,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     private fun collapseBottomNavDrawer() = binding.bottomNavigationDrawer.collapse()
 
     override fun currentAccountChanged() = viewModel.reloadContent()
-
-    private fun setUpWorkers() {
-        enqueueSubscriptionSyncWork()
-        enqueueCleanUpWork()
-    }
 
     private fun getCurrentDestinationMenu(): Int? =
             when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
@@ -208,12 +205,11 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         collapseBottomNavDrawer()
     }
 
-    private fun openExplore() {
+    private fun openSubreddit(name: String) {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .setCustomAnimations(R.anim.enter_from_top, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_top)
-                .replace(R.id.fragment_container, ExploreFragment())
+                .replace(R.id.fragment_container, SubredditFragment.newInstance(name))
                 .commit()
     }
 

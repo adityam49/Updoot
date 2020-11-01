@@ -2,9 +2,10 @@ package com.ducktapedapps.updoot.ui.explore
 
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 class ExploreRepo @Inject constructor(
-        private val redditClient: RedditClient,
+        private val redditClient: IRedditClient,
         private val subredditDAO: SubredditDAO
 ) {
 
@@ -28,11 +29,14 @@ class ExploreRepo @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 subredditDAO.getTrendingSubs().apply {
-                    if (isEmpty()) {
-                        fetchNewTrendingSubs()
-                    } else if (isStale()) {
-                        fetchNewTrendingSubs()
-                        forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
+                    when {
+                        isEmpty() -> fetchNewTrendingSubs()
+
+                        isStale() -> {
+                            fetchNewTrendingSubs()
+                            forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
+                        }
+                        else -> delay(2_000)
                     }
                 }
             } catch (e: Exception) {
@@ -48,7 +52,7 @@ class ExploreRepo @Inject constructor(
         val api = redditClient.api()
         val result = api.getTrendingSubredditNames()
         result.subreddit_names.forEach {
-            (api.getSubredditInfo(it).data as? Subreddit)?.apply {
+            (api.getSubredditInfo(it)).apply {
                 subredditDAO.insertSubreddit(copy(lastUpdated = System.currentTimeMillis(), isTrending = 1))
             }
         }

@@ -171,7 +171,7 @@ class RedditClient @Inject constructor(
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 val result = authAPI.logout(refresh_token = androidAccountManager.getUserData(accountToRemove, Constants.USER_TOKEN_REFRESH_KEY))
-                if (result.code() == 204) {
+                if (result.code() == 204 || result.code() == 200) {
                     invalidateToken()
                     if (sharedPreferences.getString(Constants.CURRENT_ACCOUNT_NAME, null) == accountName) {
                         sharedPreferences.edit().putString(Constants.CURRENT_ACCOUNT_NAME, Constants.ANON_USER).apply()

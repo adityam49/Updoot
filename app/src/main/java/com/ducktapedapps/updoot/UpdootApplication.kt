@@ -16,7 +16,11 @@ import javax.inject.Inject
 class UpdootApplication : Application(), Configuration.Provider {
 
     val updootComponent: UpdootComponent by lazy {
-        DaggerUpdootComponent.factory().create(this)
+        DaggerUpdootComponent
+                .builder()
+                .bindApplication(this)
+                .bindApplicationContext(this)
+                .build()
     }
 
     @Inject

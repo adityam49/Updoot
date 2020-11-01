@@ -28,7 +28,7 @@ class SubscriptionsAdapter(private val clickHandler: ClickHandler) : ListAdapter
 
             override fun areContentsTheSame(oldItem: Subreddit, newItem: Subreddit) =
                     newItem.subscribers == oldItem.subscribers &&
-                            newItem.active_user_count == oldItem.active_user_count
+                            newItem.accounts_active == oldItem.accounts_active
         }
     }
 

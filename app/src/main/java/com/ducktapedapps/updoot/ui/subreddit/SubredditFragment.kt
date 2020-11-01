@@ -39,7 +39,6 @@ import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
-import com.ducktapedapps.updoot.ui.common.ScrollPositionListener
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
@@ -200,7 +199,6 @@ class SubredditFragment : Fragment() {
                         }
                 )).attachToRecyclerView(this)
                 addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
-                addOnScrollListener(ScrollPositionListener(linearLayoutManager, submissionsVM))
             }
         }
     }
@@ -323,7 +321,7 @@ class SubredditFragment : Fragment() {
                     .append(subreddit.display_name)
                     .popSpan()
                     .pushSpan(AbsoluteSizeSpan(12, true))
-                    .append("\n\n${getCompactCountAsString(subreddit.subscribers ?: 0)} Users / ${getCompactCountAsString(subreddit.active_user_count ?: 0)} Active now")
+                    .append("\n\n${getCompactCountAsString(subreddit.subscribers ?: 0)} Users / ${getCompactCountAsString(subreddit.accounts_active ?: 0)} Active now")
                     .build()
         }
     }

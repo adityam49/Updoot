@@ -2,42 +2,65 @@ package com.ducktapedapps.updoot.ui.login
 
 import android.net.Uri
 import androidx.lifecycle.*
-import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.SubredditSubscription
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.backgroundWork.SubscriptionSyncWorker
+import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.data.local.model.Account
-import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.data.local.model.Token
 import com.ducktapedapps.updoot.data.remote.AuthAPI
 import com.ducktapedapps.updoot.data.remote.RedditAPI
 import com.ducktapedapps.updoot.ui.login.LoginState.*
-import com.ducktapedapps.updoot.ui.login.ResultState.*
+import com.ducktapedapps.updoot.ui.login.ResultState.Finished
+import com.ducktapedapps.updoot.ui.login.ResultState.Running
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import com.ducktapedapps.updoot.utils.asSubredditPage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 import javax.inject.Inject
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 class LoginViewModel(
         private val redditClient: RedditClient,
         private val redditAPI: RedditAPI,
         private val authAPI: AuthAPI,
         private val interceptor: TokenInterceptor,
-        private val subredditDAO: SubredditDAO
-) : ViewModel() {
+        private val application: UpdootApplication,
+        private val workManager: WorkManager
+) : AndroidViewModel(application) {
 
-    private val _loginState: MutableLiveData<LoginState> = MutableLiveData(NotLoggedIn)
-    val loginResult: LiveData<LoginState> = _loginState
+    private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(NotLoggedIn)
+    val loginState: Flow<LoginState> = _loginState.onEach {
+        when (it) {
+            NotLoggedIn -> Unit
+            ObservingUrl -> Unit
+            is FetchingToken -> when (it.token) {
+                Running -> Unit
+                is Finished<Token> -> loadUserName(it.token.value)
+            }
+            is FetchingUserName -> when (it.account) {
+                Running -> Unit
+                is Finished -> loadUserSubscribedSubreddits(it.account.value.name)
+            }
+            is FetchingSubscriptions -> when (it.subscriptionSync) {
+                Running -> Unit
+                is Finished<Int> -> _loginState.value = LoggedIn
+            }
+            is Error -> Unit
+            LoggedIn -> delay(3_000)
+        }
+    }
 
-    private val _accountNameState = MutableLiveData<ResultState<Account>>(Uninitiated)
-    val accountNameState: LiveData<ResultState<Account>> = _accountNameState
-
-    private val _subscribedSubreddits = MutableLiveData<ResultState<Int>>(Uninitiated)
-    val subscribedSubreddits: LiveData<ResultState<Int>> = _subscribedSubreddits
+    private val subscribedSubreddits: Flow<List<WorkInfo>> = workManager
+            .getWorkInfosByTagLiveData(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
+            .asFlow()
 
     val authUrl: String
         get() {
@@ -62,82 +85,65 @@ class LoginViewModel(
     fun parseUrl(uri: Uri?) {
         if (uri != null && uri.host == Uri.parse(Constants.redirect_uri).host) {
             if (uri.getQueryParameter("error") == null) {
-                _loginState.value = Processing
-                getDetails(uri.getQueryParameter("code")!!)
+                _loginState.value = ObservingUrl
+                viewModelScope.launch(Dispatchers.IO) { fetchToken(uri.getQueryParameter("code")!!) }
             } else {
                 _loginState.value = Error("Access denied")
             }
         }
     }
 
-    private suspend fun loadUserSubscribedSubreddits(userName: String) {
+    private suspend fun fetchToken(code: String) {
         try {
-            _subscribedSubreddits.postValue(Initiated)
-            var result = redditAPI.getSubscribedSubreddits(null).asSubredditPage()
-            val allSubs = mutableListOf<Subreddit>().apply {
-                addAll(result.component1())
-            }
-            var after: String? = result.component2()
-            while (after != null) {
-                result = redditAPI.getSubscribedSubreddits(after).asSubredditPage()
-                allSubs.addAll(result.component1())
-                after = result.component2()
-            }
-            allSubs.forEach {
-                subredditDAO.apply {
-                    insertSubreddit(it)
-                    insertSubscription(SubredditSubscription(subredditName = it.display_name, userName = userName))
-                }
-            }
-            _subscribedSubreddits.postValue(Finished(allSubs.size))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            _loginState.postValue(Error("Unable to sync user subscribed subreddits"))
-        }
-    }
-
-    private fun getDetails(code: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val fetchedToken = fetchToken(code)
-
-                val account = loadUserName()
-
-                loadUserSubscribedSubreddits(account!!.name)
-
-                delay(2000)
-                saveAccount(account, fetchedToken!!)
-
-                _loginState.postValue(LoggedIn)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _loginState.postValue(Error(e.message.toString()))
-            }
-        }
-    }
-
-    private suspend fun fetchToken(code: String): Token? =
-            try {
+            _loginState.value = FetchingToken(Running)
+            withContext(Dispatchers.IO) {
                 val token: Token = authAPI.getUserToken(code = code)
                 token.setAbsoluteExpiry()
                 interceptor.sessionToken = token.access_token
-                token
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                null
+                _loginState.value = FetchingToken(Finished(token))
             }
-
-    private suspend fun loadUserName(): Account? {
-        return try {
-            _accountNameState.postValue(Initiated)
-            val account = redditAPI.userIdentity()
-            _accountNameState.postValue(Finished(account))
-            account
         } catch (exception: Exception) {
             exception.printStackTrace()
-            _loginState.postValue(Error("Unable to load Username"))
-            null
+            _loginState.value = Error(exception.message!!)
+        }
+    }
+
+    private suspend fun loadUserName(token: Token) {
+        try {
+            _loginState.value = FetchingUserName(Running)
+            withContext(Dispatchers.IO) {
+                val account = redditAPI.userIdentity()
+                _loginState.value = FetchingUserName(Finished(account))
+                saveAccount(account, token)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            _loginState.value = Error(exception.message!!)
+        }
+    }
+
+    private fun loadUserSubscribedSubreddits(userName: String) {
+        workManager.apply {
+            pruneWork()
+            application.enqueueOneOffSubscriptionsSyncFor(userName)
+            viewModelScope.launch {
+                subscribedSubreddits.collect {
+                    val workState = it.firstOrNull()
+                    workState?.state?.let { workStatus ->
+                        when (workStatus) {
+                            WorkInfo.State.ENQUEUED,
+                            WorkInfo.State.RUNNING -> _loginState.value = FetchingSubscriptions(Running)
+                            WorkInfo.State.SUCCEEDED -> {
+                                val count = workState.outputData.getInt(SubscriptionSyncWorker.SYNC_UPDATED_COUNT_KEY, -1)
+                                _loginState.value = FetchingSubscriptions(Finished(count))
+                            }
+                            WorkInfo.State.FAILED,
+                            WorkInfo.State.BLOCKED,
+                            WorkInfo.State.CANCELLED -> _loginState.value = Error("Unable to fetch user subscriptions")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -147,25 +153,30 @@ class LoginViewModel(
             }
 }
 
-sealed class ResultState<out T> {
-    object Uninitiated : ResultState<Nothing>()
-    object Initiated : ResultState<Nothing>()
-    data class Finished<out T>(val result: T) : ResultState<T>()
-}
-
 sealed class LoginState {
     object NotLoggedIn : LoginState()
-    object Processing : LoginState()
+    object ObservingUrl : LoginState()
+    data class FetchingToken(val token: ResultState<Token>) : LoginState()
+    data class FetchingUserName(val account: ResultState<Account>) : LoginState()
+    data class FetchingSubscriptions(val subscriptionSync: ResultState<Int>) : LoginState()
     data class Error(val errorMessage: String) : LoginState()
     object LoggedIn : LoginState()
 }
 
+sealed class ResultState<out T> {
+    object Running : ResultState<Nothing>()
+    data class Finished<T>(val value: T) : ResultState<T>()
+}
+
+@FlowPreview
+@ExperimentalCoroutinesApi
 class LoginVMFactory @Inject constructor(
         private val redditClient: RedditClient,
         private val redditAPI: RedditAPI,
         private val authAPI: AuthAPI,
         private val interceptor: TokenInterceptor,
-        private val subredditDAO: SubredditDAO
+        private val application: UpdootApplication,
+        private val workManager: WorkManager
 ) : ViewModelProvider.Factory {
     @Suppress("Unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T =
@@ -175,7 +186,8 @@ class LoginVMFactory @Inject constructor(
                         redditAPI,
                         authAPI,
                         interceptor,
-                        subredditDAO
+                        application,
+                        workManager
                 ) as T
             else throw RuntimeException("Unsupported vm requested ${modelClass.simpleName}")
 }

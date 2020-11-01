@@ -51,4 +51,6 @@
     <string name="using_multiple_color_thread">Comments use multiple color threads</string>
     <string name="link_preview_icon">Link preview icon</string>
     <string name="exit_app">Exit the app?</string>
+    <string name="sync_subscriptions">Sync Subscriptions</string>
+    <string name="synced_count_subreddits">Synced %1$d subreddits</string>
 </resources>

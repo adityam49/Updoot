@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.remote.LinkModel
 import com.ducktapedapps.updoot.data.remote.fetchMetaData
@@ -28,7 +29,7 @@ class CommentsVM(
         private val subreddit_name: String,
         private val linkMetaDataDAO: LinkMetaDataDAO
 ) : ViewModel() {
-    val allComments = repo.allComments
+    val allComments = repo.visibleComments
 
     val submissionData: Flow<LinkData> = submissionsCacheDAO
             .observeLinkData(id)
@@ -59,7 +60,13 @@ class CommentsVM(
 
     fun toggleChildrenVisibility(index: Int) {
         viewModelScope.launch {
-            repo.toggleChildrenCommentVisibility(index, id)
+            repo.toggleChildrenCommentVisibility(index)
+        }
+    }
+
+    fun loadMoreComment(moreCommentData: MoreCommentData, index: Int) {
+        viewModelScope.launch {
+            repo.fetchMoreComments(id, moreCommentData, index)
         }
     }
 

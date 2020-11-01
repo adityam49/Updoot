@@ -9,19 +9,22 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.CommentData
-import com.ducktapedapps.updoot.data.local.model.MoreCommentData
+import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
+import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.databinding.CommentItemBinding
 import com.ducktapedapps.updoot.databinding.MoreCommentItemBinding
 import com.ducktapedapps.updoot.ui.common.SwipeableViewHolder
 import com.ducktapedapps.updoot.utils.RoundedBackgroundSpan
 import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import com.ducktapedapps.updoot.utils.mapToRepliesModel
 
 
 sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    class MoreCommentHolder(val binding: MoreCommentItemBinding, singleThreadMode: Boolean, singleThreadColorMode: Boolean) : CommentsViewHolder(binding.root) {
+    class MoreCommentHolder(
+            val binding: MoreCommentItemBinding,
+            singleThreadMode: Boolean,
+            singleThreadColorMode: Boolean
+    ) : CommentsViewHolder(binding.root) {
         init {
             binding.indentView.apply {
                 this.singleThreadMode = singleThreadMode
@@ -29,9 +32,10 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             }
         }
 
-        fun bind(data: MoreCommentData) = binding.apply {
+        fun bind(data: MoreCommentData, expandCollapseComment: (MoreCommentData, Int) -> Unit) = binding.apply {
             indentView.setIndentLevel(data.depth)
-            moreCommentCountTv.text = String.format("Load %d more %s", 1, "comments")
+            moreCommentCountTv.text = String.format("Load %d more %s", data.count, "comments")
+            root.setOnClickListener { expandCollapseComment(data, bindingAdapterPosition) }
         }
     }
 
@@ -64,7 +68,7 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 textViewCommentHeader.bindHeader(data, expandCollapseComment)
                 textViewCommentBody.bindCommentBody(data, expandCollapseComment)
                 scoreView.setData(data.ups ?: 0, data.likes)
-                textViewChildrenCount.bindChildCount(data.repliesExpanded, data.replies.mapToRepliesModel().size)
+                textViewChildrenCount.bindChildCount(data.repliesExpanded, data.replies.children.size)
             }
         }
 
@@ -85,13 +89,13 @@ sealed class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
 
 
-        private fun TextView.bindCommentBody(data: CommentData, expandCollapseComment: (index: Int) -> Unit) = apply {
+        private fun TextView.bindCommentBody(data: CommentData, expandCollapseComment: (Int) -> Unit) = apply {
             setOnClickListener { expandCollapseComment(bindingAdapterPosition) }
             text = data.body
             movementMethod = LinkMovementMethod.getInstance()
         }
 
-        private fun TextView.bindHeader(data: CommentData, expandCollapseComment: (index: Int) -> Unit) = apply {
+        private fun TextView.bindHeader(data: CommentData, expandCollapseComment: (Int) -> Unit) = apply {
             setOnClickListener { expandCollapseComment(bindingAdapterPosition) }
             setText(Truss()
                     .apply {

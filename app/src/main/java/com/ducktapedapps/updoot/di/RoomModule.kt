@@ -38,7 +38,7 @@ class RoomModule {
                                     display_name = FRONTPAGE,
                                     community_icon = "",
                                     subscribers = -1,
-                                    active_user_count = -1,
+                                    accounts_active = -1,
                                     public_description = "The front page of the internet",
                                     created = 1137566705,
                                     lastUpdated = System.currentTimeMillis(),

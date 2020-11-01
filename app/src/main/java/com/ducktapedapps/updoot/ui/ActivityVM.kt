@@ -1,28 +1,36 @@
 package com.ducktapedapps.updoot.ui
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.*
+import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
+import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
+import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User.LoggedIn
 import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
 import com.ducktapedapps.updoot.ui.navDrawer.AllNavigationEntries
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination
+import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.asSubredditPage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class ActivityVM(private val redditClient: IRedditClient, private val subredditDAO: SubredditDAO) : ViewModel() {
+class ActivityVM(
+        private val application: UpdootApplication,
+        val redditClient: IRedditClient,
+        val subredditDAO: SubredditDAO
+) : AndroidViewModel(application) {
     private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
     val shouldReload: StateFlow<SingleLiveEvent<Boolean>> = _shouldReload
 
@@ -31,6 +39,33 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
 
     private val _navDrawerVisible = MutableLiveData(true)
     val navDrawerVisibility = _navDrawerVisible
+
+    private val _currentNavDrawerScreen: MutableState<NavigationDestination> = mutableStateOf(NavigationMenu)
+    val currentNavDrawerScreen: State<NavigationDestination> = _currentNavDrawerScreen
+
+    /**
+     * Returns false if navigation menu is visible
+     * and true if other nested screen is visible
+     */
+    fun drawerScreenCanGoBack(): Boolean =
+            if (currentNavDrawerScreen.value == NavigationMenu) false
+            else {
+                _currentNavDrawerScreen.value = NavigationMenu
+                true
+            }
+
+    fun drawerNavigateTo(destination: NavigationDestination) {
+        when (destination) {
+            NavigationMenu -> _currentNavDrawerScreen.value = NavigationMenu
+            Search -> _currentNavDrawerScreen.value = Search
+            Explore -> _currentNavDrawerScreen.value = Explore
+            CreatePost,
+            Inbox,
+            History -> Log.e("ActivityViewModel", "${destination.title} Not implemented! ")
+
+            Exit -> TODO()
+        }
+    }
 
     val user: Flow<User> = _accounts.map {
         if (it.first().name == Constants.ANON_USER) LoggedOut
@@ -93,32 +128,22 @@ class ActivityVM(private val redditClient: IRedditClient, private val subredditD
         }
     }
 
-    private val query: MutableStateFlow<String> = MutableStateFlow("")
-    private val _searchQueryLoading = MutableStateFlow(false)
-    val searchQueryLoading: StateFlow<Boolean> = _searchQueryLoading
-    private var currentSearchJob: Job? = null
 
-    val results: Flow<List<Subreddit>> = query.combineTransform(user) { keyWord: String, user: User ->
-        if (keyWord.isNotBlank()) emit(subredditDAO.observeSubredditWithKeyword(keyWord).distinctUntilChanged())
-        else emit(subredditDAO.observeSubscribedSubredditsFor(user.name).distinctUntilChanged())
-    }.flattenMerge()
+    fun enqueueSubscriptionSyncWork() {
+        val currentLoggedIn = _accounts.value.first()
+        application.enqueueOneOffSubscriptionsSyncFor(currentLoggedIn.name)
+    }
 
-    fun searchSubreddit(queryString: String) {
-        currentSearchJob?.cancel()
-        currentSearchJob = viewModelScope.launch(Dispatchers.IO) {
-            query.value = queryString
-            if (queryString.isNotBlank())
-                try {
-                    _searchQueryLoading.value = true
-                    val redditAPI = redditClient.api()
-                    val results = redditAPI.search(query = queryString).asSubredditPage()
-                    results.component1().forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                } finally {
-                    _searchQueryLoading.value = false
-                }
+    private fun enqueuePeriodicWork() {
+        application.apply {
+            enqueueSubscriptionSyncWork()
+            enqueueCleanUpWork()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        enqueuePeriodicWork()
     }
 }
 
@@ -131,8 +156,10 @@ sealed class User(val name: String) {
 @ExperimentalCoroutinesApi
 class ActivityVMFactory @Inject constructor(
         private val redditClient: RedditClient,
-        private val subredditDAO: SubredditDAO
-) : ViewModelProvider.Factory {
+        private val subredditDAO: SubredditDAO,
+        private val application: UpdootApplication
+) : ViewModelProvider.AndroidViewModelFactory(application) {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T = ActivityVM(redditClient, subredditDAO) as T
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
+            ActivityVM(application, redditClient, subredditDAO) as T
 }

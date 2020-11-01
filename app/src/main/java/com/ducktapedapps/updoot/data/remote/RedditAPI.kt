@@ -1,8 +1,7 @@
 package com.ducktapedapps.updoot.data.remote
 
-import com.ducktapedapps.updoot.data.local.model.Account
-import com.ducktapedapps.updoot.data.local.model.TrendingSubredditNames
-import com.ducktapedapps.updoot.data.remote.moshiAdapters.Thing
+import com.ducktapedapps.updoot.data.local.model.*
+import com.ducktapedapps.updoot.data.local.moshiAdapters.InconsistentApiResponse
 import com.ducktapedapps.updoot.utils.Constants
 import retrofit2.http.*
 
@@ -16,7 +15,7 @@ interface RedditAPI {
             @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
             @Query("t") time: String?,
-            @Query("after") after: String?): Thing
+            @Query("after") after: String?): Listing<LinkData>
 
     @FormUrlEncoded
     @POST("/api/save")
@@ -34,14 +33,15 @@ interface RedditAPI {
     suspend fun getComments(
             @Path("subreddit") subreddit: String,
             @Path("id") submissions_id: String
-    ): List<Thing>
+    ): List<Listing<RedditThing>>
 
     @GET("/api/morechildren")
+    @InconsistentApiResponse
     suspend fun getMoreChildren(
-            @Query("children") children: String,
+            @Query("api_type") api_type: String = "json",
             @Query("link_id") link_id: String,
-            @Query("api_type") type: String = "json"
-    ): Thing
+            @Query("children") children: String
+    ): Listing<Comment>
 
     @FormUrlEncoded
     @POST("/api/vote")
@@ -53,12 +53,12 @@ interface RedditAPI {
     @GET("/subreddits/search")
     suspend fun search(
             @Query("q") query: String
-    ): Thing
+    ): Listing<Subreddit>
 
     @GET("r/{subreddit}/about")
     suspend fun getSubredditInfo(
             @Path("subreddit") subreddit: String
-    ): Thing
+    ): Subreddit
 
     @GET
     suspend fun getTrendingSubredditNames(@Url fullUrl: String = Constants.TRENDING_API_URL): TrendingSubredditNames
@@ -66,6 +66,6 @@ interface RedditAPI {
     @GET("/subreddits/mine/subscriber")
     suspend fun getSubscribedSubreddits(
             @Query("after") after: String?
-    ): Thing
+    ): Listing<Subreddit>
 }
 

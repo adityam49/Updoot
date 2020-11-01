@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        compose_version = '1.0.0-alpha03'
+        compose_version = '1.0.0-alpha06'
         kotlin_version = "1.4.10"
         lifecycle_version = '2.2.0'
         retrofit_version = '2.9.0'
@@ -14,7 +14,7 @@ buildscript {
         markwon_version = '4.4.0'
         work_manager_version = "2.4.0"
         jsoup_version = '1.13.1'
-        exoPlayer_version = '2.11.7'
+        exoPlayer_version = '2.11.8'
         archTestingVersion = '2.1.0'
         hamcrestVersion = '1.3'
     }
@@ -24,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.2.0-alpha14'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

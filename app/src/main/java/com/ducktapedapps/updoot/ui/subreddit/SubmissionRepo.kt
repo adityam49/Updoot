@@ -15,7 +15,6 @@ import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import com.ducktapedapps.updoot.utils.asSubmissionsPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -53,7 +52,7 @@ class SubmissionRepo(
                 try {
                     val api = redditClient.api()
                     val result = api.getSubredditInfo(subredditName)
-                    (result.data as? Subreddit)!!.let { subredditDAO.insertSubreddit(it) }
+                    subredditDAO.insertSubreddit(result)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _toastMessage.value = SingleLiveEvent("Unable to fetch $subredditName metadata : ${e.message}")
@@ -65,10 +64,10 @@ class SubmissionRepo(
             SimpleSQLiteQuery(
                     StringBuilder().apply {
                         append(" SELECT * FROM Linkdata")
-                        append(" WHERE id IN (")
+                        append(" WHERE name IN (")
                         append(TextUtils.join(",", ids.map { "\'$it\'" }))
                         append(")")
-                        append(" ORDER BY CASE id ")
+                        append(" ORDER BY CASE name ")
                         ids.forEachIndexed { index, id -> append(" WHEN \'$id\' THEN $index ") }
                         append(" END")
                     }.toString(), null)
@@ -190,12 +189,11 @@ class SubmissionRepo(
                 sorting.second,
                 nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()
         )
-        val page = fetchedData.asSubmissionsPage()
-        page.component1().forEach { submission -> submissionsCacheDAO.insertSubmissions(submission) }
-        if (page.component1().isNotEmpty()) {
+        fetchedData.children.forEach { submission -> submissionsCacheDAO.insertSubmissions(submission) }
+        if (fetchedData.children.isNotEmpty()) {
             nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
                     .toMutableMap()
-                    .apply { put(page.component2(), page.component1().map { linkData -> linkData.id }) }
+                    .apply { put(fetchedData.after, fetchedData.children.map { linkData -> linkData.name }) }
         }
     }
 
