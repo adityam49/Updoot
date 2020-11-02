@@ -10,13 +10,10 @@ import com.ducktapedapps.updoot.ui.common.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-@ExperimentalCoroutinesApi
 class SubmissionsVM constructor(
         private val submissionRepo: SubmissionRepo
 ) : ViewModel(), InfiniteScrollVM {
@@ -67,7 +64,6 @@ class SubmissionsVM constructor(
     }
 }
 
-@ExperimentalCoroutinesApi
 class SubmissionsVMFactory @Inject constructor(
         private val redditClient: RedditClient,
         private val prefsDAO: SubredditPrefsDAO,

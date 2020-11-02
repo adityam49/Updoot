@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun UpdootTheme(
-        isDarkTheme : Boolean = isSystemInDarkTheme(),
+        isDarkTheme: Boolean = isSystemInDarkTheme(),
         content: @Composable () -> Unit
 ) {
     MaterialTheme(

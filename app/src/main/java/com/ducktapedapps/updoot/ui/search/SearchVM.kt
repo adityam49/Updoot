@@ -4,11 +4,12 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class SearchVM(
         private val subredditDAO: SubredditDAO,
         private val redditClient: IRedditClient,

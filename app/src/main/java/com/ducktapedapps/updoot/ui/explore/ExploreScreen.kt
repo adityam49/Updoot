@@ -1,6 +1,9 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollableRow
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -12,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -23,13 +25,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.ui.theme.surfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dev.chrisbanes.accompanist.glide.GlideImage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
-@ExperimentalCoroutinesApi
 @Composable
 fun ExploreScreen(
         onClickSubreddit: (String) -> Unit,
@@ -67,17 +66,13 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                     .padding(start = 8.dp, end = 8.dp)
                     .clickable(onClick = { onClickSubreddit(subreddit.display_name) }),
             shape = RoundedCornerShape(16.dp),
-            backgroundColor = surfaceOnDrawer
     ) {
-        Row(modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Transparent)
-                .wrapContentHeight()
-                .padding(16.dp)
+        Row(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
         ) {
             GlideImage(
                     data = subreddit.community_icon,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(48.dp).padding(start = 16.dp, top = 16.dp),
                     requestBuilder = {
                         apply(RequestOptions().transform(CenterCrop(), CircleCrop()))
                     },
@@ -85,10 +80,17 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                         Image(asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp), modifier = Modifier.align(Alignment.CenterVertically))
                     }
             )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                Text(text = subreddit.display_name, style = MaterialTheme.typography.h6)
+            Column {
+                Text(
+                        text = subreddit.display_name,
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                )
                 subreddit.public_description?.run {
-                    Text(text = this, style = MaterialTheme.typography.caption)
+                    Text(
+                            text = this,
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier.padding(16.dp))
                 }
             }
         }

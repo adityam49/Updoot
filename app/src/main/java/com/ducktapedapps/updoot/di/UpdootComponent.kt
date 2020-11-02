@@ -13,12 +13,8 @@ import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Singleton
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 @Singleton
 @Component(modules = [NetworkModule::class, ApiModule::class, ApplicationModule::class, RoomModule::class])
 interface UpdootComponent {

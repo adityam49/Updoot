@@ -20,12 +20,12 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class ActivityVM(
         private val application: UpdootApplication,
         val redditClient: IRedditClient,
@@ -152,8 +152,6 @@ sealed class User(val name: String) {
     data class LoggedIn(val userName: String) : User(userName)
 }
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class ActivityVMFactory @Inject constructor(
         private val redditClient: RedditClient,
         private val subredditDAO: SubredditDAO,

@@ -7,12 +7,8 @@ import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.work.Configuration
 import com.ducktapedapps.updoot.di.DaggerUpdootComponent
 import com.ducktapedapps.updoot.di.UpdootComponent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class UpdootApplication : Application(), Configuration.Provider {
 
     val updootComponent: UpdootComponent by lazy {

@@ -4,7 +4,6 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 class ExploreRepo @Inject constructor(
         private val redditClient: IRedditClient,
         private val subredditDAO: SubredditDAO
@@ -31,12 +29,11 @@ class ExploreRepo @Inject constructor(
                 subredditDAO.getTrendingSubs().apply {
                     when {
                         isEmpty() -> fetchNewTrendingSubs()
-
                         isStale() -> {
                             fetchNewTrendingSubs()
                             forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
                         }
-                        else -> delay(2_000)
+                        else -> delay(1_000)
                     }
                 }
             } catch (e: Exception) {

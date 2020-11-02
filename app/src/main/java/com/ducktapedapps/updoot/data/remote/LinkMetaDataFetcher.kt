@@ -4,13 +4,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.URI
 
-@ExperimentalCoroutinesApi
 fun String.fetchMetaData(linkMetaDataDAO: LinkMetaDataDAO): Flow<LinkModel> {
     val url = if (this.startsWith("http:")) this.replaceFirst("http:", "https:") else this
     return fetchMetaDataFromLocalSource(url, linkMetaDataDAO).flatMapLatest { cachedUrlMetaData ->

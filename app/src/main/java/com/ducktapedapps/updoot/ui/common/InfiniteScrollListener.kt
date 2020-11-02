@@ -2,9 +2,7 @@ package com.ducktapedapps.updoot.ui.common
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 class InfiniteScrollListener(private val layoutManager: LinearLayoutManager, private val viewModel: InfiniteScrollVM) : RecyclerView.OnScrollListener() {
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

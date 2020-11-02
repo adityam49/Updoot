@@ -19,12 +19,7 @@ import androidx.work.*
 import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.backgroundWork.ImageDownLoadWorker
 import com.ducktapedapps.updoot.databinding.FragmentImagePreviewBinding
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 
-
-@ExperimentalCoroutinesApi
-@FlowPreview
 class ImagePreviewFragment : Fragment() {
     companion object {
         private const val IMAGE_DOWNLOAD_TAG = "image_download_tag"

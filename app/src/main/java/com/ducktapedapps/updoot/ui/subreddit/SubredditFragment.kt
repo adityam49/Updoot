@@ -39,6 +39,7 @@ import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
+import com.ducktapedapps.updoot.ui.common.ScrollPositionListener
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
@@ -51,11 +52,12 @@ import com.ducktapedapps.updoot.utils.Truss
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class SubredditFragment : Fragment() {
     companion object {
         private const val SUBREDDIT_KEY = "subreddit_key"
@@ -199,6 +201,7 @@ class SubredditFragment : Fragment() {
                         }
                 )).attachToRecyclerView(this)
                 addOnScrollListener(InfiniteScrollListener(linearLayoutManager, submissionsVM))
+                addOnScrollListener(ScrollPositionListener(linearLayoutManager, submissionsVM))
             }
         }
     }

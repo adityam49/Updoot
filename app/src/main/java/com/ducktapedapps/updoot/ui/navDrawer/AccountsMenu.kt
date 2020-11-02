@@ -18,7 +18,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
-import com.ducktapedapps.updoot.ui.theme.surfaceOnDrawer
 import dev.chrisbanes.accompanist.glide.GlideImage
 
 @Preview
@@ -54,15 +53,14 @@ fun AccountsMenu(
         removeAccount: (accountName: String) -> Unit,
         switch: (accountName: String) -> Unit
 ) {
-    Surface(
+    Card(
             modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(8.dp)
                     .animateContentSize(),
-            shape = RoundedCornerShape(if (accounts.size == 1) 32.dp else 16.dp),
-            color = surfaceOnDrawer,
-            elevation = 1.dp
+            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(percent = if (accounts.size == 1) 50 else 10),
     ) {
         Column {
             accounts.forEach { accountModel ->
@@ -100,9 +98,7 @@ fun NonCurrentAccountItem(
                             is AccountModel.AnonymousAccount, is AccountModel.UserModel -> switch(accountModel.name)
                         }
                     }),
-
-
-            ) {
+    ) {
         val paddingModifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 20.dp)
         when (accountModel) {
             AccountModel.AddAccount -> Image(
@@ -127,11 +123,12 @@ fun NonCurrentAccountItem(
         }
 
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
-            Text(text = accountModel.name, modifier = Modifier.padding(start = 8.dp))
+            Text(text = accountModel.name, modifier = Modifier.padding(start = 8.dp).weight(1f))
         }
 
         if (accountModel is AccountModel.UserModel) {
             IconButton(
+                    modifier = Modifier.padding(end = 4.dp),
                     onClick = { removeAccount(accountModel.name) },
                     icon = { Image(asset = vectorResource(id = R.drawable.ic_baseline_remove_24)) },
             )
@@ -145,21 +142,18 @@ fun CurrentAccountItem(
         removeAccount: (accountName: String) -> Unit,
         toggleAccountMenu: () -> Unit
 ) {
-    ConstraintLayout(modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .wrapContentHeight()
+    Row(
+            modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+            verticalAlignment = Alignment.CenterVertically
     ) {
-        val (icon, username, removeButton, expandChevron) = createRefs()
-        val iconModifier = Modifier.constrainAs(icon) {
-            start.linkTo(parent.start)
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
-        }
-
+        val userIconModifier = Modifier
+                .size(64.dp)
+                .padding(8.dp)
         if (accountModel is AccountModel.UserModel) GlideImage(
                 data = accountModel.userIcon,
-                modifier = iconModifier.size(48.dp),
+                modifier = userIconModifier,
                 requestBuilder = {
                     val options = RequestOptions()
                     options.transform(CenterCrop(), CircleCrop())
@@ -169,31 +163,19 @@ fun CurrentAccountItem(
         else Image(
                 asset = vectorResource(id = R.drawable.ic_account_circle_24dp)
                         .copy(defaultHeight = 48.dp, defaultWidth = 48.dp),
-                modifier = iconModifier
+                modifier = userIconModifier
         )
 
         ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
-            Text(text = accountModel.name, modifier = Modifier.constrainAs(username) {
-                start.linkTo(icon.end, margin = 8.dp)
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-            })
+            Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
         if (accountModel is AccountModel.UserModel) IconButton(
                 icon = { Icon(asset = vectorResource(id = R.drawable.ic_baseline_remove_24)) },
-                onClick = {
-                    removeAccount(accountModel.name)
-                },
-                modifier = Modifier.constrainAs(removeButton) {
-                    end.linkTo(expandChevron.start)
-                }
+                onClick = { removeAccount(accountModel.name) },
         )
         IconButton(
                 onClick = { toggleAccountMenu() },
                 icon = { Icon(asset = vectorResource(id = R.drawable.ic_baseline_chevron_down_24)) },
-                modifier = Modifier.constrainAs(expandChevron) {
-                    end.linkTo(parent.end)
-                }
         )
     }
 }

@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.search
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,11 +7,14 @@ import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.CoreTextField
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -21,21 +23,20 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User
-import com.ducktapedapps.updoot.ui.theme.surfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) {
-    Row(modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = { openSubreddit(subreddit.display_name) })
-            .padding(8.dp)
+    Row(
+            modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { openSubreddit(subreddit.display_name) })
+                    .padding(top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp), modifier = Modifier.align(Alignment.CenterVertically))
+        Icon(asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp))
         Column(
                 modifier = Modifier
                         .padding(start = 8.dp)
@@ -55,7 +56,7 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
 
             }
         }
-        IconButton(onClick = {}) { R.drawable.ic_round_add_circle_24 }
+        IconButton(onClick = {}) { vectorResource(id = R.drawable.ic_round_add_circle_24) }
     }
 
 }
@@ -63,52 +64,53 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
 @Preview
 @Composable
 fun previewSearchView() {
-    ComposeSearchView(performSearch = {}, modifier = Modifier.fillMaxWidth())
+    ComposeSearchView(performSearch = {}, modifier = Modifier.fillMaxWidth(), {})
 }
 
 
 @Composable
-fun ComposeSearchView(performSearch: (query: String) -> Unit, modifier: Modifier) {
+fun ComposeSearchView(
+        performSearch: (query: String) -> Unit,
+        modifier: Modifier,
+        goBack: () -> Unit
+) {
     val (queryString, setQuery) = remember { mutableStateOf(TextFieldValue("")) }
-
-    Surface(
+    Card(
             modifier = modifier,
-            color = surfaceOnDrawer,
-            contentColor = MaterialTheme.colors.onSurface,
-            elevation = 1.dp,
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(50),
+            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.1f)
     ) {
         Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = goBack) {
+                Icon(asset = Icons.Default.ArrowBack)
+            }
             CoreTextField(
                     maxLines = 1,
-                    modifier = Modifier.padding(start = 16.dp, end = 8.dp).weight(0.8f),
+                    modifier = Modifier.weight(0.8f).padding(start = 16.dp, end = 8.dp),
                     value = queryString,
-                    cursorColor = MaterialTheme.colors.onSecondary,
                     onValueChange = setQuery,
                     imeAction = ImeAction.Search,
-                    onTextInputStarted = { controller: SoftwareKeyboardController ->
-                        controller.showSoftwareKeyboard()
-                    }
             )
             IconButton(
+                    icon = { Icon(asset = Icons.Default.Search) },
                     onClick = { performSearch(queryString.text) },
-                    modifier = Modifier.padding(end = 8.dp).weight(0.2f)
-            ) {
-                Icon(asset = vectorResource(id = R.drawable.ic_search_24dp))
-            }
+            )
+            if (queryString.text.isNotBlank()) IconButton(
+                    icon = { Icon(asset = Icons.Default.Clear) },
+                    onClick = { setQuery(TextFieldValue("")) },
+            )
         }
     }
 }
 
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @Composable
 fun SearchScreen(
+        goBack: () -> Unit,
         openSubreddit: (String) -> Unit,
         subredditDAO: SubredditDAO,
         redditClient: IRedditClient,
-        currentUser: Flow<User>
+        currentUser: Flow<User>,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val viewModel = remember {
@@ -125,7 +127,13 @@ fun SearchScreen(
                     .wrapContentHeight()
                     .padding(8.dp)
     ) {
-        ComposeSearchView(viewModel::searchSubreddit, Modifier.fillMaxWidth().wrapContentHeight().padding(8.dp))
+        ComposeSearchView(
+                performSearch = viewModel::searchSubreddit,
+                modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                goBack = goBack
+        )
         LazyColumnFor(
                 items = viewModel.results.collectAsState(initial = emptyList()).value,
                 modifier = Modifier.fillMaxWidth().padding(8.dp)
@@ -134,4 +142,3 @@ fun SearchScreen(
         }
     }
 }
-

@@ -1,9 +1,7 @@
 package com.ducktapedapps.updoot.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 
@@ -12,9 +10,7 @@ val lightBlueVariant = Color(0x3C62CB)
 val darkBlue = Color(0x2979FF)
 val darkBlueVariant = Color(0x2979FF)
 val lightWhiteGray = Color(0xF8F8F8)
-val darkWhiteGray = Color(0xDCDCDC)
 val lightGray = Color(0x202124)
-val darkGray = Color(0xff00ff)
 val darkRed = Color(0xF44336)
 val lightRed = Color(0xFF7961)
 
@@ -42,7 +38,3 @@ val UpdootDarkColors = darkColors(
         error = lightRed,
         onError = Color.White
 )
-
-@Composable
-val surfaceOnDrawer: Color
-    get() = if (isSystemInDarkTheme()) darkGray else darkWhiteGray

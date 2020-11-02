@@ -15,14 +15,10 @@ import dagger.Provides
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.linkify.LinkifyPlugin
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import java.util.*
 import javax.inject.Named
 import javax.inject.Singleton
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @Module
 class ApplicationModule {
     @Provides

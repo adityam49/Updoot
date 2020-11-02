@@ -23,12 +23,8 @@ import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 class CommentsFragment : Fragment() {
     companion object {
         private const val SUBREDDIT_KEY = "subreddit_key"

@@ -9,13 +9,10 @@ import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.explore.ExploreScreen
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 import com.ducktapedapps.updoot.ui.search.SearchScreen
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @Composable
 fun NavDrawerScreen(
+        goBack: () -> Unit,
         activityVM: ActivityVM,
         onLogin: () -> Unit,
         onRemoveAccount: (accountName: String) -> Unit,
@@ -43,7 +40,8 @@ fun NavDrawerScreen(
                         openSubreddit = openSubreddit,
                         subredditDAO = activityVM.subredditDAO,
                         redditClient = activityVM.redditClient,
-                        currentUser = activityVM.user
+                        currentUser = activityVM.user,
+                        goBack = goBack,
                 )
                 Explore -> ExploreScreen(
                         redditClient = activityVM.redditClient,

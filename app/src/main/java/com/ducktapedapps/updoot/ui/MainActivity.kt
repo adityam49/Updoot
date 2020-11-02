@@ -6,6 +6,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
@@ -22,13 +23,9 @@ import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
     lateinit var redditClient: RedditClient
@@ -138,7 +135,8 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                         onSwitchAccount = ::switchAccount,
                         onToggleAccountMenu = viewModel::toggleAccountsMenuList,
                         onExit = ::showExitDialog,
-                        openSubreddit = ::openSubreddit
+                        openSubreddit = ::openSubreddit,
+                        goBack = { onBackPressed() }
                 )
             }
         }
@@ -209,8 +207,10 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .replace(R.id.fragment_container, SubredditFragment.newInstance(name))
                 .commit()
+        collapseBottomNavDrawer()
     }
 
     private fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)

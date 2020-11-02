@@ -17,16 +17,17 @@ import com.ducktapedapps.updoot.ui.login.ResultState.Running
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class LoginViewModel(
         private val redditClient: RedditClient,
         private val redditAPI: RedditAPI,
@@ -168,8 +169,6 @@ sealed class ResultState<out T> {
     data class Finished<T>(val value: T) : ResultState<T>()
 }
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class LoginVMFactory @Inject constructor(
         private val redditClient: RedditClient,
         private val redditAPI: RedditAPI,

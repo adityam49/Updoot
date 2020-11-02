@@ -15,12 +15,10 @@ import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.toMedia
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 class CommentsVM(
         private val repo: CommentsRepo,
         submissionsCacheDAO: SubmissionsCacheDAO,
@@ -94,7 +92,6 @@ sealed class SubmissionContent {
     object JustTitle : SubmissionContent()
 }
 
-@ExperimentalCoroutinesApi
 class CommentsVMFactory @Inject constructor(
         private val commentsRepo: CommentsRepo,
         private val submissionsCacheDAO: SubmissionsCacheDAO,

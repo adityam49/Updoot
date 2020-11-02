@@ -22,12 +22,8 @@ import com.ducktapedapps.updoot.databinding.FragmentLoginBinding
 import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 class LoginFragment : Fragment() {
 
     @Inject

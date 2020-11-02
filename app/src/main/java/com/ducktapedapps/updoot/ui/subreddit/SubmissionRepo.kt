@@ -16,13 +16,11 @@ import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 
 private const val TAG = "SubmissionRepo"
 
-@ExperimentalCoroutinesApi
 class SubmissionRepo(
         private val redditClient: RedditClient,
         private val prefsDAO: SubredditPrefsDAO,
