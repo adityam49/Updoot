@@ -17,6 +17,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import dev.chrisbanes.accompanist.glide.GlideImage
 
@@ -59,7 +60,7 @@ fun AccountsMenu(
                     .wrapContentHeight()
                     .padding(8.dp)
                     .animateContentSize(),
-            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.1f),
+            backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
             shape = RoundedCornerShape(percent = if (accounts.size == 1) 50 else 10),
     ) {
         Column {

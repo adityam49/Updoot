@@ -19,16 +19,4 @@
     <color name="color_status_bar">@color/color_surface</color>
     <color name="sticky_post_color">#69F0AE</color>
     <color name="color_active_account">#262626</color>
-
-    <color name="thread_violet">#b39ddb</color>
-    <color name="thread_indigo">#9fa8da</color>
-    <color name="thread_blue">#90caf9</color>
-    <color name="thread_green">#a5d6a7</color>
-    <color name="thread_light_green">#aed581</color>
-    <color name="thread_lime">#dce775</color>
-    <color name="thread_yellow">#fff59d</color>
-    <color name="thread_orange">#ffcc80</color>
-    <color name="thread_deep_orange">#ffab91</color>
-    <color name="thread_pink">#f48fb1</color>
-    <color name="thread_red">#ef9a9a</color>
 </resources>

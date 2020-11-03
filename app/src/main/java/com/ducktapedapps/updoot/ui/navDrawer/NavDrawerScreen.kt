@@ -2,8 +2,7 @@ package com.ducktapedapps.updoot.ui.navDrawer
 
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.explore.ExploreScreen
@@ -21,9 +20,7 @@ fun NavDrawerScreen(
         onExit: () -> Unit,
         openSubreddit: (subredditName: String) -> Unit
 ) {
-    Surface(
-            color = MaterialTheme.colors.surface
-    ) {
+    Card {
         Crossfade(current = activityVM.currentNavDrawerScreen) {
             when (it.value) {
                 NavigationMenu -> NavigationMenuScreen(

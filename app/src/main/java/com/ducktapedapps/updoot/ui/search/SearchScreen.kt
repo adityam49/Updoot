@@ -23,6 +23,7 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User
+import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import kotlinx.coroutines.flow.Flow
@@ -78,7 +79,7 @@ fun ComposeSearchView(
     Card(
             modifier = modifier,
             shape = RoundedCornerShape(50),
-            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.1f)
+            backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
         Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = goBack) {

@@ -25,6 +25,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dev.chrisbanes.accompanist.glide.GlideImage
 
@@ -66,6 +67,7 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                     .padding(start = 8.dp, end = 8.dp)
                     .clickable(onClick = { onClickSubreddit(subreddit.display_name) }),
             shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
         Row(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
