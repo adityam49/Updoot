@@ -4,11 +4,8 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class SearchVM(
         private val subredditDAO: SubredditDAO,
@@ -23,7 +20,12 @@ class SearchVM(
 
     val results: Flow<List<Subreddit>> = query.combineTransform(currentUser) { keyWord: String, user: User ->
         if (keyWord.isNotBlank()) emit(subredditDAO.observeSubredditWithKeyword(keyWord).distinctUntilChanged())
-        else emit(subredditDAO.observeSubscribedSubredditsFor(user.name).distinctUntilChanged())
+        else {
+            _searchQueryLoading.value = true
+            delay(2_000)
+            _searchQueryLoading.value = false
+            emit(subredditDAO.observeSubscribedSubredditsFor(user.name).distinctUntilChanged())
+        }
     }.flattenMerge()
 
     fun searchSubreddit(queryString: String) {

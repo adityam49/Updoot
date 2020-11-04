@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -65,8 +66,8 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                     .preferredWidth((screenWidth / 1.2).dp)
                     .wrapContentHeight()
                     .padding(start = 8.dp, end = 8.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .clickable(onClick = { onClickSubreddit(subreddit.display_name) }),
-            shape = RoundedCornerShape(16.dp),
             backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
         Row(
@@ -85,7 +86,7 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
             Column {
                 Text(
                         text = subreddit.display_name,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.body1,
                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
                 )
                 subreddit.public_description?.run {

@@ -18,18 +18,23 @@ fun CommentsScreen(
     if (viewModel.isLoading.asFlow().collectAsState(initial = true).value)
         CircularProgressIndicator(modifier = Modifier.size(48.dp))
     else
-        AllComments(allComments = viewModel.allComments, loadMoreComments = viewModel::toggleChildrenVisibility)
+        AllComments(
+                allComments = viewModel.allComments,
+                loadMoreComments = viewModel::toggleChildrenVisibility,
+        )
 }
 
 
 @Composable
 fun AllComments(allComments: Flow<List<Comment>>, loadMoreComments: (Int) -> Unit) {
-    LazyColumnForIndexed(items = allComments.collectAsState(initial = emptyList()).value) { index: Int, comment: Comment ->
+    LazyColumnForIndexed(
+            items = allComments.collectAsState(initial = emptyList()).value
+    ) { index: Int, comment: Comment ->
         if (comment is Comment.CommentData)
             FullComment(
                     comment = comment,
                     onClickComment = { loadMoreComments(index) },
-                    singleThreadMode = false,
+                    singleThreadMode = true, // TODO : get value from preference storage
                     threadSpacingWidth = 6.dp,
                     threadWidth = 2.dp,
             )

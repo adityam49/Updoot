@@ -27,6 +27,7 @@ import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 @Composable
 fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) {
@@ -37,14 +38,17 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                     .padding(top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp))
+        Icon(
+                asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp),
+                modifier = Modifier.padding(start = 16.dp)
+        )
         Column(
                 modifier = Modifier
-                        .padding(start = 8.dp)
+                        .wrapContentWidth()
+                        .padding(start = 16.dp)
                         .align(Alignment.CenterVertically)
         ) {
-            Text(text = subreddit.display_name, style = MaterialTheme.typography.caption)
-
+            Text(text = subreddit.display_name)
             ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.disabled) {
                 Text(
                         text = "${
@@ -52,20 +56,20 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                         } ${
                             subreddit.accounts_active?.run { "/" + getCompactCountAsString(this) + " Active" } ?: ""
                         }",
-                        style = MaterialTheme.typography.subtitle2
+                        style = MaterialTheme.typography.caption
                 )
-
             }
         }
-        IconButton(onClick = {}) { vectorResource(id = R.drawable.ic_round_add_circle_24) }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(onClick = {}) { Icon(vectorResource(id = R.drawable.ic_round_add_circle_24)) }
     }
 
 }
 
 @Preview
 @Composable
-fun previewSearchView() {
-    ComposeSearchView(performSearch = {}, modifier = Modifier.fillMaxWidth(), {})
+private fun previewSearchView() {
+    ComposeSearchView(performSearch = {}, modifier = Modifier.fillMaxWidth(), {}, flow { })
 }
 
 
@@ -73,11 +77,12 @@ fun previewSearchView() {
 fun ComposeSearchView(
         performSearch: (query: String) -> Unit,
         modifier: Modifier,
-        goBack: () -> Unit
+        goBack: () -> Unit,
+        isLoading: Flow<Boolean>
 ) {
     val (queryString, setQuery) = remember { mutableStateOf(TextFieldValue("")) }
     Card(
-            modifier = modifier,
+            modifier = modifier.padding(start = 0.dp),
             shape = RoundedCornerShape(50),
             backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
@@ -86,20 +91,31 @@ fun ComposeSearchView(
                 Icon(asset = Icons.Default.ArrowBack)
             }
             CoreTextField(
+                    softWrap = false,
                     maxLines = 1,
-                    modifier = Modifier.weight(0.8f).padding(start = 16.dp, end = 8.dp),
+                    cursorColor = MaterialTheme.colors.primary,
+                    modifier = Modifier.weight(0.8f).padding(start = 8.dp, end = 8.dp),
                     value = queryString,
                     onValueChange = setQuery,
                     imeAction = ImeAction.Search,
-            )
-            IconButton(
-                    icon = { Icon(asset = Icons.Default.Search) },
-                    onClick = { performSearch(queryString.text) },
             )
             if (queryString.text.isNotBlank()) IconButton(
                     icon = { Icon(asset = Icons.Default.Clear) },
                     onClick = { setQuery(TextFieldValue("")) },
             )
+
+            if (isLoading.collectAsState(initial = true).value)
+                CircularProgressIndicator(
+                        modifier = Modifier
+                                .size(32.dp)
+                                .align(Alignment.CenterVertically)
+                                .padding(end = 4.dp)
+                )
+            else
+                IconButton(
+                        icon = { Icon(asset = Icons.Default.Search) },
+                        onClick = { performSearch(queryString.text) },
+                )
         }
     }
 }
@@ -126,18 +142,19 @@ fun SearchScreen(
             modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(8.dp)
     ) {
         ComposeSearchView(
                 performSearch = viewModel::searchSubreddit,
                 modifier = Modifier
                         .fillMaxWidth()
+                        .padding(16.dp)
                         .height(48.dp),
-                goBack = goBack
+                goBack = goBack,
+                isLoading = viewModel.searchQueryLoading
         )
         LazyColumnFor(
                 items = viewModel.results.collectAsState(initial = emptyList()).value,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+                modifier = Modifier.fillMaxWidth()
         ) {
             ComposeSubredditItem(it, openSubreddit)
         }

@@ -3,12 +3,11 @@ package com.ducktapedapps.updoot.ui.comments
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -59,8 +58,8 @@ private val commentData = CommentData(
 private fun CommentBody(text: String, modifier: Modifier) {
     Text(
             text = text,
-            style = MaterialTheme.typography.body1,
-            modifier = modifier.fillMaxWidth().wrapContentHeight().padding(4.dp)
+            style = MaterialTheme.typography.body2,
+            modifier = modifier.fillMaxWidth().wrapContentHeight().padding(8.dp)
     )
 }
 
@@ -91,7 +90,7 @@ private fun UserName(username: String, isOp: Boolean) {
     ) {
         Text(
                 text = username,
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.overline,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp)
         )
     }
@@ -99,12 +98,12 @@ private fun UserName(username: String, isOp: Boolean) {
 
 @Composable
 private fun ReplyCounter(replyCount: Int) {
-    val background = if (isSystemInDarkTheme()) lightYellow else darkYellow
+    val background = MaterialTheme.colors.ScoreBackground
     ColoredTag(color = background) {
         Text(
-                color = contentColorFor(color = background),
+                color = MaterialTheme.colors.ColorOnScoreBackground,
                 text = "+ $replyCount",
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.overline,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp)
         )
     }
@@ -114,7 +113,7 @@ private fun ReplyCounter(replyCount: Int) {
 private fun VoteCounter(ups: Int?, likes: Boolean?) {
     Text(
             text = ups?.toString() ?: "?",
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.overline,
             color = when (likes) {
                 true -> upVoteColor
                 false -> downVoteColor
@@ -129,11 +128,12 @@ private fun ColoredTag(
         color: Color,
         body: @Composable () -> Unit
 ) {
-    Surface(
-            color = color,
+    Card(
+            backgroundColor = color,
             shape = RoundedCornerShape(20),
-            modifier = Modifier.wrapContentSize()
-    ) { body() }
+            modifier = Modifier.wrapContentSize(),
+            content = body
+    )
 }
 
 @Composable
@@ -220,6 +220,7 @@ private fun IndentationThread(
         threadWidth: Dp,
         spacingWidth: Dp,
 ) {
+    if (indentLevel == 0) return
     val isLight = MaterialTheme.colors.isLight
     Canvas(modifier = modifier.width(((spacingWidth.value + threadWidth.value) * indentLevel).dp), onDraw = {
         if (singleThreadMode) drawLine(

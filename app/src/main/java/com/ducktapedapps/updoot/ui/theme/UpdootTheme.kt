@@ -11,6 +11,7 @@ fun UpdootTheme(
 ) {
     MaterialTheme(
             colors = if (isDarkTheme) UpdootDarkColors else UpdootLightColors,
+            typography = UpdootTypography,
             content = content
     )
 }
