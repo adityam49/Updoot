@@ -11,7 +11,7 @@ sealed class Comment(
 
     @JsonClass(generateAdapter = true)
     data class CommentData(
-            override val depth: Int,
+            override val depth: Int = 0,
             override val parent_id: String,
             override val name: String,
             val author: String,
@@ -30,7 +30,7 @@ sealed class Comment(
             val count: Int,
             override val name: String,
             override val parent_id: String,
-            override val depth: Int,
+            override val depth: Int = 0,
             val children: List<String>,
     ) : Comment(depth, name, parent_id)
 }

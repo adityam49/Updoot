@@ -15,7 +15,8 @@ interface RedditAPI {
             @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
             @Query("t") time: String?,
-            @Query("after") after: String?): Listing<LinkData>
+            @Query("after") after: String? = null
+    ): Listing<LinkData>
 
     @FormUrlEncoded
     @POST("/api/save")
@@ -65,7 +66,49 @@ interface RedditAPI {
 
     @GET("/subreddits/mine/subscriber")
     suspend fun getSubscribedSubreddits(
-            @Query("after") after: String?
+            @Query("after") after: String? = null
     ): Listing<Subreddit>
+
+    @GET("user/{username}/overview")
+    suspend fun getUserOverView(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<RedditThing>
+
+    @GET("user/{username}/submitted")
+    suspend fun getUserSubmittedPosts(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<LinkData>
+
+    @GET("user/{username}/comments")
+    suspend fun getUserComments(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<Comment.CommentData>
+
+    @GET("user/{username}/upvoted")
+    suspend fun getUserUpVotedThings(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<RedditThing>
+
+    @GET("user/{username}/downvoted")
+    suspend fun getUserDownVotedThings(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<RedditThing>
+
+    @GET("user/{username}/gilded")
+    suspend fun getUserGildedThings(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<RedditThing>
+
+    @GET("user/{username}/saved")
+    suspend fun getUserSavedThings(
+            @Path("username") username: String,
+            @Query("after") after: String? = null
+    ): Listing<RedditThing>
 }
 
