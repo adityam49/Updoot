@@ -11,6 +11,7 @@ import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVMFactory
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
+import com.ducktapedapps.updoot.ui.user.UserFragment
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -36,6 +37,7 @@ interface UpdootComponent {
     fun inject(videoPreviewFragment: VideoPreviewFragment)
     fun inject(imagePreviewFragment: ImagePreviewFragment)
     fun inject(loginFragment: LoginFragment)
+    fun inject(userFragment: UserFragment)
 
     fun inject(submissionsVMFactory: SubmissionsVMFactory)
     fun inject(commentsVMFactory: CommentsVMFactory)

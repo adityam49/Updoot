@@ -9,10 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubmissionOptionsBottomSheetBinding
+import com.ducktapedapps.updoot.ui.user.UserFragment
 import com.ducktapedapps.updoot.utils.Constants
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import javax.inject.Inject
@@ -38,7 +39,7 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
     }
     private lateinit var binding: FragmentSubmissionOptionsBottomSheetBinding
 
-    private val optionsAdapter = OptionsAdapter(::copyLink)
+    private val optionsAdapter = OptionsAdapter(::copyLink, ::openUser)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -61,8 +62,15 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
+    private fun openUser(userName: String) {
+        requireActivity().supportFragmentManager.beginTransaction()
+                .addToBackStack(null)
+                .replace(R.id.fragment_container, UserFragment.newInstance(userName))
+                .commit()
+    }
+
     private fun setUpViewModel() =
-            viewModel.optionsList.observe(viewLifecycleOwner) { optionsAdapter.submitList(it) }
+            viewModel.optionsList.observe(viewLifecycleOwner, { optionsAdapter.submitList(it) })
 
     private fun copyLink(link: String) {
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", Constants.BASE_URL + link))
