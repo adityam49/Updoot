@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
+import com.ducktapedapps.updoot.data.local.model.ImageVariants
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
@@ -129,7 +130,7 @@ class SubredditFragment : Fragment() {
 
             override fun actionOpenOption(linkDataId: String) = openOptions(linkDataId)
 
-            override fun actionOpenImage(lowResUrl: String, highResUrl: String) = openImage(lowResUrl, highResUrl)
+            override fun actionOpenImage(preview: ImageVariants?) = openImage(preview)
 
             override fun actionOpenLink(link: String) = openLink(link)
 
@@ -279,8 +280,8 @@ class SubredditFragment : Fragment() {
         data = Uri.parse(link)
     })
 
-    private fun openImage(lowResImage: String, highResImage: String) {
-        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(lowResImage, highResImage)).commit()
+    private fun openImage(preview: ImageVariants?) {
+        requireActivity().supportFragmentManager.beginTransaction().addToBackStack(null).add(R.id.fragment_container, ImagePreviewFragment.newInstance(preview?.lowResUrl, preview?.highResUrl!!)).commit()
     }
 
     private fun openVideo(videoUrl: String) {

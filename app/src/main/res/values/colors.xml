@@ -16,7 +16,7 @@
     <color name="color_on_secondary">#000000</color>
     <color name="color_error">#F44336</color>
     <color name="color_on_error">#FFFFFF</color>
-    <color name="color_surface">#F8F8F8</color>
+    <color name="color_surface">#EFEFEF</color>
     <color name="color_active_account">#DCDCDC</color>
     <color name="color_on_surface">#000000</color>
     <color name="color_background">#FFFFFF</color>

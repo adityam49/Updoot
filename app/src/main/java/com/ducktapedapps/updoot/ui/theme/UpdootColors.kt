@@ -61,6 +61,10 @@ val Colors.ScoreBackground: Color
 val Colors.ColorOnScoreBackground: Color
     get() = Color.Black
 
+@Composable
+val Colors.StickyPostColor: Color
+    get() = if (isLight) Color(0xFF388E3C) else Color(0xFF69F0AE)
+
 val LightThreadColors = arrayOf(
         Color(0xFF7b1fa2),
         Color(0xFF303f9f),

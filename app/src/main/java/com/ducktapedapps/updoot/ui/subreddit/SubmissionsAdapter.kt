@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.ducktapedapps.updoot.data.local.model.ImageVariants
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.databinding.CompactSubmissionImageBinding
 import com.ducktapedapps.updoot.databinding.CompactSubmissionSelftextBinding
@@ -19,7 +20,7 @@ class SubmissionsAdapter(private val clickHandler: SubmissionClickHandler) : Lis
     interface SubmissionClickHandler {
         fun actionOpenComments(linkDataId: String, commentId: String)
         fun actionOpenOption(linkDataId: String)
-        fun actionOpenImage(lowResUrl: String, highResUrl: String)
+        fun actionOpenImage(preview: ImageVariants?)
         fun actionOpenLink(link: String)
         fun actionOpenVideo(videoUrl: String)
     }

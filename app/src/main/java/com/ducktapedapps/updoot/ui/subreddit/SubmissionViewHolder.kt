@@ -277,7 +277,7 @@ private fun getDrawable(@DrawableRes res: Int, textView: TextView): Drawable = C
 private fun SubmissionClickHandler.performAction(linkData: LinkData) {
     when (val media = linkData.toMedia()) {
         is SelfText, JustTitle -> actionOpenComments(linkData.subredditName, linkData.name)
-        is Image -> actionOpenImage(media.lowResUrl!!, media.highResUrl)
+        is Image -> actionOpenImage(linkData.preview)
         is Video -> actionOpenVideo(media.url)
         is Link -> actionOpenLink(media.url)
     }

@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.platform.ComposeView
@@ -14,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.Image
+import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import javax.inject.Inject
@@ -55,12 +58,27 @@ class CommentsFragment : Fragment() {
         inflater.inflate(R.menu.comment_screen_menu, menu)
     }
 
+    @ExperimentalLazyDsl
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             ComposeView(requireContext()).apply {
                 setContent {
                     UpdootTheme {
                         Surface(color = MaterialTheme.colors.background) {
-                            CommentsScreen(viewModel = viewModel)
+                            CommentsScreen(
+                                    viewModel = viewModel,
+                                    openContent = { content ->
+                                        when (content) {
+                                            is Image -> openImage(
+                                                    lowResImage = content.data.imageData?.lowResUrl,
+                                                    highResImage = content.data.imageData?.highResUrl
+                                                            ?: ""
+                                            )
+                                            is LoadedLink -> openLink(content.linkModel.url)
+                                            is LoadingLink -> openLink(content.url)
+                                            is NoMetaDataLink -> openLink(content.url)
+                                            else -> Unit
+                                        }
+                                    })
                         }
                     }
                 }
