@@ -1,8 +1,6 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,19 +10,18 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
-import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
 import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.data.local.model.Gildings
 import com.ducktapedapps.updoot.data.local.model.Listing
+import com.ducktapedapps.updoot.ui.common.AllGildings
+import com.ducktapedapps.updoot.ui.common.VoteCounter
 import com.ducktapedapps.updoot.ui.theme.*
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
@@ -115,19 +112,6 @@ private fun ReplyCounter(replyCount: Int) {
     }
 }
 
-@Composable
-private fun VoteCounter(ups: Int?, likes: Boolean?) {
-    Text(
-            text = ups?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
-            style = MaterialTheme.typography.overline,
-            color = when (likes) {
-                true -> upVoteColor
-                false -> downVoteColor
-                null -> MaterialTheme.colors.onBackground
-            },
-            modifier = Modifier.padding(start = 4.dp, end = 4.dp)
-    )
-}
 
 @Composable
 private fun ColoredTag(
@@ -257,20 +241,7 @@ fun MoreComment(
     }
 }
 
-@Composable
-private fun AllGildings(gildings: Gildings) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (gildings.silver != 0) SingleGilding(resId = R.drawable.ic_silver_gilding_14dp, count = gildings.silver)
-        if (gildings.gold != 0) SingleGilding(resId = R.drawable.ic_gold_gilding_14dp, count = gildings.gold)
-        if (gildings.platinum != 0) SingleGilding(resId = R.drawable.ic_platinum_gilding_14dp, count = gildings.platinum)
-    }
-}
 
-@Composable
-fun SingleGilding(@DrawableRes resId: Int, count: Int) {
-    Text(text = count.toString(), style = MaterialTheme.typography.overline)
-    Image(asset = vectorResource(id = resId))
-}
 
 @Composable
 private fun IndentationThread(

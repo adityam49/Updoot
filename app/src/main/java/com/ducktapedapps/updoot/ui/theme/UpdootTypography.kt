@@ -7,8 +7,8 @@ import androidx.compose.ui.unit.sp
 
 val UpdootTypography = Typography(
         h6 = TextStyle(
-                fontWeight = FontWeight.Medium,
-                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
                 letterSpacing = 0.15.sp
         ),
         body2 = TextStyle(
