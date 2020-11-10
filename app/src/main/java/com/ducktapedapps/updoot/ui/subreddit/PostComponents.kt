@@ -116,19 +116,21 @@ fun SubmissionTitle(
         isSticky: Boolean,
         modifier: Modifier = Modifier
 ) {
-    Text(
-            text = title,
-            color = if (isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h6,
-            modifier = modifier
-    )
+    ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+        Text(
+                text = title,
+                color = if (isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.h4,
+                modifier = modifier
+        )
+    }
 }
 
 @Composable
 private fun MetaData(linkData: LinkData, modifier: Modifier) {
     ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.disabled) {
         Text(
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.h6,
                 text = "${linkData.subredditName} • ${getCompactCountAsString(linkData.commentsCount.toLong())} Replies • ${getCompactDateAsString(linkData.created)}",
                 modifier = modifier
         )
@@ -170,7 +172,7 @@ fun LargePost(
         MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
             start.linkTo(media.start, margin = 8.dp)
             top.linkTo(media.bottom, margin = 8.dp)
-            bottom.linkTo(parent.bottom, margin = 8.dp)
+            bottom.linkTo(parent.bottom, margin = 16.dp)
             width = Dimension.fillToConstraints
             height = Dimension.wrapContent
         })
@@ -263,9 +265,9 @@ private fun LinkPreview(linkData: LinkData, modifier: Modifier, onClickMedia: ()
                 modifier = Modifier.size(48.dp).padding(8.dp)
         )
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text(text = linkData.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Uri.parse(linkData.url).authority?.run { Text(text = this, style = MaterialTheme.typography.h5) }
             ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.disabled) {
-                Uri.parse(linkData.url).authority?.run { Text(text = this, style = MaterialTheme.typography.caption) }
+                Text(text = linkData.url, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption)
             }
         }
     }

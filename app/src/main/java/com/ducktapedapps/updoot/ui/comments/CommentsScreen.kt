@@ -177,7 +177,7 @@ fun Header(linkData: LinkData) {
     Text(
             color = if (linkData.stickied) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
             text = linkData.title,
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h4,
             modifier = Modifier.padding(8.dp)
     )
 }

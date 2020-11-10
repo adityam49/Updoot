@@ -3,10 +3,7 @@ package com.ducktapedapps.updoot.ui.user
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.data.local.model.Comment
 import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.ui.comments.FullComment
+import com.ducktapedapps.updoot.ui.subreddit.LargePost
 import com.ducktapedapps.updoot.ui.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.ui.theme.ScoreBackground
 
@@ -31,7 +30,7 @@ fun UserInfoScreen(viewModel: UserViewModel) {
     val loading = viewModel.loading.collectAsState()
     val currentSection = viewModel.currentSection.collectAsState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
         item {
             UserSections(
@@ -45,15 +44,25 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-        item {
-            Divider()
-            content.value.children.forEach {
-                when (it) {
-                    is Comment.CommentData -> Text(text = it.body ?: "?")
-                    is LinkData -> Text(text = it.title)
-                }
+        items(content.value.children) { item ->
+            when (item) {
+                is Comment.CommentData -> FullComment(
+                        threadWidth = 2.dp,
+                        threadSpacingWidth = 6.dp,
+                        singleThreadMode = false,
+                        comment = item,
+                        onClickComment = {}
+                )
+                is LinkData -> LargePost(
+                        linkData = item,
+                        onClickMedia = {},
+                        openPost = {},
+                        openOptions = {}
+                )
             }
+            Divider()
         }
+        item { Spacer(Modifier.height(200.dp)) }
     }
 }
 

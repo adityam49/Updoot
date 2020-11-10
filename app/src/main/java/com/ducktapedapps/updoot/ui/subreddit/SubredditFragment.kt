@@ -7,11 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.ExperimentalLazyDsl
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -97,22 +93,20 @@ class SubredditFragment : Fragment() {
             ComposeView(requireContext()).apply {
                 setContent {
                     UpdootTheme {
-                        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                            SubredditScreen(
-                                    viewModel = submissionsVM,
-                                    openOptions = { id: String -> openOptions(id) },
-                                    openMedia = { media ->
-                                        when (media) {
-                                            is SelfText -> Unit
-                                            is Image -> openImage(media.imageData)
-                                            is Video -> openVideo(media.url)
-                                            is Link -> openLink(media.url)
-                                            JustTitle -> Unit
-                                        }
-                                    },
-                                    openComments = { subreddit, id -> openComments(subreddit, id) }
-                            )
-                        }
+                        SubredditScreen(
+                                viewModel = submissionsVM,
+                                openOptions = { id: String -> openOptions(id) },
+                                openMedia = { media ->
+                                    when (media) {
+                                        is SelfText -> Unit
+                                        is Image -> openImage(media.imageData)
+                                        is Video -> openVideo(media.url)
+                                        is Link -> openLink(media.url)
+                                        JustTitle -> Unit
+                                    }
+                                },
+                                openComments = { subreddit, id -> openComments(subreddit, id) }
+                        )
                     }
                 }
             }
