@@ -5,15 +5,15 @@ buildscript {
         kotlin_version = "1.4.10"
         lifecycle_version = '2.2.0'
         retrofit_version = '2.9.0'
-        dagger_version = '2.28.3'
+        dagger_version = '2.29.1'
         glide_version = '4.11.0'
-        kotlin_coroutines = "1.3.9"
+        kotlin_coroutines = "1.4.1"
         moshi_version = '1.9.3'
         room_version = '2.2.5'
         markwon_version = '4.4.0'
         work_manager_version = "2.4.0"
         jsoup_version = '1.13.1'
-        exoPlayer_version = '2.11.7'
+        exoPlayer_version = '2.11.8'
         archTestingVersion = '2.1.0'
         hamcrestVersion = '1.3'
     }

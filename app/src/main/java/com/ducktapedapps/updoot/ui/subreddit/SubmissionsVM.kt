@@ -11,7 +11,9 @@ import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +33,14 @@ class SubmissionsVM constructor(
 
     var lastScrollPosition: Int = 0
     val postViewType = submissionRepo.postViewType
-    val allSubmissions = submissionRepo.allSubmissions
+    val allSubmissions = submissionRepo
+            .allSubmissions
+            .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Lazily,
+                    initialValue = emptyList(),
+            )
+
     val toastMessage: StateFlow<SingleLiveEvent<String?>> = submissionRepo.toastMessage
     val subredditInfo = submissionRepo.subredditInfo
 
