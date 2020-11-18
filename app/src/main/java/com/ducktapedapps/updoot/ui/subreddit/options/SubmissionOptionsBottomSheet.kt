@@ -8,42 +8,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentSubmissionOptionsBottomSheetBinding
 import com.ducktapedapps.updoot.utils.Constants
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
     companion object {
-        private const val SUBMISSION_ID_KEY = "submission_id_key"
+        const val SUBMISSION_ID_KEY = "submission_id_key"
         fun newInstance(id: String) = SubmissionOptionsBottomSheet().apply {
             arguments = Bundle().apply { putString(SUBMISSION_ID_KEY, id) }
         }
     }
 
-    @Inject
-    lateinit var vmFactory: OptionsSheetVMFactory
-    private val viewModel: OptionsSheetViewModel by lazy {
-        ViewModelProvider(
-                this,
-                vmFactory.apply { setSubmissionId(requireArguments().getString(SUBMISSION_ID_KEY)!!) }
-        ).get(OptionsSheetViewModel::class.java)
-    }
+    private val viewModel: OptionsSheetViewModel by viewModels()
+
     private val clipboardManager by lazy {
         requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     }
     private lateinit var binding: FragmentSubmissionOptionsBottomSheetBinding
 
     private val optionsAdapter = OptionsAdapter(::copyLink)
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (requireContext().applicationContext as UpdootApplication).updootComponent.inject(this)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSubmissionOptionsBottomSheetBinding.inflate(inflater, container, false)
@@ -62,7 +50,7 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun setUpViewModel() =
-            viewModel.optionsList.observe(viewLifecycleOwner) { optionsAdapter.submitList(it) }
+            viewModel.optionsList.observe(viewLifecycleOwner, { optionsAdapter.submitList(it) })
 
     private fun copyLink(link: String) {
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", Constants.BASE_URL + link))

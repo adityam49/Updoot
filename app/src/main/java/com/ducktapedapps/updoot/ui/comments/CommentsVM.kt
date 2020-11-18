@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.text.Spanned
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
@@ -15,20 +17,19 @@ import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.toMedia
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
-class CommentsVM(
+class CommentsVM @ViewModelInject constructor(
         private val repo: CommentsRepo,
         submissionsCacheDAO: SubmissionsCacheDAO,
         private val markwon: Markwon,
-        private val id: String,
-        private val subreddit_name: String,
-        private val linkMetaDataDAO: LinkMetaDataDAO
+        private val linkMetaDataDAO: LinkMetaDataDAO,
+        @Assisted savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val id: String = savedStateHandle.get<String>(CommentsFragment.COMMENTS_KEY)!!
+    private val subreddit: String = savedStateHandle.get<String>(CommentsFragment.SUBREDDIT_KEY)!!
     val allComments = repo.visibleComments
 
     val submissionData: Flow<LinkData> = submissionsCacheDAO
@@ -54,7 +55,7 @@ class CommentsVM(
 
     private fun loadComments() {
         viewModelScope.launch {
-            repo.loadComments(subreddit_name, id)
+            repo.loadComments(subreddit, id)
         }
     }
 
@@ -92,24 +93,4 @@ sealed class SubmissionContent {
     }
 
     object JustTitle : SubmissionContent()
-}
-
-@ExperimentalCoroutinesApi
-class CommentsVMFactory @Inject constructor(
-        private val commentsRepo: CommentsRepo,
-        private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val markwon: Markwon,
-        private val linkMetaDataDAO: LinkMetaDataDAO
-) : ViewModelProvider.Factory {
-    private lateinit var subredditName: String
-    private lateinit var id: String
-
-    fun setSubredditAndId(name: String, id: String) {
-        subredditName = name
-        this.id = id
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
-            CommentsVM(commentsRepo, submissionsCacheDAO, markwon, id, subredditName, linkMetaDataDAO) as T
 }

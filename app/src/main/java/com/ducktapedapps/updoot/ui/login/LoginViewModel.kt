@@ -1,10 +1,13 @@
 package com.ducktapedapps.updoot.ui.login
 
+import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.*
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.backgroundWork.SubscriptionSyncWorker
 import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.data.local.model.Account
@@ -15,26 +18,28 @@ import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import kotlinx.coroutines.*
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
-import javax.inject.Inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
-class LoginViewModel(
-        private val redditClient: RedditClient,
+
+class LoginViewModel @ViewModelInject constructor(
+        private val redditClient: IRedditClient,
         private val redditAPI: RedditAPI,
         private val authAPI: AuthAPI,
         private val interceptor: TokenInterceptor,
-        private val application: UpdootApplication,
+        @ApplicationContext private val context: Context,
         private val workManager: WorkManager
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(NotLoggedIn)
     val loginState: Flow<LoginState> = _loginState.onEach {
@@ -125,7 +130,7 @@ class LoginViewModel(
     private fun loadUserSubscribedSubreddits(userName: String) {
         workManager.apply {
             pruneWork()
-            application.enqueueOneOffSubscriptionsSyncFor(userName)
+            context.enqueueOneOffSubscriptionsSyncFor(userName)
             viewModelScope.launch {
                 subscribedSubreddits.collect {
                     val workState = it.firstOrNull()
@@ -166,28 +171,4 @@ sealed class LoginState {
 sealed class ResultState<out T> {
     object Running : ResultState<Nothing>()
     data class Finished<T>(val value: T) : ResultState<T>()
-}
-
-@FlowPreview
-@ExperimentalCoroutinesApi
-class LoginVMFactory @Inject constructor(
-        private val redditClient: RedditClient,
-        private val redditAPI: RedditAPI,
-        private val authAPI: AuthAPI,
-        private val interceptor: TokenInterceptor,
-        private val application: UpdootApplication,
-        private val workManager: WorkManager
-) : ViewModelProvider.Factory {
-    @Suppress("Unchecked_cast")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
-            if (modelClass.isAssignableFrom(LoginViewModel::class.java))
-                LoginViewModel(
-                        redditClient,
-                        redditAPI,
-                        authAPI,
-                        interceptor,
-                        application,
-                        workManager
-                ) as T
-            else throw RuntimeException("Unsupported vm requested ${modelClass.simpleName}")
 }

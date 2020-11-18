@@ -13,19 +13,22 @@ import com.ducktapedapps.updoot.utils.Constants.UPDOOT_DB
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import dagger.Module
 import dagger.Provides
-import dagger.Reusable
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 
+@InstallIn(ApplicationComponent::class)
 @Module
-class RoomModule {
+object RoomModule {
     private lateinit var updootDb: UpdootDB
 
     @Provides
     @Singleton
-    fun provideDB(context: Context): UpdootDB {
+    fun provideDB(@ApplicationContext context: Context): UpdootDB {
         updootDb = Room.databaseBuilder(
                 context.applicationContext,
                 UpdootDB::class.java,
@@ -59,19 +62,15 @@ class RoomModule {
         return updootDb
     }
 
-    @Reusable
     @Provides
     fun provideSubredditDAO(db: UpdootDB) = db.subredditDAO()
 
-    @Reusable
     @Provides
     fun provideSubredditPrefsDAO(db: UpdootDB) = db.subredditPrefsDAO()
 
-    @Reusable
     @Provides
     fun provideSubmissionsCacheDAO(db: UpdootDB) = db.submissionsCacheDAO()
 
-    @Reusable
     @Provides
     fun provideUrlMetaDataDAO(db: UpdootDB) = db.linkMetaDataCacheDAO()
 }

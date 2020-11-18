@@ -8,16 +8,15 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
@@ -31,23 +30,18 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-@FlowPreview
-@ExperimentalCoroutinesApi
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
     lateinit var redditClient: RedditClient
 
-    @Inject
-    lateinit var activityVMFactory: ActivityVMFactory
-    private val viewModel by lazy { ViewModelProvider(this@MainActivity, activityVMFactory).get(ActivityVM::class.java) }
+    private val viewModel: ActivityVM by viewModels()
 
     private lateinit var binding: ActivityMainBinding
     private val bottomNavBinding by lazy { binding.bottomNavigationDrawer.binding }
@@ -127,7 +121,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as UpdootApplication).updootComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

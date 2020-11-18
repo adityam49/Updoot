@@ -14,20 +14,18 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 private const val TAG = "SubmissionRepo"
 
-@ExperimentalCoroutinesApi
-class SubmissionRepo(
-        private val redditClient: RedditClient,
+class SubmissionRepo @Inject constructor(
+        private val redditClient: IRedditClient,
         private val prefsDAO: SubredditPrefsDAO,
         private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val subredditName: String,
         private val subredditDAO: SubredditDAO
 ) {
     private val _isLoading = MutableStateFlow(true)
@@ -36,7 +34,7 @@ class SubmissionRepo(
     private val _toastMessage = MutableStateFlow(SingleLiveEvent<String?>(null))
     val toastMessage: StateFlow<SingleLiveEvent<String?>> = _toastMessage
 
-    val postViewType: Flow<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
+    fun postViewType(subredditName: String): Flow<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
     private val nextPageKeyAndCurrentPageEntries = MutableStateFlow<Map<String?, List<String>>>(mapOf())
     val allSubmissions: Flow<List<LinkData>> = nextPageKeyAndCurrentPageEntries.flatMapLatest {
         if (it.keys.isNotEmpty())
@@ -44,18 +42,18 @@ class SubmissionRepo(
         else flow { emit(emptyList<LinkData>()) }
     }
 
-    val subredditInfo: Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
+    fun subredditInfo(subredditName: String): Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
 
-    suspend fun loadAndSaveSubredditInfo() {
-        if (subredditName != FRONTPAGE)
+    suspend fun loadAndSaveSubredditInfo(subreddit: String) {
+        if (subreddit != FRONTPAGE)
             withContext(Dispatchers.IO) {
                 try {
                     val api = redditClient.api()
-                    val result = api.getSubredditInfo(subredditName)
+                    val result = api.getSubredditInfo(subreddit)
                     subredditDAO.insertSubreddit(result)
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    _toastMessage.value = SingleLiveEvent("Unable to fetch $subredditName metadata : ${e.message}")
+                    _toastMessage.value = SingleLiveEvent("Unable to fetch $subreddit metadata : ${e.message}")
                 }
             }
     }
@@ -74,15 +72,15 @@ class SubmissionRepo(
 
     fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value.keys.last() != null
 
-    suspend fun setPostViewType(type: SubmissionUiType) = withContext(Dispatchers.IO) {
-        prefsDAO.setUIType(type, subredditName)
+    suspend fun setPostViewType(subreddit: String, type: SubmissionUiType) = withContext(Dispatchers.IO) {
+        prefsDAO.setUIType(type, subreddit)
     }
 
-    suspend fun changeSort(newSort: SubredditSorting) {
+    suspend fun changeSort(subreddit: String, newSort: SubredditSorting) {
         clearSubmissions()
         withContext(Dispatchers.IO) {
-            prefsDAO.setSorting(newSort, subredditName)
-            loadPage()
+            prefsDAO.setSorting(newSort, subreddit)
+            loadPage(subreddit)
         }
     }
 
@@ -164,11 +162,11 @@ class SubmissionRepo(
         nextPageKeyAndCurrentPageEntries.value = emptyMap()
     }
 
-    suspend fun loadPage() {
+    suspend fun loadPage(subreddit: String) {
         withContext(Dispatchers.IO) {
             try {
                 _isLoading.value = true
-                loadPageAndCacheToDbSuccessfully()
+                loadPageAndCacheToDbSuccessfully(subreddit)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _toastMessage.value = SingleLiveEvent("Something went wrong! try again later some later")
@@ -179,12 +177,12 @@ class SubmissionRepo(
     }
 
     @Throws(Exception::class)
-    private suspend fun loadPageAndCacheToDbSuccessfully() {
+    private suspend fun loadPageAndCacheToDbSuccessfully(subreddit: String) {
         val redditAPI = redditClient.api()
-        val sorting = (prefsDAO.getSubredditSorting(subredditName)
-                ?: createAndSaveDefaultSubredditPrefs(subredditName).subredditSorting).mapSorting()
+        val sorting = (prefsDAO.getSubredditSorting(subreddit)
+                ?: createAndSaveDefaultSubredditPrefs(subreddit).subredditSorting).mapSorting()
         val fetchedData = redditAPI.getSubreddit(
-                "${if (subredditName != FRONTPAGE) "r/" else ""}$subredditName",
+                "${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit",
                 sorting.first,
                 sorting.second,
                 nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()

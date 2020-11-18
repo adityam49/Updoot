@@ -13,7 +13,8 @@ import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
-import dagger.Reusable
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -21,8 +22,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
+@InstallIn(ApplicationComponent::class)
 @Module
-class NetworkModule {
+object NetworkModule {
     @Singleton
     @Provides
     fun provideOkHttpClient(tokenInterceptor: TokenInterceptor): OkHttpClient {
@@ -46,7 +48,7 @@ class NetworkModule {
         return okHttpClient.build()
     }
 
-    @Reusable
+    @Singleton
     @Provides
     fun provideMoshi(): Moshi = Moshi
             .Builder()

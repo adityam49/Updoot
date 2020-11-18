@@ -6,9 +6,13 @@ import com.ducktapedapps.updoot.data.remote.AuthAPI
 import com.ducktapedapps.updoot.data.remote.RedditAPI
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
+@InstallIn(ApplicationComponent::class)
 @Module
 class ApiModule {
     @Provides
@@ -19,5 +23,5 @@ class ApiModule {
     fun provideRedditAPIService(retrofit: Retrofit): RedditAPI = retrofit.create(RedditAPI::class.java)
 
     @Provides
-    fun provideAccountManager(context: Context): AccountManager = AccountManager.get(context)
+    fun provideAccountManager(@ApplicationContext context: Context): AccountManager = AccountManager.get(context)
 }

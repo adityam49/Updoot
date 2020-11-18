@@ -8,13 +8,11 @@ import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
 import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 class CommentsRepo @Inject constructor(
         private val redditClient: RedditClient
 ) {
