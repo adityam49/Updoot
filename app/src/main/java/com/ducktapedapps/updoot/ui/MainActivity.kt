@@ -3,13 +3,12 @@ package com.ducktapedapps.updoot.ui
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProvider
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
@@ -23,16 +22,15 @@ import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     @Inject
     lateinit var redditClient: RedditClient
 
-    @Inject
-    lateinit var activityVMFactory: ActivityVMFactory
-    private val viewModel by lazy { ViewModelProvider(this@MainActivity, activityVMFactory).get(ActivityVM::class.java) }
+    private val viewModel: ActivityVM by viewModels()
 
     private lateinit var binding: ActivityMainBinding
     private val bottomNavBinding by lazy { binding.bottomNavigationDrawer.binding }
@@ -52,7 +50,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as UpdootApplication).updootComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -1,16 +1,22 @@
 package com.ducktapedapps.updoot.ui.user
 
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.Listing
 import com.ducktapedapps.updoot.data.local.model.RedditThing
 import com.ducktapedapps.updoot.ui.user.UserSection.*
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.flow.*
-import javax.inject.Inject
 
-class UserViewModel(private val redditClient: RedditClient, private val userName: String) : ViewModel() {
+class UserViewModel @ViewModelInject constructor(
+        private val redditClient: RedditClient,
+        @Assisted savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    private val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
+
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
@@ -21,6 +27,10 @@ class UserViewModel(private val redditClient: RedditClient, private val userName
     val content: StateFlow<Listing<out RedditThing>> = _content
 
     init {
+        reload()
+    }
+
+    private fun reload() {
         currentSection
                 .transformSectionToListing()
                 .onEach { newListing -> _content.value = newListing }
@@ -56,17 +66,4 @@ class UserViewModel(private val redditClient: RedditClient, private val userName
 
 enum class UserSection {
     OverView, Comments, Posts, UpVoted, DownVoted, Gilded, Saved
-}
-
-class UserVMFactory @Inject() constructor(
-        private val redditClient: RedditClient
-) : ViewModelProvider.Factory {
-    private lateinit var userName: String
-    fun forUser(name: String) {
-        userName = name
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
-            UserViewModel(redditClient, userName) as T
 }

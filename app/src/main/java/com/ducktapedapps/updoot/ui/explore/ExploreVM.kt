@@ -1,5 +1,4 @@
 package com.ducktapedapps.updoot.ui.explore
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

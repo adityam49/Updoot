@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.comments
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -11,20 +10,21 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.Image
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class CommentsFragment : Fragment() {
     companion object {
-        private const val SUBREDDIT_KEY = "subreddit_key"
-        private const val COMMENTS_KEY = "comments_key"
+        const val SUBREDDIT_KEY = "subreddit_key"
+        const val COMMENTS_KEY = "comments_key"
         fun newInstance(subreddit: String, commentsId: String) = CommentsFragment().apply {
             arguments = Bundle().apply {
                 putString(SUBREDDIT_KEY, subreddit)
@@ -35,19 +35,8 @@ class CommentsFragment : Fragment() {
 
     @Inject
     lateinit var sharedPrefs: SharedPreferences
+    private val viewModel: CommentsVM by viewModels()
 
-    @Inject
-    lateinit var commentsVMFactory: CommentsVMFactory
-    private val viewModel: CommentsVM by lazy {
-        with(requireArguments()) {
-            setUpViewModel(getString(SUBREDDIT_KEY, null)!!, getString(COMMENTS_KEY, null)!!)
-        }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (activity?.application as UpdootApplication).updootComponent.inject(this@CommentsFragment)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,13 +72,6 @@ class CommentsFragment : Fragment() {
                     }
                 }
             }
-
-
-    private fun setUpViewModel(name: String, id: String): CommentsVM =
-            ViewModelProvider(
-                    this,
-                    commentsVMFactory.apply { setSubredditAndId(name, id) }
-            ).get(CommentsVM::class.java)
 
 
     private fun openLink(link: String) = startActivity(Intent().apply {

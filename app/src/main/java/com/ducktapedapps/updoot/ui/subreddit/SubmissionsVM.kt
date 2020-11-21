@@ -1,25 +1,27 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
-import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class SubmissionsVM constructor(
-        private val submissionRepo: SubmissionRepo
+class SubmissionsVM @ViewModelInject constructor(
+        private val submissionRepo: SubmissionRepo,
+        @Assisted savedStateHandle: SavedStateHandle
 ) : ViewModel(), InfiniteScrollVM {
+    private val subreddit: String = savedStateHandle.get<String>(SubredditFragment.SUBREDDIT_KEY)!!
+
     init {
         viewModelScope.launch {
-            submissionRepo.loadAndSaveSubredditInfo()
+            submissionRepo.loadAndSaveSubredditInfo(subreddit)
         }
         loadPage()
     }
@@ -27,13 +29,28 @@ class SubmissionsVM constructor(
     override val isLoading = submissionRepo.isLoading
 
     var lastScrollPosition: Int = 0
-    val postViewType = submissionRepo.postViewType
-    val allSubmissions = submissionRepo.allSubmissions
+    val postViewType = submissionRepo
+            .postViewType(subreddit)
+            .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Lazily,
+                    initialValue = SubmissionUiType.COMPACT
+            )
+    val allSubmissions = submissionRepo
+            .allSubmissions
+            .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Lazily,
+                    initialValue = emptyList(),
+            )
+
     val toastMessage: StateFlow<SingleLiveEvent<String?>> = submissionRepo.toastMessage
-    val subredditInfo = submissionRepo.subredditInfo
+    val subredditInfo = submissionRepo
+            .subredditInfo(subreddit)
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     override fun loadPage() {
-        viewModelScope.launch { submissionRepo.loadPage() }
+        viewModelScope.launch { submissionRepo.loadPage(subreddit) }
     }
 
     override fun hasNextPage() = submissionRepo.hasNextPage()
@@ -44,11 +61,11 @@ class SubmissionsVM constructor(
     }
 
     fun setPostViewType(type: SubmissionUiType) {
-        viewModelScope.launch { submissionRepo.setPostViewType(type) }
+        viewModelScope.launch { submissionRepo.setPostViewType(subreddit, type) }
     }
 
     fun changeSort(newSubredditSorting: SubredditSorting) {
-        viewModelScope.launch { submissionRepo.changeSort(newSubredditSorting) }
+        viewModelScope.launch { submissionRepo.changeSort(subreddit, newSubredditSorting) }
     }
 
     fun upVote(name: String) {
@@ -62,21 +79,4 @@ class SubmissionsVM constructor(
     fun save(id: String) {
         viewModelScope.launch { submissionRepo.save(id) }
     }
-}
-
-class SubmissionsVMFactory @Inject constructor(
-        private val redditClient: RedditClient,
-        private val prefsDAO: SubredditPrefsDAO,
-        private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val subredditDAO: SubredditDAO
-) : ViewModelProvider.Factory {
-
-    private lateinit var subreddit: String
-    fun setSubreddit(name: String) {
-        subreddit = name
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            SubmissionsVM(SubmissionRepo(redditClient, prefsDAO, submissionsCacheDAO, subreddit, subredditDAO)) as T
 }

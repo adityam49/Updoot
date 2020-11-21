@@ -1,11 +1,14 @@
 package com.ducktapedapps.updoot.ui
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.*
-import com.ducktapedapps.updoot.UpdootApplication
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
@@ -19,18 +22,18 @@ import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class ActivityVM(
-        private val application: UpdootApplication,
+
+class ActivityVM @ViewModelInject constructor(
+        @ApplicationContext private val appContext: Context,
         val redditClient: IRedditClient,
         val subredditDAO: SubredditDAO
-) : AndroidViewModel(application) {
+) : ViewModel() {
     private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
     val shouldReload: StateFlow<SingleLiveEvent<Boolean>> = _shouldReload
 
@@ -131,11 +134,11 @@ class ActivityVM(
 
     fun enqueueSubscriptionSyncWork() {
         val currentLoggedIn = _accounts.value.first()
-        application.enqueueOneOffSubscriptionsSyncFor(currentLoggedIn.name)
+        appContext.enqueueOneOffSubscriptionsSyncFor(currentLoggedIn.name)
     }
 
     private fun enqueuePeriodicWork() {
-        application.apply {
+        appContext.apply {
             enqueueSubscriptionSyncWork()
             enqueueCleanUpWork()
         }
@@ -150,14 +153,4 @@ class ActivityVM(
 sealed class User(val name: String) {
     object LoggedOut : User(Constants.ANON_USER)
     data class LoggedIn(val userName: String) : User(userName)
-}
-
-class ActivityVMFactory @Inject constructor(
-        private val redditClient: RedditClient,
-        private val subredditDAO: SubredditDAO,
-        private val application: UpdootApplication
-) : ViewModelProvider.AndroidViewModelFactory(application) {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T =
-            ActivityVM(application, redditClient, subredditDAO) as T
 }

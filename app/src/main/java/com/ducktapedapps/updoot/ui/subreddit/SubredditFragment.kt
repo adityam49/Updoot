@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
@@ -10,10 +9,10 @@ import android.widget.Toast
 import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.data.local.model.ImageVariants
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.User.LoggedIn
@@ -27,36 +26,24 @@ import com.ducktapedapps.updoot.ui.subreddit.options.SubredditScreen
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.Media.*
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SubredditFragment : Fragment() {
     companion object {
-        private const val SUBREDDIT_KEY = "subreddit_key"
+        const val SUBREDDIT_KEY = "subreddit_key"
         fun newInstance(subreddit: String) = SubredditFragment().apply {
             arguments = Bundle().apply { putString(SUBREDDIT_KEY, subreddit) }
         }
     }
 
-    @Inject
-    lateinit var viewModelFactory: SubmissionsVMFactory
-
-    private val activityVM by lazy { ViewModelProvider(requireActivity()).get(ActivityVM::class.java) }
-    private val submissionsVM by lazy {
-        ViewModelProvider(
-                this@SubredditFragment,
-                viewModelFactory.apply { setSubreddit(requireArguments().getString(SUBREDDIT_KEY)!!) }
-        ).get(SubmissionsVM::class.java)
-    }
+    private val activityVM: ActivityVM by activityViewModels()
+    private val submissionsVM: SubmissionsVM by viewModels()
     private var isLoggedIn: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (activity?.application as UpdootApplication).updootComponent.inject(this@SubredditFragment)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -89,27 +76,29 @@ class SubredditFragment : Fragment() {
     }
 
     @ExperimentalLazyDsl
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            ComposeView(requireContext()).apply {
-                setContent {
-                    UpdootTheme {
-                        SubredditScreen(
-                                viewModel = submissionsVM,
-                                openOptions = { id: String -> openOptions(id) },
-                                openMedia = { media ->
-                                    when (media) {
-                                        is SelfText -> Unit
-                                        is Image -> openImage(media.imageData)
-                                        is Video -> openVideo(media.url)
-                                        is Link -> openLink(media.url)
-                                        JustTitle -> Unit
-                                    }
-                                },
-                                openComments = { subreddit, id -> openComments(subreddit, id) }
-                        )
-                    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        observeViewModel()
+        return ComposeView(requireContext()).apply {
+            setContent {
+                UpdootTheme {
+                    SubredditScreen(
+                            viewModel = submissionsVM,
+                            openOptions = { id: String -> openOptions(id) },
+                            openMedia = { media ->
+                                when (media) {
+                                    is SelfText -> Unit
+                                    is Image -> openImage(media.imageData)
+                                    is Video -> openVideo(media.url)
+                                    is Link -> openLink(media.url)
+                                    JustTitle -> Unit
+                                }
+                            },
+                            openComments = { subreddit, id -> openComments(subreddit, id) }
+                    )
                 }
             }
+        }
+    }
 
 
     private fun observeViewModel() {

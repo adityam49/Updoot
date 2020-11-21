@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.login
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -12,29 +11,23 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentLoginBinding
 import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
-    @Inject
-    lateinit var vmFactory: LoginVMFactory
     private lateinit var binding: FragmentLoginBinding
-    private val viewModel by lazy { ViewModelProvider(this, vmFactory).get(LoginViewModel::class.java) }
 
-    override fun onAttach(context: Context) {
-        (requireActivity().application as UpdootApplication).updootComponent.inject(this)
-        super.onAttach(context)
-    }
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)

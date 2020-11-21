@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.UpdootApplication
 import com.ducktapedapps.updoot.databinding.FragmentVideoPreviewBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
@@ -20,8 +19,10 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class VideoPreviewFragment : Fragment() {
 
     companion object {
@@ -60,7 +61,6 @@ class VideoPreviewFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (activity?.application as UpdootApplication).updootComponent.inject(this)
         exoPlayer.apply {
             playWhenReady = true
             prepare(getMediaSource())
