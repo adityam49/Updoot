@@ -2,12 +2,12 @@ package com.ducktapedapps.updoot.ui.navDrawer
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
@@ -123,7 +123,7 @@ fun NonCurrentAccountItem(
                 )
         }
 
-        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
+        Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.padding(start = 8.dp).weight(1f))
         }
 
@@ -167,7 +167,7 @@ fun CurrentAccountItem(
                 modifier = userIconModifier
         )
 
-        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+        Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
         if (accountModel is AccountModel.UserModel) IconButton(

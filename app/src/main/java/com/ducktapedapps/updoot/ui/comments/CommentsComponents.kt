@@ -1,14 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Surface
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -79,6 +75,7 @@ private fun CommentHeader(
             Spacer(modifier = Modifier.weight(1f))
             AllGildings(gildings = gildings)
             if (replies.children.isNotEmpty() && !repliesExpanded) ReplyCounter(replyCount = replies.children.size)
+            Spacer(modifier = Modifier.width(2.dp))
             VoteCounter(ups = ups, likes = likes)
         }
     }

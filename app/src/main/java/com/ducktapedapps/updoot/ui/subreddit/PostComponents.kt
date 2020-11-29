@@ -1,19 +1,14 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AmbientEmphasisLevels
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideEmphasis
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Providers
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.vectorResource
@@ -22,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.ui.common.AllGildings
+import com.ducktapedapps.updoot.ui.common.StaticLinkPreview
 import com.ducktapedapps.updoot.ui.common.VoteCounter
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
 import com.ducktapedapps.updoot.utils.Media.*
@@ -104,6 +100,7 @@ fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
                 is Image, is Video -> linkData.thumbnail
                 is Link, JustTitle -> R.drawable.ic_link_24dp
             },
+            error = { vectorResource(id = R.drawable.ic_image_error_24dp) },
             modifier = modifier,
             requestBuilder = { fitCenter().circleCrop() }
 
@@ -116,11 +113,11 @@ fun SubmissionTitle(
         isSticky: Boolean,
         modifier: Modifier = Modifier
 ) {
-    ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+    Providers(AmbientContentAlpha provides ContentAlpha.high) {
         Text(
                 text = title,
                 color = if (isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.h4,
+                style = MaterialTheme.typography.h5,
                 modifier = modifier
         )
     }
@@ -128,7 +125,7 @@ fun SubmissionTitle(
 
 @Composable
 private fun MetaData(linkData: LinkData, modifier: Modifier) {
-    ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.disabled) {
+    Providers(AmbientContentAlpha provides ContentAlpha.disabled) {
         Text(
                 style = MaterialTheme.typography.h6,
                 text = "${linkData.subredditName} • ${getCompactCountAsString(linkData.commentsCount.toLong())} Replies • ${getCompactDateAsString(linkData.created)}",
@@ -180,7 +177,7 @@ fun LargePost(
                 ups = linkData.ups,
                 likes = linkData.likes,
                 modifier = Modifier.constrainAs(voteCounter) {
-                    top.linkTo(parent.top, margin = 8.dp)
+                    top.linkTo(title.top)
                     end.linkTo(parent.end, margin = 8.dp)
                     start.linkTo(title.end)
                     width = Dimension.wrapContent
@@ -201,7 +198,12 @@ fun LargePostMedia(linkData: LinkData, onClickMedia: () -> Unit, modifier: Modif
         is Image -> ImagePostMedia(onClickMedia = onClickMedia, modifier = modifier, media = mediaData)
         is Video,
         is Link,
-        JustTitle -> LinkPreview(linkData = linkData, modifier = modifier, onClickMedia = onClickMedia)
+        JustTitle -> StaticLinkPreview(
+                url = linkData.url,
+                thumbnail = linkData.thumbnail,
+                modifier = modifier,
+                onClickLink = onClickMedia
+        )
     }
 }
 
@@ -211,14 +213,12 @@ fun ImagePostMedia(onClickMedia: () -> Unit, modifier: Modifier, media: Image) {
     val ratio = ((data?.lowResWidth?.toFloat() ?: 1f) / (data?.lowResHeight?.toFloat()
             ?: 1f)).absoluteValue
     Log.i("AspectRatio", "ratio :$ratio")
-
-
     GlideImage(
             data = data?.lowResUrl ?: "",
             modifier = modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .aspectRatio(ratio)
+                    .aspectRatio(if (ratio < 1.0) 1f else ratio)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onClickMedia)
     ) { imageLoadState ->
@@ -233,42 +233,20 @@ fun ImagePostMedia(onClickMedia: () -> Unit, modifier: Modifier, media: Image) {
 
 @Composable
 fun TextPostMedia(text: String, modifier: Modifier) {
-    Box(modifier = modifier
-            .padding(8.dp)
-            .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp)
+    Box(
+            modifier = modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colors.surface.copy(alpha = 0.5f))
+    ) {
+        Providers(AmbientContentAlpha provides ContentAlpha.medium) {
+            Text(
+                    text = text,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(8.dp),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
             )
-    ) {
-        Text(text = text, style = MaterialTheme.typography.body2, modifier = Modifier.padding(8.dp), maxLines = 3)
-    }
-}
-
-@Composable
-private fun LinkPreview(linkData: LinkData, modifier: Modifier, onClickMedia: () -> Unit) {
-    Row(modifier = modifier
-            .padding(8.dp)
-            .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp)
-            ).clickable(onClick = onClickMedia),
-            verticalAlignment = Alignment.Top
-    ) {
-        GlideImage(
-                data = linkData.thumbnail,
-                error = { Icon(asset = vectorResource(id = R.drawable.ic_link_24dp)) },
-                requestBuilder = {
-                    centerCrop().circleCrop()
-                },
-                modifier = Modifier.size(48.dp).padding(8.dp)
-        )
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Uri.parse(linkData.url).authority?.run { Text(text = this, style = MaterialTheme.typography.h5) }
-            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.disabled) {
-                Text(text = linkData.url, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption)
-            }
         }
     }
 }

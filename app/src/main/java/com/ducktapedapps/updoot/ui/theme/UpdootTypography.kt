@@ -32,8 +32,8 @@ val UpdootTypography = Typography(
                 letterSpacing = 1.5.sp
         ),
         caption = TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp,
                 letterSpacing = 0.4.sp
         ),
 )

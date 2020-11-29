@@ -35,7 +35,7 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
 
     private val optionsAdapter = OptionsAdapter(::copyLink, ::openUser)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSubmissionOptionsBottomSheetBinding.inflate(inflater, container, false)
         setUpViewModel()
         return binding.root
@@ -56,6 +56,7 @@ class SubmissionOptionsBottomSheet : BottomSheetDialogFragment() {
                 .addToBackStack(null)
                 .replace(R.id.fragment_container, UserFragment.newInstance(userName))
                 .commit()
+        dismiss()
     }
 
     private fun setUpViewModel() =

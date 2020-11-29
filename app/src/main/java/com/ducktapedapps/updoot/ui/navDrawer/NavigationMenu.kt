@@ -1,15 +1,16 @@
 package com.ducktapedapps.updoot.ui.navDrawer
 
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AmbientEmphasisLevels
+import androidx.compose.material.AmbientContentAlpha
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
-import androidx.compose.material.ProvideEmphasis
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Providers
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,7 +45,7 @@ fun NavigationMenu(
                         vectorResource(id = navDestination.icon),
                         modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp)
                 )
-                ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+                Providers(AmbientContentAlpha provides ContentAlpha.high) {
                     Text(text = navDestination.title, modifier = Modifier.padding(start = 16.dp))
                 }
             }

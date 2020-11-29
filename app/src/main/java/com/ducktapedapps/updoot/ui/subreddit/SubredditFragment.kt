@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -22,7 +21,6 @@ import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
-import com.ducktapedapps.updoot.ui.subreddit.options.SubredditScreen
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.Media.*
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
@@ -75,8 +73,7 @@ class SubredditFragment : Fragment() {
         return true
     }
 
-    @ExperimentalLazyDsl
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         observeViewModel()
         return ComposeView(requireContext()).apply {
             setContent {

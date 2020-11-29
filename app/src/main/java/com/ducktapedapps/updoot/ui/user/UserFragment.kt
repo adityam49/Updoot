@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
@@ -28,8 +27,7 @@ class UserFragment : Fragment() {
 
     private val viewModel: UserViewModel by viewModels()
 
-    @ExperimentalLazyDsl
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             ComposeView(requireContext()).apply {
                 setContent {
                     UpdootTheme {

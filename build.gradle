@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        compose_version = '1.0.0-alpha06'
+        compose_version = '1.0.0-alpha07'
         kotlin_version = "1.4.10"
         lifecycle_version = '2.2.0'
         retrofit_version = '2.9.0'

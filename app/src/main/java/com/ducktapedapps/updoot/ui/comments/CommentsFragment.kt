@@ -5,9 +5,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.lazy.ExperimentalLazyDsl
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -47,28 +44,25 @@ class CommentsFragment : Fragment() {
         inflater.inflate(R.menu.comment_screen_menu, menu)
     }
 
-    @ExperimentalLazyDsl
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             ComposeView(requireContext()).apply {
                 setContent {
                     UpdootTheme {
-                        Surface(color = MaterialTheme.colors.background) {
-                            CommentsScreen(
-                                    viewModel = viewModel,
-                                    openContent = { content ->
-                                        when (content) {
-                                            is Image -> openImage(
-                                                    lowResImage = content.data.imageData?.lowResUrl,
-                                                    highResImage = content.data.imageData?.highResUrl
-                                                            ?: ""
-                                            )
-                                            is LoadedLink -> openLink(content.linkModel.url)
-                                            is LoadingLink -> openLink(content.url)
-                                            is NoMetaDataLink -> openLink(content.url)
-                                            else -> Unit
-                                        }
-                                    })
-                        }
+                        CommentsScreen(
+                                viewModel = viewModel,
+                                openContent = { content ->
+                                    when (content) {
+                                        is Image -> openImage(
+                                                lowResImage = content.data.imageData?.lowResUrl,
+                                                highResImage = content.data.imageData?.highResUrl
+                                                        ?: ""
+                                        )
+                                        is LoadedLink -> openLink(content.linkModel.url)
+                                        is LoadingLink -> openLink(content.url)
+                                        is NoMetaDataLink -> openLink(content.url)
+                                        else -> Unit
+                                    }
+                                })
                     }
                 }
             }

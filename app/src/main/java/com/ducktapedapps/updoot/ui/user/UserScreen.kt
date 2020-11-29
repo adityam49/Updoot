@@ -1,16 +1,11 @@
 package com.ducktapedapps.updoot.ui.user
 
 import androidx.compose.foundation.ScrollableRow
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -23,7 +18,6 @@ import com.ducktapedapps.updoot.ui.subreddit.LargePost
 import com.ducktapedapps.updoot.ui.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.ui.theme.ScoreBackground
 
-@ExperimentalLazyDsl
 @Composable
 fun UserInfoScreen(viewModel: UserViewModel) {
     val content = viewModel.content.collectAsState()

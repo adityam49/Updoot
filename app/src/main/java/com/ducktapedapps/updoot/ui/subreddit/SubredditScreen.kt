@@ -1,7 +1,6 @@
-package com.ducktapedapps.updoot.ui.subreddit.options
+package com.ducktapedapps.updoot.ui.subreddit
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.ExperimentalLazyDsl
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -13,15 +12,11 @@ import androidx.compose.runtime.onActive
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ducktapedapps.updoot.ui.subreddit.CompactPost
-import com.ducktapedapps.updoot.ui.subreddit.LargePost
-import com.ducktapedapps.updoot.ui.subreddit.SubmissionsVM
 import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
 import com.ducktapedapps.updoot.utils.toMedia
 
-@ExperimentalLazyDsl
 @Composable
 fun SubredditScreen(
         viewModel: SubmissionsVM,
