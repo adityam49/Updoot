@@ -1,13 +1,14 @@
 package com.ducktapedapps.updoot.ui.explore
 
+import android.util.Log
 import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.TrendingSubreddit
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -19,19 +20,17 @@ class ExploreRepo @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    val trendingSubs: Flow<List<Subreddit>> = subredditDAO.observeTrendingSubs().distinctUntilChanged()
+    val trendingSubs: Flow<List<Subreddit>> = subredditDAO.observeTrendingSubreddits()
 
     suspend fun loadTrendingSubs() {
         _isLoading.value = true
         withContext(Dispatchers.IO) {
             try {
-                subredditDAO.getTrendingSubs().apply {
-                    if (isEmpty()) {
-                        fetchNewTrendingSubs()
-                    } else if (isStale()) {
-                        fetchNewTrendingSubs()
-                        forEach { subredditDAO.insertSubreddit(it.copy(isTrending = 0)) }
-                    }
+                val subs = subredditDAO.getTrendingSubs()
+                if (subs.isEmpty() || subs.isStale()) {
+                    val newSubs = fetchNewTrendingSubs()
+                    removeOldTrendingSubreddits()
+                    newSubs.saveToCache()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -42,19 +41,30 @@ class ExploreRepo @Inject constructor(
     }
 
     @Throws(Exception::class)
-    private suspend fun fetchNewTrendingSubs() {
+    private suspend fun fetchNewTrendingSubs(): List<Subreddit> {
         val api = redditClient.api()
         val result = api.getTrendingSubredditNames()
-        result.subreddit_names.forEach {
-            (api.getSubredditInfo(it)).apply {
-                subredditDAO.insertSubreddit(copy(lastUpdated = System.currentTimeMillis(), isTrending = 1))
-            }
+        return result.subreddit_names.map { id ->
+            api.getSubredditInfo(id)
+        }.toList()
+    }
+
+    private suspend fun List<Subreddit>.saveToCache() {
+        forEach {
+            subredditDAO.insertSubreddit(it.copy(lastUpdated = System.currentTimeMillis()))
+            subredditDAO.insertTrendingSubreddit(TrendingSubreddit(it.display_name))
         }
     }
 
     private fun List<Subreddit>.isStale(): Boolean = any {
-        (System.currentTimeMillis() - (it.lastUpdated
-                ?: 0L) > TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS * 60 * 60 * 1000)
+        val diff = System.currentTimeMillis() - (it.lastUpdated ?: 0L)
+        val threshold = TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS * 60 * 60 * 1000
+        Log.i(TAG, "diff = $diff and threshold = $threshold")
+        diff > threshold
+    }
+
+    private suspend fun removeOldTrendingSubreddits() {
+        subredditDAO.removeAllTrendingSubs()
     }
 
     companion object {

@@ -15,5 +15,4 @@ data class Subreddit(
         val description: String?,
         val created: Long,
         var lastUpdated: Long?,
-        val isTrending: Int = 0 //0 is not trending 1 is trending
 )
