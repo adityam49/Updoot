@@ -12,12 +12,6 @@ interface SubredditDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubreddit(subreddit: Subreddit)
 
-    @Query("SELECT * FROM Subreddit WHERE isTrending = 1")
-    fun observeTrendingSubs(): Flow<List<Subreddit>>
-
-    @Query("SELECT * FROM Subreddit WHERE isTrending = 1")
-    suspend fun getTrendingSubs(): List<Subreddit>
-
     @Query("SELECT * FROM Subreddit WHERE display_name IS :name")
     fun observeSubredditInfo(name: String): Flow<Subreddit?>
 
@@ -38,4 +32,16 @@ interface SubredditDAO {
 
     @Query("DELETE  FROM subreddit WHERE display_name is :name")
     suspend fun deleteSubreddit(name: String)
+
+    @Query("SELECT * FROM subreddit,trendingsubreddit where display_name == id")
+    fun observeTrendingSubreddits(): Flow<List<Subreddit>>
+
+    @Query("SELECT * FROM subreddit,trendingsubreddit where display_name == id")
+    suspend fun getTrendingSubs(): List<Subreddit>
+
+    @Query("DELETE FROM trendingsubreddit")
+    suspend fun removeAllTrendingSubs()
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTrendingSubreddit(subreddit: TrendingSubreddit)
 }

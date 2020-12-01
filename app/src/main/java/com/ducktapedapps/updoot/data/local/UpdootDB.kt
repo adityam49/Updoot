@@ -9,7 +9,18 @@ import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubredditPrefsConverter
 
 @TypeConverters(SubredditPrefsConverter::class)
-@Database(entities = [Subreddit::class, SubredditSubscription::class, SubredditPrefs::class, LinkData::class, LinkModel::class], version = 1, exportSchema = false)
+@Database(
+        entities = [
+            Subreddit::class,
+            SubredditSubscription::class,
+            SubredditPrefs::class,
+            LinkData::class,
+            LinkModel::class,
+            TrendingSubreddit::class,
+        ],
+        version = 1,
+        exportSchema = false
+)
 abstract class UpdootDB : RoomDatabase() {
     abstract fun subredditDAO(): SubredditDAO
     abstract fun subredditPrefsDAO(): SubredditPrefsDAO
@@ -30,4 +41,15 @@ data class SubredditPrefs(
         @PrimaryKey val subreddit_name: String,
         val viewType: SubmissionUiType,
         val subredditSorting: SubredditSorting
+)
+
+@Entity
+data class TrendingSubreddit(
+        @PrimaryKey
+        @ForeignKey(
+                entity = Subreddit::class,
+                parentColumns = ["display_name"],
+                childColumns = ["id"],
+                onDelete = ForeignKey.NO_ACTION
+        ) val id: String
 )

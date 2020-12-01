@@ -113,7 +113,6 @@ fun PreviewTrendingSub() {
             description = "Some info about subreddit",
             created = 12334323432,
             lastUpdated = 12334323432,
-            isTrending = 0
     )
     TrendingSub(subreddit = subreddit, onClickSubreddit = {})
 }
