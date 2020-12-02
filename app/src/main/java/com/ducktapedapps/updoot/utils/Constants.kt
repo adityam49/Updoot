@@ -51,6 +51,6 @@ object Constants {
     //notification
     const val NOTIFICATION_CHANNEL_ID = "com.ducktapedapps.updoot.notification"
 
-    const val DEBOUNCE_TIME_OUT = 400L
+    const val DEBOUNCE_TIME_OUT = 300L
 }
 

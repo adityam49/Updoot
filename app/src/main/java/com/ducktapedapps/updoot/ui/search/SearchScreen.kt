@@ -22,16 +22,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 @Composable
 fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) {
@@ -58,7 +57,7 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                         text = "${
                             subreddit.subscribers?.run { getCompactCountAsString(this) + " Subscribers" }
                         } ${
-                            subreddit.accounts_active?.run { "/" + getCompactCountAsString(this) + " Active" } ?: ""
+                            " • " + getCompactAge(subreddit.created)
                         }",
                         style = MaterialTheme.typography.caption
                 )
@@ -70,21 +69,15 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
 
 }
 
-@Preview
-@Composable
-private fun previewSearchView() {
-    ComposeSearchView(performSearch = {}, modifier = Modifier.fillMaxWidth(), {}, flow { })
-}
-
-
 @Composable
 fun ComposeSearchView(
         performSearch: (query: String) -> Unit,
+        queryString: TextFieldValue,
+        setQuery: (TextFieldValue) -> Unit,
         modifier: Modifier,
         goBack: () -> Unit,
         isLoading: Flow<Boolean>
 ) {
-    val (queryString, setQuery) = remember { mutableStateOf(TextFieldValue("")) }
     ConstraintLayout(modifier) {
         val (backButton, searchField, searchActions) = createRefs()
         BackButton(
@@ -201,14 +194,18 @@ fun SearchScreen(
         redditClient: IRedditClient,
         currentUser: Flow<User>,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val viewModel = remember {
         SearchVM(
                 redditClient = redditClient,
                 subredditDAO = subredditDAO,
                 currentUser = currentUser,
-                coroutineScope = coroutineScope
         )
+    }
+    val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
+    val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
+    val setQuery: (TextFieldValue) -> Unit = { value ->
+        viewModel.searchSubreddit(value.text)
+        setFieldQueryValue(value)
     }
     Column(
             modifier = Modifier
@@ -222,13 +219,20 @@ fun SearchScreen(
                         .padding(8.dp)
                         .height(48.dp),
                 goBack = goBack,
-                isLoading = viewModel.searchQueryLoading
+                isLoading = viewModel.searchQueryLoading,
+                queryString = queryString,
+                setQuery = setQuery
         )
         LazyColumnFor(
-                items = viewModel.results.collectAsState(initial = emptyList()).value,
+                items = searchResults,
                 modifier = Modifier.fillMaxWidth()
         ) {
             ComposeSubredditItem(it, openSubreddit)
         }
+        Spacer(
+                Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.4f)
+        )
     }
 }
