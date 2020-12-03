@@ -8,15 +8,18 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.SubredditPrefsDAO
 import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.Listing
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -28,84 +31,55 @@ class SubmissionRepo @Inject constructor(
         private val submissionsCacheDAO: SubmissionsCacheDAO,
         private val subredditDAO: SubredditDAO
 ) {
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    fun subredditPrefs(subredditName: String): Flow<SubredditPrefs?> = prefsDAO
+            .observeSubredditPrefs(subredditName)
+            .distinctUntilChanged()
 
-    private val _toastMessage = MutableStateFlow(SingleLiveEvent<String?>(null))
-    val toastMessage: StateFlow<SingleLiveEvent<String?>> = _toastMessage
+    fun subredditInfo(subredditName: String): Flow<Subreddit?> =
+            if (subredditName == FRONTPAGE) flow { emit(null) }
+            else subredditDAO.observeSubredditInfo(subredditName)
+                    .transform {
+                        if (it == null) {
+                            val subreddit = fetchSubredditInfo(subredditName)
+                            subredditDAO.insertSubreddit(subreddit.copy(lastUpdated = System.currentTimeMillis()))
+                        } else emit(it)
+                    }.distinctUntilChanged()
 
-    fun postViewType(subredditName: String): Flow<SubmissionUiType> = prefsDAO.observeViewType(subredditName)
-    private val nextPageKeyAndCurrentPageEntries = MutableStateFlow<Map<String?, List<String>>>(mapOf())
-    val allSubmissions: Flow<List<LinkData>> = nextPageKeyAndCurrentPageEntries.flatMapLatest {
-        if (it.keys.isNotEmpty())
-            submissionsCacheDAO.observeCachedSubmissions(cachedSubmissionsObserveQueryInOrderOfGivenIds(it.values.flatten())).distinctUntilChanged()
-        else flow { emit(emptyList<LinkData>()) }
+
+    private suspend fun fetchSubredditInfo(subreddit: String): Subreddit = withContext(Dispatchers.IO) {
+        val api = redditClient.api()
+        api.getSubredditInfo(subreddit)
     }
 
-    fun subredditInfo(subredditName: String): Flow<Subreddit?> = subredditDAO.observeSubredditInfo(subredditName)
 
-    suspend fun loadAndSaveSubredditInfo(subreddit: String) {
-        if (subreddit != FRONTPAGE)
-            withContext(Dispatchers.IO) {
-                try {
-                    val api = redditClient.api()
-                    val result = api.getSubredditInfo(subreddit)
-                    subredditDAO.insertSubreddit(result)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    _toastMessage.value = SingleLiveEvent("Unable to fetch $subreddit metadata : ${e.message}")
-                }
-            }
-    }
-
-    private fun cachedSubmissionsObserveQueryInOrderOfGivenIds(ids: List<String>): SimpleSQLiteQuery =
-            SimpleSQLiteQuery(
-                    StringBuilder().apply {
-                        append(" SELECT * FROM Linkdata")
-                        append(" WHERE name IN (")
-                        append(TextUtils.join(",", ids.map { "\'$it\'" }))
-                        append(")")
-                        append(" ORDER BY CASE name ")
-                        ids.forEachIndexed { index, id -> append(" WHEN \'$id\' THEN $index ") }
-                        append(" END")
-                    }.toString(), null)
-
-    fun hasNextPage(): Boolean = nextPageKeyAndCurrentPageEntries.value.keys.last() != null
-
-    suspend fun setPostViewType(subreddit: String, type: SubmissionUiType) = withContext(Dispatchers.IO) {
-        prefsDAO.setUIType(type, subreddit)
+    suspend fun setPostViewType(subreddit: String, type: SubmissionUiType) {
+        withContext(Dispatchers.IO) { prefsDAO.setUIType(type, subreddit) }
     }
 
     suspend fun changeSort(subreddit: String, newSort: SubredditSorting) {
-        clearSubmissions()
         withContext(Dispatchers.IO) {
             prefsDAO.setSorting(newSort, subreddit)
-            loadPage(subreddit)
         }
     }
 
     suspend fun vote(id: String, direction: Int) {
         withContext(Dispatchers.IO) {
-            try {
-                val cachedSubmission = submissionsCacheDAO.getLinkData(id)
-                if (cachedSubmission.archived)
-                    _toastMessage.value = SingleLiveEvent("Can't vote on archived submission")
-                else {
-                    val api = redditClient.api()
-                    val updatedSubmission = cachedSubmission.withUpdatedVote(direction)
-                    val result = api.castVote(cachedSubmission.name, when (updatedSubmission.likes) {
-                        true -> 1
-                        false -> -1
-                        null -> 0
-                    })
-                    when (result.code()) {
-                        200 -> submissionsCacheDAO.insertSubmissions(updatedSubmission)
-                        429 -> _toastMessage.value = SingleLiveEvent("Too many vote requests!")
-                        else -> Log.e(TAG, result.message())
-                    }
+            val cachedSubmission = submissionsCacheDAO.getLinkData(id)
+            if (cachedSubmission.archived)
+                throw IllegalArgumentException("Can't vote on archived submission with id : $id")
+            else {
+                val api = redditClient.api()
+                val updatedSubmission = cachedSubmission.withUpdatedVote(direction)
+                val result = api.castVote(cachedSubmission.name, when (updatedSubmission.likes) {
+                    true -> 1
+                    false -> -1
+                    null -> 0
+                })
+                when (result.code()) {
+                    200 -> submissionsCacheDAO.insertSubmissions(updatedSubmission)
+                    429 -> throw Exception("Too many vote requests!")
+                    else -> Log.e(TAG, result.message())
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
@@ -144,59 +118,53 @@ class SubmissionRepo @Inject constructor(
 
     suspend fun save(id: String) {
         withContext(Dispatchers.IO) {
-            try {
-                val api = redditClient.api()
-                val cachedSubmission = submissionsCacheDAO.getLinkData(id)
-                val result = api.run { if (cachedSubmission.saved) unSave(cachedSubmission.name) else save(cachedSubmission.name) }
-                when (result.code()) {
-                    200 -> submissionsCacheDAO.insertSubmissions(cachedSubmission.copy(saved = !cachedSubmission.saved))
-                    else -> Log.e(TAG, result.message())
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val api = redditClient.api()
+            val cachedSubmission = submissionsCacheDAO.getLinkData(id)
+            val result = api.run { if (cachedSubmission.saved) unSave(cachedSubmission.name) else save(cachedSubmission.name) }
+            when (result.code()) {
+                200 -> submissionsCacheDAO.insertSubmissions(cachedSubmission.copy(saved = !cachedSubmission.saved))
+                else -> Log.e(TAG, result.message())
             }
         }
     }
 
-    fun clearSubmissions() {
-        nextPageKeyAndCurrentPageEntries.value = emptyMap()
-    }
-
-    suspend fun loadPage(subreddit: String) {
-        withContext(Dispatchers.IO) {
-            try {
-                _isLoading.value = true
-                loadPageAndCacheToDbSuccessfully(subreddit)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _toastMessage.value = SingleLiveEvent("Something went wrong! try again later some later")
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    @Throws(Exception::class)
-    private suspend fun loadPageAndCacheToDbSuccessfully(subreddit: String) {
+    suspend fun getPage(
+            subreddit: String,
+            nextPageKey: String?,
+            sorting: SubredditSorting,
+    ): Listing<LinkData> = withContext(Dispatchers.IO) {
         val redditAPI = redditClient.api()
-        val sorting = (prefsDAO.getSubredditSorting(subreddit)
-                ?: createAndSaveDefaultSubredditPrefs(subreddit).subredditSorting).mapSorting()
-        val fetchedData = redditAPI.getSubreddit(
-                "${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit",
-                sorting.first,
-                sorting.second,
-                nextPageKeyAndCurrentPageEntries.value.keys.lastOrNull()
+        val s = sorting.mapSorting()
+        redditAPI.getSubmissions(
+                subreddit = "${if (subreddit != FRONTPAGE) "r/" else ""}$subreddit",
+                sort = s.first,
+                time = s.second,
+                after = nextPageKey
         )
-        fetchedData.children.forEach { submission -> submissionsCacheDAO.insertSubmissions(submission) }
-        if (fetchedData.children.isNotEmpty()) {
-            nextPageKeyAndCurrentPageEntries.value = nextPageKeyAndCurrentPageEntries.value
-                    .toMutableMap()
-                    .apply { put(fetchedData.after, fetchedData.children.map { linkData -> linkData.name }) }
-        }
     }
 
-    private suspend fun createAndSaveDefaultSubredditPrefs(subredditName: String) =
-            SubredditPrefs(subredditName, SubmissionUiType.COMPACT, Hot).apply { prefsDAO.insertSubredditPrefs(this) }
+    fun observeCachedSubmissions(ids: List<String>): Flow<List<LinkData>> =
+            submissionsCacheDAO.observeCachedSubmissions(buildSqlQuery(ids))
+
+    private fun buildSqlQuery(ids: List<String>): SimpleSQLiteQuery =
+            SimpleSQLiteQuery(
+                    StringBuilder().apply {
+                        append(" SELECT * FROM Linkdata")
+                        append(" WHERE name IN (")
+                        append(TextUtils.join(",", ids.map { "\'$it\'" }))
+                        append(")")
+                        append(" ORDER BY CASE name ")
+                        ids.forEachIndexed { index, id -> append(" WHEN \'$id\' THEN $index ") }
+                        append(" END")
+                    }.toString(), null)
+
+    suspend fun cacheSubmissions(submissions: List<LinkData>) = submissions.forEach {
+        withContext(Dispatchers.IO) { submissionsCacheDAO.insertSubmissions(it) }
+    }
+
+    suspend fun saveDefaultSubredditPrefs(subredditName: String) {
+        prefsDAO.insertSubredditPrefs(SubredditPrefs(subredditName, SubmissionUiType.COMPACT, Hot))
+    }
 
     private fun SubredditSorting.mapSorting(): Pair<String, String?> = when (this) {
         Rising -> Pair(Constants.RISING, null)

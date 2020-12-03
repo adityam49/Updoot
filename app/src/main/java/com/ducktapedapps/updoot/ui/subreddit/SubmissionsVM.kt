@@ -5,12 +5,13 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ducktapedapps.updoot.data.local.SubredditPrefs
+import com.ducktapedapps.updoot.data.local.model.LinkData
+import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollVM
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
@@ -20,44 +21,91 @@ class SubmissionsVM @ViewModelInject constructor(
 ) : ViewModel(), InfiniteScrollVM {
     private val subreddit: String = savedStateHandle.get<String>(SubredditFragment.SUBREDDIT_KEY)!!
 
-    init {
-        viewModelScope.launch {
-            submissionRepo.loadAndSaveSubredditInfo(subreddit)
-        }
-        loadPage()
-    }
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading
 
-    override val isLoading = submissionRepo.isLoading
+    private val _toastMessage = MutableStateFlow(SingleLiveEvent<String?>(null))
+    val toastMessage: StateFlow<SingleLiveEvent<String?>> = _toastMessage
 
-    var lastScrollPosition: Int = 0
-    val postViewType = submissionRepo
-            .postViewType(subreddit)
+    private val subredditPrefs: Flow<SubredditPrefs> = submissionRepo
+            .subredditPrefs(subreddit)
+            .transform { if (it != null) emit(it) else submissionRepo.saveDefaultSubredditPrefs(subreddit) }
+
+    val sorting : StateFlow<SubredditSorting?> = subredditPrefs
+            .map { it.subredditSorting }
+            .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Lazily,
+                    initialValue = null
+            )
+
+    val postViewType: StateFlow<SubmissionUiType> = subredditPrefs
+            .map { it.viewType }
             .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.Lazily,
                     initialValue = SubmissionUiType.COMPACT
             )
-    val allSubmissions = submissionRepo
-            .allSubmissions
-            .stateIn(
+
+
+    private val _feedPagesOfIds: MutableStateFlow<Map<String?, List<String>>> = MutableStateFlow(emptyMap())
+    val feedPages: StateFlow<List<LinkData>> = _feedPagesOfIds
+            .map {
+                it.values.flatten()
+            }.flatMapLatest { pages ->
+                if (pages.isNotEmpty())
+                    submissionRepo.observeCachedSubmissions(pages)
+                else emptyFlow()
+            }.stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.Lazily,
-                    initialValue = emptyList(),
+                    initialValue = emptyList()
             )
 
-    val toastMessage: StateFlow<SingleLiveEvent<String?>> = submissionRepo.toastMessage
-    val subredditInfo = submissionRepo
-            .subredditInfo(subreddit)
+    var lastScrollPosition: Int = 0
+
+    val subredditInfo: StateFlow<Subreddit?> = submissionRepo.subredditInfo(subreddit)
+            .catch { _toastMessage.value = SingleLiveEvent("Something went wrong! : ${it.message}") }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    override fun loadPage() {
-        viewModelScope.launch { submissionRepo.loadPage(subreddit) }
+    init {
+        viewModelScope.launch {
+            sorting.filterNotNull().onEach { reload() }.collect()
+        }
     }
 
-    override fun hasNextPage() = submissionRepo.hasNextPage()
+    override fun loadPage() {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val result = submissionRepo.getPage(
+                        subreddit = subreddit,
+                        nextPageKey = _feedPagesOfIds.value.keys.lastOrNull(),
+                        sorting = sorting.value!!
+                )
+
+                submissionRepo.cacheSubmissions(result.children)
+
+                _feedPagesOfIds.value = _feedPagesOfIds
+                        .value
+                        .toMutableMap()
+                        .apply {
+                            put(result.after, result.children.map { it.name })
+                        }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _toastMessage.value = SingleLiveEvent("Something went wrong! : ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+
+    }
+
+    override fun hasNextPage() = _feedPagesOfIds.value.keys.lastOrNull() != null
 
     fun reload() {
-        submissionRepo.clearSubmissions()
+        _feedPagesOfIds.value = emptyMap()
         loadPage()
     }
 

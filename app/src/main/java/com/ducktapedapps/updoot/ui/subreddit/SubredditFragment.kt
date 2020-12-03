@@ -112,7 +112,7 @@ class SubredditFragment : Fragment() {
         return true
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSubredditBinding.inflate(inflater, container, false)
         val submissionsAdapter = SubmissionsAdapter(object : SubmissionsAdapter.SubmissionClickHandler {
             override fun actionOpenComments(linkDataId: String, commentId: String) = openComments(linkDataId, commentId)
@@ -236,7 +236,7 @@ class SubredditFragment : Fragment() {
                         }
                     }
             )
-            allSubmissions.asLiveData().observe(viewLifecycleOwner, { things: List<LinkData> -> submissionsAdapter.submitList(things) })
+            feedPages.asLiveData().observe(viewLifecycleOwner, { things: List<LinkData> -> submissionsAdapter.submitList(things) })
 
             toastMessage.asLiveData().observe(viewLifecycleOwner, { toastMessage: SingleLiveEvent<String?> ->
                 val toast = toastMessage.contentIfNotHandled
