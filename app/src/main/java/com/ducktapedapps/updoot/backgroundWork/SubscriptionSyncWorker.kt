@@ -13,6 +13,7 @@ import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.createNotificationChannel
+import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.random.Random
@@ -75,8 +76,8 @@ class SubscriptionSyncWorker(
         }
     }
 
-    private fun getSubredditCount(user: String) =
-            subredditDAO.subscribedSubredditsFor(user).size
+    private suspend fun getSubredditCount(user: String) =
+            subredditDAO.observeSubscribedSubredditsFor(user).first().size
 
     private fun buildNotificationAndShow(title: String, message: String, context: Context, id: Int = Random.nextInt()) {
         context.createNotificationChannel()
