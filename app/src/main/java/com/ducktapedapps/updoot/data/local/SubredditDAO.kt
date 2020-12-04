@@ -21,11 +21,8 @@ interface SubredditDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubredditSubscription)
 
-    @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
+    @Query("SELECT * FROM Subreddit JOIN SubredditSubscription ON SubredditSubscription.subredditName = Subreddit.display_name WHERE userName == :user")
     fun observeSubscribedSubredditsFor(user: String): Flow<List<Subreddit>>
-
-    @Query("SELECT * FROM SubredditSubscription,Subreddit WHERE subredditName==display_name AND userName = :user")
-    fun subscribedSubredditsFor(user: String): List<Subreddit>
 
     @Query("SELECT * FROM subreddit WHERE display_name NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<Subreddit>
@@ -33,13 +30,10 @@ interface SubredditDAO {
     @Query("DELETE  FROM subreddit WHERE display_name is :name")
     suspend fun deleteSubreddit(name: String)
 
-    @Query("SELECT * FROM subreddit,trendingsubreddit where display_name == id")
+    @Query("SELECT * FROM subreddit JOIN TrendingSubreddit ON Subreddit.display_name == TrendingSubreddit.id")
     fun observeTrendingSubreddits(): Flow<List<Subreddit>>
 
-    @Query("SELECT * FROM subreddit,trendingsubreddit where display_name == id")
-    suspend fun getTrendingSubs(): List<Subreddit>
-
-    @Query("DELETE FROM trendingsubreddit")
+    @Query("DELETE FROM TrendingSubreddit")
     suspend fun removeAllTrendingSubs()
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

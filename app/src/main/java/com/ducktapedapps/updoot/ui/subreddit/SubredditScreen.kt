@@ -24,7 +24,7 @@ fun SubredditScreen(
         openComments: (subreddit: String, id: String) -> Unit,
         openOptions: (id: String) -> Unit
 ) {
-    val allSubmissions = viewModel.allSubmissions.collectAsState(initial = emptyList())
+    val allSubmissions = viewModel.feedPages.collectAsState(initial = emptyList())
     val loading = viewModel.isLoading.collectAsState()
     val postType = viewModel.postViewType.collectAsState(initial = null)
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {

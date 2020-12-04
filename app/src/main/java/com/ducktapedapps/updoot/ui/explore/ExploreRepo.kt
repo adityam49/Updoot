@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -26,7 +27,7 @@ class ExploreRepo @Inject constructor(
         _isLoading.value = true
         withContext(Dispatchers.IO) {
             try {
-                val subs = subredditDAO.getTrendingSubs()
+                val subs = subredditDAO.observeTrendingSubreddits().first()
                 if (subs.isEmpty() || subs.isStale()) {
                     val newSubs = fetchNewTrendingSubs()
                     removeOldTrendingSubreddits()

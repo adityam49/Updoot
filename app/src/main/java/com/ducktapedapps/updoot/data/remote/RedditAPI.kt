@@ -11,7 +11,7 @@ interface RedditAPI {
     suspend fun userIdentity(): Account
 
     @GET("{subreddit}/{sort}")
-    suspend fun getSubreddit(
+    suspend fun getSubmissions(
             @Path("subreddit") subreddit: String?,
             @Path("sort") sort: String,
             @Query("t") time: String?,
