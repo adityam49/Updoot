@@ -1,6 +1,8 @@
 package com.ducktapedapps.updoot.ui.search
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -17,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,6 +33,7 @@ import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
+import dev.chrisbanes.accompanist.glide.GlideImage
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -41,9 +45,18 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                     .padding(top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-                asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp),
-                modifier = Modifier.padding(start = 16.dp)
+        Log.i("SearchScreen", "url : ${subreddit.community_icon}")
+        GlideImage(
+                data = subreddit.community_icon,
+                error = {
+                    loadVectorResource(id = R.drawable.ic_subreddit_default_24dp).resource.resource?.let {
+                        Image(imageVector = it)
+                    }
+                },
+                requestBuilder = {
+                    centerInside().circleCrop()
+                },
+                modifier = Modifier.padding(start = 16.dp).preferredSize(32.dp)
         )
         Column(
                 modifier = Modifier
@@ -127,6 +140,7 @@ fun SearchField(
             modifier = modifier,
             shape = RoundedCornerShape(50),
             color = MaterialTheme.colors.SurfaceOnDrawer,
+            contentColor = MaterialTheme.colors.onSecondary
     ) {
         BasicTextField(
                 maxLines = 1,
@@ -155,8 +169,8 @@ fun SearchActions(
     ) {
         Row {
             if (queryString.text.isNotBlank()) IconButton(
-                    icon = { Icon(asset = Icons.Default.Clear) },
                     onClick = { setQuery(TextFieldValue("")) },
+                    content = { Icon(Icons.Default.Clear) }
             )
 
             if (isLoading.collectAsState(initial = true).value)
@@ -168,8 +182,8 @@ fun SearchActions(
                 )
             else
                 IconButton(
-                        icon = { Icon(asset = Icons.Default.Search) },
                         onClick = { performSearch(queryString.text) },
+                        content = { Icon(Icons.Default.Search) }
                 )
         }
     }
@@ -182,7 +196,10 @@ private fun BackButton(modifier: Modifier, goBack: () -> Unit) {
             color = MaterialTheme.colors.SurfaceOnDrawer,
             modifier = modifier.clip(CircleShape),
     ) {
-        IconButton(onClick = goBack) { Icon(asset = Icons.Default.ArrowBack) }
+        IconButton(
+                onClick = goBack,
+                content = { Icon(Icons.Default.ArrowBack) }
+        )
     }
 }
 

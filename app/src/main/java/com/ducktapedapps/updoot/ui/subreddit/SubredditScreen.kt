@@ -24,16 +24,16 @@ fun SubredditScreen(
         openComments: (subreddit: String, id: String) -> Unit,
         openOptions: (id: String) -> Unit
 ) {
-    val allSubmissions = viewModel.feedPages.collectAsState(initial = emptyList())
+    val feed = viewModel.feedPages.collectAsState()
+    val postType = viewModel.postViewType.collectAsState()
     val loading = viewModel.isLoading.collectAsState()
-    val postType = viewModel.postViewType.collectAsState(initial = null)
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         LazyColumn {
-            itemsIndexed(items = allSubmissions.value) { index, item ->
+            itemsIndexed(items = feed.value) { index, item ->
                 onActive {
                     viewModel.lastScrollPosition = index
                     //TODO move paging stuff to viewModel
-                    if (index >= allSubmissions.value.size - 10 && viewModel.hasNextPage() && !viewModel.isLoading.value) viewModel.loadPage()
+                    if (index >= feed.value.size - 10 && viewModel.hasNextPage() && !viewModel.isLoading.value) viewModel.loadPage()
                 }
                 when (postType.value) {
                     COMPACT -> CompactPost(
@@ -48,12 +48,11 @@ fun SubredditScreen(
                             openPost = { openComments(item.subredditName, item.name) },
                             openOptions = { openOptions(item.name) }
                     )
-                    null -> Unit
                 }
                 Divider()
             }
             if (loading.value) item {
-                Box(alignment = Alignment.Center, modifier = Modifier.fillParentMaxWidth()) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillParentMaxWidth()) {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp).padding(16.dp))
                 }
             }

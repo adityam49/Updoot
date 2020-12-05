@@ -16,10 +16,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.ContextAmbient
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.res.loadVectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
@@ -58,7 +58,7 @@ fun ExploreScreen(
 
 @Composable
 fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
-    val resources = ContextAmbient.current.resources
+    val resources = AmbientContext.current.resources
     val displayMetrics = resources.displayMetrics
     val screenWidth = displayMetrics.widthPixels / displayMetrics.density
     Card(
@@ -80,7 +80,9 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                         apply(RequestOptions().transform(CenterCrop(), CircleCrop()))
                     },
                     error = {
-                        Image(asset = vectorResource(id = R.drawable.ic_subreddit_default_24dp), modifier = Modifier.align(Alignment.CenterVertically))
+                        loadVectorResource(id = R.drawable.ic_subreddit_default_24dp).resource.resource?.let {
+                            Image(imageVector = it, modifier = Modifier.align(Alignment.CenterVertically))
+                        }
                     }
             )
             Column {

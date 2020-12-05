@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
@@ -47,7 +48,7 @@ fun CompactPost(
                 linkData = linkData,
                 modifier = Modifier
                         .clip(CircleShape)
-                        .size(48.dp)
+                        .preferredSize(48.dp)
                         .clickable(onClick = onClickMedia)
                         .constrainAs(mediaThumbnail) {
                             start.linkTo(parent.start, margin = 8.dp)
@@ -94,17 +95,27 @@ fun CompactPost(
 
 @Composable
 fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
-    GlideImage(
-            data = when (linkData.toMedia()) {
-                is SelfText -> R.drawable.ic_selftext_24dp
-                is Image, is Video -> linkData.thumbnail
-                is Link, JustTitle -> R.drawable.ic_link_24dp
-            },
-            error = { vectorResource(id = R.drawable.ic_image_error_24dp) },
-            modifier = modifier,
-            requestBuilder = { fitCenter().circleCrop() }
+    when (linkData.toMedia()) {
+        is Image, is Video -> GlideImage(
+                data = linkData.thumbnail,
+                error = {
+                    it.throwable.printStackTrace()
+                    loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let { imageVector ->
+                        Image(imageVector = imageVector, modifier = modifier)
+                    }
+                },
+                modifier = modifier,
+                requestBuilder = { fitCenter().circleCrop() }
+        )
+        is SelfText -> loadVectorResource(id = R.drawable.ic_selftext_24dp).resource.resource?.let {
+            Image(imageVector = it, modifier = modifier)
+        }
 
-    )
+        is Link, JustTitle -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+            Image(imageVector = it, modifier = modifier)
+        }
+
+    }
 }
 
 @Composable
@@ -127,7 +138,7 @@ fun SubmissionTitle(
 private fun MetaData(linkData: LinkData, modifier: Modifier) {
     Providers(AmbientContentAlpha provides ContentAlpha.disabled) {
         Text(
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.caption,
                 text = "${linkData.subredditName} • ${getCompactCountAsString(linkData.commentsCount.toLong())} Replies • ${getCompactDateAsString(linkData.created)}",
                 modifier = modifier
         )
@@ -226,7 +237,9 @@ fun ImagePostMedia(onClickMedia: () -> Unit, modifier: Modifier, media: Image) {
             Empty -> Unit
             Loading -> Unit
             is Success -> MaterialLoadingImage(result = imageLoadState, fadeInEnabled = true)
-            is Error -> Icon(asset = vectorResource(id = R.drawable.ic_image_error_24dp), modifier = modifier)
+            is Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
+                Icon(it, modifier = modifier)
+            }
         }
     }
 }

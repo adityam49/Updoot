@@ -9,9 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
 import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.data.local.model.Gildings
@@ -113,13 +113,13 @@ private fun ReplyCounter(replyCount: Int) {
 @Composable
 private fun ColoredTag(
         color: Color,
-        body: @Composable () -> Unit
+        content: @Composable () -> Unit
 ) {
     Card(
             backgroundColor = color,
             shape = RoundedCornerShape(20),
             modifier = Modifier.wrapContentSize(),
-            content = body
+            content = content
     )
 }
 

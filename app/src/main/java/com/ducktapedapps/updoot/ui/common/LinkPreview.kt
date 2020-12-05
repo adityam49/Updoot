@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.common
 
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,30 +63,34 @@ fun LinkPreview(modifier: Modifier = Modifier, linkState: SubmissionContent.Link
     ) {
         val imageModifier = Modifier.padding(end = 16.dp).size(48.dp)
         when (linkState) {
-            is LoadingLink -> LoadingLinkPreview(loadingLink = linkState, imageModifier = imageModifier)
-            is LoadedLink -> LoadedLinkPreview(linkState = linkState, imageModifier = imageModifier)
-            is NoMetaDataLink -> NoMetaDataLinkPreview(linkState = linkState, imageModifier = imageModifier)
+            is LoadingLink -> LoadingLinkPreview(loadingLink = linkState, modifier = imageModifier)
+            is LoadedLink -> LoadedLinkPreview(linkState = linkState, modifier = imageModifier)
+            is NoMetaDataLink -> NoMetaDataLinkPreview(linkState = linkState, modifier = imageModifier)
         }
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
 
 @Composable
-fun LoadingLinkPreview(loadingLink: LoadingLink, imageModifier: Modifier) {
-    CircularProgressIndicator(modifier = imageModifier)
+fun LoadingLinkPreview(loadingLink: LoadingLink, modifier: Modifier) {
+    CircularProgressIndicator(modifier = modifier)
     Providers(AmbientContentAlpha provides ContentAlpha.high) {
         Text(text = loadingLink.url, style = MaterialTheme.typography.caption)
     }
 }
 
 @Composable
-fun LoadedLinkPreview(linkState: LoadedLink, imageModifier: Modifier) {
+fun LoadedLinkPreview(linkState: LoadedLink, modifier: Modifier) {
     GlideImage(
             data = linkState.linkModel.image ?: "",
-            error = { vectorResource(id = R.drawable.ic_image_error_24dp) },
-            modifier = imageModifier,
+            error = {
+                loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+                    Image(it, modifier)
+                }
+            },
+            modifier = modifier,
             requestBuilder = { circleCrop() },
-            loading = { CircularProgressIndicator(modifier = imageModifier) }
+            loading = { CircularProgressIndicator(modifier = modifier) }
     )
     Column {
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
@@ -102,8 +108,10 @@ fun LoadedLinkPreview(linkState: LoadedLink, imageModifier: Modifier) {
 }
 
 @Composable
-fun NoMetaDataLinkPreview(linkState: NoMetaDataLink, imageModifier: Modifier) {
-    Icon(asset = vectorResource(id = R.drawable.ic_link_24dp), modifier = imageModifier)
+fun NoMetaDataLinkPreview(linkState: NoMetaDataLink, modifier: Modifier) {
+    loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+        Image(imageVector = it, modifier = modifier)
+    }
     Column {
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = linkState.url, style = MaterialTheme.typography.caption)
