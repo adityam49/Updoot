@@ -8,8 +8,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.vectorResource
-import androidx.ui.tooling.preview.Preview
+import androidx.compose.ui.res.loadVectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.Gildings
 import com.ducktapedapps.updoot.ui.theme.downVoteColor
@@ -35,15 +35,22 @@ fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         if (gildings.silver != 0) {
             Text(text = gildings.silver.toString(), style = MaterialTheme.typography.overline)
-            Image(asset = vectorResource(id = R.drawable.ic_silver_gilding_14dp))
+            loadVectorResource(id = R.drawable.ic_silver_gilding_14dp).resource.resource?.let {
+                Image(imageVector = it)
+            }
         }
         if (gildings.gold != 0) {
             Text(text = gildings.gold.toString(), style = MaterialTheme.typography.overline)
-            Image(asset = vectorResource(id = R.drawable.ic_gold_gilding_14dp))
+            loadVectorResource(id = R.drawable.ic_gold_gilding_14dp).resource.resource?.let {
+                Image(imageVector = it)
+            }
+
         }
         if (gildings.platinum != 0) {
             Text(text = gildings.platinum.toString(), style = MaterialTheme.typography.overline)
-            Image(asset = vectorResource(id = R.drawable.ic_platinum_gilding_14dp))
+            loadVectorResource(id = R.drawable.ic_platinum_gilding_14dp).resource.resource?.let {
+                Image(imageVector = it)
+            }
         }
     }
 }

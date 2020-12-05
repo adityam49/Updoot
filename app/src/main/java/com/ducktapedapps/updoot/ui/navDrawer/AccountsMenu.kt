@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.loadVectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
@@ -102,16 +102,19 @@ fun NonCurrentAccountItem(
     ) {
         val paddingModifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 20.dp)
         when (accountModel) {
-            AccountModel.AddAccount -> Image(
-                    modifier = paddingModifier,
-                    asset = vectorResource(id = R.drawable.ic_round_add_circle_24)
-            )
-            is AccountModel.AnonymousAccount -> Image(
-                    modifier = paddingModifier,
-                    asset = vectorResource(id = R.drawable.ic_account_circle_24dp)
-            )
+            AccountModel.AddAccount -> loadVectorResource(id = R.drawable.ic_round_add_circle_24).resource.resource?.let {
+                Image(
+                        imageVector = it,
+                        modifier = paddingModifier
+                )
+            }
+            is AccountModel.AnonymousAccount -> loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+                Image(
+                        imageVector = it,
+                        modifier = paddingModifier
+                )
+            }
             is AccountModel.UserModel ->
-                // This will automatically use the value of AmbientRequestManager
                 GlideImage(
                         data = accountModel.userIcon,
                         modifier = paddingModifier.size(24.dp),
@@ -130,9 +133,12 @@ fun NonCurrentAccountItem(
         if (accountModel is AccountModel.UserModel) {
             IconButton(
                     modifier = Modifier.padding(end = 4.dp),
-                    onClick = { removeAccount(accountModel.name) },
-                    icon = { Image(asset = vectorResource(id = R.drawable.ic_baseline_remove_24)) },
-            )
+                    onClick = { removeAccount(accountModel.name) }
+            ) {
+                loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+                    Icon(imageVector = it)
+                }
+            }
         }
     }
 }
@@ -161,22 +167,29 @@ fun CurrentAccountItem(
                     apply(options)
                 }
         )
-        else Image(
-                asset = vectorResource(id = R.drawable.ic_account_circle_24dp)
-                        .copy(defaultHeight = 48.dp, defaultWidth = 48.dp),
-                modifier = userIconModifier
-        )
+        else loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+            Image(
+                    imageVector = it,
+                    modifier = userIconModifier
+            )
+        }
 
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
-        if (accountModel is AccountModel.UserModel) IconButton(
-                icon = { Icon(asset = vectorResource(id = R.drawable.ic_baseline_remove_24)) },
+        IconButton(
                 onClick = { removeAccount(accountModel.name) },
-        )
+        ) {
+            loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
+                Icon(imageVector = it)
+            }
+        }
         IconButton(
                 onClick = { toggleAccountMenu() },
-                icon = { Icon(asset = vectorResource(id = R.drawable.ic_baseline_chevron_down_24)) },
-        )
+        ) {
+            loadVectorResource(id = R.drawable.ic_baseline_chevron_down_24).resource.resource?.let {
+                Icon(imageVector = it)
+            }
+        }
     }
 }

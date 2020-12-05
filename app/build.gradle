@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 
@@ -47,10 +46,6 @@ android {
         kotlinCompilerVersion kotlin_version
         kotlinCompilerExtensionVersion compose_version
     }
-
-    androidExtensions {
-        experimental = true
-    }
 }
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
@@ -74,9 +69,9 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "androidx.recyclerview:recyclerview:1.2.0-beta01"
-    implementation 'com.google.android.material:material:1.3.0-alpha04'
+    implementation 'com.google.android.material:material:1.3.0-beta01'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation "androidx.fragment:fragment-ktx:1.3.0-beta02"
+    implementation "androidx.fragment:fragment-ktx:1.3.0-rc01"
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
     //compose stuff
@@ -85,7 +80,7 @@ dependencies {
     implementation "androidx.compose.foundation:foundation-layout:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.foundation:foundation:$compose_version"
-    implementation "androidx.ui:ui-tooling:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
 
     //android lifecycle
@@ -99,7 +94,7 @@ dependencies {
 
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
 
     //persistence -> room
@@ -120,7 +115,7 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glide_version"
     implementation "com.github.bumptech.glide:compiler:$glide_version"
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    implementation "dev.chrisbanes.accompanist:accompanist-glide:0.3.3.1"
+    implementation "dev.chrisbanes.accompanist:accompanist-glide:0.4.1"
 
     //video loading
     implementation "com.google.android.exoplayer:exoplayer:$exoPlayer_version"

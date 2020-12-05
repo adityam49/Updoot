@@ -24,7 +24,8 @@ val UpdootTypography = Typography(
         body2 = TextStyle(
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
-                letterSpacing = 0.25.sp
+                lineHeight = 18.sp,
+                letterSpacing = 0.15.sp
         ),
         overline = TextStyle(
                 fontWeight = FontWeight.SemiBold,
