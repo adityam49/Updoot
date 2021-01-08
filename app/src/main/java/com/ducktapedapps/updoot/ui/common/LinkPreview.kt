@@ -37,13 +37,21 @@ fun StaticLinkPreview(
     ) {
         GlideImage(
                 data = thumbnail ?: "",
-                error = { vectorResource(id = R.drawable.ic_image_error_24dp) },
+                error = {
+                    loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
+                        Image(imageVector = it)
+                    }
+                },
                 requestBuilder = {
                     centerCrop().circleCrop()
                 },
-                modifier = Modifier.size(48.dp).padding(8.dp)
+                modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp)
         )
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
             Uri.parse(url).authority?.run { Text(text = this, style = MaterialTheme.typography.h6) }
             Providers(AmbientContentAlpha provides ContentAlpha.medium) {
                 Text(text = url, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption)
@@ -61,7 +69,9 @@ fun LinkPreview(modifier: Modifier = Modifier, linkState: SubmissionContent.Link
             .padding(8.dp),
             verticalAlignment = Alignment.Top
     ) {
-        val imageModifier = Modifier.padding(end = 16.dp).size(48.dp)
+        val imageModifier = Modifier
+                .padding(end = 16.dp)
+                .size(48.dp)
         when (linkState) {
             is LoadingLink -> LoadingLinkPreview(loadingLink = linkState, modifier = imageModifier)
             is LoadedLink -> LoadedLinkPreview(linkState = linkState, modifier = imageModifier)
