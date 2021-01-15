@@ -2,10 +2,10 @@ package com.ducktapedapps.updoot.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.preference.PreferenceManager
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.ducktapedapps.updoot.backgroundWork.UpdootWorkerFactory
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
@@ -15,8 +15,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.linkify.LinkifyPlugin
@@ -24,7 +24,7 @@ import java.util.*
 import javax.inject.Named
 import javax.inject.Singleton
 
-@InstallIn(ApplicationComponent::class)
+@InstallIn(SingletonComponent::class)
 @Module
 abstract class ApplicationModule {
 
@@ -60,10 +60,10 @@ abstract class ApplicationModule {
 
         @Provides
         @Singleton
-        fun provideWorkConfiguration(updootWorkerFactory: UpdootWorkerFactory): Configuration = Configuration
+        fun provideWorkConfiguration(hiltWorkerFactory: HiltWorkerFactory): Configuration = Configuration
                 .Builder()
                 .setMinimumLoggingLevel(android.util.Log.DEBUG)
-                .setWorkerFactory(updootWorkerFactory)
+                .setWorkerFactory(hiltWorkerFactory)
                 .build()
 
         @Provides

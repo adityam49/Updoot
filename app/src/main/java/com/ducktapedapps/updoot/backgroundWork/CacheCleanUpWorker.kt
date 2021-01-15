@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.Assisted
+import androidx.hilt.work.WorkerInject
 import androidx.work.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
@@ -16,9 +18,9 @@ import com.ducktapedapps.updoot.utils.createNotificationChannel
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-class CacheCleanUpWorker(
-        private val context: Context,
-        workParas: WorkerParameters,
+class CacheCleanUpWorker @WorkerInject constructor(
+        @Assisted private val context: Context,
+        @Assisted workParas: WorkerParameters,
         private val submissionsCacheDAO: SubmissionsCacheDAO,
         private val subredditDAO: SubredditDAO
 ) : CoroutineWorker(context, workParas) {
@@ -107,16 +109,6 @@ class CacheCleanUpWorker(
         private const val SUBREDDIT_STALE_THRESHOLD_IN_HOURS = 48
         private const val SUBMISSION_STALE_THRESHOLD_IN_HOURS = 6
     }
-}
-
-class CacheCleanUpWorkerFactory(
-        private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val subredditDAO: SubredditDAO
-) : WorkerFactory() {
-    override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker? =
-            if (workerClassName == CacheCleanUpWorker::class.java.name)
-                CacheCleanUpWorker(appContext, workerParameters, submissionsCacheDAO, subredditDAO)
-            else null
 }
 
 fun Context.enqueueCleanUpWork() {
