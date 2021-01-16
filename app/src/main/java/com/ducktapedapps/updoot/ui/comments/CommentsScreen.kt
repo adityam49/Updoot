@@ -28,6 +28,10 @@ fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Un
     val content = viewModel.content.collectAsState(initial = null)
     val linkData = viewModel.submissionData.collectAsState(initial = null)
     val allComments = viewModel.allComments.collectAsState(initial = emptyList())
+    val singleThreadMode = viewModel.singleThreadMode.collectAsState()
+
+//TODO : val singleColorThread = viewModel.singleColorThreadMode.collectAsState()
+
     val listState = rememberLazyListState()
     Surface(color = MaterialTheme.colors.background) {
         LazyColumn(state = listState) {
@@ -50,14 +54,14 @@ fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Un
                     is Comment.CommentData -> FullComment(
                             comment = comment,
                             onClickComment = { viewModel.toggleChildrenVisibility(index) },
-                            singleThreadMode = false, // TODO : get value from preference storage
+                            singleThreadMode = singleThreadMode.value,
                             threadSpacingWidth = 6.dp,
                             threadWidth = 2.dp,
                     )
                     is Comment.MoreCommentData -> MoreComment(
                             data = comment,
                             loadMoreComments = { viewModel.loadMoreComment(comment, index) },
-                            singleThreadMode = false, // TODO : get value from preference storage
+                            singleThreadMode = singleThreadMode.value,
                             threadSpacingWidth = 6.dp,
                             threadWidth = 2.dp,
                     )
@@ -76,7 +80,9 @@ fun Content(content: SubmissionContent, onClick: (SubmissionContent) -> Unit) {
         is Video -> Unit
         is SelfText -> TextPost(text = content.parsedMarkdown.toString())
         is LinkState -> LinkPreview(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).fillMaxWidth(),
+                modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp)
+                        .fillMaxWidth(),
                 linkState = content,
                 openLink = { onClick(content) }
         )
@@ -90,7 +96,8 @@ fun TextPost(text: String) {
             color = MaterialTheme.colors.surface.copy(alpha = 0.5f),
             modifier = Modifier
                     .padding(8.dp)
-                    .fillMaxWidth().wrapContentHeight()
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .clip(RoundedCornerShape(8.dp)),
             content = {
                 Providers(AmbientContentAlpha provides ContentAlpha.medium) {
@@ -110,7 +117,8 @@ fun ContentImage(image: Image, openImage: () -> Unit) {
                     .fillMaxWidth()
                     .aspectRatio(
                             (data.lowResWidth ?: 0) / (data.lowResHeight ?: 1).toFloat()
-                    ).clickable(onClick = openImage),
+                    )
+                    .clickable(onClick = openImage),
             requestBuilder = {
                 transform(RoundedCorners(8))
             }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/theme_option"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:text="@string/theme"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/theme_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/theme_subText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintEnd_toEndOf="@id/theme_option"
+        app:layout_constraintStart_toStartOf="@id/theme_option"
+        app:layout_constraintTop_toBottomOf="@id/theme_option" />
+
+    <TextView
+        android:id="@+id/single_thread_indicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/single_thread_indicator"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/single_thread_indicator_switch"
+        app:layout_constraintStart_toStartOf="@id/theme_subText"
+        app:layout_constraintTop_toBottomOf="@id/theme_subText" />
+
+    <TextView
+        android:id="@+id/single_thread_indicator_sub_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="0dp"
+        app:layout_constraintEnd_toStartOf="@id/single_thread_indicator_switch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/single_thread_indicator" />
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/theme_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/theme_subText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/theme_option" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/single_thread_indicator_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="0dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/single_thread_indicator_sub_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/theme_subText" />
+
+
+    <TextView
+        android:id="@+id/single_color_thread_indicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/using_single_color_thread"
+        android:textSize="18sp"
+        android:textStyle="bold"
+
+        app:layout_constraintEnd_toStartOf="@+id/single_color_thread_indicator_switch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/single_thread_indicator_sub_text" />
+
+    <TextView
+        android:id="@+id/single_color_thread_indicator_sub_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/single_color_thread_indicator_switch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/single_color_thread_indicator" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/single_color_thread_indicator_switch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="0dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/single_color_thread_indicator_sub_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/single_color_thread_indicator" />
+</androidx.constraintlayout.widget.ConstraintLayout>

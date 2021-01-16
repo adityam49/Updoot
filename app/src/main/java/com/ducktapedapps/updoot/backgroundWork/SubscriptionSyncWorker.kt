@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.Assisted
+import androidx.hilt.work.WorkerInject
 import androidx.work.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
@@ -15,14 +17,13 @@ import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.createNotificationChannel
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlin.random.Random
 
-class SubscriptionSyncWorker(
-        workerParameters: WorkerParameters,
+class SubscriptionSyncWorker @WorkerInject constructor(
+        @Assisted workerParameters: WorkerParameters,
+        @Assisted private val context: Context,
         private val subredditDAO: SubredditDAO,
         private val redditClient: RedditClient,
-        private val context: Context
 ) : CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = try {
         val accountsToSync = mutableListOf<String>().apply {
@@ -96,16 +97,6 @@ class SubscriptionSyncWorker(
         const val SUBSCRIPTION_SYNC_TAG = "sub_sync_tag"
         const val SYNC_UPDATED_COUNT_KEY = "sync_update_count_key"
     }
-}
-
-class SubscriptionSyncWorkerFactory @Inject constructor(
-        private val subredditDAO: SubredditDAO,
-        private val redditClient: RedditClient
-) : WorkerFactory() {
-    override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker? =
-            if (workerClassName == SubscriptionSyncWorker::class.java.name)
-                SubscriptionSyncWorker(workerParameters, subredditDAO, redditClient, appContext)
-            else null
 }
 
 fun Context.enqueueSubscriptionSyncWork() {

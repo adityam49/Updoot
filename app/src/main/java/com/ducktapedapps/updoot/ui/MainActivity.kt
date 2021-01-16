@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.asLiveData
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
@@ -20,6 +22,7 @@ import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.ThemeType.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import dagger.hilt.android.AndroidEntryPoint
@@ -73,6 +76,13 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                 if (visible) showWihAnimation() else hideWithAnimation()
             }
         })
+        theme.asLiveData().observe(this@MainActivity, {
+            setDefaultNightMode(when (it) {
+                DARK -> MODE_NIGHT_YES
+                LIGHT -> MODE_NIGHT_NO
+                null, AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+            })
+        })
     }
 
     private fun setUpStatusBarColors() {
@@ -124,7 +134,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     private fun setUpBottomNavViews() = bottomNavBinding.apply {
         composeView.setContent {
             UpdootTheme(isDarkTheme = isSystemInDarkTheme()) {
-
                 NavDrawerScreen(
                         activityVM = viewModel,
                         onLogin = ::openLoginScreen,
