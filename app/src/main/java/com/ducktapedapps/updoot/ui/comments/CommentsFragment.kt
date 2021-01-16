@@ -56,7 +56,7 @@ class CommentsFragment : Fragment() {
         inflater.inflate(R.menu.comment_screen_menu, menu)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentCommentsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -79,8 +79,8 @@ class CommentsFragment : Fragment() {
         val commentsAdapter = CommentsAdapter(
                 viewModel::toggleChildrenVisibility,
                 viewModel::loadMoreComment,
-                sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_count_key), true),
-                sharedPrefs.getBoolean(getString(R.string.comment_thread_indicator_color_key), true)
+                singleThreadMode = true,
+                singleThreadColorMode = true
         )
         val submissionHeaderAdapter = SubmissionMetaDataAdapter()
         setUpRecyclerView(submissionHeaderAdapter, contentAdapter, commentsAdapter)

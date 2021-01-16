@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="theme_key">Theme key</string>
-    <string name="comment_thread_indicator_count_key">Single Thread Key</string>
-    <string name="comment_thread_indicator_color_key">Color Thread Key</string>
-</resources>

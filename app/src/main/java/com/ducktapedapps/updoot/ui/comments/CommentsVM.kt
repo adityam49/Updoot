@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
 import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.remote.LinkModel
@@ -25,11 +26,18 @@ class CommentsVM @ViewModelInject constructor(
         submissionsCacheDAO: SubmissionsCacheDAO,
         private val markwon: Markwon,
         private val linkMetaDataDAO: LinkMetaDataDAO,
-        @Assisted savedStateHandle: SavedStateHandle
+        @Assisted savedStateHandle: SavedStateHandle,
+        dataStore: UpdootDataStore,
 ) : ViewModel() {
 
     private val id: String = savedStateHandle.get<String>(CommentsFragment.COMMENTS_KEY)!!
     private val subreddit: String = savedStateHandle.get<String>(CommentsFragment.SUBREDDIT_KEY)!!
+    val singleThreadMode: StateFlow<Boolean> = dataStore
+            .showSingleThread()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val singleColorThreadMode: StateFlow<Boolean> = dataStore
+            .showSingleThreadColor()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val allComments = repo.visibleComments
 
     val submissionData: Flow<LinkData> = submissionsCacheDAO

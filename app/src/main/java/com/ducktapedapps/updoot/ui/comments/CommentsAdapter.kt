@@ -16,8 +16,8 @@ import com.ducktapedapps.updoot.ui.comments.CommentsViewHolder.MoreCommentHolder
 class CommentsAdapter(
         private val expandCollapseComment: (index: Int) -> Unit,
         private val loadMoreComment: (MoreCommentData, Int) -> Unit,
-        private val singleThreadMode: Boolean,
-        private val singleThreadColorMode: Boolean
+        var singleThreadMode: Boolean,
+        var singleThreadColorMode: Boolean
 ) : ListAdapter<Comment, CommentsViewHolder>(CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentsViewHolder =

@@ -10,6 +10,7 @@ import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.asLiveData
@@ -28,6 +29,7 @@ import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.ThemeType.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import dagger.hilt.android.AndroidEntryPoint
@@ -139,6 +141,13 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     }
 
     private fun setUpViewModel() = viewModel.apply {
+        theme.asLiveData().observe(this@MainActivity, {
+            setDefaultNightMode(when (it) {
+                DARK -> MODE_NIGHT_YES
+                LIGHT -> MODE_NIGHT_NO
+                null, AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+            })
+        })
         accounts.asLiveData().observe(this@MainActivity, { accountsAdapter.submitList(it) })
         lifecycleScope.launch {
             delay(2_000)

@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.data.local.SubredditDAO
+import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User.LoggedIn
 import com.ducktapedapps.updoot.ui.User.LoggedOut
@@ -17,6 +19,7 @@ import com.ducktapedapps.updoot.ui.navDrawer.AllNavigationEntries
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.SingleLiveEvent
+import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +31,8 @@ import kotlinx.coroutines.withContext
 class ActivityVM @ViewModelInject constructor(
         @ApplicationContext private val appContext: Context,
         private val redditClient: IRedditClient,
-        private val subredditDAO: SubredditDAO
+        private val subredditDAO: SubredditDAO,
+        dataStore: UpdootDataStore,
 ) : ViewModel() {
     private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
     val shouldReload: StateFlow<SingleLiveEvent<Boolean>> = _shouldReload
@@ -48,6 +52,11 @@ class ActivityVM @ViewModelInject constructor(
         if (expanded) accounts
         else listOf(accounts.first())
     }
+
+    val theme: StateFlow<ThemeType> = dataStore.themeType()
+            .onEach {
+                Log.i("MainActivity", "new Theme : $it")
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeType.AUTO)
 
     private fun reloadAccountList() {
         _accounts.value = redditClient.getAccountModels()
