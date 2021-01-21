@@ -36,6 +36,91 @@ import dev.chrisbanes.accompanist.glide.GlideImage
 import kotlinx.coroutines.flow.Flow
 
 @Composable
+fun SearchScreen(
+        goBack: () -> Unit,
+        openSubreddit: (String) -> Unit,
+        subredditDAO: SubredditDAO,
+        redditClient: IRedditClient,
+) {
+    val viewModel = remember {
+        SearchVM(
+                redditClient = redditClient,
+                subredditDAO = subredditDAO,
+        )
+    }
+    val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
+    val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
+    val setQuery: (TextFieldValue) -> Unit = { value ->
+        viewModel.searchSubreddit(value.text)
+        setFieldQueryValue(value)
+    }
+    val showNsfw = viewModel.includeOver18.collectAsState(true)
+    Column(
+            modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+    ) {
+        ComposeSearchView(
+                performSearch = viewModel::searchSubreddit,
+                modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .height(48.dp),
+                goBack = goBack,
+                isLoading = viewModel.searchQueryLoading,
+                queryString = queryString,
+                setQuery = setQuery,
+        )
+        NsfwCheckRow(
+                modifier = Modifier
+                        .padding(8.dp)
+                        .height(48.dp)
+                        .fillMaxWidth(),
+                showNsfw = showNsfw.value,
+                toggleNsfwPref = { viewModel.toggleIncludeOver18() }
+        )
+        LazyColumn(modifier = Modifier.fillMaxWidth()
+        ) {
+            items(items = searchResults,
+                    itemContent = {
+                        ComposeSubredditItem(it, openSubreddit)
+                    })
+        }
+        Spacer(
+                Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.4f)
+        )
+    }
+}
+
+@Composable
+fun NsfwCheckRow(
+        modifier: Modifier = Modifier,
+        showNsfw: Boolean,
+        toggleNsfwPref: (Boolean) -> Unit
+) {
+    Surface(
+            modifier = modifier,
+            color = MaterialTheme.colors.SurfaceOnDrawer,
+            shape = RoundedCornerShape(8.dp),
+    ) {
+        Row(
+                modifier = Modifier.padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Show NSFW results")
+            Checkbox(checked = showNsfw, onCheckedChange = {
+                toggleNsfwPref(
+                        true /* won't matter as viewModel is changing this value */
+                )
+            })
+        }
+    }
+}
+
+@Composable
 fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) {
     Row(
             modifier = Modifier
@@ -202,56 +287,6 @@ private fun BackButton(modifier: Modifier, goBack: () -> Unit) {
         IconButton(
                 onClick = goBack,
                 content = { Icon(Icons.Default.ArrowBack) }
-        )
-    }
-}
-
-@Composable
-fun SearchScreen(
-        goBack: () -> Unit,
-        openSubreddit: (String) -> Unit,
-        subredditDAO: SubredditDAO,
-        redditClient: IRedditClient,
-) {
-    val viewModel = remember {
-        SearchVM(
-                redditClient = redditClient,
-                subredditDAO = subredditDAO,
-        )
-    }
-    val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
-    val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
-    val setQuery: (TextFieldValue) -> Unit = { value ->
-        viewModel.searchSubreddit(value.text)
-        setFieldQueryValue(value)
-    }
-    Column(
-            modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-    ) {
-        ComposeSearchView(
-                performSearch = viewModel::searchSubreddit,
-                modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .height(48.dp),
-                goBack = goBack,
-                isLoading = viewModel.searchQueryLoading,
-                queryString = queryString,
-                setQuery = setQuery
-        )
-        LazyColumn(modifier = Modifier.fillMaxWidth()
-        ) {
-            items(items = searchResults,
-                    itemContent = {
-                        ComposeSubredditItem(it, openSubreddit)
-                    })
-        }
-        Spacer(
-                Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.4f)
         )
     }
 }
