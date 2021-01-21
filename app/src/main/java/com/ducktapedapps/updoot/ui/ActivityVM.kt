@@ -11,7 +11,6 @@ import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
-import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.User.LoggedIn
 import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
@@ -23,7 +22,6 @@ import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -109,33 +107,6 @@ class ActivityVM @ViewModelInject constructor(
         }
     }
 
-    private val query: MutableStateFlow<String> = MutableStateFlow("")
-    private val _searchQueryLoading = MutableStateFlow(false)
-    val searchQueryLoading: StateFlow<Boolean> = _searchQueryLoading
-    private var currentSearchJob: Job? = null
-
-    val results: Flow<List<Subreddit>> = query.combineTransform(user) { keyWord: String, user: User ->
-        if (keyWord.isNotBlank()) emit(subredditDAO.observeSubredditWithKeyword(keyWord).distinctUntilChanged())
-        else emit(subredditDAO.observeSubscribedSubredditsFor(user.name).distinctUntilChanged())
-    }.flattenMerge()
-
-    fun searchSubreddit(queryString: String) {
-        currentSearchJob?.cancel()
-        currentSearchJob = viewModelScope.launch(Dispatchers.IO) {
-            query.value = queryString
-            if (queryString.isNotBlank())
-                try {
-                    _searchQueryLoading.value = true
-                    val redditAPI = redditClient.api()
-                    val results = redditAPI.search(query = queryString)
-                    results.children.forEach { subreddit -> subredditDAO.insertSubreddit(subreddit) }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                } finally {
-                    _searchQueryLoading.value = false
-                }
-        }
-    }
 
     fun enqueueSubscriptionSyncWork() {
         val currentLoggedIn = _accounts.value.first()

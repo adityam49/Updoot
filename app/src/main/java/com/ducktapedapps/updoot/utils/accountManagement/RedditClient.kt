@@ -17,6 +17,10 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+//  TODO:expose current account as sharedFlow
+//  TODO:all accounts as Stateflow
+//  TODO:ditch sharedPrefs
+//  TODO:account manager should use callback flow and ditch the account change listener interface
 @Singleton
 class RedditClient @Inject constructor(
         private val redditAPI: RedditAPI,

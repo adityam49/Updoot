@@ -25,6 +25,7 @@ import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.*
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
+import com.ducktapedapps.updoot.ui.search.SearchVM
 import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.utils.Constants
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     lateinit var redditClient: RedditClient
 
     private val viewModel: ActivityVM by viewModels()
+    private val searchVM: SearchVM by viewModels()
 
     private lateinit var binding: ActivityMainBinding
     private val bottomNavBinding by lazy { binding.bottomNavigationDrawer.binding }
@@ -140,28 +142,31 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         setUpStatusBarColors()
     }
 
-    private fun setUpViewModel() = viewModel.apply {
-        theme.asLiveData().observe(this@MainActivity, {
-            setDefaultNightMode(when (it) {
-                DARK -> MODE_NIGHT_YES
-                LIGHT -> MODE_NIGHT_NO
-                null, AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+    private fun setUpViewModel() {
+        viewModel.apply {
+            theme.asLiveData().observe(this@MainActivity, {
+                setDefaultNightMode(when (it) {
+                    DARK -> MODE_NIGHT_YES
+                    LIGHT -> MODE_NIGHT_NO
+                    null, AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+                })
             })
-        })
-        accounts.asLiveData().observe(this@MainActivity, { accountsAdapter.submitList(it) })
-        lifecycleScope.launch {
-            delay(2_000)
-            searchQueryLoading.asLiveData().observe(this@MainActivity, { loading ->
-                bottomNavBinding.loadingIndicator.visibility =
-                        if (loading) VISIBLE else GONE
-            })
+            accounts.asLiveData().observe(this@MainActivity, { accountsAdapter.submitList(it) })
             navigationEntries.asLiveData().observe(this@MainActivity, { destinationAdapter.submitList(it) })
-            results.asLiveData().observe(this@MainActivity, { subscriptionAdapter.submitList(it) })
             navDrawerVisibility.observe(this@MainActivity, { visible ->
                 binding.bottomNavigationDrawer.apply {
                     if (visible) showWihAnimation() else hideWithAnimation()
                 }
             })
+        }
+        lifecycleScope.launch {
+            delay(2_000)
+            searchVM.searchQueryLoading.asLiveData().observe(this@MainActivity, { loading ->
+                bottomNavBinding.loadingIndicator.visibility =
+                        if (loading) VISIBLE else GONE
+            })
+            searchVM.results.asLiveData().observe(this@MainActivity, { subscriptionAdapter.submitList(it) })
+
         }
     }
 
@@ -239,7 +244,7 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
                     .filterNotNull()
                     .distinctUntilChanged()
                     .collectLatest {
-                        viewModel.searchSubreddit(it)
+                        searchVM.searchSubreddit(it)
                     }
         }
     }
