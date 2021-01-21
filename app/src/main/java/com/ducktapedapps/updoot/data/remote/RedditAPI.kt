@@ -53,7 +53,8 @@ interface RedditAPI {
 
     @GET("/subreddits/search")
     suspend fun search(
-            @Query("q") query: String
+            @Query("q") query: String,
+            @Query("include_over_18") includeOver18: Boolean = false,
     ): Listing<Subreddit>
 
     @GET("r/{subreddit}/about")

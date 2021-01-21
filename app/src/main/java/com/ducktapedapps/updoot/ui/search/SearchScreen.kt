@@ -5,7 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.ui.User
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactAge
@@ -56,7 +55,9 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                 requestBuilder = {
                     centerInside().circleCrop()
                 },
-                modifier = Modifier.padding(start = 16.dp).preferredSize(32.dp)
+                modifier = Modifier
+                        .padding(start = 16.dp)
+                        .preferredSize(32.dp)
         )
         Column(
                 modifier = Modifier
@@ -165,7 +166,9 @@ fun SearchActions(
 ) {
     Surface(
             color = MaterialTheme.colors.SurfaceOnDrawer,
-            modifier = modifier.clip(RoundedCornerShape(50)).animateContentSize()
+            modifier = modifier
+                    .clip(RoundedCornerShape(50))
+                    .animateContentSize()
     ) {
         Row {
             if (queryString.text.isNotBlank()) IconButton(
@@ -209,13 +212,11 @@ fun SearchScreen(
         openSubreddit: (String) -> Unit,
         subredditDAO: SubredditDAO,
         redditClient: IRedditClient,
-        currentUser: Flow<User>,
 ) {
     val viewModel = remember {
         SearchVM(
                 redditClient = redditClient,
                 subredditDAO = subredditDAO,
-                currentUser = currentUser,
         )
     }
     val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
@@ -240,11 +241,12 @@ fun SearchScreen(
                 queryString = queryString,
                 setQuery = setQuery
         )
-        LazyColumnFor(
-                items = searchResults,
-                modifier = Modifier.fillMaxWidth()
+        LazyColumn(modifier = Modifier.fillMaxWidth()
         ) {
-            ComposeSubredditItem(it, openSubreddit)
+            items(items = searchResults,
+                    itemContent = {
+                        ComposeSubredditItem(it, openSubreddit)
+                    })
         }
         Spacer(
                 Modifier

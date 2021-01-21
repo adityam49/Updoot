@@ -10,59 +10,87 @@ import com.ducktapedapps.updoot.data.local.model.RedditThing
 import com.ducktapedapps.updoot.ui.user.UserSection.*
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class UserViewModel @ViewModelInject constructor(
         private val redditClient: RedditClient,
-        @Assisted savedStateHandle: SavedStateHandle
+        @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
 
-    private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+
+    private val requestDispatcher = MutableSharedFlow<NextPageRequest>()
 
     private val _currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
     val currentSection: StateFlow<UserSection> = _currentSection
 
-    private val _content: MutableStateFlow<Listing<out RedditThing>> = MutableStateFlow(Listing(null, emptyList()))
-    val content: StateFlow<Listing<out RedditThing>> = _content
+    private val _content: MutableStateFlow<List<Listing<out RedditThing>>> = MutableStateFlow(emptyList())
+    val content: StateFlow<List<RedditThing>> = _content.map {
+        it.flatMap { listing -> listing.children }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     init {
-        reload()
+        observeRequests().launchIn(viewModelScope)
+        loadPage()
     }
 
-    private fun reload() {
-        currentSection
-                .transformSectionToListing()
-                .onEach { newListing -> _content.value = newListing }
-                .launchIn(viewModelScope)
+    fun reload() {
+        _content.value = emptyList()
+        loadPage()
     }
 
-    private fun StateFlow<UserSection>.transformSectionToListing(): Flow<Listing<out RedditThing>> =
-            transform { section ->
-                emit(Listing<RedditThing>(null, emptyList()))
-                _loading.value = true
-                val api = redditClient.api()
-                try {
-                    emit(when (section) {
-                        OverView -> api.getUserOverView(userName)
-                        Comments -> api.getUserComments(userName)
-                        Posts -> api.getUserSubmittedPosts(userName)
-                        UpVoted -> api.getUserUpVotedThings(userName)
-                        DownVoted -> api.getUserDownVotedThings(userName)
-                        Gilded -> api.getUserGildedThings(userName)
-                        Saved -> api.getUserSavedThings(userName)
-                    })
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    _loading.value = false
-                }
+    //TODO : add currently logged in user as a sharedflow and combine with this flow
+    private fun observeRequests(): Flow<List<Listing<out RedditThing>>> =
+            combine(currentSection, requestDispatcher) { userSection, request ->
+                _content.value + getPage(userSection, request.nextPageKey)
+            }.onEach {
+                _content.value = it
             }
 
+    fun loadPage() {
+        viewModelScope.launch {
+            if (_content.value.isEmpty())
+                requestDispatcher.emit(FirstPageRequest)
+            else if (_content.value.last().after != null)
+                requestDispatcher.emit(
+                        NextPageRequest(nextPageKey = _content.value.last().after)
+                )
+        }
+    }
+
+    private suspend fun getPage(section: UserSection, after: String?): Listing<out RedditThing> {
+        _loading.value = true
+        val api = redditClient.api()
+        return try {
+            when (section) {
+                OverView -> api.getUserOverView(userName, after)
+                Comments -> api.getUserComments(userName, after)
+                Posts -> api.getUserSubmittedPosts(userName, after)
+                // logged in specific sections : should not be visible to non logged in users
+                UpVoted -> api.getUserUpVotedThings(userName, after)
+                DownVoted -> api.getUserDownVotedThings(userName, after)
+                Gilded -> api.getUserGildedThings(userName, after)
+                Saved -> api.getUserSavedThings(userName, after)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Listing(null, emptyList())
+        } finally {
+            _loading.value = false
+        }
+    }
+
     fun setSection(section: UserSection) {
+        _content.value = emptyList()
         _currentSection.value = section
     }
 }
+
+data class NextPageRequest(val nextPageKey: String?)
+
+val FirstPageRequest = NextPageRequest(null)
 
 enum class UserSection {
     OverView, Comments, Posts, UpVoted, DownVoted, Gilded, Saved

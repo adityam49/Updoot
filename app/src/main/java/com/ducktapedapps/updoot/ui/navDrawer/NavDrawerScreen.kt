@@ -37,7 +37,6 @@ fun NavDrawerScreen(
                         openSubreddit = openSubreddit,
                         subredditDAO = activityVM.subredditDAO,
                         redditClient = activityVM.redditClient,
-                        currentUser = activityVM.user,
                         goBack = goBack,
                 )
                 Explore -> ExploreScreen(

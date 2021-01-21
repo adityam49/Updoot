@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -33,12 +34,9 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                     onClick = { viewModel.setSection(it) }
             )
         }
-        if (loading.value)
-            item {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
 
-        items(content.value.children) { item ->
+        itemsIndexed(content.value) { index, item ->
+            if (content.value.size - 5 <= index) viewModel.loadPage()
             when (item) {
                 is Comment.CommentData -> FullComment(
                         threadWidth = 2.dp,
@@ -56,6 +54,15 @@ fun UserInfoScreen(viewModel: UserViewModel) {
             }
             Divider()
         }
+
+        if (loading.value) item {
+            Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
         item { Spacer(Modifier.height(200.dp)) }
     }
 }
