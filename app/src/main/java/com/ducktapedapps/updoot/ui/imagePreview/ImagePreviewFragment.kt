@@ -44,7 +44,7 @@ class ImagePreviewFragment : Fragment() {
     private val binding: FragmentImagePreviewBinding
         get() = _binding!!
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentImagePreviewBinding.inflate(inflater, container, false)
         return binding.root
     }

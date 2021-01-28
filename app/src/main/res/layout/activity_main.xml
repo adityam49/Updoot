@@ -1,35 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ducktapedapps.updoot.ui.MainActivity">
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        app:layout_dodgeInsetEdges="bottom" />
-
-    <View
-        android:id="@+id/scrim_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_scrim"
-        android:visibility="gone" />
-
-    <com.ducktapedapps.updoot.ui.navDrawer.BottomNavigationDrawer
-        android:id="@+id/bottomNavigationDrawer"
-        style="@style/BottomNavDrawer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:behavior_halfExpandedRatio="0.4"
-        app:behavior_hideable="false"
-        app:behavior_skipCollapsed="false"
-        app:layout_behavior="@string/bottom_sheet_behavior"
-        tools:behavior_peekHeight="?attr/actionBarSize" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    tools:context="com.ducktapedapps.updoot.ui.MainActivity" />

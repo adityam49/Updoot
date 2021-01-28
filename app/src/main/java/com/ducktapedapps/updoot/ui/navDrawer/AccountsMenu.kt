@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.loadVectorResource
@@ -19,18 +21,20 @@ import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import dev.chrisbanes.accompanist.glide.GlideImage
 
 @Preview
 @Composable
 fun PreviewAccountsMenuDark() {
     val accounts = listOf(
-            AccountModel.AnonymousAccount(true),
-            AccountModel.UserModel("Someusername", false, ""),
-            AccountModel.AddAccount
+            AnonymousAccount(true),
+            UserModel("Someusername", false, ""),
     )
     UpdootTheme(isDarkTheme = true) {
-        AccountsMenu(accounts = accounts, login = {}, toggleAccountMenu = {}, removeAccount = {}, switch = {})
+        AccountsMenu(accounts = accounts, removeAccount = {}, switch = {})
     }
 }
 
@@ -39,21 +43,19 @@ fun PreviewAccountsMenuDark() {
 @Composable
 fun PreviewAccountsMenu() {
     val accounts = listOf(
-            AccountModel.AnonymousAccount(true),
-            AccountModel.UserModel("Someusername", false, ""),
-            AccountModel.AddAccount
+            AnonymousAccount(true),
+            UserModel("Someusername", false, ""),
     )
-    AccountsMenu(accounts = accounts, login = {}, toggleAccountMenu = {}, removeAccount = {}, switch = {})
+    AccountsMenu(accounts = accounts, removeAccount = {}, switch = {})
 }
 
 @Composable
 fun AccountsMenu(
         accounts: List<AccountModel>,
-        login: () -> Unit,
-        toggleAccountMenu: () -> Unit,
         removeAccount: (accountName: String) -> Unit,
         switch: (accountName: String) -> Unit
 ) {
+    val showAllAccounts = remember { mutableStateOf(false) }
     Card(
             modifier = Modifier
                     .fillMaxWidth()
@@ -68,11 +70,10 @@ fun AccountsMenu(
                 if (accountModel.isCurrent) CurrentAccountItem(
                         accountModel = accountModel,
                         removeAccount = removeAccount,
-                        toggleAccountMenu = toggleAccountMenu
+                        toggleAccountMenu = { showAllAccounts.value = !showAllAccounts.value }
                 )
                 else NonCurrentAccountItem(
                         accountModel = accountModel,
-                        login = login,
                         removeAccount = removeAccount,
                         switch = switch
                 )
@@ -85,7 +86,6 @@ fun AccountsMenu(
 @Composable
 fun NonCurrentAccountItem(
         accountModel: AccountModel,
-        login: () -> Unit,
         removeAccount: (accountName: String) -> Unit,
         switch: (accountName: String) -> Unit
 ) {
@@ -93,28 +93,17 @@ fun NonCurrentAccountItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = {
-                        when (accountModel) {
-                            AccountModel.AddAccount -> login()
-                            is AccountModel.AnonymousAccount, is AccountModel.UserModel -> switch(accountModel.name)
-                        }
-                    }),
+                    .clickable(onClick = { switch(accountModel.name) }),
     ) {
         val paddingModifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 20.dp)
         when (accountModel) {
-            AccountModel.AddAccount -> loadVectorResource(id = R.drawable.ic_round_add_circle_24).resource.resource?.let {
+            is AnonymousAccount -> loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
                 Image(
                         imageVector = it,
                         modifier = paddingModifier
                 )
             }
-            is AccountModel.AnonymousAccount -> loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
-                Image(
-                        imageVector = it,
-                        modifier = paddingModifier
-                )
-            }
-            is AccountModel.UserModel ->
+            is UserModel ->
                 GlideImage(
                         data = accountModel.userIcon,
                         modifier = paddingModifier.size(24.dp),
@@ -127,15 +116,17 @@ fun NonCurrentAccountItem(
         }
 
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
-            Text(text = accountModel.name, modifier = Modifier.padding(start = 8.dp).weight(1f))
+            Text(text = accountModel.name, modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1f))
         }
 
-        if (accountModel is AccountModel.UserModel) {
+        if (accountModel is UserModel) {
             IconButton(
                     modifier = Modifier.padding(end = 4.dp),
                     onClick = { removeAccount(accountModel.name) }
             ) {
-                loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+                loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
                     Icon(imageVector = it)
                 }
             }
@@ -158,7 +149,7 @@ fun CurrentAccountItem(
         val userIconModifier = Modifier
                 .size(64.dp)
                 .padding(8.dp)
-        if (accountModel is AccountModel.UserModel) GlideImage(
+        if (accountModel is UserModel) GlideImage(
                 data = accountModel.userIcon,
                 modifier = userIconModifier,
                 requestBuilder = {
@@ -177,13 +168,15 @@ fun CurrentAccountItem(
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
-        IconButton(
-                onClick = { removeAccount(accountModel.name) },
-        ) {
-            loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
-                Icon(imageVector = it)
+        if (accountModel is UserModel)
+            IconButton(
+                    onClick = { removeAccount(accountModel.name) },
+            ) {
+                loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
+                    Icon(imageVector = it)
+                }
             }
-        }
+
         IconButton(
                 onClick = { toggleAccountMenu() },
         ) {

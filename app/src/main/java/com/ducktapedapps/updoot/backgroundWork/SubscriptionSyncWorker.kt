@@ -13,7 +13,7 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.SubredditSubscription
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.createNotificationChannel
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
@@ -23,7 +23,7 @@ class SubscriptionSyncWorker @WorkerInject constructor(
         @Assisted workerParameters: WorkerParameters,
         @Assisted private val context: Context,
         private val subredditDAO: SubredditDAO,
-        private val redditClient: RedditClient,
+        private val redditClient: IRedditClient,
 ) : CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = try {
         val accountsToSync = mutableListOf<String>().apply {

@@ -55,7 +55,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
                 "-Xskip-prerelease-check",
                 "-Xopt-in=kotlin.Experimental",
                 "-Xopt-in=kotlinx.coroutines.FlowPreview",
-                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
         ]
     }
 }

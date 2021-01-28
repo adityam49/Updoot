@@ -1,148 +1,77 @@
 package com.ducktapedapps.updoot.ui
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
-import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
-import com.ducktapedapps.updoot.ui.User.LoggedIn
-import com.ducktapedapps.updoot.ui.User.LoggedOut
-import com.ducktapedapps.updoot.ui.navDrawer.AccountModel
+import com.ducktapedapps.updoot.ui.common.IThemeManager
 import com.ducktapedapps.updoot.ui.navDrawer.AllNavigationEntries
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination
-import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
-import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.ThemeType
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class ActivityVM @ViewModelInject constructor(
         @ApplicationContext private val appContext: Context,
         val redditClient: IRedditClient,
-        val subredditDAO: SubredditDAO,
-        dataStore: UpdootDataStore,
+        themeManager: IThemeManager,
 ) : ViewModel() {
-    private val _shouldReload = MutableStateFlow(SingleLiveEvent(false))
-    val shouldReload: StateFlow<SingleLiveEvent<Boolean>> = _shouldReload
+    private val _shouldReload: MutableSharedFlow<Boolean> = MutableSharedFlow()
+    val shouldReload: SharedFlow<Boolean> = _shouldReload
 
-    private val _accounts: MutableStateFlow<List<AccountModel>> = MutableStateFlow(redditClient.getAccountModels())
-    private val accountEntriesExpanded = MutableStateFlow(false)
+    val currentAccount: StateFlow<AccountModel?> = redditClient.allAccounts
+            .map { it.firstOrNull { account -> account.isCurrent } }
+            .onEach { reloadContent() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val _navDrawerVisible = MutableLiveData(true)
-    val navDrawerVisibility = _navDrawerVisible
+    val accounts: StateFlow<List<AccountModel>> = redditClient.allAccounts
 
-    private val _currentNavDrawerScreen: MutableState<NavigationDestination> = mutableStateOf(NavigationMenu)
-    val currentNavDrawerScreen: State<NavigationDestination> = _currentNavDrawerScreen
+    val theme: StateFlow<ThemeType> = themeManager.themeType()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeType.AUTO)
 
-    /**
-     * Returns false if navigation menu is visible
-     * and true if other nested screen is visible
-     */
-    fun drawerScreenCanGoBack(): Boolean =
-            if (currentNavDrawerScreen.value == NavigationMenu) false
-            else {
-                _currentNavDrawerScreen.value = NavigationMenu
-                true
-            }
-
-    fun drawerNavigateTo(destination: NavigationDestination) {
-        when (destination) {
-            NavigationMenu -> _currentNavDrawerScreen.value = NavigationMenu
-            Search -> _currentNavDrawerScreen.value = Search
-            Explore -> _currentNavDrawerScreen.value = Explore
-            CreatePost,
-            Inbox,
-            History -> Log.e("ActivityViewModel", "${destination.title} Not implemented! ")
-
-            Exit -> TODO()
+    fun setCurrentAccount(name: String) {
+        viewModelScope.launch {
+            redditClient.setCurrentAccount(name)
         }
     }
 
-    val user: Flow<User> = _accounts.map {
-        if (it.first().name == Constants.ANON_USER) LoggedOut
-        else LoggedIn(it.first().name)
-    }
-
-    val accounts: Flow<List<AccountModel>> = accountEntriesExpanded.combine(_accounts) { expanded, accounts: List<AccountModel> ->
-        if (expanded) accounts
-        else listOf(accounts.first())
-    }
-
-    val theme: StateFlow<ThemeType> = dataStore.themeType()
-            .onEach {
-                Log.i("MainActivity", "new Theme : $it")
-            }.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeType.AUTO)
-
-    private fun reloadAccountList() {
-        _accounts.value = redditClient.getAccountModels()
-    }
-
-    fun setCurrentAccount(name: String) {
-        redditClient.setCurrentAccount(name)
-        _shouldReload.value = SingleLiveEvent(true)
-        reloadAccountList()
-        collapseAccountsMenu()
-    }
-
     fun reloadContent() {
-        _shouldReload.value = SingleLiveEvent(true)
-        reloadAccountList()
-        collapseAccountsMenu()
+        viewModelScope.launch { _shouldReload.emit(true) }
     }
 
     fun logout(accountName: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val accountRemovedSuccessfully = redditClient.removeUser(accountName)
-            if (accountRemovedSuccessfully) withContext(Dispatchers.Main) {
-                reloadContent()
-                reloadAccountList()
-                collapseAccountsMenu()
-            }
+            redditClient.removeUser(accountName)
         }
     }
 
-    private fun collapseAccountsMenu() {
-        accountEntriesExpanded.value = false
-    }
-
-    fun toggleAccountsMenuList() {
-        accountEntriesExpanded.value = !accountEntriesExpanded.value
-    }
-
-    fun showBottomNavDrawer() {
-        _navDrawerVisible.value = true
-    }
-
-    fun hideBottomNavDrawer() {
-        _navDrawerVisible.value = false
-    }
-
-    val navigationEntries: Flow<List<NavigationDestination>> = combine(flow { emit(AllNavigationEntries) }, user) { allEntries, loginState ->
-        when (loginState) {
-            is LoggedOut -> allEntries.filterNot { it.isUserSpecific }
-            is LoggedIn -> allEntries
+    val navigationEntries: StateFlow<List<NavigationDestination>> = combine(
+            flow { emit(AllNavigationEntries) },
+            currentAccount
+    ) { allEntries, currentAccount ->
+        when (currentAccount) {
+            is AnonymousAccount -> allEntries.filterNot { it.isUserSpecific }
+            is UserModel -> allEntries
+            null -> emptyList()
         }
-    }
-
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun enqueueSubscriptionSyncWork() {
-        val currentLoggedIn = _accounts.value.first()
-        appContext.enqueueOneOffSubscriptionsSyncFor(currentLoggedIn.name)
+        viewModelScope.launch {
+            currentAccount.value?.name?.let {
+                appContext.enqueueOneOffSubscriptionsSyncFor(it)
+            }
+        }
     }
 
     private fun enqueuePeriodicWork() {
@@ -156,9 +85,4 @@ class ActivityVM @ViewModelInject constructor(
         super.onCleared()
         enqueuePeriodicWork()
     }
-}
-
-sealed class User(val name: String) {
-    object LoggedOut : User(Constants.ANON_USER)
-    data class LoggedIn(val userName: String) : User(userName)
 }

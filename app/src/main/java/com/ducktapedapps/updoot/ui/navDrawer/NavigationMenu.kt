@@ -1,10 +1,7 @@
 package com.ducktapedapps.updoot.ui.navDrawer
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.AmbientContentAlpha
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -12,12 +9,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.ui.ActivityVM
+import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 
 @Composable
 fun NavigationMenu(
@@ -25,6 +22,8 @@ fun NavigationMenu(
         onExitApp: () -> Unit,
         onOpenExplore: () -> Unit,
         onSearch: () -> Unit,
+        openSettings: () -> Unit,
+        addAccount: () -> Unit,
 ) {
     Column {
         navDestinations.forEach { navDestination ->
@@ -33,9 +32,11 @@ fun NavigationMenu(
                             .fillMaxWidth()
                             .clickable(onClick = {
                                 when (navDestination) {
-                                    NavigationDestination.Explore -> onOpenExplore()
-                                    NavigationDestination.Exit -> onExitApp()
-                                    NavigationDestination.Search -> onSearch()
+                                    Explore -> onOpenExplore()
+                                    Exit -> onExitApp()
+                                    Search -> onSearch()
+                                    AddAccount -> addAccount()
+                                    Settings -> openSettings()
                                     else -> Unit
                                 }
                             }),
@@ -56,29 +57,27 @@ fun NavigationMenu(
 @Composable
 fun NavigationMenuScreen(
         viewModel: ActivityVM,
-        onLogin: () -> Unit,
-        onRemoveAccount: (accountName: String) -> Unit,
-        onToggleAccountMenu: () -> Unit,
-        onSwitchAccount: (accountName: String) -> Unit,
         onExplore: () -> Unit,
         onSearch: () -> Unit,
-        onExit: () -> Unit
+        onExit: () -> Unit,
+        onAddAccount: () -> Unit,
+        onOpenSettings: () -> Unit
 ) {
-    val accountsList: List<AccountModel> by viewModel.accounts.collectAsState(emptyList())
-    val navDestinations: List<NavigationDestination> by viewModel.navigationEntries.collectAsState(emptyList())
-    Column {
+    val accountsList = viewModel.accounts.collectAsState()
+    val navDestinations = viewModel.navigationEntries.collectAsState()
+    Column(modifier = Modifier.fillMaxSize()) {
         AccountsMenu(
-                accounts = accountsList,
-                login = onLogin,
-                removeAccount = onRemoveAccount,
-                toggleAccountMenu = onToggleAccountMenu,
-                switch = onSwitchAccount
+                accounts = accountsList.value,
+                removeAccount = viewModel::logout,
+                switch = viewModel::setCurrentAccount
         )
         NavigationMenu(
-                navDestinations = navDestinations,
+                navDestinations = navDestinations.value,
                 onOpenExplore = onExplore,
                 onSearch = onSearch,
-                onExitApp = onExit
+                onExitApp = onExit,
+                addAccount = onAddAccount,
+                openSettings = onOpenSettings,
         )
     }
 }

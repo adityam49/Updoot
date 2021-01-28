@@ -102,6 +102,7 @@ class VideoPreviewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        requireActivity()
         activity?.window?.apply {
             ContextCompat.getColor(requireContext(), R.color.color_scrim).let {
                 statusBarColor = it
