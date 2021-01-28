@@ -8,12 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.Listing
 import com.ducktapedapps.updoot.data.local.model.RedditThing
 import com.ducktapedapps.updoot.ui.user.UserSection.*
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class UserViewModel @ViewModelInject constructor(
-        private val redditClient: RedditClient,
+        private val redditClient: IRedditClient,
         @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     companion object {

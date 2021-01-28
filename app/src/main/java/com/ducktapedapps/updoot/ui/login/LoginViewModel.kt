@@ -152,10 +152,9 @@ class LoginViewModel @ViewModelInject constructor(
         }
     }
 
-    private suspend fun saveAccount(account: Account, token: Token) =
-            withContext(Dispatchers.Main) {
-                redditClient.createUserAccountAndSetItAsCurrent(account.name, account.icon_img, token)
-            }
+    private suspend fun saveAccount(account: Account, token: Token) {
+        redditClient.createAccount(account.name, account.icon_img, token)
+    }
 }
 
 sealed class LoginState {

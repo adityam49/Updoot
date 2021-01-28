@@ -4,7 +4,7 @@ import android.util.Log
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.TrendingSubreddit
 import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ExploreRepo @Inject constructor(
-        private val redditClient: RedditClient,
+        private val redditClient: IRedditClient,
         private val subredditDAO: SubredditDAO
 ) {
 

@@ -20,7 +20,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,12 +28,9 @@ import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.databinding.FragmentSubredditBinding
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.User.LoggedIn
-import com.ducktapedapps.updoot.ui.User.LoggedOut
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollListener
@@ -43,8 +39,6 @@ import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.ui.subreddit.options.SubmissionOptionsBottomSheet
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
-import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
 import com.ducktapedapps.updoot.utils.Truss
@@ -54,7 +48,10 @@ import io.noties.markwon.Markwon
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -76,7 +73,6 @@ class SubredditFragment : Fragment() {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
-    private var isLoggedIn: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,13 +150,11 @@ class SubredditFragment : Fragment() {
                 addDrawerListener(object : DrawerLayout.DrawerListener {
                     override fun onDrawerClosed(drawerView: View) {
                         setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                        activityVM.showBottomNavDrawer()
                     }
 
                     override fun onDrawerOpened(drawerView: View) {
                         setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                         setSideBarContent()
-                        activityVM.hideBottomNavDrawer()
                     }
 
                     override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
@@ -202,50 +196,38 @@ class SubredditFragment : Fragment() {
 
     private fun observeViewModel(submissionsAdapter: SubmissionsAdapter) {
         activityVM.apply {
-            shouldReload.asLiveData().observe(viewLifecycleOwner, { shouldReload ->
-                if (shouldReload.contentIfNotHandled == true) {
-                    Toast.makeText(requireContext(), resources.getString(R.string.reloading), Toast.LENGTH_SHORT).show()
-                    reloadFragmentContent()
-                }
-            })
-            user.asLiveData().observe(viewLifecycleOwner, {
-                isLoggedIn = when (it) {
-                    is LoggedOut -> false
-                    is LoggedIn -> true
-                }
-            })
+            shouldReload.filter { it }
+                    .onEach {
+                        submissionsVM.reload()
+                    }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
         submissionsVM.apply {
-            postViewType.asLiveData().observe(viewLifecycleOwner,
-                    { postViewType: SubmissionUiType? ->
-                        postViewType?.let {
-                            submissionsAdapter.itemUi = it
-                            binding.apply {
-                                recyclerView.apply {
-                                    adapter = null
-                                    adapter = submissionsAdapter
-                                    scrollToPosition(lastScrollPosition)
-                                }
-                                sideBar.viewTypeGroup.check(
-                                        when (it) {
-                                            COMPACT -> R.id.view_type_list_button
-                                            LARGE -> R.id.view_type_card_button
-                                        }
-                                )
+            postViewType.onEach {
+                submissionsAdapter.itemUi = it
+                binding.apply {
+                    recyclerView.adapter = null
+                    recyclerView.adapter = submissionsAdapter
+                    recyclerView.scrollToPosition(lastScrollPosition)
+                    sideBar.viewTypeGroup.check(
+                            when (it) {
+                                COMPACT -> R.id.view_type_list_button
+                                LARGE -> R.id.view_type_card_button
                             }
-                        }
-                    }
-            )
-            feedPages.asLiveData().observe(viewLifecycleOwner, { things: List<LinkData> -> submissionsAdapter.submitList(things) })
-
-            toastMessage.asLiveData().observe(viewLifecycleOwner, { toastMessage: SingleLiveEvent<String?> ->
-                val toast = toastMessage.contentIfNotHandled
-                if (toast != null) Toast.makeText(requireContext(), toast, Toast.LENGTH_SHORT).show()
-            }
-            )
-            isLoading.asLiveData().observe(viewLifecycleOwner, { binding.swipeToRefreshLayout.isRefreshing = it })
-
-            subredditInfo.asLiveData().observe(viewLifecycleOwner, { subreddit -> subreddit?.let { loadSubredditIconAndTitle(it) } })
+                    )
+                }
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+            feedPages.onEach {
+                submissionsAdapter.submitList(it)
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+            toastMessage.onEach {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+            isLoading.onEach {
+                binding.swipeToRefreshLayout.isRefreshing = it
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+            subredditInfo.filterNotNull().onEach {
+                loadSubredditIconAndTitle(it)
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
     }
 
@@ -320,11 +302,11 @@ class SubredditFragment : Fragment() {
     }
 
     private fun setSideBarContent() {
-        submissionsVM.subredditInfo.asLiveData().observe(viewLifecycleOwner) {
+        submissionsVM.subredditInfo.onEach {
             it?.let {
                 binding.apply {
                     if (binding.sideBar.sideBarInfo.text.isNullOrEmpty()) {
-                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
+                        withContext(Dispatchers.Default) {
                             val spannedText = markwon.toMarkdown(it.description?.replace("(#+)".toRegex(), "$1 ")
                                     ?: "")
                             withContext(Dispatchers.Main) {
@@ -340,6 +322,6 @@ class SubredditFragment : Fragment() {
                     }
                 }
             }
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 }

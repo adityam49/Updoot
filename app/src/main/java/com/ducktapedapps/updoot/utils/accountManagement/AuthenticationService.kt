@@ -6,7 +6,7 @@ import android.os.IBinder
 
 class AuthenticationService : Service() {
     private lateinit var mAuthenticator: Authenticator
-    override fun onCreate() { // Create a new authenticator object
+    override fun onCreate() {
         mAuthenticator = Authenticator(this)
     }
 

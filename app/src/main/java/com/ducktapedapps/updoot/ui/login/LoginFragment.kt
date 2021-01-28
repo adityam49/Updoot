@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.FragmentLoginBinding
+import com.ducktapedapps.updoot.ui.MainActivity
 import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running
@@ -29,9 +30,9 @@ class LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreate(savedInstanceState)
-
+        (requireActivity() as MainActivity).hideBottomNavDrawer()
         binding = FragmentLoginBinding.inflate(layoutInflater)
 
         clearCookies()
@@ -45,6 +46,11 @@ class LoginFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (requireActivity() as MainActivity).showBottomNavDrawer()
     }
 
     private fun clearCookies() {

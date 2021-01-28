@@ -19,6 +19,7 @@ import androidx.work.*
 import com.bumptech.glide.Glide
 import com.ducktapedapps.updoot.backgroundWork.ImageDownLoadWorker
 import com.ducktapedapps.updoot.databinding.FragmentImagePreviewBinding
+import com.ducktapedapps.updoot.ui.MainActivity
 
 class ImagePreviewFragment : Fragment() {
     companion object {
@@ -44,13 +45,14 @@ class ImagePreviewFragment : Fragment() {
     private val binding: FragmentImagePreviewBinding
         get() = _binding!!
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentImagePreviewBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onResume() {
         super.onResume()
+        (requireActivity() as MainActivity).hideBottomNavDrawer()
         requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
@@ -78,6 +80,7 @@ class ImagePreviewFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        (requireActivity() as MainActivity).showBottomNavDrawer()
         _binding = null
     }
 

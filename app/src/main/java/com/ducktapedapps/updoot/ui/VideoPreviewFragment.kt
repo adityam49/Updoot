@@ -102,6 +102,8 @@ class VideoPreviewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        (requireActivity() as MainActivity).hideBottomNavDrawer()
+        requireActivity()
         activity?.window?.apply {
             ContextCompat.getColor(requireContext(), R.color.color_scrim).let {
                 statusBarColor = it
@@ -120,6 +122,7 @@ class VideoPreviewFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        (requireActivity() as MainActivity).showBottomNavDrawer()
         binding.playerView.player = null
         exoPlayer.removeListener(playBackListener)
         _binding = null

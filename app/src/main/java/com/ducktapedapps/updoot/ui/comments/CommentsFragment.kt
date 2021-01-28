@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -22,7 +21,6 @@ import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
 import com.ducktapedapps.updoot.ui.common.SwipeCallback
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class CommentsFragment : Fragment() {
@@ -36,10 +34,6 @@ class CommentsFragment : Fragment() {
             }
         }
     }
-
-    @Inject
-    lateinit var sharedPrefs: SharedPreferences
-
 
     private val viewModel: CommentsVM by viewModels()
     private var _binding: FragmentCommentsBinding? = null

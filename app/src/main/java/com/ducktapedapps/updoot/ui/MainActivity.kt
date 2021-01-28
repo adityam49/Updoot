@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +20,6 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.explore.ExploreFragment
-import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.*
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
@@ -32,7 +30,6 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.ThemeType.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -40,9 +37,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
+class MainActivity : AppCompatActivity() {
     @Inject
-    lateinit var redditClient: RedditClient
+    lateinit var redditClient: IRedditClient
 
     private val viewModel: ActivityVM by viewModels()
     private val searchVM: SearchVM by viewModels()
@@ -68,6 +65,13 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     private val destinationAdapter = NavDrawerDestinationAdapter(object : NavDrawerDestinationAdapter.ClickHandler {
         override fun openDestination(destination: NavigationDestination) {
             when (destination) {
+                AddAccount -> supportFragmentManager
+                        .beginTransaction()
+                        .addToBackStack(null)
+                        .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
+                        .replace(R.id.fragment_container, LoginFragment())
+                        .commit()
+
                 Search -> bottomNavBinding.searchView.apply {
                     expandBottomNavDrawer()
                     visibility = VISIBLE
@@ -89,23 +93,12 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
     })
 
     private val accountsAdapter = AccountsAdapter(object : AccountsAdapter.AccountAction {
-        override fun login() {
-            supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
-                    .replace(R.id.fragment_container, LoginFragment())
-                    .commit()
-        }
-
         override fun switch(accountName: String) {
             viewModel.setCurrentAccount(accountName)
             collapseBottomNavDrawer()
         }
 
         override fun logout(accountName: String) = viewModel.logout(accountName)
-
-        override fun toggleEntryMenu() = viewModel.toggleAccountsMenuList()
     })
 
     private val concatAdapter = ConcatAdapter(accountsAdapter, destinationAdapter)
@@ -131,42 +124,35 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
         setUpFragments()
 
-        observeScreen()
-
         setUpViews()
 
         setUpViewModel()
-
-        redditClient.attachListener(this)
 
         setUpStatusBarColors()
     }
 
     private fun setUpViewModel() {
         viewModel.apply {
-            theme.asLiveData().observe(this@MainActivity, {
+            theme.onEach {
                 setDefaultNightMode(when (it) {
                     DARK -> MODE_NIGHT_YES
                     LIGHT -> MODE_NIGHT_NO
-                    null, AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+                    AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
                 })
-            })
-            accounts.asLiveData().observe(this@MainActivity, { accountsAdapter.submitList(it) })
-            navigationEntries.asLiveData().observe(this@MainActivity, { destinationAdapter.submitList(it) })
-            navDrawerVisibility.observe(this@MainActivity, { visible ->
-                binding.bottomNavigationDrawer.apply {
-                    if (visible) showWihAnimation() else hideWithAnimation()
-                }
-            })
-        }
-        lifecycleScope.launch {
-            delay(2_000)
-            searchVM.searchQueryLoading.asLiveData().observe(this@MainActivity, { loading ->
-                bottomNavBinding.loadingIndicator.visibility =
-                        if (loading) VISIBLE else GONE
-            })
-            searchVM.results.asLiveData().observe(this@MainActivity, { subscriptionAdapter.submitList(it) })
-
+            }.launchIn(lifecycleScope)
+            accounts.onEach {
+                accountsAdapter.submitList(it)
+            }.launchIn(lifecycleScope)
+            navigationEntries.onEach {
+                destinationAdapter.submitList(it)
+            }.launchIn(lifecycleScope)
+            searchVM.searchQueryLoading
+                    .onEach { loading ->
+                        bottomNavBinding.loadingIndicator.visibility = if (loading) VISIBLE else GONE
+                    }
+                    .onStart { delay(2_000) }
+                    .launchIn(lifecycleScope)
+            searchVM.results.onEach { subscriptionAdapter.submitList(it) }.launchIn(lifecycleScope)
         }
     }
 
@@ -261,28 +247,6 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
         return query
     }
 
-    private fun observeScreen() {
-        with(supportFragmentManager) {
-            addOnBackStackChangedListener {
-                when (findFragmentById(R.id.fragment_container)) {
-                    is SubredditFragment,
-                    is CommentsFragment -> viewModel.showBottomNavDrawer()
-
-                    is LoginFragment,
-                    is SettingsFragment,
-                    is VideoPreviewFragment,
-                    is ImagePreviewFragment,
-                    is ExploreFragment -> viewModel.hideBottomNavDrawer()
-                }
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        redditClient.detachListener()
-    }
-
     private fun openSettings() {
         supportFragmentManager
                 .beginTransaction()
@@ -296,7 +260,9 @@ class MainActivity : AppCompatActivity(), IRedditClient.AccountChangeListener {
 
     fun expandBottomNavDrawer() = binding.bottomNavigationDrawer.expand()
 
-    override fun currentAccountChanged() = viewModel.reloadContent()
+    fun hideBottomNavDrawer() = binding.bottomNavigationDrawer.hideWithAnimation()
+
+    fun showBottomNavDrawer() = binding.bottomNavigationDrawer.showWihAnimation()
 
     private fun getCurrentDestinationMenu(): Int? =
             when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {

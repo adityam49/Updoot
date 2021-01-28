@@ -9,7 +9,6 @@ import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.common.InfiniteScrollVM
-import com.ducktapedapps.updoot.utils.SingleLiveEvent
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,14 +23,14 @@ class SubmissionsVM @ViewModelInject constructor(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _toastMessage = MutableStateFlow(SingleLiveEvent<String?>(null))
-    val toastMessage: StateFlow<SingleLiveEvent<String?>> = _toastMessage
+    private val _toastMessage: MutableSharedFlow<String> = MutableSharedFlow()
+    val toastMessage: SharedFlow<String> = _toastMessage
 
     private val subredditPrefs: Flow<SubredditPrefs> = submissionRepo
             .subredditPrefs(subreddit)
             .transform { if (it != null) emit(it) else submissionRepo.saveDefaultSubredditPrefs(subreddit) }
 
-    val sorting : StateFlow<SubredditSorting?> = subredditPrefs
+    val sorting: StateFlow<SubredditSorting?> = subredditPrefs
             .map { it.subredditSorting }
             .stateIn(
                     scope = viewModelScope,
@@ -65,7 +64,7 @@ class SubmissionsVM @ViewModelInject constructor(
     var lastScrollPosition: Int = 0
 
     val subredditInfo: StateFlow<Subreddit?> = submissionRepo.subredditInfo(subreddit)
-            .catch { _toastMessage.value = SingleLiveEvent("Something went wrong! : ${it.message}") }
+            .catch { _toastMessage.emit("Something went wrong! : ${it.message}") }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     init {
@@ -94,7 +93,7 @@ class SubmissionsVM @ViewModelInject constructor(
                         }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _toastMessage.value = SingleLiveEvent("Something went wrong! : ${e.message}")
+                _toastMessage.emit("Something went wrong! : ${e.message}")
             } finally {
                 _isLoading.value = false
             }
