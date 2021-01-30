@@ -1,9 +1,10 @@
 package com.ducktapedapps.updoot.ui.explore
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.LinearProgressIndicator
@@ -13,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AmbientContext
@@ -29,6 +29,7 @@ import com.ducktapedapps.updoot.data.local.model.Subreddit
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dev.chrisbanes.accompanist.glide.GlideImage
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 
 
 @Composable
@@ -44,13 +45,16 @@ fun ExploreScreen(
         if (exploreVM.isLoading.collectAsState(true).value)
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         else {
-            ScrollableRow {
-                exploreVM.trendingSubs
-                        .collectAsState(initial = emptyList())
-                        .value
-                        .forEach {
-                            TrendingSub(subreddit = it, onClickSubreddit)
-                        }
+            rememberScrollState(0f)
+            LazyRow {
+                item {
+                    exploreVM.trendingSubs
+                            .collectAsState(initial = emptyList())
+                            .value
+                            .forEach {
+                                TrendingSub(subreddit = it, onClickSubreddit)
+                            }
+                }
             }
         }
     }
@@ -71,20 +75,28 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
             backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
         Row(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
         ) {
             GlideImage(
                     data = subreddit.community_icon,
-                    modifier = Modifier.size(48.dp).padding(start = 16.dp, top = 16.dp),
+                    modifier = Modifier
+                            .size(48.dp)
+                            .padding(start = 16.dp, top = 16.dp),
                     requestBuilder = {
                         apply(RequestOptions().transform(CenterCrop(), CircleCrop()))
-                    },
-                    error = {
-                        loadVectorResource(id = R.drawable.ic_subreddit_default_24dp).resource.resource?.let {
-                            Image(imageVector = it, modifier = Modifier.align(Alignment.CenterVertically))
-                        }
                     }
-            )
+            ) { imageLoadState ->
+                if (imageLoadState is ImageLoadState.Error)
+                    loadVectorResource(id = R.drawable.ic_subreddit_default_24dp)
+                            .resource.resource?.let {
+                                Image(
+                                        imageVector = it,
+                                        contentDescription = "subreddit Icon",
+                                )
+                            }
+            }
             Column {
                 Text(
                         text = subreddit.display_name,

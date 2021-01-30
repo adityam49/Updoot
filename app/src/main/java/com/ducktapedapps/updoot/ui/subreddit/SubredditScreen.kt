@@ -2,6 +2,7 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -38,12 +39,13 @@ fun SubredditScreen(
         onExit: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    onActive(callback = {
+    LaunchedEffect(key1 = "onActive") {
         activityVM
                 .shouldReload
                 .onEach { viewModel.reload() }
                 .launchIn(coroutineScope)
-    })
+
+    }
     val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
     val activeContent = remember { mutableStateOf<ActiveContent?>(null) }
     if (bottomSheetState.isCollapsed) activeContent.value = null
@@ -72,8 +74,7 @@ fun SubredditScreen(
             sheetElevation = 1.dp,
             sheetContent = {
                 FancyBottomBar(
-                        modifier = Modifier
-                                .padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                         sheetProgress = bottomSheetState.progress,
                         options = subredditBottomBarActions,
                         title = when (activeContent.value) {
@@ -106,9 +107,7 @@ fun SubredditScreen(
                     else -> EmptyScreen()
                 }
             },
-            bodyContent = {
-                Body(viewModel, openMedia, openComments, openOptions)
-            }
+            bodyContent = { Body(viewModel, openMedia, openComments, openOptions) }
     )
 }
 
@@ -125,7 +124,7 @@ fun Body(
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         LazyColumn {
             itemsIndexed(items = feed.value) { index, item ->
-                onActive {
+                LaunchedEffect(key1 = "onActive?" /* TODO : Lookup source docs */) {
                     viewModel.lastScrollPosition = index
                     //TODO move paging stuff to viewModel
                     if (index >= feed.value.size - 10 && viewModel.hasNextPage() && !viewModel.isLoading.value) viewModel.loadPage()
@@ -165,9 +164,7 @@ fun EmptyScreen() {
 
 @Composable
 fun SubredditInfoScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "TODO :\n sorting \n post view type \n subscribe button \n wiki \n ")
-    }
+    LazyColumn(modifier = Modifier.fillMaxSize()) { }
 }
 
 sealed class ActiveContent {

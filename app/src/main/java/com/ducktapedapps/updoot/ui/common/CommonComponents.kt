@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ducktapedapps.updoot.R
@@ -36,20 +37,20 @@ fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
         if (gildings.silver != 0) {
             Text(text = gildings.silver.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_silver_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it)
+                Image(imageVector = it, contentDescription = AmbientContext.current.getString(R.string.silver_award))
             }
         }
         if (gildings.gold != 0) {
             Text(text = gildings.gold.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_gold_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it)
+                Image(imageVector = it, AmbientContext.current.getString(R.string.gold_award))
             }
 
         }
         if (gildings.platinum != 0) {
             Text(text = gildings.platinum.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_platinum_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it)
+                Image(imageVector = it, AmbientContext.current.getString(R.string.platinum_award))
             }
         }
     }

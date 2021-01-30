@@ -1,9 +1,11 @@
 package com.ducktapedapps.updoot.ui.user
 
-import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -68,7 +70,11 @@ fun UserInfoScreen(viewModel: UserViewModel) {
 }
 
 @Composable
-fun SectionChip(section: UserSection, isSelected: Boolean, onClick: () -> Unit) {
+fun SectionChip(
+        section: UserSection,
+        isSelected: Boolean,
+        onClick: () -> Unit
+) {
     Surface(
             color =
             if (isSelected)
@@ -101,12 +107,12 @@ fun UserSections(
         currentSection: UserSection,
         onClick: (UserSection) -> Unit
 ) {
-    ScrollableRow {
-        sections.forEach { userSection ->
+    LazyRow {
+        items(sections) {
             SectionChip(
-                    section = userSection,
-                    isSelected = userSection == currentSection,
-                    onClick = { onClick(userSection) }
+                    section = it,
+                    isSelected = it == currentSection,
+                    onClick = { onClick(it) }
             )
         }
     }

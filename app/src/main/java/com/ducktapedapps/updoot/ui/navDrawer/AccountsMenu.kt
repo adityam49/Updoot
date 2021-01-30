@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,8 @@ import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import dev.chrisbanes.accompanist.glide.GlideImage
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Error
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
 
 @Preview
 @Composable
@@ -100,7 +104,8 @@ fun NonCurrentAccountItem(
             is AnonymousAccount -> loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
                 Image(
                         imageVector = it,
-                        modifier = paddingModifier
+                        contentDescription = "Account Icon",
+                        modifier = paddingModifier,
                 )
             }
             is UserModel ->
@@ -112,7 +117,13 @@ fun NonCurrentAccountItem(
                             options.transform(CenterCrop(), CircleCrop())
                             apply(options)
                         }
-                )
+                ) { imageLoadState ->
+                    when (imageLoadState) {
+                        is Success -> Image(painter = imageLoadState.painter, contentDescription = "Account Image")
+                        is Error -> Icon(Icons.Default.AccountCircle, contentDescription = Icons.Default.AccountCircle.name)
+                        else -> Unit
+                    }
+                }
         }
 
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
@@ -127,7 +138,7 @@ fun NonCurrentAccountItem(
                     onClick = { removeAccount(accountModel.name) }
             ) {
                 loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
-                    Icon(imageVector = it)
+                    Icon(imageVector = it, contentDescription = "Remove Account Icon")
                 }
             }
         }
@@ -157,11 +168,24 @@ fun CurrentAccountItem(
                     options.transform(CenterCrop(), CircleCrop())
                     apply(options)
                 }
-        )
-        else loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+        ) { imageLoadState ->
+            when (imageLoadState) {
+                is Success -> Image(painter = imageLoadState.painter, contentDescription = "Account Icon")
+                is Error -> loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
+                    Image(
+                            imageVector = it,
+                            contentDescription = "Account Icon",
+                            modifier = userIconModifier,
+                    )
+                }
+                else -> Unit
+            }
+
+        } else loadVectorResource(id = R.drawable.ic_account_circle_24dp).resource.resource?.let {
             Image(
                     imageVector = it,
-                    modifier = userIconModifier
+                    contentDescription = "Account Icon",
+                    modifier = userIconModifier,
             )
         }
 
@@ -173,7 +197,7 @@ fun CurrentAccountItem(
                     onClick = { removeAccount(accountModel.name) },
             ) {
                 loadVectorResource(id = R.drawable.ic_baseline_remove_24).resource.resource?.let {
-                    Icon(imageVector = it)
+                    Icon(imageVector = it, "Account Removal Icon")
                 }
             }
 
@@ -181,7 +205,7 @@ fun CurrentAccountItem(
                 onClick = { toggleAccountMenu() },
         ) {
             loadVectorResource(id = R.drawable.ic_baseline_chevron_down_24).resource.resource?.let {
-                Icon(imageVector = it)
+                Icon(imageVector = it, "Chevron")
             }
         }
     }

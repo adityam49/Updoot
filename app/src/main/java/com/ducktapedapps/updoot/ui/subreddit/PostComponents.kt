@@ -95,27 +95,32 @@ fun CompactPost(
 
 @Composable
 fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
-    when (linkData.toMedia()) {
-        is Image, is Video -> GlideImage(
-                data = linkData.thumbnail,
-                error = {
-                    it.throwable.printStackTrace()
-                    loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let { imageVector ->
-                        Image(imageVector = imageVector, modifier = modifier)
-                    }
-                },
-                modifier = modifier,
-                requestBuilder = { fitCenter().circleCrop() }
-        )
-        is SelfText -> loadVectorResource(id = R.drawable.ic_selftext_24dp).resource.resource?.let {
-            Image(imageVector = it, modifier = modifier)
-        }
-
-        is Link, JustTitle -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
-            Image(imageVector = it, modifier = modifier)
-        }
-
+    if (linkData.over_18) loadVectorResource(id = R.drawable.ic_nsfw_24dp).resource.resource?.let {
+        Image(modifier = modifier, imageVector = it, contentDescription = "NSFW Content")
     }
+    else
+        when (linkData.toMedia()) {
+            is Image, is Video -> GlideImage(
+                    data = linkData.thumbnail,
+                    modifier = modifier,
+                    requestBuilder = { fitCenter().circleCrop() },
+            ) { imageLoadState ->
+                when (imageLoadState) {
+                    is Success -> Image(painter = imageLoadState.painter, contentDescription = "Post Thumbnail")
+                    is Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let { imageVector ->
+                        Image(imageVector = imageVector, contentDescription = "Error Icon", modifier = modifier)
+                    }
+                    else -> Unit
+                }
+            }
+            is SelfText -> loadVectorResource(id = R.drawable.ic_selftext_24dp).resource.resource?.let {
+                Image(imageVector = it, contentDescription = "Selftext Icon", modifier = modifier)
+            }
+
+            is Link, JustTitle -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+                Image(imageVector = it, contentDescription = "Link Icon", modifier = modifier)
+            }
+        }
 }
 
 @Composable
@@ -152,7 +157,10 @@ fun LargePost(
         openPost: () -> Unit,
         openOptions: () -> Unit
 ) {
-    ConstraintLayout(modifier = Modifier.fillMaxWidth().wrapContentHeight().clickable(onClick = openPost, onLongClick = openOptions)) {
+    ConstraintLayout(modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable(onClick = openPost, onLongClick = openOptions)) {
         val (media, title, metaData, voteCounter, gildings) = createRefs()
         SubmissionTitle(
                 title = linkData.title,
@@ -236,9 +244,9 @@ fun ImagePostMedia(onClickMedia: () -> Unit, modifier: Modifier, media: Image) {
         when (imageLoadState) {
             Empty -> Unit
             Loading -> Unit
-            is Success -> MaterialLoadingImage(result = imageLoadState, fadeInEnabled = true)
+            is Success -> MaterialLoadingImage(result = imageLoadState, fadeInEnabled = true, contentDescription = "Post Image")
             is Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
-                Icon(it, modifier = modifier)
+                Icon(it, modifier = modifier, contentDescription = "Error Icon")
             }
         }
     }

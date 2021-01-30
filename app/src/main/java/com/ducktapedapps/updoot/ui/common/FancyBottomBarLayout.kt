@@ -30,7 +30,7 @@ fun FancyBottomBar(
     ) {
         //TODO : make back button optional
         IconButton(onClick = navigateUp) {
-            Icon(Icons.Default.ArrowBack)
+            Icon(Icons.Default.ArrowBack, "Back Arrow")
         }
         Text(
                 modifier = Modifier.wrapContentWidth(),
@@ -38,7 +38,7 @@ fun FancyBottomBar(
         )
         options.forEach {
             IconButton(onClick = it.open) {
-                Icon(it.icon)
+                Icon(it.icon, it.title)
             }
         }
     }

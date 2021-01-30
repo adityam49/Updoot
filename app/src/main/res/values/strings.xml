@@ -57,4 +57,8 @@
     <string name="light_theme">Light Theme</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="follow_system">Follow System</string>
+    <string name="silver_award">Silver Award</string>
+    <string name="gold_award">Gold Award</string>
+    <string name="platinum_award">Platinum Award</string>
+
 </resources>

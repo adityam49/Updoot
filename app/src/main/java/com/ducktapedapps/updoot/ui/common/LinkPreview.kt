@@ -12,14 +12,16 @@ import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadVectorResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
 import dev.chrisbanes.accompanist.glide.GlideImage
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState.*
 
 @Composable
 fun StaticLinkPreview(
@@ -37,18 +39,22 @@ fun StaticLinkPreview(
     ) {
         GlideImage(
                 data = thumbnail ?: "",
-                error = {
-                    loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
-                        Image(imageVector = it)
-                    }
-                },
-                requestBuilder = {
-                    centerCrop().circleCrop()
-                },
+                requestBuilder = { centerCrop().circleCrop() },
                 modifier = Modifier
                         .size(48.dp)
                         .padding(8.dp)
-        )
+        ) { imageLoadState: ImageLoadState ->
+            when (imageLoadState) {
+                is Success -> Image(painter = imageLoadState.painter, contentDescription = "Link thumbnail")
+                is Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
+                    Image(imageVector = it, "Link preview icon")
+                }
+                is Loading -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+                    Image(imageVector = it, "Link preview icon")
+                }
+                else -> Unit
+            }
+        }
         Column(modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)) {
@@ -91,17 +97,24 @@ fun LoadingLinkPreview(loadingLink: LoadingLink, modifier: Modifier) {
 
 @Composable
 fun LoadedLinkPreview(linkState: LoadedLink, modifier: Modifier) {
-    GlideImage(
-            data = linkState.linkModel.image ?: "",
-            error = {
-                loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
-                    Image(it, modifier)
+    if (linkState.linkModel.image != null)
+        GlideImage(
+                data = linkState.linkModel.image,
+                modifier = modifier,
+                requestBuilder = { circleCrop() },
+        ) { imageLoadState ->
+            when (imageLoadState) {
+                is Success -> Image(painter = imageLoadState.painter, contentDescription = "Link thumbnail")
+                is Loading -> CircularProgressIndicator()
+                is Error -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+                    Image(it, "Link icon")
                 }
-            },
-            modifier = modifier,
-            requestBuilder = { circleCrop() },
-            loading = { CircularProgressIndicator(modifier = modifier) }
-    )
+                else -> Unit
+            }
+        }
+    else loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
+        Image(modifier = modifier, imageVector = it, contentDescription = "Link Icon", contentScale = ContentScale.FillBounds)
+    }
     Column {
         Providers(AmbientContentAlpha provides ContentAlpha.high) {
             Text(text = linkState.linkModel.title
@@ -120,7 +133,7 @@ fun LoadedLinkPreview(linkState: LoadedLink, modifier: Modifier) {
 @Composable
 fun NoMetaDataLinkPreview(linkState: NoMetaDataLink, modifier: Modifier) {
     loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
-        Image(imageVector = it, modifier = modifier)
+        Image(imageVector = it, contentDescription = "Link icon", modifier = modifier)
     }
     Column {
         Providers(AmbientContentAlpha provides ContentAlpha.high) {

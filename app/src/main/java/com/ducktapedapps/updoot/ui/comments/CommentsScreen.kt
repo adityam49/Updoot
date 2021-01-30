@@ -1,8 +1,10 @@
 package com.ducktapedapps.updoot.ui.comments
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -11,9 +13,11 @@ import androidx.compose.runtime.Providers
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asFlow
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.Comment
 import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
@@ -21,6 +25,7 @@ import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
 import com.ducktapedapps.updoot.ui.common.LinkPreview
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
 import dev.chrisbanes.accompanist.glide.GlideImage
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 
 @Composable
 fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Unit) {
@@ -42,6 +47,7 @@ fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Un
                 }
             }
 
+            stickyHeader { }
             content.value?.run {
                 item {
                     Content(content = this@run, onClick = openContent)
@@ -122,7 +128,15 @@ fun ContentImage(image: Image, openImage: () -> Unit) {
             requestBuilder = {
                 transform(RoundedCorners(8))
             }
-    )
+    ) { imageLoadState ->
+        when (imageLoadState) {
+            is ImageLoadState.Success -> Image(painter = imageLoadState.painter, contentDescription = "Post Image")
+            is ImageLoadState.Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let {
+                Icon(it, "Error Icon")
+            }
+            else -> Unit
+        }
+    }
 }
 
 @Composable

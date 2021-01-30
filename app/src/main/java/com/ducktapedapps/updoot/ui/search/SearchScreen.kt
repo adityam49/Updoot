@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.loadVectorResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -33,6 +32,7 @@ import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import dev.chrisbanes.accompanist.glide.GlideImage
+import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -81,10 +81,11 @@ fun SearchScreen(
         )
         LazyColumn(modifier = Modifier.fillMaxWidth()
         ) {
-            items(items = searchResults,
-                    itemContent = {
-                        ComposeSubredditItem(it, openSubreddit)
-                    })
+            item {
+                searchResults.forEach {
+                    ComposeSubredditItem(it, openSubreddit)
+                }
+            }
         }
         Spacer(
                 Modifier
@@ -132,18 +133,18 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
         Log.i("SearchScreen", "url : ${subreddit.community_icon}")
         GlideImage(
                 data = subreddit.community_icon,
-                error = {
-                    loadVectorResource(id = R.drawable.ic_subreddit_default_24dp).resource.resource?.let {
-                        Image(imageVector = it)
-                    }
-                },
                 requestBuilder = {
                     centerInside().circleCrop()
                 },
                 modifier = Modifier
                         .padding(start = 16.dp)
                         .preferredSize(32.dp)
-        )
+        ) { imageLoadState ->
+            if (imageLoadState is ImageLoadState.Error)
+                loadVectorResource(id = R.drawable.ic_subreddit_default_24dp).resource.resource?.let {
+                    Image(imageVector = it, contentDescription = "Subreddit Icon")
+                }
+        }
         Column(
                 modifier = Modifier
                         .wrapContentWidth()
@@ -163,7 +164,6 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = {}) { Icon(vectorResource(id = R.drawable.ic_round_add_circle_24)) }
     }
 
 }
@@ -258,7 +258,7 @@ fun SearchActions(
         Row {
             if (queryString.text.isNotBlank()) IconButton(
                     onClick = { setQuery(TextFieldValue("")) },
-                    content = { Icon(Icons.Default.Clear) }
+                    content = { Icon(Icons.Default.Clear, contentDescription = "Clear Icon") }
             )
 
             if (isLoading.collectAsState(initial = true).value)
@@ -271,7 +271,7 @@ fun SearchActions(
             else
                 IconButton(
                         onClick = { performSearch(queryString.text) },
-                        content = { Icon(Icons.Default.Search) }
+                        content = { Icon(Icons.Default.Search, contentDescription = "Search Icon") }
                 )
         }
     }
@@ -286,7 +286,7 @@ private fun BackButton(modifier: Modifier, goBack: () -> Unit) {
     ) {
         IconButton(
                 onClick = goBack,
-                content = { Icon(Icons.Default.ArrowBack) }
+                content = { Icon(Icons.Default.ArrowBack, contentDescription = Icons.Default.ArrowBack.name) }
         )
     }
 }

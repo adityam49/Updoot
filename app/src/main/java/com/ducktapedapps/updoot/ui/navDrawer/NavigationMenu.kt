@@ -2,6 +2,8 @@ package com.ducktapedapps.updoot.ui.navDrawer
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.AmbientContentAlpha
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -25,13 +27,13 @@ fun NavigationMenu(
         openSettings: () -> Unit,
         addAccount: () -> Unit,
 ) {
-    Column {
-        navDestinations.forEach { navDestination ->
+    LazyColumn {
+        items(navDestinations) { item ->
             Row(
                     modifier = Modifier
                             .fillMaxWidth()
                             .clickable(onClick = {
-                                when (navDestination) {
+                                when (item) {
                                     Explore -> onOpenExplore()
                                     Exit -> onExitApp()
                                     Search -> onSearch()
@@ -43,11 +45,12 @@ fun NavigationMenu(
                     verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                        vectorResource(id = navDestination.icon),
-                        modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp)
+                        imageVector = vectorResource(id = item.icon),
+                        contentDescription = "${item.title} Icon",
+                        modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp),
                 )
                 Providers(AmbientContentAlpha provides ContentAlpha.high) {
-                    Text(text = navDestination.title, modifier = Modifier.padding(start = 16.dp))
+                    Text(text = item.title, modifier = Modifier.padding(start = 16.dp))
                 }
             }
         }
