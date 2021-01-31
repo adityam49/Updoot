@@ -103,7 +103,7 @@ fun SubredditScreen(
                             onAddAccount = addAccount,
                             onOpenSettings = openSettings,
                     )
-                    SubredditInfo -> SubredditInfoScreen()
+                    SubredditInfo -> SubredditInfo(submissionsVM = viewModel)
                     else -> EmptyScreen()
                 }
             },
@@ -160,11 +160,6 @@ fun Body(
 @Composable
 fun EmptyScreen() {
     Box(modifier = Modifier.fillMaxSize()) { }
-}
-
-@Composable
-fun SubredditInfoScreen() {
-    LazyColumn(modifier = Modifier.fillMaxSize()) { }
 }
 
 sealed class ActiveContent {
