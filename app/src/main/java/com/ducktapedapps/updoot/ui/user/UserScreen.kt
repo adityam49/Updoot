@@ -51,7 +51,8 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                         linkData = item,
                         onClickMedia = {},
                         openPost = {},
-                        openOptions = {}
+                        openSubreddit = {},
+                        openUser = {},
                 )
             }
             Divider()
@@ -73,7 +74,7 @@ fun UserInfoScreen(viewModel: UserViewModel) {
 fun SectionChip(
         section: UserSection,
         isSelected: Boolean,
-        onClick: () -> Unit
+        onClick: () -> Unit,
 ) {
     Surface(
             color =
@@ -105,7 +106,7 @@ fun SectionChip(
 fun UserSections(
         sections: List<UserSection>,
         currentSection: UserSection,
-        onClick: (UserSection) -> Unit
+        onClick: (UserSection) -> Unit,
 ) {
     LazyRow {
         items(sections) {

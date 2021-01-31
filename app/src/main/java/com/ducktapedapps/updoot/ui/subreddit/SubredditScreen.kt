@@ -32,14 +32,15 @@ fun SubredditScreen(
         viewModel: SubmissionsVM,
         openMedia: (Media) -> Unit,
         openComments: (subreddit: String, id: String) -> Unit,
-        openOptions: (id: String) -> Unit,
+        openUser: (String) -> Unit,
+        openSubreddit: (String) -> Unit,
         activityVM: ActivityVM,
         addAccount: () -> Unit,
         openSettings: () -> Unit,
         onExit: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(key1 = "onActive") {
+    LaunchedEffect(key1 = Unit) {
         activityVM
                 .shouldReload
                 .onEach { viewModel.reload() }
@@ -63,6 +64,7 @@ fun SubredditScreen(
                 bottomSheetState.expand()
             }
     )
+
     BottomSheetScaffold(
             sheetGesturesEnabled = bottomSheetState.isExpanded,
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
@@ -107,7 +109,7 @@ fun SubredditScreen(
                     else -> EmptyScreen()
                 }
             },
-            bodyContent = { Body(viewModel, openMedia, openComments, openOptions) }
+            bodyContent = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
     )
 }
 
@@ -116,7 +118,8 @@ fun Body(
         viewModel: SubmissionsVM,
         openMedia: (Media) -> Unit,
         openComments: (subreddit: String, id: String) -> Unit,
-        openOptions: (id: String) -> Unit
+        openSubreddit: (String) -> Unit,
+        openUser: (String) -> Unit,
 ) {
     val feed = viewModel.feedPages.collectAsState()
     val postType = viewModel.postViewType.collectAsState()
@@ -134,13 +137,15 @@ fun Body(
                             linkData = item,
                             onClickMedia = { openMedia(item.toMedia()) },
                             onClickPost = { openComments(item.subredditName, item.name) },
-                            openOptions = { openOptions(item.name) }
+                            openSubreddit = openSubreddit,
+                            openUser = openUser,
                     )
                     LARGE -> LargePost(
                             linkData = item,
                             onClickMedia = { openMedia(item.toMedia()) },
                             openPost = { openComments(item.subredditName, item.name) },
-                            openOptions = { openOptions(item.name) }
+                            openSubreddit = openSubreddit,
+                            openUser = openUser,
                     )
                 }
                 Divider()

@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.loadVectorResource
@@ -36,60 +38,77 @@ fun CompactPost(
         linkData: LinkData,
         onClickMedia: () -> Unit,
         onClickPost: () -> Unit,
-        openOptions: () -> Unit
+        openSubreddit: (String) -> Unit,
+        openUser: (String) -> Unit,
 ) {
-    ConstraintLayout(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clickable(onClick = onClickPost, onLongClick = openOptions)
-    ) {
-        val (mediaThumbnail, title, metaData, voteCounter, gildings) = createRefs()
-        CompactMediaThumbnail(
-                linkData = linkData,
-                modifier = Modifier
-                        .clip(CircleShape)
-                        .preferredSize(48.dp)
-                        .clickable(onClick = onClickMedia)
-                        .constrainAs(mediaThumbnail) {
-                            start.linkTo(parent.start, margin = 8.dp)
-                            top.linkTo(parent.top, margin = 8.dp)
-                            end.linkTo(title.start)
-                        })
-        SubmissionTitle(
-                title = linkData.title,
-                isSticky = linkData.stickied,
-                modifier = Modifier.constrainAs(title) {
-                    start.linkTo(mediaThumbnail.end, 8.dp)
-                    top.linkTo(parent.top, margin = 8.dp)
-                    end.linkTo(voteCounter.start, margin = 8.dp)
-                    bottom.linkTo(metaData.top, margin = 8.dp)
-                    height = Dimension.wrapContent
-                    width = Dimension.fillToConstraints
-                })
+    val (dropDownVisible, setDropDownVisibility) = remember { mutableStateOf(false) }
 
-        MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
-            start.linkTo(title.start)
-            top.linkTo(title.bottom, margin = 8.dp)
-            bottom.linkTo(parent.bottom, margin = 8.dp)
-            end.linkTo(gildings.start, margin = 8.dp)
-            width = Dimension.fillToConstraints
-            height = Dimension.wrapContent
-        })
-        VoteCounter(
-                ups = linkData.ups,
-                likes = linkData.likes,
-                modifier = Modifier.constrainAs(voteCounter) {
-                    top.linkTo(parent.top, margin = 8.dp)
-                    end.linkTo(parent.end, margin = 8.dp)
-                    start.linkTo(title.end)
-                    width = Dimension.wrapContent
-                }
-        )
-        AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
-            end.linkTo(parent.end, margin = 8.dp)
-            top.linkTo(metaData.top)
-            bottom.linkTo(metaData.bottom)
-        })
+    val list = listOf(
+            MenuItemModel({ setDropDownVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
+            MenuItemModel({
+                setDropDownVisibility(false)
+                openSubreddit(linkData.subredditName)
+            }, linkData.subredditName, R.drawable.ic_subreddit_default_24dp),
+            MenuItemModel({
+                setDropDownVisibility(false)
+                openUser(linkData.author)
+            }, linkData.author, R.drawable.ic_account_circle_24dp),
+    )
+
+    PopUp(dismiss = { setDropDownVisibility(false) }, expanded = dropDownVisible, options = list) {
+        ConstraintLayout(modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .clickable(onClick = onClickPost, onLongClick = { setDropDownVisibility(true) })
+        ) {
+            val (mediaThumbnail, title, metaData, voteCounter, gildings) = createRefs()
+            CompactMediaThumbnail(
+                    linkData = linkData,
+                    modifier = Modifier
+                            .clip(CircleShape)
+                            .preferredSize(48.dp)
+                            .clickable(onClick = onClickMedia)
+                            .constrainAs(mediaThumbnail) {
+                                start.linkTo(parent.start, margin = 8.dp)
+                                top.linkTo(parent.top, margin = 8.dp)
+                                end.linkTo(title.start)
+                            })
+            SubmissionTitle(
+                    title = linkData.title,
+                    isSticky = linkData.stickied,
+                    modifier = Modifier.constrainAs(title) {
+                        start.linkTo(mediaThumbnail.end, 8.dp)
+                        top.linkTo(parent.top, margin = 8.dp)
+                        end.linkTo(voteCounter.start, margin = 8.dp)
+                        bottom.linkTo(metaData.top, margin = 8.dp)
+                        height = Dimension.wrapContent
+                        width = Dimension.fillToConstraints
+                    })
+
+            MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
+                start.linkTo(title.start)
+                top.linkTo(title.bottom, margin = 8.dp)
+                bottom.linkTo(parent.bottom, margin = 8.dp)
+                end.linkTo(gildings.start, margin = 8.dp)
+                width = Dimension.fillToConstraints
+                height = Dimension.wrapContent
+            })
+            VoteCounter(
+                    ups = linkData.ups,
+                    likes = linkData.likes,
+                    modifier = Modifier.constrainAs(voteCounter) {
+                        top.linkTo(parent.top, margin = 8.dp)
+                        end.linkTo(parent.end, margin = 8.dp)
+                        start.linkTo(title.end)
+                        width = Dimension.wrapContent
+                    }
+            )
+            AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
+                end.linkTo(parent.end, margin = 8.dp)
+                top.linkTo(metaData.top)
+                bottom.linkTo(metaData.bottom)
+            })
+        }
     }
 }
 
@@ -127,7 +146,7 @@ fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
 fun SubmissionTitle(
         title: String,
         isSticky: Boolean,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
 ) {
     Providers(AmbientContentAlpha provides ContentAlpha.high) {
         Text(
@@ -155,58 +174,74 @@ fun LargePost(
         linkData: LinkData,
         onClickMedia: () -> Unit,
         openPost: () -> Unit,
-        openOptions: () -> Unit
+        openSubreddit: (String) -> Unit,
+        openUser: (String) -> Unit,
 ) {
-    ConstraintLayout(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clickable(onClick = openPost, onLongClick = openOptions)) {
-        val (media, title, metaData, voteCounter, gildings) = createRefs()
-        SubmissionTitle(
-                title = linkData.title,
-                isSticky = linkData.stickied,
-                modifier = Modifier.constrainAs(title) {
-                    start.linkTo(parent.start, margin = 8.dp)
-                    top.linkTo(parent.top, margin = 8.dp)
-                    end.linkTo(voteCounter.start, margin = 8.dp)
-                    bottom.linkTo(media.top, margin = 8.dp)
-                    height = Dimension.wrapContent
-                    width = Dimension.fillToConstraints
-                })
+    val (dropDownVisible, setDropDownVisibility) = remember { mutableStateOf(false) }
 
-        LargePostMedia(
-                linkData = linkData,
-                modifier = Modifier.constrainAs(media) {
-                    start.linkTo(parent.start)
-                    top.linkTo(title.bottom)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(metaData.top)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.wrapContent
-                }, onClickMedia = onClickMedia)
+    val list = listOf(
+            MenuItemModel({ setDropDownVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
+            MenuItemModel({
+                setDropDownVisibility(false)
+                openSubreddit(linkData.subredditName)
+            }, linkData.subredditName, R.drawable.ic_subreddit_default_24dp),
+            MenuItemModel({
+                setDropDownVisibility(false)
+                openUser(linkData.author)
+            }, linkData.author, R.drawable.ic_account_circle_24dp),
+    )
+    PopUp(dismiss = { setDropDownVisibility(false) }, expanded = dropDownVisible, options = list) {
+        ConstraintLayout(modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .clickable(onClick = openPost, onLongClick = { setDropDownVisibility(true) })) {
+            val (media, title, metaData, voteCounter, gildings) = createRefs()
+            SubmissionTitle(
+                    title = linkData.title,
+                    isSticky = linkData.stickied,
+                    modifier = Modifier.constrainAs(title) {
+                        start.linkTo(parent.start, margin = 8.dp)
+                        top.linkTo(parent.top, margin = 8.dp)
+                        end.linkTo(voteCounter.start, margin = 8.dp)
+                        bottom.linkTo(media.top, margin = 8.dp)
+                        height = Dimension.wrapContent
+                        width = Dimension.fillToConstraints
+                    })
 
-        MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
-            start.linkTo(media.start, margin = 8.dp)
-            top.linkTo(media.bottom, margin = 8.dp)
-            bottom.linkTo(parent.bottom, margin = 16.dp)
-            width = Dimension.fillToConstraints
-            height = Dimension.wrapContent
-        })
-        VoteCounter(
-                ups = linkData.ups,
-                likes = linkData.likes,
-                modifier = Modifier.constrainAs(voteCounter) {
-                    top.linkTo(title.top)
-                    end.linkTo(parent.end, margin = 8.dp)
-                    start.linkTo(title.end)
-                    width = Dimension.wrapContent
-                }
-        )
-        AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
-            end.linkTo(parent.end, margin = 8.dp)
-            top.linkTo(metaData.top)
-            bottom.linkTo(metaData.bottom)
-        })
+            LargePostMedia(
+                    linkData = linkData,
+                    modifier = Modifier.constrainAs(media) {
+                        start.linkTo(parent.start)
+                        top.linkTo(title.bottom)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(metaData.top)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.wrapContent
+                    }, onClickMedia = onClickMedia)
+
+            MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
+                start.linkTo(media.start, margin = 8.dp)
+                top.linkTo(media.bottom, margin = 8.dp)
+                bottom.linkTo(parent.bottom, margin = 16.dp)
+                width = Dimension.fillToConstraints
+                height = Dimension.wrapContent
+            })
+            VoteCounter(
+                    ups = linkData.ups,
+                    likes = linkData.likes,
+                    modifier = Modifier.constrainAs(voteCounter) {
+                        top.linkTo(title.top)
+                        end.linkTo(parent.end, margin = 8.dp)
+                        start.linkTo(title.end)
+                        width = Dimension.wrapContent
+                    }
+            )
+            AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
+                end.linkTo(parent.end, margin = 8.dp)
+                top.linkTo(metaData.top)
+                bottom.linkTo(metaData.bottom)
+            })
+        }
     }
 }
 
@@ -217,7 +252,8 @@ fun LargePostMedia(linkData: LinkData, onClickMedia: () -> Unit, modifier: Modif
         is Image -> ImagePostMedia(onClickMedia = onClickMedia, modifier = modifier, media = mediaData)
         is Video,
         is Link,
-        JustTitle -> StaticLinkPreview(
+        JustTitle,
+        -> StaticLinkPreview(
                 url = linkData.url,
                 thumbnail = linkData.thumbnail,
                 modifier = modifier,

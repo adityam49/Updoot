@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -169,12 +170,12 @@ fun DrawerCard(
 @Composable
 private fun Info(modifier: Modifier, description: String?) {
     DrawerCard(modifier = modifier) {
-        Column(
+        LazyColumn(
                 modifier = Modifier
                         .padding(8.dp)
                         .fillMaxSize()
         ) {
-            Text(text = description ?: "", style = MaterialTheme.typography.body1)
+            item { Text(text = description ?: "", style = MaterialTheme.typography.body1) }
         }
     }
 }
