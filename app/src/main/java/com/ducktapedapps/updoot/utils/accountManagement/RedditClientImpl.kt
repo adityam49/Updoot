@@ -44,6 +44,15 @@ class RedditClientImpl @Inject constructor(
                 )
             }
         }
+    }.transform { accounts ->
+        if (accounts.isNotEmpty())
+            emit(
+                    mutableListOf<AccountModel>().apply {
+                        add(accounts.first { it.isCurrent })
+                        addAll(accounts.filterNot { it.isCurrent })
+                    }
+            )
+
     }.stateIn(GlobalScope, SharingStarted.Eagerly, emptyList())
 
     init {
@@ -161,7 +170,7 @@ sealed class AccountModel(
         open val isCurrent: Boolean,
 ) {
     data class AnonymousAccount(
-            override val isCurrent: Boolean
+            override val isCurrent: Boolean,
     ) : AccountModel(Constants.ANON_USER, isCurrent) {
         @DrawableRes
         val icon = R.drawable.ic_account_circle_24dp
@@ -170,6 +179,6 @@ sealed class AccountModel(
     data class UserModel(
             private val _name: String,
             override val isCurrent: Boolean,
-            val userIcon: String
+            val userIcon: String,
     ) : AccountModel(_name, isCurrent)
 }

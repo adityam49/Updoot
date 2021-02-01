@@ -57,7 +57,7 @@ fun PreviewAccountsMenu() {
 fun AccountsMenu(
         accounts: List<AccountModel>,
         removeAccount: (accountName: String) -> Unit,
-        switch: (accountName: String) -> Unit
+        switch: (accountName: String) -> Unit,
 ) {
     val showAllAccounts = remember { mutableStateOf(false) }
     Card(
@@ -67,21 +67,30 @@ fun AccountsMenu(
                     .padding(8.dp)
                     .animateContentSize(),
             backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
-            shape = RoundedCornerShape(percent = if (accounts.size == 1) 50 else 10),
+            shape = RoundedCornerShape(
+                    percent =
+                    if (accounts.size != 1 && showAllAccounts.value) 10
+                    else 50
+            ),
     ) {
         Column {
-            accounts.forEach { accountModel ->
-                if (accountModel.isCurrent) CurrentAccountItem(
-                        accountModel = accountModel,
-                        removeAccount = removeAccount,
-                        toggleAccountMenu = { showAllAccounts.value = !showAllAccounts.value }
-                )
-                else NonCurrentAccountItem(
-                        accountModel = accountModel,
-                        removeAccount = removeAccount,
-                        switch = switch
-                )
-            }
+            accounts
+                    .take(if (showAllAccounts.value) accounts.size else 1)
+                    .forEach { accountModel ->
+                        if (accountModel.isCurrent) CurrentAccountItem(
+                                accountModel = accountModel,
+                                removeAccount = removeAccount,
+                                toggleAccountMenu = { showAllAccounts.value = !showAllAccounts.value }
+                        )
+                        else NonCurrentAccountItem(
+                                accountModel = accountModel,
+                                removeAccount = removeAccount,
+                                switch = {
+                                    showAllAccounts.value = false
+                                    switch(accountModel.name)
+                                }
+                        )
+                    }
         }
     }
 }
@@ -91,7 +100,7 @@ fun AccountsMenu(
 fun NonCurrentAccountItem(
         accountModel: AccountModel,
         removeAccount: (accountName: String) -> Unit,
-        switch: (accountName: String) -> Unit
+        switch: (accountName: String) -> Unit,
 ) {
     Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -149,7 +158,7 @@ fun NonCurrentAccountItem(
 fun CurrentAccountItem(
         accountModel: AccountModel,
         removeAccount: (accountName: String) -> Unit,
-        toggleAccountMenu: () -> Unit
+        toggleAccountMenu: () -> Unit,
 ) {
     Row(
             modifier = Modifier
