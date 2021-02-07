@@ -5,7 +5,6 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 
 sealed class NavigationDestination(val title: String, @DrawableRes val icon: Int, val isUserSpecific: Boolean) {
-    object NavigationMenu : NavigationDestination("NavigationMenu", R.drawable.ic_explore_24dp, false)
     object AddAccount : NavigationDestination("Add Account", R.drawable.ic_round_add_circle_24, false)
     object Search : NavigationDestination("Search", R.drawable.ic_search_24dp, false)
     object Explore : NavigationDestination("Explore", R.drawable.ic_explore_24dp, false)

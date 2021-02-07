@@ -29,7 +29,7 @@ class ActivityVM @ViewModelInject constructor(
     private val _shouldReload: MutableSharedFlow<Boolean> = MutableSharedFlow()
     val shouldReload: SharedFlow<Boolean> = _shouldReload
 
-    val currentAccount: StateFlow<AccountModel?> = redditClient.allAccounts
+    private val currentAccount: StateFlow<AccountModel?> = redditClient.allAccounts
             .map { it.firstOrNull { account -> account.isCurrent } }
             .onEach { reloadContent() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -38,6 +38,13 @@ class ActivityVM @ViewModelInject constructor(
 
     val theme: StateFlow<ThemeType> = themeManager.themeType()
             .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeType.AUTO)
+
+    private val _navigationRequest: MutableSharedFlow<NavigationDestination> = MutableSharedFlow()
+    val navigationRequest: SharedFlow<NavigationDestination> = _navigationRequest
+
+    fun navigateTo(destination: NavigationDestination) {
+        viewModelScope.launch { _navigationRequest.emit(destination) }
+    }
 
     fun setCurrentAccount(name: String) {
         viewModelScope.launch {

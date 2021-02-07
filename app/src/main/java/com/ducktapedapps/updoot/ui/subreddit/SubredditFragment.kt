@@ -44,9 +44,6 @@ class SubredditFragment : Fragment() {
                                     }
                                 },
                                 openComments = { subreddit, id -> openComments(subreddit, id) },
-                                addAccount = ::openLoginScreen,
-                                openSettings = ::openSettings,
-                                onExit = ::showExitDialog,
                                 openUser = ::openUser,
                                 openSubreddit = ::openSubreddit,
                         )

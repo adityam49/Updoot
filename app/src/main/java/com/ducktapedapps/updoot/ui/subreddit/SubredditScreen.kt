@@ -35,9 +35,6 @@ fun SubredditScreen(
         openUser: (String) -> Unit,
         openSubreddit: (String) -> Unit,
         activityVM: ActivityVM,
-        addAccount: () -> Unit,
-        openSettings: () -> Unit,
-        onExit: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = Unit) {
@@ -97,14 +94,7 @@ fun SubredditScreen(
                         navigateUp = {},
                 )
                 when (activeContent.value) {
-                    GlobalMenu -> NavigationMenuScreen(
-                            viewModel = activityVM,
-                            onExplore = { },
-                            onSearch = { },
-                            onExit = onExit,
-                            onAddAccount = addAccount,
-                            onOpenSettings = openSettings,
-                    )
+                    GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
                     SubredditInfo -> SubredditInfo(submissionsVM = viewModel)
                     else -> EmptyScreen()
                 }

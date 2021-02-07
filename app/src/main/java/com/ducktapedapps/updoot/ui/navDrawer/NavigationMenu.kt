@@ -16,41 +16,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 
 @Composable
 fun NavigationMenu(
         navDestinations: List<NavigationDestination>,
-        onExitApp: () -> Unit,
-        onOpenExplore: () -> Unit,
-        onSearch: () -> Unit,
-        openSettings: () -> Unit,
-        addAccount: () -> Unit,
+        navigateTo: (NavigationDestination) -> Unit,
 ) {
     LazyColumn {
-        items(navDestinations) { item ->
+        items(navDestinations) { destination ->
             Row(
                     modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(onClick = {
-                                when (item) {
-                                    Explore -> onOpenExplore()
-                                    Exit -> onExitApp()
-                                    Search -> onSearch()
-                                    AddAccount -> addAccount()
-                                    Settings -> openSettings()
-                                    else -> Unit
-                                }
-                            }),
+                            .clickable(onClick = { navigateTo(destination) }),
                     verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                        imageVector = vectorResource(id = item.icon),
-                        contentDescription = "${item.title} Icon",
+                        imageVector = vectorResource(id = destination.icon),
+                        contentDescription = "${destination.title} Icon",
                         modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp),
                 )
                 Providers(AmbientContentAlpha provides ContentAlpha.high) {
-                    Text(text = item.title, modifier = Modifier.padding(start = 16.dp))
+                    Text(text = destination.title, modifier = Modifier.padding(start = 16.dp))
                 }
             }
         }
@@ -58,14 +44,7 @@ fun NavigationMenu(
 }
 
 @Composable
-fun NavigationMenuScreen(
-        viewModel: ActivityVM,
-        onExplore: () -> Unit,
-        onSearch: () -> Unit,
-        onExit: () -> Unit,
-        onAddAccount: () -> Unit,
-        onOpenSettings: () -> Unit
-) {
+fun NavigationMenuScreen(viewModel: ActivityVM) {
     val accountsList = viewModel.accounts.collectAsState()
     val navDestinations = viewModel.navigationEntries.collectAsState()
     Column(modifier = Modifier.fillMaxSize()) {
@@ -76,11 +55,7 @@ fun NavigationMenuScreen(
         )
         NavigationMenu(
                 navDestinations = navDestinations.value,
-                onOpenExplore = onExplore,
-                onSearch = onSearch,
-                onExitApp = onExit,
-                addAccount = onAddAccount,
-                openSettings = onOpenSettings,
+                navigateTo = viewModel::navigateTo,
         )
     }
 }

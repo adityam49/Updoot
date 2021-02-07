@@ -16,6 +16,7 @@ import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
+import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.user.UserFragment
@@ -52,6 +53,16 @@ class MainActivity : AppCompatActivity() {
                         AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
                     })
                 }.launchIn(lifecycleScope)
+        viewModel
+                .navigationRequest
+                .onEach {
+                    when (it) {
+                        AddAccount -> openLoginScreen()
+                        Exit -> showExitDialog()
+                        Settings -> openSettings()
+                        else -> Unit
+                    }
+                }.launchIn(lifecycleScope)
     }
 
     private fun setUpStatusBarColors() {
@@ -75,21 +86,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openSettings() {
+    private fun openSettings() {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .setCustomAnimations(R.anim.enter_from_top, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_top)
                 .replace(R.id.fragment_container, SettingsFragment())
                 .commit()
     }
 
 
-    fun openLoginScreen() {
+    private fun openLoginScreen() {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_top, R.anim.enter_from_top, R.anim.exit_to_bottom)
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
     }
@@ -116,7 +125,6 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
                 .replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id))
                 .commit()
     }
@@ -142,5 +150,5 @@ class MainActivity : AppCompatActivity() {
                 .commit()
     }
 
-    fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)
+    private fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)
 }
