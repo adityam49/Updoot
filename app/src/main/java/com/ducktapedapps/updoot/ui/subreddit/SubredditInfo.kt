@@ -16,6 +16,7 @@ import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.SubmissionUiType
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
@@ -139,8 +140,8 @@ fun SelectableViewType(submissionUiType: SubmissionUiType, isSelected: Boolean, 
             modifier = Modifier
                     .wrapContentSize()
                     .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = if (isSelected) 1f else 0.1f),
+                            width = 2.dp,
+                            color = contentColorFor(color = MaterialTheme.colors.BottomDrawerColor.copy(alpha = if (isSelected) 1f else 0.1f)),
                             shape = RoundedCornerShape(4.dp)
                     )
                     .clickable { selectViewType() }

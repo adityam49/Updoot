@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -98,12 +99,12 @@ fun Content(content: SubmissionContent, onClick: (SubmissionContent) -> Unit) {
 
 @Composable
 fun TextPost(text: String) {
-    Surface(
-            color = MaterialTheme.colors.surface.copy(alpha = 0.5f),
+    Box(
             modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
                     .wrapContentHeight()
+                    .border(0.5.dp, MaterialTheme.colors.onBackground, RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp)),
             content = {
                 Providers(AmbientContentAlpha provides ContentAlpha.medium) {

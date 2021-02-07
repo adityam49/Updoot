@@ -20,6 +20,8 @@ import com.ducktapedapps.updoot.ui.common.BottomBarActions
 import com.ducktapedapps.updoot.ui.common.FancyBottomBar
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationMenuScreen
 import com.ducktapedapps.updoot.ui.subreddit.ActiveContent.*
+import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
+import com.ducktapedapps.updoot.ui.theme.UpdootDarkColors
 import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
@@ -65,10 +67,8 @@ fun SubredditScreen(
     BottomSheetScaffold(
             sheetGesturesEnabled = bottomSheetState.isExpanded,
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
-            sheetShape = RoundedCornerShape(
-                    topLeft = 16.dp,
-                    topRight = 16.dp
-            ),
+            sheetBackgroundColor = MaterialTheme.colors.BottomDrawerColor,
+            sheetShape = RoundedCornerShape(topLeft = 16.dp, topRight = 16.dp),
             sheetPeekHeight = 64.dp,
             sheetElevation = 1.dp,
             sheetContent = {
@@ -93,10 +93,12 @@ fun SubredditScreen(
                         },
                         navigateUp = {},
                 )
-                when (activeContent.value) {
-                    GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
-                    SubredditInfo -> SubredditInfo(submissionsVM = viewModel)
-                    else -> EmptyScreen()
+                Surface(color = MaterialTheme.colors.BottomDrawerColor, contentColor = UpdootDarkColors.onSurface) {
+                    when (activeContent.value) {
+                        GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
+                        SubredditInfo -> SubredditInfo(submissionsVM = viewModel)
+                        else -> EmptyScreen()
+                    }
                 }
             },
             bodyContent = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }

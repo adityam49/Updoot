@@ -1,11 +1,8 @@
-package com.ducktapedapps.updoot.ui.subreddit
+package com.ducktapedapps.updoot.ui.common
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.DropdownMenu
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -13,35 +10,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.AndroidDialogProperties
+import androidx.compose.ui.window.Dialog
 
 @Composable
-fun PopUp(
+fun OptionsDialog(
         dismiss: () -> Unit,
-        expanded: Boolean,
         options: List<MenuItemModel>,
-        toggle: @Composable () -> Unit,
 ) {
-    DropdownMenu(
-            toggle = toggle,
-            expanded = expanded,
+    Dialog(
             onDismissRequest = dismiss,
-            dropdownOffset = DpOffset(32.dp, 0.dp)
+            properties = AndroidDialogProperties(
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true,
+            )
     ) {
-        options.forEach {
-            DropdownMenuItem(onClick = it.onClick) {
-                MenuItem(menuItemModel = it)
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                options.forEach {
+                    DropdownMenuItem(onClick = it.onClick) {
+                        MenuItem(menuItemModel = it)
+                    }
+                }
             }
         }
     }
 }
 
-
 @Composable
 fun MenuItem(menuItemModel: MenuItemModel) {
     Row(
             modifier = Modifier
+                    .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically

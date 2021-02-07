@@ -1,18 +1,19 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
+    android:tint="?attr/colorControlNormal"
     android:viewportWidth="24"
     android:viewportHeight="24">
-        <path
-            android:pathData="M1 12a11 11 0 1 1 22 0 11 11 0 1 1-22 0"
-            android:strokeWidth="2"
-            android:strokeAlpha="0.2"
-            android:strokeColor="@color/color_on_surface" />
-        <path
-            android:fillColor="@color/color_on_surface"
-            android:pathData="M10.6 14.1l3.5-3.5-0.7-0.7-3.5 3.5z" />
-        <path
-            android:fillColor="@color/color_on_surface"
-            android:fillType="evenOdd"
-            android:pathData="M14.1 7l-2.8 3-0.7-0.7 2.8-2.9a3 3 0 0 1 4.3 4.3l-2.9 2.8-0.7-0.7L17 10a2 2 0 1 0-2.9-3zm-1.4 7.1L10 17a2 2 0 1 1-3-2.9l2.8-2.8-0.7-0.7-2.9 2.8a3 3 0 0 0 4.3 4.3l2.8-2.9-0.7-0.7z" />
+    <path
+        android:pathData="M1 12a11 11 0 1 1 22 0 11 11 0 1 1-22 0"
+        android:strokeWidth="2"
+        android:strokeAlpha="0.2"
+        android:strokeColor="@android:color/white" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M10.6 14.1l3.5-3.5-0.7-0.7-3.5 3.5z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:fillType="evenOdd"
+        android:pathData="M14.1 7l-2.8 3-0.7-0.7 2.8-2.9a3 3 0 0 1 4.3 4.3l-2.9 2.8-0.7-0.7L17 10a2 2 0 1 0-2.9-3zm-1.4 7.1L10 17a2 2 0 1 1-3-2.9l2.8-2.8-0.7-0.7-2.9 2.8a3 3 0 0 0 4.3 4.3l2.8-2.9-0.7-0.7z" />
 </vector>

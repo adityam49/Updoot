@@ -13,13 +13,11 @@ val downVoteColor = Color(0xFF9494FF)
 val saveColor = Color(0xFFFFB100)
 
 
-val darkWhiteGray = Color(0xFFD2D2D2)
 val darkGray = Color(0xFF171717)
 val lightBlue = Color(0xFF83b9ff)
 val lightBlueVariant = Color(0xFF3C62CB)
 val darkBlue = Color(0xFF2979FF)
 val darkBlueVariant = Color(0xFF2979FF)
-val lightWhiteGray = Color(0xFFEFEFEF)
 val lightGray = Color(0xFF363636)
 val darkRed = Color(0xFFF44336)
 val lightRed = Color(0xFFFF7961)
@@ -28,7 +26,6 @@ val UpdootLightColors = lightColors(
         primary = darkBlue,
         primaryVariant = darkBlueVariant,
         onPrimary = Color.White,
-        surface = lightWhiteGray,
         onSurface = Color.Black,
         secondary = Color.White,
         onSecondary = Color.Black,
@@ -50,8 +47,12 @@ val UpdootDarkColors = darkColors(
 )
 
 @Composable
+val Colors.BottomDrawerColor: Color
+    get() = UpdootDarkColors.surface
+
+@Composable
 val Colors.SurfaceOnDrawer: Color
-    get() = if (isLight) darkWhiteGray else Color(0xFF4F4F4F)
+    get() = Color(0xFF4F4F4F)
 
 @Composable
 val Colors.ScoreBackground: Color

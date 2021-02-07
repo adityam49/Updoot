@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpStatusBarColors() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            window.statusBarColor = ContextCompat.getColor(this, R.color.color_primary)
+            window.statusBarColor = ContextCompat.getColor(this, R.color.color_status_bar)
         }
     }
 

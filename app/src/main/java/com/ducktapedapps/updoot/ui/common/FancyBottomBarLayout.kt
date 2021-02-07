@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import com.ducktapedapps.updoot.ui.theme.UpdootDarkColors
 
 /**
  *  Fancy bottom bar to be used with BottomSheetScaffold
@@ -30,15 +31,16 @@ fun FancyBottomBar(
     ) {
         //TODO : make back button optional
         IconButton(onClick = navigateUp) {
-            Icon(Icons.Default.ArrowBack, "Back Arrow")
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back Arrow", tint = UpdootDarkColors.onSurface)
         }
         Text(
                 modifier = Modifier.wrapContentWidth(),
-                text = title
+                text = title,
+                color = UpdootDarkColors.onSurface
         )
         options.forEach {
             IconButton(onClick = it.open) {
-                Icon(it.icon, it.title)
+                Icon(it.icon, it.title, tint = UpdootDarkColors.onSurface)
             }
         }
     }

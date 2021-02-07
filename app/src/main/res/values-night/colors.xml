@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_primary">#2A2B2E</color>
-    <color name="color_primary_variant">#101218</color>
-    <color name="color_on_primary">#ffffff</color>
-    <color name="color_on_primary_light">#393e46</color>
-    <color name="color_secondary">#83b9ff</color>
-    <color name="color_secondary_alt">#f9d276</color>
-    <color name="color_secondary_variant">#3C62CB</color>
-    <color name="color_on_secondary">#000000</color>
-    <color name="color_error">#FF7961</color>
-    <color name="color_on_error">#000000</color>
-    <color name="color_surface">#202124</color>
-    <color name="color_on_surface">#FFFFFF</color>
-    <color name="color_background">#202124</color>
-    <color name="color_on_background">#FFFFFF</color>
+
+    <color name="nav_bar_color">#FF363636</color>
+    <color name="color_status_bar">#FF171717</color>
     <color name="color_scrim">#de000000</color>
-    <color name="nav_bar_color">@color/color_surface</color>
-    <color name="color_status_bar">@color/color_surface</color>
-    <color name="sticky_post_color">#69F0AE</color>
-    <color name="color_active_account">#262626</color>
 </resources>

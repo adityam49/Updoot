@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.ui.common
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,9 +16,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent
 import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
+import dev.chrisbanes.accompanist.coil.CoilImage
 import dev.chrisbanes.accompanist.glide.GlideImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState.*
@@ -28,18 +30,16 @@ fun StaticLinkPreview(
         modifier: Modifier = Modifier,
         url: String,
         thumbnail: String?,
-        onClickLink: () -> Unit
 ) {
     Row(modifier = modifier
             .padding(8.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.surface.copy(alpha = 0.5f))
-            .clickable(onClick = onClickLink),
+            .border(0.5.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
             verticalAlignment = Alignment.Top
     ) {
-        GlideImage(
+        CoilImage(
                 data = thumbnail ?: "",
-                requestBuilder = { centerCrop().circleCrop() },
+                requestBuilder = { transformations(CircleCropTransformation()) },
                 modifier = Modifier
                         .size(48.dp)
                         .padding(8.dp)
@@ -70,7 +70,7 @@ fun StaticLinkPreview(
 fun LinkPreview(modifier: Modifier = Modifier, linkState: SubmissionContent.LinkState, openLink: () -> Unit) {
     Row(modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.surface.copy(alpha = 0.5f))
+            .border(0.5.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
             .clickable(onClick = openLink)
             .padding(8.dp),
             verticalAlignment = Alignment.Top
