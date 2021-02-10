@@ -4,7 +4,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.Constants.DEBOUNCE_TIME_OUT
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,7 @@ class SearchVM @ViewModelInject constructor(
     private val _includeOver18: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val includeOver18: StateFlow<Boolean> = _includeOver18
 
-    private val remoteResults: Flow<List<Subreddit>> = query
+    private val remoteResults: Flow<List<RemoteSubreddit>> = query
             .debounce(DEBOUNCE_TIME_OUT)
             .combine(includeOver18) { keyWord, nsfwPref ->
                 if (keyWord.isEmpty()) emptyList()
@@ -48,7 +48,7 @@ class SearchVM @ViewModelInject constructor(
 //                        }
 //            }.flattenMerge()
 
-    private suspend fun getSubredditsWithKeywords(keyword: String, nsfwPref: Boolean): List<Subreddit> = withContext(Dispatchers.IO) {
+    private suspend fun getSubredditsWithKeywords(keyword: String, nsfwPref: Boolean): List<RemoteSubreddit> = withContext(Dispatchers.IO) {
         _searchQueryLoading.value = true
         val redditAPI = redditClient.api()
         val results = redditAPI.search(query = keyword, includeOver18 = nsfwPref)
@@ -64,7 +64,7 @@ class SearchVM @ViewModelInject constructor(
         _includeOver18.value = !includeOver18.value
     }
 
-    val results: StateFlow<List<Subreddit>> = remoteResults.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val results: StateFlow<List<RemoteSubreddit>> = remoteResults.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 //            combine(localResults, remoteResults) { localSubs: List<Subreddit>, remoteSubs: List<Subreddit> ->
 //                localSubs + remoteSubs.filterNot { remoteSub ->
 //                    localSubs.any { localSub ->

@@ -10,10 +10,10 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.ducktapedapps.updoot.backgroundWork.SubscriptionSyncWorker
 import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
-import com.ducktapedapps.updoot.data.local.model.Account
-import com.ducktapedapps.updoot.data.local.model.Token
 import com.ducktapedapps.updoot.data.remote.AuthAPI
 import com.ducktapedapps.updoot.data.remote.RedditAPI
+import com.ducktapedapps.updoot.data.remote.model.Account
+import com.ducktapedapps.updoot.data.remote.model.Token
 import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running

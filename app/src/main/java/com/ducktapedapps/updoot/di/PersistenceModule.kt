@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.UpdootDB
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.ui.comments.ICommentPrefManager
 import com.ducktapedapps.updoot.ui.common.IThemeManager
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
@@ -23,6 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Singleton
 
 
@@ -52,14 +53,14 @@ abstract class PersistenceModule {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     GlobalScope.launch {
                         updootDb.subredditDAO().insertSubreddit(
-                                Subreddit(
-                                        display_name = FRONTPAGE,
-                                        community_icon = "",
+                                LocalSubreddit(
+                                        subredditName = FRONTPAGE,
+                                        icon = "",
                                         subscribers = -1,
-                                        public_description = "The front page of the internet",
-                                        created = 1137566705,
-                                        lastUpdated = System.currentTimeMillis(),
-                                        description = ""
+                                        shortDescription = "The front page of the internet",
+                                        created = Date(1137566705),
+                                        lastUpdated = Date(System.currentTimeMillis()),
+                                        longDescription = ""
                                 )
                         )
                         updootDb.subredditPrefsDAO().insertSubredditPrefs(

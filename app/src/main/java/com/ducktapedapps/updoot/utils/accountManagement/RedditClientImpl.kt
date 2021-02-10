@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.annotation.DrawableRes
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.Token
 import com.ducktapedapps.updoot.data.remote.AuthAPI
 import com.ducktapedapps.updoot.data.remote.RedditAPI
+import com.ducktapedapps.updoot.data.remote.model.Token
 import com.ducktapedapps.updoot.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

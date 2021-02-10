@@ -3,7 +3,9 @@ package com.ducktapedapps.updoot.ui.explore
 import android.util.Log
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.TrendingSubreddit
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
+import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
+import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -11,17 +13,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ExploreRepo @Inject constructor(
         private val redditClient: IRedditClient,
-        private val subredditDAO: SubredditDAO
+        private val subredditDAO: SubredditDAO,
 ) {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    val trendingSubs: Flow<List<Subreddit>> = subredditDAO.observeTrendingSubreddits()
+    val trendingSubs: Flow<List<LocalSubreddit>> = subredditDAO.observeTrendingSubreddits()
 
     suspend fun loadTrendingSubs() {
         _isLoading.value = true
@@ -42,7 +46,7 @@ class ExploreRepo @Inject constructor(
     }
 
     @Throws(Exception::class)
-    private suspend fun fetchNewTrendingSubs(): List<Subreddit> {
+    private suspend fun fetchNewTrendingSubs(): List<RemoteSubreddit> {
         val api = redditClient.api()
         val result = api.getTrendingSubredditNames()
         return result.subreddit_names.map { id ->
@@ -50,18 +54,19 @@ class ExploreRepo @Inject constructor(
         }.toList()
     }
 
-    private suspend fun List<Subreddit>.saveToCache() {
+    private suspend fun List<RemoteSubreddit>.saveToCache() {
         forEach {
-            subredditDAO.insertSubreddit(it.copy(lastUpdated = System.currentTimeMillis()))
+            subredditDAO.insertSubreddit(it.toLocalSubreddit().copy(lastUpdated = Date(System.currentTimeMillis())))
             subredditDAO.insertTrendingSubreddit(TrendingSubreddit(it.display_name))
         }
     }
 
-    private fun List<Subreddit>.isStale(): Boolean = any {
-        val diff = System.currentTimeMillis() - (it.lastUpdated ?: 0L)
+    private fun List<LocalSubreddit>.isStale(): Boolean = any {
+        val diff = System.currentTimeMillis() - it.lastUpdated.time
+        val diffInHours = TimeUnit.HOURS.toHours(diff)
         val threshold = TRENDING_SUBS_STALE_THRESHOLD_IN_HOURS * 60 * 60 * 1000
         Log.i(TAG, "diff = $diff and threshold = $threshold")
-        diff > threshold
+        diffInHours > threshold
     }
 
     private suspend fun removeOldTrendingSubreddits() {

@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.data.local.model
+package com.ducktapedapps.updoot.data.remote.model
 
 import com.squareup.moshi.JsonClass
 

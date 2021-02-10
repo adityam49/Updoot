@@ -1,6 +1,6 @@
 package com.ducktapedapps.updoot.data.remote
 
-import com.ducktapedapps.updoot.data.local.model.Token
+import com.ducktapedapps.updoot.data.remote.model.Token
 import com.ducktapedapps.updoot.utils.Constants
 import okhttp3.Credentials
 import retrofit2.http.*

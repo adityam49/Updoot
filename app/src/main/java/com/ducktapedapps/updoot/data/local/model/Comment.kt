@@ -1,36 +1,29 @@
 package com.ducktapedapps.updoot.data.local.model
 
-import com.squareup.moshi.JsonClass
-
-@JsonClass(generateAdapter = false)
-sealed class Comment(
+sealed class LocalComment(
+        open val id: String,
         open val depth: Int,
-        open val name: String,
-        open val parent_id: String
-) : RedditThing {
+        open val parentId: String,
+)
 
-    @JsonClass(generateAdapter = true)
-    data class CommentData(
-            override val depth: Int = 0,
-            override val parent_id: String,
-            override val name: String,
-            val author: String,
-            var body: String?,
-            var ups: Int?,
-            val likes: Boolean?,
-            val replies: Listing<Comment> = Listing(children = emptyList()),
-            val gildings: Gildings,
-            val repliesExpanded: Boolean = false,
-            val is_submitter: Boolean,
-            val author_flair_text: String? = ""
-    ) : Comment(depth, name, parent_id)
+data class FullComment(
+        override val id: String,
+        override val depth: Int = 0,
+        override val parentId: String,
+        val author: String,
+        var body: String?,
+        var upVotes: Int?,
+        val userHasUpVoted: Boolean?,
+        val replies: List<LocalComment>,
+        val gildings: Gildings,
+        val repliesExpanded: Boolean = false,
+        val userIsOriginalPoster: Boolean,
+        val userFlair: String? = null,
+) : LocalComment(id, depth, parentId)
 
-    @JsonClass(generateAdapter = true)
-    data class MoreCommentData(
-            val count: Int,
-            override val name: String,
-            override val parent_id: String,
-            override val depth: Int = 0,
-            val children: List<String>,
-    ) : Comment(depth, name, parent_id)
-}
+data class MoreComment(
+        override val id: String,
+        override val parentId: String,
+        override val depth: Int = 0,
+        val children: List<String>,
+) : LocalComment(id, depth, parentId)

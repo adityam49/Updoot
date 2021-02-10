@@ -11,7 +11,8 @@ import androidx.work.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.SubredditSubscription
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
+import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.createNotificationChannel
@@ -42,7 +43,7 @@ class SubscriptionSyncWorker @WorkerInject constructor(
             count += subs.size
             subs.forEach { subreddit ->
                 subredditDAO.apply {
-                    insertSubreddit(subreddit)
+                    insertSubreddit(subreddit.toLocalSubreddit())
                     insertSubscription(SubredditSubscription(subreddit.display_name, user))
                 }
             }
@@ -57,12 +58,12 @@ class SubscriptionSyncWorker @WorkerInject constructor(
             AccountManager.get(context).accounts.map { it.name }.filter { it != Constants.ANON_USER }
 
 
-    private suspend fun loadUserSubscribedSubreddits(user: String): List<Subreddit> {
+    private suspend fun loadUserSubscribedSubreddits(user: String): List<RemoteSubreddit> {
         try {
             redditClient.setCurrentAccount(user)
             val redditAPI = redditClient.api()
             var result = redditAPI.getSubscribedSubreddits(null)
-            val allSubs = mutableListOf<Subreddit>().apply {
+            val allSubs = mutableListOf<RemoteSubreddit>().apply {
                 addAll(result.children)
             }
             var after: String? = result.after

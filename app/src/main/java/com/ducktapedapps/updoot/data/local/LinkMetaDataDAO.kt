@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface LinkMetaDataDAO {
     @Insert
-    suspend fun insertLinkMetaData(linkModel: LinkModel)
+    suspend fun insertUrlMetaData(linkModel: LinkModel)
 
     @Query("SELECT * FROM LinkModel where url is :url")
     suspend fun getUrlMetaData(url: String): LinkModel?

@@ -1,7 +1,7 @@
 package com.ducktapedapps.updoot.utils.accountManagement
 
-import com.ducktapedapps.updoot.data.local.model.Token
 import com.ducktapedapps.updoot.data.remote.RedditAPI
+import com.ducktapedapps.updoot.data.remote.model.Token
 import kotlinx.coroutines.flow.StateFlow
 
 interface IRedditClient {

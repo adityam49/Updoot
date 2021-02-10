@@ -5,64 +5,65 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.data.local.model.Listing
-import com.ducktapedapps.updoot.data.local.model.RedditThing
+import com.ducktapedapps.updoot.data.local.model.FullComment
+import com.ducktapedapps.updoot.data.remote.model.Listing
+import com.ducktapedapps.updoot.data.remote.model.RedditThing
+import com.ducktapedapps.updoot.ui.subreddit.PostUiModel
 import com.ducktapedapps.updoot.ui.user.UserSection.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
-//TODO : fix infinite loading
+//TODO : fix the entire thing
 class UserViewModel @ViewModelInject constructor(
         private val redditClient: IRedditClient,
         @Assisted savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    private val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
+) : ViewModel(), IUserViewModel {
+    override val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
 
-    private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
+    override val isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
+
+    private val _content: MutableStateFlow<Map<String?, List<RedditThing>>> = MutableStateFlow(emptyMap())
+    override val content: StateFlow<List<UserContent>> = emptyFlow<List<UserContent>>().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+    )
 
     private val requestDispatcher = MutableSharedFlow<NextPageRequest>()
 
-    private val _currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
-    val currentSection: StateFlow<UserSection> = _currentSection
-
-    private val _content: MutableStateFlow<List<Listing<out RedditThing>>> = MutableStateFlow(emptyList())
-    val content: StateFlow<List<RedditThing>> = _content.map {
-        it.flatMap { listing -> listing.children }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     init {
-        observeRequests().launchIn(viewModelScope)
+//        observeRequests().launchIn(viewModelScope)
         loadPage()
     }
 
-    fun reload() {
-        _content.value = emptyList()
+    override fun reload() {
+        _content.value = emptyMap()
         loadPage()
     }
 
     //TODO : add currently logged in user as a sharedflow and combine with this flow
-    private fun observeRequests(): Flow<List<Listing<out RedditThing>>> =
-            combine(currentSection, requestDispatcher) { userSection, request ->
-                _content.value + getPage(userSection, request.nextPageKey)
-            }.onEach {
-                _content.value = it
-            }
+//    private fun observeRequests(): Flow<List<UserContent>> =
+//            combine(currentSection, requestDispatcher) { userSection, request ->
+//                _content.value + getPage(userSection, request.nextPageKey)
+//            }.onEach {
+//                _content.value = it
+//            }
 
-    fun loadPage() {
-        viewModelScope.launch {
-            if (_content.value.isEmpty())
-                requestDispatcher.emit(FirstPageRequest)
-            else if (_content.value.last().after != null)
-                requestDispatcher.emit(
-                        NextPageRequest(nextPageKey = _content.value.last().after)
-                )
-        }
+    override fun loadPage() {
+//        viewModelScope.launch {
+//            if (_content.value.isEmpty())
+//                requestDispatcher.emit(FirstPageRequest)
+//            else if (_content.value.last().after != null)
+//                requestDispatcher.emit(
+//                        NextPageRequest(nextPageKey = _content.value.last().after)
+//                )
+//        }
     }
 
     private suspend fun getPage(section: UserSection, after: String?): Listing<out RedditThing> {
-        _loading.value = true
+        isLoading.value = true
         val api = redditClient.api()
         return try {
             when (section) {
@@ -79,14 +80,19 @@ class UserViewModel @ViewModelInject constructor(
             e.printStackTrace()
             Listing(null, emptyList())
         } finally {
-            _loading.value = false
+            isLoading.value = false
         }
     }
 
-    fun setSection(section: UserSection) {
-        _content.value = emptyList()
-        _currentSection.value = section
+    override fun setSection(section: UserSection) {
+        _content.value = emptyMap()
+        currentSection.value = section
     }
+}
+
+sealed class UserContent {
+    data class UserPost(val data: PostUiModel) : UserContent()
+    data class UserComment(val data: FullComment) : UserContent()
 }
 
 data class NextPageRequest(val nextPageKey: String?)

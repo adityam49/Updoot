@@ -8,27 +8,27 @@ import androidx.hilt.Assisted
 import androidx.hilt.work.WorkerInject
 import androidx.work.*
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.SubmissionsCacheDAO
+import com.ducktapedapps.updoot.data.local.PostDAO
 import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.model.LinkData
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
+import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.createNotificationChannel
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class CacheCleanUpWorker @WorkerInject constructor(
         @Assisted private val context: Context,
         @Assisted workParas: WorkerParameters,
-        private val submissionsCacheDAO: SubmissionsCacheDAO,
-        private val subredditDAO: SubredditDAO
+        private val postCacheDAO: PostDAO,
+        private val subredditDAO: SubredditDAO,
 ) : CoroutineWorker(context, workParas) {
     override suspend fun doWork(): Result =
             try {
-                val currentTimeInSeconds = System.currentTimeMillis() / 1000
-                findAndRemoveStaleSubmissions(currentTimeInSeconds)
-                findAndRemoveStaleSubreddits(currentTimeInSeconds)
+                findAndRemoveStaleSubmissions()
+                findAndRemoveStaleSubreddits()
                 Result.success()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -37,13 +37,13 @@ class CacheCleanUpWorker @WorkerInject constructor(
             }
 
     @Throws(Exception::class)
-    private suspend fun findAndRemoveStaleSubmissions(currentTimeInSeconds: Long) {
+    private suspend fun findAndRemoveStaleSubmissions() {
         var totalSubmissions: Int
         var submissionsRemoved: Int
-        submissionsCacheDAO.getAllCachedSubmissions().also { totalSubmissions = it.size }
-                .filter { it.isStale(currentTimeInSeconds) }
+        postCacheDAO.getCachedPosts().also { totalSubmissions = it.size }
+                .filter { it.isStale() }
                 .also { submissionsRemoved = it.size }
-                .forEach { submissionsCacheDAO.deleteSubmission(it.name, it.subredditName) }
+                .forEach { postCacheDAO.deletePost(it.id, it.subredditName) }
         showSubmissionsRemovedNotification(totalSubmissions, submissionsRemoved)
     }
 
@@ -56,16 +56,15 @@ class CacheCleanUpWorker @WorkerInject constructor(
                 )
             }
 
-    private fun LinkData.isStale(currentTimeInSeconds: Long): Boolean =
-            SUBMISSION_STALE_THRESHOLD_IN_HOURS * 60 * 60 < currentTimeInSeconds - lastUpdated
+    private fun Post.isStale(): Boolean =
+            SUBMISSION_STALE_THRESHOLD_IN_HOURS < TimeUnit.HOURS.toHours(Date().time - lastUpdated.time)
 
-    @Throws(Exception::class)
-    private suspend fun findAndRemoveStaleSubreddits(currentTimeInSeconds: Long) {
+    private suspend fun findAndRemoveStaleSubreddits() {
         var subredditsRemovedCount: Int
         subredditDAO.getNonSubscribedSubreddits()
-                .filter { it.isStale(currentTimeInSeconds) && it.display_name != FRONTPAGE }
+                .filter { it.isStale() && it.subredditName != FRONTPAGE }
                 .also { subredditsRemovedCount = it.size }
-                .forEach { subredditDAO.deleteSubreddit(it.display_name) }
+                .forEach { subredditDAO.deleteSubreddit(it.subredditName) }
         showSubredditsRemovedNotification(subredditsRemovedCount)
     }
 
@@ -79,10 +78,9 @@ class CacheCleanUpWorker @WorkerInject constructor(
         }
     }
 
-    private fun Subreddit?.isStale(currentTimeInSeconds: Long): Boolean {
+    private fun LocalSubreddit?.isStale(): Boolean {
         return this == null ||
-                SUBREDDIT_STALE_THRESHOLD_IN_HOURS * 60 * 60 <
-                currentTimeInSeconds - (lastUpdated ?: 0L)
+                SUBREDDIT_STALE_THRESHOLD_IN_HOURS < TimeUnit.HOURS.toHours(Date().time - lastUpdated.time)
     }
 
     private fun showFailureReportNotification(e: Exception) = with(context) {

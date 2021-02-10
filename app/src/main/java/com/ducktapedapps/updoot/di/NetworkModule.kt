@@ -1,13 +1,13 @@
 package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.BuildConfig
-import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
-import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
-import com.ducktapedapps.updoot.data.local.model.LinkData
-import com.ducktapedapps.updoot.data.local.model.Subreddit
-import com.ducktapedapps.updoot.data.local.moshiAdapters.ImageJsonAdapterFactory
-import com.ducktapedapps.updoot.data.local.moshiAdapters.UpdootAdapterFactory
-import com.ducktapedapps.updoot.data.local.moshiAdapters.VideoJsonAdapterFactory
+import com.ducktapedapps.updoot.data.remote.model.Comment.CommentData
+import com.ducktapedapps.updoot.data.remote.model.Comment.MoreCommentData
+import com.ducktapedapps.updoot.data.remote.model.LinkData
+import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.ImageJsonAdapterFactory
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.UpdootAdapterFactory
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.VideoJsonAdapterFactory
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.squareup.moshi.Moshi
@@ -58,7 +58,7 @@ object NetworkModule {
                     UpdootAdapterFactory.of("kind", "data")
                             .withSubType("t1", CommentData::class.java)
                             .withSubType("t3", LinkData::class.java)
-                            .withSubType("t5", Subreddit::class.java)
+                            .withSubType("t5", RemoteSubreddit::class.java)
                             .withSubType("more", MoreCommentData::class.java)
             )
             .build()

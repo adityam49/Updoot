@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.MainActivity
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
-import com.ducktapedapps.updoot.utils.Media.*
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,7 +23,7 @@ class SubredditFragment : Fragment() {
     }
 
     private val activityVM: ActivityVM by activityViewModels()
-    private val submissionsVM: SubmissionsVM by viewModels()
+    private val subredditVM: ISubredditVM by viewModels<SubredditVMImpl>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
@@ -32,15 +31,15 @@ class SubredditFragment : Fragment() {
                 UpdootTheme {
                     with((requireActivity() as MainActivity)) {
                         SubredditScreen(
-                                viewModel = submissionsVM,
+                                viewModel = subredditVM,
                                 activityVM = activityVM,
                                 openMedia = { media ->
                                     when (media) {
-                                        is SelfText -> Unit
-                                        is Image -> openImage(media.imageData)
-                                        is Video -> openVideo(media.url)
-                                        is Link -> openLink(media.url)
-                                        JustTitle -> Unit
+                                        is PostMedia.TextMedia -> Unit
+                                        is PostMedia.ImageMedia -> openImage(media)
+                                        is PostMedia.LinkMedia -> openLink(media.url)
+                                        is PostMedia.VideoMedia -> openVideo(media.url)
+                                        PostMedia.NoMedia -> Unit
                                     }
                                 },
                                 openComments = { subreddit, id -> openComments(subreddit, id) },

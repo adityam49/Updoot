@@ -25,11 +25,12 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import dev.chrisbanes.accompanist.glide.GlideImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import java.util.*
 
 
 @Composable
@@ -61,7 +62,7 @@ fun ExploreScreen(
 }
 
 @Composable
-fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
+fun TrendingSub(subreddit: LocalSubreddit, onClickSubreddit: (String) -> Unit) {
     val resources = AmbientContext.current.resources
     val displayMetrics = resources.displayMetrics
     val screenWidth = displayMetrics.widthPixels / displayMetrics.density
@@ -71,7 +72,7 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                     .wrapContentHeight()
                     .padding(start = 8.dp, end = 8.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable(onClick = { onClickSubreddit(subreddit.display_name) }),
+                    .clickable(onClick = { onClickSubreddit(subreddit.subredditName) }),
             backgroundColor = MaterialTheme.colors.SurfaceOnDrawer,
     ) {
         Row(
@@ -80,7 +81,7 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
                         .wrapContentHeight()
         ) {
             GlideImage(
-                    data = subreddit.community_icon,
+                    data = subreddit.icon,
                     modifier = Modifier
                             .size(48.dp)
                             .padding(start = 16.dp, top = 16.dp),
@@ -99,11 +100,11 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
             }
             Column {
                 Text(
-                        text = subreddit.display_name,
+                        text = subreddit.subredditName,
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
                 )
-                subreddit.public_description?.run {
+                subreddit.shortDescription?.run {
                     Text(
                             text = this,
                             style = MaterialTheme.typography.caption,
@@ -118,15 +119,15 @@ fun TrendingSub(subreddit: Subreddit, onClickSubreddit: (String) -> Unit) {
 @Preview
 @Composable
 fun PreviewTrendingSub() {
-    val subreddit = Subreddit(
-            display_name = "r/Android",
-            community_icon = "https://b.thumbs.redditmedia.com/EndDxMGB-FTZ2MGtjepQ06cQEkZw_YQAsOUudpb9nSQ.png",
+    val subreddit = LocalSubreddit(
+            subredditName = "r/Android",
+            icon = "https://b.thumbs.redditmedia.com/EndDxMGB-FTZ2MGtjepQ06cQEkZw_YQAsOUudpb9nSQ.png",
             subscribers = 0,
-            accounts_active = 0,
-            public_description = "Some info about subreddit",
-            description = "Some info about subreddit",
-            created = 12334323432,
-            lastUpdated = 12334323432,
+            accountsActive = 0,
+            shortDescription = "Some info about subreddit",
+            longDescription = "Some info about subreddit",
+            created = Date(12334323432),
+            lastUpdated = Date(),
     )
     TrendingSub(subreddit = subreddit, onClickSubreddit = {})
 }

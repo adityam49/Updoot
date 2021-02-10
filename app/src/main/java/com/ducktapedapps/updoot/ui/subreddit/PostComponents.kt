@@ -19,13 +19,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.ui.common.*
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
-import com.ducktapedapps.updoot.utils.Media.*
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.ducktapedapps.updoot.utils.getCompactDateAsString
-import com.ducktapedapps.updoot.utils.toMedia
 import dev.chrisbanes.accompanist.coil.CoilImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState.*
 import dev.chrisbanes.accompanist.imageloading.MaterialLoadingImage
@@ -34,7 +31,7 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun CompactPost(
-        linkData: LinkData,
+        post: PostUiModel,
         onClickMedia: () -> Unit,
         onClickPost: () -> Unit,
         openSubreddit: (String) -> Unit,
@@ -46,12 +43,12 @@ fun CompactPost(
             MenuItemModel({ setOptionsDialogVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
             MenuItemModel({
                 setOptionsDialogVisibility(false)
-                openSubreddit(linkData.subredditName)
-            }, linkData.subredditName, R.drawable.ic_subreddit_default_24dp),
+                openSubreddit(post.subredditName)
+            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
             MenuItemModel({
                 setOptionsDialogVisibility(false)
-                openUser(linkData.author)
-            }, linkData.author, R.drawable.ic_account_circle_24dp),
+                openUser(post.author)
+            }, post.author, R.drawable.ic_account_circle_24dp),
     )
 
     if (optionsDialog) OptionsDialog(options = list, dismiss = { setOptionsDialogVisibility(false) })
@@ -62,7 +59,7 @@ fun CompactPost(
     ) {
         val (mediaThumbnail, title, metaData, voteCounter, gildings) = createRefs()
         CompactMediaThumbnail(
-                linkData = linkData,
+                post = post,
                 modifier = Modifier
                         .clip(CircleShape)
                         .preferredSize(48.dp)
@@ -73,8 +70,8 @@ fun CompactPost(
                             end.linkTo(title.start)
                         })
         SubmissionTitle(
-                title = linkData.title,
-                isSticky = linkData.stickied,
+                title = post.title,
+                isSticky = post.isSticky,
                 modifier = Modifier.constrainAs(title) {
                     start.linkTo(mediaThumbnail.end, 8.dp)
                     top.linkTo(parent.top, margin = 8.dp)
@@ -84,7 +81,7 @@ fun CompactPost(
                     width = Dimension.fillToConstraints
                 })
 
-        MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
+        MetaData(post = post, modifier = Modifier.constrainAs(metaData) {
             start.linkTo(title.start)
             top.linkTo(title.bottom, margin = 8.dp)
             bottom.linkTo(parent.bottom, margin = 8.dp)
@@ -93,8 +90,8 @@ fun CompactPost(
             height = Dimension.wrapContent
         })
         VoteCounter(
-                ups = linkData.ups,
-                likes = linkData.likes,
+                upVotes = post.upVotes,
+                userHasUpVoted = post.userHasUpVoted,
                 modifier = Modifier.constrainAs(voteCounter) {
                     top.linkTo(parent.top, margin = 8.dp)
                     end.linkTo(parent.end, margin = 8.dp)
@@ -102,7 +99,7 @@ fun CompactPost(
                     width = Dimension.wrapContent
                 }
         )
-        AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
+        AllGildings(gildings = post.gildings, modifier = Modifier.constrainAs(gildings) {
             end.linkTo(parent.end, margin = 8.dp)
             top.linkTo(metaData.top)
             bottom.linkTo(metaData.bottom)
@@ -111,14 +108,14 @@ fun CompactPost(
 }
 
 @Composable
-fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
-    if (linkData.over_18) loadVectorResource(id = R.drawable.ic_nsfw_24dp).resource.resource?.let {
+fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
+    if (post.isNsfw) loadVectorResource(id = R.drawable.ic_nsfw_24dp).resource.resource?.let {
         Image(modifier = modifier, imageVector = it, contentDescription = "NSFW Content")
     }
-    else
-        when (linkData.toMedia()) {
-            is Image, is Video -> CoilImage(
-                    data = linkData.thumbnail,
+    else {
+        when (post.thumbnail) {
+            is Thumbnail.Remote -> CoilImage(
+                    data = post.thumbnail.url,
                     modifier = modifier,
                     requestBuilder = {
                         transformations(CircleCropTransformation())
@@ -126,21 +123,20 @@ fun CompactMediaThumbnail(linkData: LinkData, modifier: Modifier) {
             ) { imageLoadState ->
                 when (imageLoadState) {
                     is Success -> Image(painter = imageLoadState.painter, contentDescription = "Post Thumbnail")
-                    is Error -> loadVectorResource(id = R.drawable.ic_image_error_24dp).resource.resource?.let { imageVector ->
+                    is Error -> loadVectorResource(id = post.thumbnail.fallbackLocalThumbnail).resource.resource?.let { imageVector ->
                         Image(imageVector = imageVector, contentDescription = "Error Icon", modifier = modifier)
                     }
                     else -> Unit
                 }
             }
-            is SelfText -> loadVectorResource(id = R.drawable.ic_selftext_24dp).resource.resource?.let {
-                Image(imageVector = it, contentDescription = "Selftext Icon", modifier = modifier)
-            }
 
-            is Link, JustTitle -> loadVectorResource(id = R.drawable.ic_link_24dp).resource.resource?.let {
-                Image(imageVector = it, contentDescription = "Link Icon", modifier = modifier)
+            is Thumbnail.LocalThumbnail -> loadVectorResource(id = post.thumbnail.imageResource).resource.resource?.let { imageVector ->
+                Image(imageVector = imageVector, contentDescription = "Error Icon", modifier = modifier)
             }
         }
+    }
 }
+
 
 @Composable
 fun SubmissionTitle(
@@ -159,11 +155,11 @@ fun SubmissionTitle(
 }
 
 @Composable
-private fun MetaData(linkData: LinkData, modifier: Modifier) {
+private fun MetaData(post: PostUiModel, modifier: Modifier) {
     Providers(AmbientContentAlpha provides ContentAlpha.disabled) {
         Text(
                 style = MaterialTheme.typography.caption,
-                text = "${linkData.subredditName} • ${getCompactCountAsString(linkData.commentsCount.toLong())} Replies • ${getCompactDateAsString(linkData.created)}",
+                text = "${post.subredditName} • ${getCompactCountAsString(post.replyCount.toLong())} Replies • ${getCompactDateAsString(post.creationDate.time)}",
                 modifier = modifier
         )
     }
@@ -171,7 +167,7 @@ private fun MetaData(linkData: LinkData, modifier: Modifier) {
 
 @Composable
 fun LargePost(
-        linkData: LinkData,
+        post: PostUiModel,
         onClickMedia: () -> Unit,
         openPost: () -> Unit,
         openSubreddit: (String) -> Unit,
@@ -183,12 +179,12 @@ fun LargePost(
             MenuItemModel({ setOptionsDialogVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
             MenuItemModel({
                 setOptionsDialogVisibility(false)
-                openSubreddit(linkData.subredditName)
-            }, linkData.subredditName, R.drawable.ic_subreddit_default_24dp),
+                openSubreddit(post.subredditName)
+            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
             MenuItemModel({
                 setOptionsDialogVisibility(false)
-                openUser(linkData.author)
-            }, linkData.author, R.drawable.ic_account_circle_24dp),
+                openUser(post.author)
+            }, post.author, R.drawable.ic_account_circle_24dp),
     )
     if (optionsDialog) OptionsDialog(dismiss = { setOptionsDialogVisibility(false) }, options = list)
     ConstraintLayout(modifier = Modifier
@@ -197,8 +193,8 @@ fun LargePost(
             .clickable(onClick = openPost, onLongClick = { setOptionsDialogVisibility(true) })) {
         val (media, title, metaData, voteCounter, gildings) = createRefs()
         SubmissionTitle(
-                title = linkData.title,
-                isSticky = linkData.stickied,
+                title = post.title,
+                isSticky = post.isSticky,
                 modifier = Modifier.constrainAs(title) {
                     start.linkTo(parent.start, margin = 8.dp)
                     top.linkTo(parent.top, margin = 8.dp)
@@ -209,7 +205,7 @@ fun LargePost(
                 })
 
         LargePostMedia(
-                linkData = linkData,
+                postMedia = post.postMedia,
                 modifier = Modifier
                         .constrainAs(media) {
                             start.linkTo(parent.start)
@@ -225,7 +221,7 @@ fun LargePost(
                         )
         )
 
-        MetaData(linkData = linkData, modifier = Modifier.constrainAs(metaData) {
+        MetaData(post = post, modifier = Modifier.constrainAs(metaData) {
             start.linkTo(media.start, margin = 8.dp)
             top.linkTo(media.bottom, margin = 8.dp)
             bottom.linkTo(parent.bottom, margin = 16.dp)
@@ -233,8 +229,8 @@ fun LargePost(
             height = Dimension.wrapContent
         })
         VoteCounter(
-                ups = linkData.ups,
-                likes = linkData.likes,
+                upVotes = post.upVotes,
+                userHasUpVoted = post.userHasUpVoted,
                 modifier = Modifier.constrainAs(voteCounter) {
                     top.linkTo(title.top)
                     end.linkTo(parent.end, margin = 8.dp)
@@ -242,7 +238,7 @@ fun LargePost(
                     width = Dimension.wrapContent
                 }
         )
-        AllGildings(gildings = linkData.gildings, modifier = Modifier.constrainAs(gildings) {
+        AllGildings(gildings = post.gildings, modifier = Modifier.constrainAs(gildings) {
             end.linkTo(parent.end, margin = 8.dp)
             top.linkTo(metaData.top)
             bottom.linkTo(metaData.bottom)
@@ -251,29 +247,31 @@ fun LargePost(
 }
 
 @Composable
-fun LargePostMedia(linkData: LinkData, modifier: Modifier) {
-    when (val mediaData = linkData.toMedia()) {
-        is SelfText -> TextPostMedia(text = mediaData.text, modifier = modifier)
-        is Image -> ImagePostMedia(modifier = modifier, media = mediaData)
-        is Video,
-        is Link,
-        -> StaticLinkPreview(
-                url = linkData.url,
-                thumbnail = linkData.thumbnail,
+fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
+    when (postMedia) {
+        is PostMedia.TextMedia -> TextPostMedia(text = postMedia.text, modifier = modifier)
+        is PostMedia.ImageMedia -> ImagePostMedia(modifier = modifier, media = postMedia)
+        PostMedia.NoMedia -> Box(modifier = modifier) {}
+        is PostMedia.LinkMedia -> StaticLinkPreview(
+                url = postMedia.url,
+                thumbnail = postMedia.thumbnail,
                 modifier = modifier,
         )
-        JustTitle -> Box(modifier = modifier) {}
+
+        is PostMedia.VideoMedia -> StaticLinkPreview(
+                url = postMedia.url,
+                thumbnail = postMedia.thumbnail,
+                modifier = modifier,
+        )
     }
 }
 
 @Composable
-fun ImagePostMedia(modifier: Modifier, media: Image) {
-    val data = media.imageData
-    val ratio = ((data?.lowResWidth?.toFloat() ?: 1f) / (data?.lowResHeight?.toFloat()
-            ?: 1f)).absoluteValue
+fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
+    val ratio = (media.width.toFloat() / media.height.toFloat()).absoluteValue
     Log.i("AspectRatio", "ratio :$ratio")
     CoilImage(
-            data = data?.lowResUrl ?: "",
+            data = media.url,
             modifier = modifier
                     .padding(8.dp)
                     .fillMaxWidth()

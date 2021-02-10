@@ -18,3 +18,12 @@ sealed class SubredditSorting {
     object TopYear : SubredditSorting()
     object TopAll : SubredditSorting()
 }
+
+//TODO
+enum class Sorting {
+    Rising, Best, New, Hot, Controversial, Top,
+}
+
+enum class Duration {
+    Hour, Day, Week, Month, Year, All,
+}

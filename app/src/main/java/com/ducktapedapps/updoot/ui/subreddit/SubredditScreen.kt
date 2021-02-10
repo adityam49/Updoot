@@ -22,17 +22,15 @@ import com.ducktapedapps.updoot.ui.navDrawer.NavigationMenuScreen
 import com.ducktapedapps.updoot.ui.subreddit.ActiveContent.*
 import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
 import com.ducktapedapps.updoot.ui.theme.UpdootDarkColors
-import com.ducktapedapps.updoot.utils.Media
 import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
 import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
-import com.ducktapedapps.updoot.utils.toMedia
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun SubredditScreen(
-        viewModel: SubmissionsVM,
-        openMedia: (Media) -> Unit,
+        viewModel: ISubredditVM,
+        openMedia: (PostMedia) -> Unit,
         openComments: (subreddit: String, id: String) -> Unit,
         openUser: (String) -> Unit,
         openSubreddit: (String) -> Unit,
@@ -78,17 +76,17 @@ fun SubredditScreen(
                         options = subredditBottomBarActions,
                         title = when (activeContent.value) {
                             SubredditInfo -> {
-                                if (viewModel.subreddit.isEmpty())
+                                if (viewModel.subredditName.isEmpty())
                                     AmbientContext.current.getString(R.string.app_name)
-                                else viewModel.subreddit + "/info"
+                                else viewModel.subredditName + "/info"
                             }
                             GlobalMenu -> AmbientContext.current.getString(R.string.app_name)
                             Search -> "Search"
                             null -> {
-                                if (viewModel.subreddit.isBlank())
+                                if (viewModel.subredditName.isBlank())
                                     AmbientContext.current.getString(R.string.app_name)
                                 else
-                                    viewModel.subreddit
+                                    viewModel.subredditName
                             }
                         },
                         navigateUp = {},
@@ -96,7 +94,7 @@ fun SubredditScreen(
                 Surface(color = MaterialTheme.colors.BottomDrawerColor, contentColor = UpdootDarkColors.onSurface) {
                     when (activeContent.value) {
                         GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
-                        SubredditInfo -> SubredditInfo(submissionsVM = viewModel)
+                        SubredditInfo -> SubredditInfo(subredditVM = viewModel)
                         else -> EmptyScreen()
                     }
                 }
@@ -107,8 +105,8 @@ fun SubredditScreen(
 
 @Composable
 fun Body(
-        viewModel: SubmissionsVM,
-        openMedia: (Media) -> Unit,
+        viewModel: ISubredditVM,
+        openMedia: (PostMedia) -> Unit,
         openComments: (subreddit: String, id: String) -> Unit,
         openSubreddit: (String) -> Unit,
         openUser: (String) -> Unit,
@@ -119,23 +117,23 @@ fun Body(
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         LazyColumn {
             itemsIndexed(items = feed.value) { index, item ->
-                LaunchedEffect(key1 = "onActive?" /* TODO : Lookup source docs */) {
+                LaunchedEffect(Unit) {
                     viewModel.lastScrollPosition = index
                     //TODO move paging stuff to viewModel
                     if (index >= feed.value.size - 10 && viewModel.hasNextPage() && !viewModel.isLoading.value) viewModel.loadPage()
                 }
                 when (postType.value) {
                     COMPACT -> CompactPost(
-                            linkData = item,
-                            onClickMedia = { openMedia(item.toMedia()) },
-                            onClickPost = { openComments(item.subredditName, item.name) },
+                            post = item,
+                            onClickMedia = { openMedia(item.postMedia) },
+                            onClickPost = { openComments(item.subredditName, item.id) },
                             openSubreddit = openSubreddit,
                             openUser = openUser,
                     )
                     LARGE -> LargePost(
-                            linkData = item,
-                            onClickMedia = { openMedia(item.toMedia()) },
-                            openPost = { openComments(item.subredditName, item.name) },
+                            post = item,
+                            onClickMedia = { openMedia(item.postMedia) },
+                            openPost = { openComments(item.subredditName, item.id) },
                             openSubreddit = openSubreddit,
                             openUser = openUser,
                     )

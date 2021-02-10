@@ -1,7 +1,7 @@
 package com.ducktapedapps.updoot.data.remote
 
-import com.ducktapedapps.updoot.data.local.model.*
-import com.ducktapedapps.updoot.data.local.moshiAdapters.InconsistentApiResponse
+import com.ducktapedapps.updoot.data.remote.model.*
+import com.ducktapedapps.updoot.data.remote.moshiAdapters.InconsistentApiResponse
 import com.ducktapedapps.updoot.utils.Constants
 import retrofit2.http.*
 
@@ -55,20 +55,20 @@ interface RedditAPI {
     suspend fun search(
             @Query("q") query: String,
             @Query("include_over_18") includeOver18: Boolean = false,
-    ): Listing<Subreddit>
+    ): Listing<RemoteSubreddit>
 
     @GET("r/{subreddit}/about")
     suspend fun getSubredditInfo(
-            @Path("subreddit") subreddit: String
-    ): Subreddit
+            @Path("subreddit") subreddit: String,
+    ): RemoteSubreddit
 
     @GET
     suspend fun getTrendingSubredditNames(@Url fullUrl: String = Constants.TRENDING_API_URL): TrendingSubredditNames
 
     @GET("/subreddits/mine/subscriber")
     suspend fun getSubscribedSubreddits(
-            @Query("after") after: String? = null
-    ): Listing<Subreddit>
+            @Query("after") after: String? = null,
+    ): Listing<RemoteSubreddit>
 
     @GET("user/{username}/overview")
     suspend fun getUserOverView(

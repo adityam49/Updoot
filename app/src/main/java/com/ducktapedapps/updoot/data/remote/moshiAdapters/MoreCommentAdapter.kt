@@ -1,6 +1,6 @@
-package com.ducktapedapps.updoot.data.local.moshiAdapters
+package com.ducktapedapps.updoot.data.remote.moshiAdapters
 
-import com.ducktapedapps.updoot.data.local.model.Listing
+import com.ducktapedapps.updoot.data.remote.model.Listing
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter

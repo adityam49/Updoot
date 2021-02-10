@@ -1,11 +1,11 @@
 package com.ducktapedapps.updoot.ui.comments
 
 import android.text.TextUtils
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.ducktapedapps.updoot.data.local.model.Comment
-import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
-import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
+import com.ducktapedapps.updoot.data.local.model.FullComment
+import com.ducktapedapps.updoot.data.local.model.LocalComment
+import com.ducktapedapps.updoot.data.local.model.MoreComment
+import com.ducktapedapps.updoot.data.mappers.toLocalComment
+import com.ducktapedapps.updoot.data.remote.model.Comment
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,11 +16,10 @@ import javax.inject.Inject
 class CommentsRepo @Inject constructor(
         private val redditClient: IRedditClient
 ) {
-    private val _allComments = MutableStateFlow<List<Comment>>(emptyList())
-    val visibleComments: Flow<List<Comment>> = _allComments
+    private val _allComments = MutableStateFlow<List<LocalComment>>(emptyList())
+    val visibleComments: Flow<List<LocalComment>> = _allComments
 
-    private val _commentsAreLoading = MutableLiveData(true)
-    val commentsAreLoading: LiveData<Boolean> = _commentsAreLoading
+    val commentsAreLoading = MutableStateFlow(true)
 
     suspend fun loadComments(subreddit: String, submission_id: String) {
         withContext(Dispatchers.IO) {
@@ -28,34 +27,34 @@ class CommentsRepo @Inject constructor(
                 val redditAPI = redditClient.api()
                 val response = (redditAPI.getComments(subreddit, submission_id.removePrefix("t3_")))
                 val allComments = response[1].children.filterIsInstance(Comment::class.java)
-                withContext(Dispatchers.Main) { _allComments.value = allComments }
+                withContext(Dispatchers.Main) { _allComments.value = allComments.map { it.toLocalComment() } }
             } catch (ex: Exception) {
                 ex.printStackTrace()
             } finally {
-                _commentsAreLoading.postValue(false)
+                commentsAreLoading.value = false
             }
         }
     }
 
     fun toggleChildrenCommentVisibility(index: Int) {
         val listOfComments = _allComments.value
-        if (listOfComments[index] is CommentData) {
+        if (listOfComments[index] is FullComment) {
             val updateList = listOfComments.toMutableList()
             val parentComment = listOfComments[index]
-            if (parentComment is CommentData) {
-                val replies = parentComment.replies.children
+            if (parentComment is FullComment) {
+                val replies = parentComment.replies
                 if (replies.isNotEmpty()) {
                     updateList[index] = parentComment.copy(repliesExpanded = !parentComment.repliesExpanded)
                     if (!parentComment.repliesExpanded) {
                         updateList.addAll(index + 1, recursiveChildrenExpansion(replies))
                     } else {
                         if (replies.isNotEmpty()) {
-                            val commentsToBeRemoved = mutableListOf<Comment>()
+                            val commentsToBeRemoved = mutableListOf<LocalComment>()
                             for (i in index + 1 until updateList.size) {
                                 when (val comment = updateList[i]) {
-                                    is CommentData -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
+                                    is FullComment -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
                                     else break
-                                    is MoreCommentData -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
+                                    is MoreComment -> if (comment.depth > parentComment.depth) commentsToBeRemoved.add(comment)
                                     else break
                                 }
                             }
@@ -68,38 +67,38 @@ class CommentsRepo @Inject constructor(
         }
     }
 
-    private fun recursiveChildrenExpansion(list: List<Comment>): List<Comment> =
-            mutableListOf<Comment>().apply {
+    private fun recursiveChildrenExpansion(list: List<LocalComment>): List<LocalComment> =
+            mutableListOf<LocalComment>().apply {
                 list.forEach {
-                    if (it is CommentData) {
+                    if (it is FullComment) {
                         this += it.copy(repliesExpanded = !it.repliesExpanded)
-                        val replies = it.replies.children
+                        val replies = it.replies
                         if (replies.isNotEmpty()) this += recursiveChildrenExpansion(replies)
                     } else this += it
                 }
             }
 
-    suspend fun fetchMoreComments(submissionId: String, moreCommentData: MoreCommentData, index: Int) {
+    suspend fun fetchMoreComments(submissionId: String, moreCommentData: MoreComment, index: Int) {
         withContext(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main) { _commentsAreLoading.value = true }
+                withContext(Dispatchers.Main) { commentsAreLoading.value = true }
                 val api = redditClient.api()
-                val childCommentTree = mutableListOf<Comment>()
+                val childCommentTree = mutableListOf<LocalComment>()
                 if (moreCommentData.children.isNotEmpty()) {
                     val results = api.getMoreChildren(
                             link_id = submissionId,
                             children = TextUtils.join(",", moreCommentData.children)
                     )
-                    childCommentTree += buildCommentForestFromFlattenedComments(results.children)
-                    val parentCommentIndex = _allComments.value.indexOfFirst { moreCommentData.parent_id == it.name }
-                    val parentCommentData = _allComments.value[parentCommentIndex] as CommentData
+                    childCommentTree += buildCommentForestFromFlattenedComments(results.children.map { it.toLocalComment() })
+                    val parentCommentIndex = _allComments.value.indexOfFirst { moreCommentData.parentId == it.id }
+                    val parentCommentData = _allComments.value[parentCommentIndex] as FullComment
                     _allComments.value = _allComments.value
                             .toMutableList()
                             .apply {
                                 removeAt(index)
                                 this[parentCommentIndex] = parentCommentData.copy(
                                         repliesExpanded = false,
-                                        replies = parentCommentData.replies.copy(children = childCommentTree)
+                                        replies = childCommentTree
                                 )
 
                             }.toList()
@@ -107,24 +106,24 @@ class CommentsRepo @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                withContext(Dispatchers.Main) { _commentsAreLoading.value = false }
+                withContext(Dispatchers.Main) { commentsAreLoading.value = false }
             }
         }
     }
 
-    private fun buildCommentForestFromFlattenedComments(flattenedComments: List<Comment>): List<Comment> {
-        val map = mutableMapOf<String, Comment>()
+    private fun buildCommentForestFromFlattenedComments(flattenedComments: List<LocalComment>): List<LocalComment> {
+        val map = mutableMapOf<String, LocalComment>()
         flattenedComments.apply {
-            forEach { map[it.name] = it }
+            forEach { map[it.id] = it }
             forEach { comment ->
                 when (comment) {
-                    is CommentData -> {
-                        val commentParent: CommentData? = map[comment.parent_id] as? CommentData
+                    is FullComment -> {
+                        val commentParent: FullComment? = map[comment.parentId] as? FullComment
                         if (commentParent != null)
-                            map[comment.parent_id] = commentParent.copy(replies = commentParent.replies.addChildren(listOf(comment)))
+                            map[comment.parentId] = commentParent.copy(replies = commentParent.replies + listOf(comment))
 //                        else resultCommentForest += comment
                     }
-                    is MoreCommentData -> {
+                    is MoreComment -> {
 //                        resultCommentForest += comment
                     }
                 }

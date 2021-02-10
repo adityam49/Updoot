@@ -12,17 +12,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.ducktapedapps.updoot.data.local.model.Comment.CommentData
-import com.ducktapedapps.updoot.data.local.model.Comment.MoreCommentData
-import com.ducktapedapps.updoot.data.local.model.Gildings
-import com.ducktapedapps.updoot.data.local.model.Listing
+import com.ducktapedapps.updoot.data.local.model.FullComment
+import com.ducktapedapps.updoot.data.local.model.MoreComment
 import com.ducktapedapps.updoot.ui.common.AllGildings
 import com.ducktapedapps.updoot.ui.common.VoteCounter
 import com.ducktapedapps.updoot.ui.theme.*
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 
-private val commentData = CommentData(
+private val commentData = FullComment(
         body = """
     Drift all you like
     From ocean to ocean
@@ -45,14 +43,15 @@ private val commentData = CommentData(
     It all comes flooding back… 
 """.trimIndent(),
         depth = 10,
-        parent_id = "id_kjflsdf",
-        name = "id_jfdskj",
+        id = "id_kjflsdf",
         author = "u/some_username_owo",
-        ups = 32,
-        likes = false,
-        gildings = Gildings(1, 2, 3),
-        is_submitter = false,
-        replies = Listing(children = emptyList())
+        userHasUpVoted = false,
+        gildings = com.ducktapedapps.updoot.data.local.model.Gildings(1, 2, 3),
+        userIsOriginalPoster = false,
+        replies = emptyList(),
+        parentId = "jlfdks",
+        userFlair = "ldf",
+        upVotes = 32,
 )
 
 @Composable
@@ -60,23 +59,29 @@ private fun CommentBody(text: String, modifier: Modifier) {
     Text(
             text = text,
             style = MaterialTheme.typography.body2,
-            modifier = modifier.fillMaxWidth().wrapContentHeight().padding(8.dp)
+            modifier = modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(8.dp)
     )
 }
 
 @Composable
 private fun CommentHeader(
-        commentData: CommentData,
-        modifier: Modifier
+        comment: FullComment,
+        modifier: Modifier,
 ) {
-    Row(modifier = modifier.fillMaxWidth().wrapContentHeight().padding(4.dp)) {
-        with(commentData) {
-            UserName(username = author, isOp = is_submitter)
+    Row(modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(4.dp)) {
+        with(comment) {
+            UserName(username = author, isOp = userIsOriginalPoster)
             Spacer(modifier = Modifier.weight(1f))
             AllGildings(gildings = gildings)
-            if (replies.children.isNotEmpty() && !repliesExpanded) ReplyCounter(replyCount = replies.children.size)
+            if (replies.isNotEmpty() && !repliesExpanded) ReplyCounter(replyCount = replies.size)
             Spacer(modifier = Modifier.width(2.dp))
-            VoteCounter(ups = ups, likes = likes)
+            VoteCounter(upVotes = upVotes, userHasUpVoted = userHasUpVoted)
         }
     }
 }
@@ -113,7 +118,7 @@ private fun ReplyCounter(replyCount: Int) {
 @Composable
 private fun ColoredTag(
         color: Color,
-        content: @Composable () -> Unit
+        content: @Composable () -> Unit,
 ) {
     Card(
             backgroundColor = color,
@@ -148,7 +153,7 @@ fun FullComment(
         threadWidth: Dp,
         threadSpacingWidth: Dp,
         singleThreadMode: Boolean,
-        comment: CommentData,
+        comment: FullComment,
         onClickComment: () -> Unit,
 ) {
     ConstraintLayout(modifier = Modifier
@@ -172,7 +177,7 @@ fun FullComment(
                 })
 
         CommentHeader(
-                commentData = comment,
+                comment = comment,
                 modifier = Modifier.constrainAs(header) {
                     start.linkTo(indentation.end)
                     top.linkTo(parent.top)
@@ -196,7 +201,7 @@ fun FullComment(
 
 @Composable
 fun MoreComment(
-        data: MoreCommentData,
+        data: MoreComment,
         loadMoreComments: () -> Unit,
         singleThreadMode: Boolean,
         threadSpacingWidth: Dp,
@@ -237,7 +242,6 @@ fun MoreComment(
 
     }
 }
-
 
 
 @Composable

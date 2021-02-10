@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.data.local.moshiAdapters
+package com.ducktapedapps.updoot.data.remote.moshiAdapters
 
 import com.squareup.moshi.JsonQualifier
 

@@ -25,21 +25,22 @@ import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import dev.chrisbanes.accompanist.glide.GlideImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import java.util.*
 
 /**
  *  Subreddit sidebar UI component
  */
 @Composable
-fun SubredditInfo(submissionsVM: SubmissionsVM) {
-    val subreddit = submissionsVM.subredditInfo.collectAsState()
-    val postType = submissionsVM.postViewType.collectAsState()
+fun SubredditInfo(subredditVM: ISubredditVM) {
+    val subreddit = subredditVM.subredditInfo.collectAsState()
+    val postType = subredditVM.postViewType.collectAsState()
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, info, footer) = createRefs()
 
         subreddit.value?.let {
             SubredditInfoHeader(
-                    iconUrl = it.community_icon,
-                    activeMembers = it.accounts_active,
+                    iconUrl = it.icon,
+                    activeMembers = it.accountsActive,
                     subscribers = it.subscribers,
                     created = it.created,
                     modifier = Modifier
@@ -51,7 +52,7 @@ fun SubredditInfo(submissionsVM: SubmissionsVM) {
                             }
             )
             Info(
-                    description = it.description,
+                    description = it.longDescription,
                     modifier = Modifier
                             .fillMaxWidth()
                             .constrainAs(info) {
@@ -63,7 +64,7 @@ fun SubredditInfo(submissionsVM: SubmissionsVM) {
         }
         SubmissionViewType(
                 type = postType.value,
-                setType = submissionsVM::setPostViewType,
+                setType = subredditVM::setPostViewType,
                 modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
@@ -81,7 +82,7 @@ private fun SubredditInfoHeader(
         iconUrl: String?,
         activeMembers: Long?,
         subscribers: Long?,
-        created: Long?,
+        created: Date,
 ) {
     DrawerCard(modifier = modifier) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -108,7 +109,7 @@ private fun SubredditInfoHeader(
                                 ?: "") +
                                 (activeMembers?.run { " • " + getCompactCountAsString(this) + " active " }
                                         ?: "") +
-                                created?.run { "\n" + getCompactAge(this) },
+                                created.run { "\n" + getCompactAge(time) },
                         style = MaterialTheme.typography.caption
                 )
             }

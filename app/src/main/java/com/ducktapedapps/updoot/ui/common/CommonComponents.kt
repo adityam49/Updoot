@@ -18,11 +18,11 @@ import com.ducktapedapps.updoot.ui.theme.upVoteColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 @Composable
-fun VoteCounter(ups: Int?, likes: Boolean?, modifier: Modifier = Modifier) {
+fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Modifier) {
     Text(
-            text = ups?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
+            text = upVotes?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
             style = MaterialTheme.typography.overline,
-            color = when (likes) {
+            color = when (userHasUpVoted) {
                 true -> upVoteColor
                 false -> downVoteColor
                 null -> MaterialTheme.colors.onBackground
@@ -34,21 +34,21 @@ fun VoteCounter(ups: Int?, likes: Boolean?, modifier: Modifier = Modifier) {
 @Composable
 fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-        if (gildings.silver != 0) {
-            Text(text = gildings.silver.toString(), style = MaterialTheme.typography.overline)
+        if (gildings.silverAwardCount != 0) {
+            Text(text = gildings.silverAwardCount.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_silver_gilding_14dp).resource.resource?.let {
                 Image(imageVector = it, contentDescription = AmbientContext.current.getString(R.string.silver_award))
             }
         }
-        if (gildings.gold != 0) {
-            Text(text = gildings.gold.toString(), style = MaterialTheme.typography.overline)
+        if (gildings.goldAwardCount != 0) {
+            Text(text = gildings.goldAwardCount.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_gold_gilding_14dp).resource.resource?.let {
                 Image(imageVector = it, AmbientContext.current.getString(R.string.gold_award))
             }
 
         }
-        if (gildings.platinum != 0) {
-            Text(text = gildings.platinum.toString(), style = MaterialTheme.typography.overline)
+        if (gildings.platinumAwardCount != 0) {
+            Text(text = gildings.platinumAwardCount.toString(), style = MaterialTheme.typography.overline)
             loadVectorResource(id = R.drawable.ic_platinum_gilding_14dp).resource.resource?.let {
                 Image(imageVector = it, AmbientContext.current.getString(R.string.platinum_award))
             }

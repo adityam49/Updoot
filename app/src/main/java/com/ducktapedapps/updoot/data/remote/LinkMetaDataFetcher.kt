@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.URI
+import java.util.*
+import kotlin.collections.HashMap
 
 fun String.fetchMetaData(linkMetaDataDAO: LinkMetaDataDAO): Flow<LinkModel> {
     val url = if (this.startsWith("http:")) this.replaceFirst("http:", "https:") else this
@@ -57,13 +59,13 @@ private fun Flow<Map<String, String>>.toLinkModel(url: String): Flow<LinkModel> 
                     "og:image" -> icon = metaDataMap["og:image"]
                 }
             }
-            LinkModel(url, siteName, title, description, icon)
+            LinkModel(url, siteName, title, description, icon, Date())
         }
 
 private fun Flow<LinkModel>.saveToLocalSourceAndEmit(linkMetaDataDAO: LinkMetaDataDAO) =
         transform {
-            val metaData = it.copy(lastUpdated = System.currentTimeMillis() / 1000)
-            linkMetaDataDAO.insertLinkMetaData(metaData)
+            val metaData = it.copy(lastUpdated = Date())
+            linkMetaDataDAO.insertUrlMetaData(metaData)
             emit(metaData)
         }
 
@@ -74,5 +76,5 @@ data class LinkModel(
         val title: String?,
         val description: String?,
         val image: String?,
-        val lastUpdated: Long? = null
+        val lastUpdated: Date,
 )

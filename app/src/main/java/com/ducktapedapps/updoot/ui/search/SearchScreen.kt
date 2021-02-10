@@ -26,7 +26,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.local.model.Subreddit
+import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.getCompactAge
@@ -122,17 +122,17 @@ fun NsfwCheckRow(
 }
 
 @Composable
-fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) {
+fun ComposeSubredditItem(remoteSubreddit: RemoteSubreddit, openSubreddit: (String) -> Unit) {
     Row(
             modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { openSubreddit(subreddit.display_name) })
+                    .clickable(onClick = { openSubreddit(remoteSubreddit.display_name) })
                     .padding(top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
     ) {
-        Log.i("SearchScreen", "url : ${subreddit.community_icon}")
+        Log.i("SearchScreen", "url : ${remoteSubreddit.community_icon}")
         GlideImage(
-                data = subreddit.community_icon,
+                data = remoteSubreddit.community_icon,
                 requestBuilder = {
                     centerInside().circleCrop()
                 },
@@ -151,13 +151,13 @@ fun ComposeSubredditItem(subreddit: Subreddit, openSubreddit: (String) -> Unit) 
                         .padding(start = 16.dp)
                         .align(Alignment.CenterVertically)
         ) {
-            Text(text = subreddit.display_name)
+            Text(text = remoteSubreddit.display_name)
             Providers(AmbientContentAlpha provides ContentAlpha.disabled) {
                 Text(
                         text = "${
-                            subreddit.subscribers?.run { getCompactCountAsString(this) + " Subscribers" }
+                            remoteSubreddit.subscribers?.run { getCompactCountAsString(this) + " Subscribers" }
                         } ${
-                            " • " + getCompactAge(subreddit.created)
+                            " • " + getCompactAge(remoteSubreddit.created)
                         }",
                         style = MaterialTheme.typography.caption
                 )

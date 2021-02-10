@@ -1,8 +1,8 @@
-package com.ducktapedapps.updoot.data.local.moshiAdapters
+package com.ducktapedapps.updoot.data.remote.moshiAdapters
 
-import com.ducktapedapps.updoot.data.local.model.Comment
-import com.ducktapedapps.updoot.data.local.model.Listing
-import com.ducktapedapps.updoot.data.local.model.RedditThing
+import com.ducktapedapps.updoot.data.remote.model.Comment
+import com.ducktapedapps.updoot.data.remote.model.Listing
+import com.ducktapedapps.updoot.data.remote.model.RedditThing
 import com.squareup.moshi.*
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type

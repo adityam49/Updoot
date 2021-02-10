@@ -11,13 +11,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.ImageVariants
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
 import com.ducktapedapps.updoot.ui.settings.SettingsFragment
+import com.ducktapedapps.updoot.ui.subreddit.PostMedia.ImageMedia
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
 import com.ducktapedapps.updoot.ui.user.UserFragment
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
@@ -134,11 +134,11 @@ class MainActivity : AppCompatActivity() {
         data = Uri.parse(link)
     })
 
-    fun openImage(preview: ImageVariants?) {
+    fun openImage(media: ImageMedia) {
         supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .add(R.id.fragment_container, ImagePreviewFragment.newInstance(preview?.lowResUrl, preview?.highResUrl!!))
+                .add(R.id.fragment_container, ImagePreviewFragment.newInstance(media.url, media.url)) //TODO : put high res url in UI model
                 .commit()
     }
 

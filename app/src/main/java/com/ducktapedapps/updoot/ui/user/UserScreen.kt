@@ -14,17 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.ducktapedapps.updoot.data.local.model.Comment
-import com.ducktapedapps.updoot.data.local.model.LinkData
 import com.ducktapedapps.updoot.ui.comments.FullComment
 import com.ducktapedapps.updoot.ui.subreddit.LargePost
 import com.ducktapedapps.updoot.ui.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.ui.theme.ScoreBackground
+import com.ducktapedapps.updoot.ui.user.UserContent.UserComment
+import com.ducktapedapps.updoot.ui.user.UserContent.UserPost
 
 @Composable
 fun UserInfoScreen(viewModel: UserViewModel) {
     val content = viewModel.content.collectAsState()
-    val loading = viewModel.loading.collectAsState()
+    val loading = viewModel.isLoading.collectAsState()
     val currentSection = viewModel.currentSection.collectAsState()
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -40,20 +40,21 @@ fun UserInfoScreen(viewModel: UserViewModel) {
         itemsIndexed(content.value) { index, item ->
             if (content.value.size - 5 <= index) viewModel.loadPage()
             when (item) {
-                is Comment.CommentData -> FullComment(
+                is UserComment -> FullComment(
                         threadWidth = 2.dp,
                         threadSpacingWidth = 6.dp,
                         singleThreadMode = false,
-                        comment = item,
+                        comment = item.data,
                         onClickComment = {}
                 )
-                is LinkData -> LargePost(
-                        linkData = item,
+                is UserPost -> LargePost(
+                        post = item.data,
                         onClickMedia = {},
                         openPost = {},
                         openSubreddit = {},
                         openUser = {},
                 )
+
             }
             Divider()
         }

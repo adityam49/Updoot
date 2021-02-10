@@ -11,9 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.VideoPreviewFragment
-import com.ducktapedapps.updoot.ui.comments.SubmissionContent.Image
-import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
+import com.ducktapedapps.updoot.ui.subreddit.PostMedia.*
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,7 +28,8 @@ class CommentsFragment : Fragment() {
             }
         }
     }
-    private val viewModel: CommentsVM by viewModels()
+
+    private val viewModel: ICommentsVM by viewModels<CommentsVMImpl>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             ComposeView(requireContext()).apply {
@@ -39,15 +39,14 @@ class CommentsFragment : Fragment() {
                                 viewModel = viewModel,
                                 openContent = { content ->
                                     when (content) {
-                                        is Image -> openImage(
-                                                lowResImage = content.data.imageData?.lowResUrl,
-                                                highResImage = content.data.imageData?.highResUrl
-                                                        ?: ""
+                                        is TextMedia -> Unit
+                                        is ImageMedia -> openImage(
+                                                lowResImage = content.url,
+                                                highResImage = content.url
                                         )
-                                        is LoadedLink -> openLink(content.linkModel.url)
-                                        is LoadingLink -> openLink(content.url)
-                                        is NoMetaDataLink -> openLink(content.url)
-                                        else -> Unit
+                                        is LinkMedia -> openLink(content.url)
+                                        is VideoMedia -> openVideo(content.url)
+                                        NoMedia -> Unit
                                     }
                                 })
                     }

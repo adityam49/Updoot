@@ -16,56 +16,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.loadVectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asFlow
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.local.model.Comment
-import com.ducktapedapps.updoot.data.local.model.LinkData
-import com.ducktapedapps.updoot.ui.comments.SubmissionContent.*
-import com.ducktapedapps.updoot.ui.comments.SubmissionContent.LinkState.*
-import com.ducktapedapps.updoot.ui.common.LinkPreview
+import com.ducktapedapps.updoot.data.local.model.FullComment
+import com.ducktapedapps.updoot.data.local.model.MoreComment
+import com.ducktapedapps.updoot.ui.common.StaticLinkPreview
+import com.ducktapedapps.updoot.ui.subreddit.PostMedia
+import com.ducktapedapps.updoot.ui.subreddit.PostMedia.*
+import com.ducktapedapps.updoot.ui.subreddit.PostUiModel
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
 import dev.chrisbanes.accompanist.glide.GlideImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 
 @Composable
-fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Unit) {
-    val loading = viewModel.isLoading.asFlow().collectAsState(initial = true)
-    val content = viewModel.content.collectAsState(initial = null)
-    val linkData = viewModel.submissionData.collectAsState(initial = null)
-    val allComments = viewModel.allComments.collectAsState(initial = emptyList())
+fun CommentsScreen(viewModel: ICommentsVM, openContent: (PostMedia) -> Unit) {
+    val loading = viewModel.isLoading.collectAsState()
+    val linkData = viewModel.post.collectAsState()
+    val allComments = viewModel.comments.collectAsState()
     val singleThreadMode = viewModel.singleThreadMode.collectAsState()
 
-//TODO : val singleColorThread = viewModel.singleColorThreadMode.collectAsState()
 
+//TODO : val singleColorThread = viewModel.singleColorThreadMode.collectAsState()
     val listState = rememberLazyListState()
     Surface(color = MaterialTheme.colors.background) {
         LazyColumn(state = listState) {
             if (loading.value) item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             linkData.value?.run {
                 item {
-                    Header(linkData = this@run)
+                    Header(post = this@run)
                 }
-            }
-
-            stickyHeader { }
-            content.value?.run {
                 item {
-                    Content(content = this@run, onClick = openContent)
+                    Content(content = postMedia, onClick = openContent)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
             itemsIndexed(items = allComments.value) { index, comment ->
                 when (comment) {
-                    is Comment.CommentData -> FullComment(
+                    is FullComment -> FullComment(
                             comment = comment,
                             onClickComment = { viewModel.toggleChildrenVisibility(index) },
                             singleThreadMode = singleThreadMode.value,
                             threadSpacingWidth = 6.dp,
                             threadWidth = 2.dp,
                     )
-                    is Comment.MoreCommentData -> MoreComment(
+                    is MoreComment -> MoreComment(
                             data = comment,
                             loadMoreComments = { viewModel.loadMoreComment(comment, index) },
                             singleThreadMode = singleThreadMode.value,
@@ -81,19 +75,20 @@ fun CommentsScreen(viewModel: CommentsVM, openContent: (SubmissionContent) -> Un
 }
 
 @Composable
-fun Content(content: SubmissionContent, onClick: (SubmissionContent) -> Unit) {
+fun Content(content: PostMedia, onClick: (PostMedia) -> Unit) {
     when (content) {
-        is Image -> ContentImage(image = content, openImage = { onClick(content) })
-        is Video -> Unit
-        is SelfText -> TextPost(text = content.parsedMarkdown.toString())
-        is LinkState -> LinkPreview(
+        is TextMedia -> TextPost(text = content.text)
+        is ImageMedia -> ContentImage(image = content, openImage = { onClick(content) })
+        is LinkMedia -> StaticLinkPreview(
                 modifier = Modifier
-                        .padding(start = 8.dp, end = 8.dp)
-                        .fillMaxWidth(),
-                linkState = content,
-                openLink = { onClick(content) }
+                        .fillMaxWidth()
+                        .clickable { onClick(content) },
+                thumbnail = content.thumbnail,
+                url = content.url
         )
-        JustTitle -> Unit
+
+        is VideoMedia -> Unit
+        NoMedia -> Unit
     }
 }
 
@@ -115,16 +110,13 @@ fun TextPost(text: String) {
 }
 
 @Composable
-fun ContentImage(image: Image, openImage: () -> Unit) {
-    val data = image.data.imageData
+fun ContentImage(image: ImageMedia, openImage: () -> Unit) {
     GlideImage(
-            data = data?.lowResUrl!!,
+            data = image.url,
             modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .aspectRatio(
-                            (data.lowResWidth ?: 0) / (data.lowResHeight ?: 1).toFloat()
-                    )
+                    .aspectRatio(image.width / image.height.toFloat())
                     .clickable(onClick = openImage),
             requestBuilder = {
                 transform(RoundedCorners(8))
@@ -141,10 +133,10 @@ fun ContentImage(image: Image, openImage: () -> Unit) {
 }
 
 @Composable
-fun Header(linkData: LinkData) {
+fun Header(post: PostUiModel) {
     Text(
-            color = if (linkData.stickied) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
-            text = linkData.title,
+            color = if (post.isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
+            text = post.title,
             style = MaterialTheme.typography.h5,
             modifier = Modifier.padding(8.dp)
     )
