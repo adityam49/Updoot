@@ -126,17 +126,8 @@ dependencies {
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_jetpack_version"
     implementation "androidx.hilt:hilt-work:$hilt_jetpack_version"
 
-
-    //recyclerview animations
-    implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
-
     //web-page parser for extracting link metadata
     implementation "org.jsoup:jsoup:$jsoup_version"
-
-    //markdown support
-    implementation "io.noties.markwon:core:$markwon_version"
-    implementation "io.noties.markwon:linkify:$markwon_version"
-    implementation "io.noties.markwon:ext-tables:$markwon_version"
 
     //dataStore
     implementation "androidx.datastore:datastore-preferences:$dataStore_version"

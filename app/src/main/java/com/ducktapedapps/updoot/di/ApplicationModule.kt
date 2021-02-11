@@ -14,9 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.noties.markwon.Markwon
-import io.noties.markwon.ext.tables.TablePlugin
-import io.noties.markwon.linkify.LinkifyPlugin
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -27,14 +24,6 @@ abstract class ApplicationModule {
     abstract fun redditClient(redditClient: RedditClientImpl): IRedditClient
 
     companion object {
-        @Provides
-        @Singleton
-        fun provideMarkwon(@ApplicationContext context: Context): Markwon = Markwon.builder(context)
-                .usePlugin(LinkifyPlugin.create())
-                .usePlugin(TablePlugin.create(context))
-                .build()
-
-
         @Provides
         @Singleton
         fun provideWorkConfiguration(hiltWorkerFactory: HiltWorkerFactory): Configuration = Configuration
