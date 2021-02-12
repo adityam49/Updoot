@@ -1,10 +1,14 @@
 package com.ducktapedapps.updoot.ui.explore
 
-import kotlinx.coroutines.CoroutineScope
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-class ExploreVM constructor(private val exploreRepo: ExploreRepo, private val coroutineScope: CoroutineScope) {
+class ExploreVM @ViewModelInject constructor(
+    private val exploreRepo: ExploreRepo
+) : ViewModel() {
     val isLoading = exploreRepo.isLoading
     val trendingSubs = exploreRepo.trendingSubs.distinctUntilChanged()
 
@@ -13,7 +17,7 @@ class ExploreVM constructor(private val exploreRepo: ExploreRepo, private val co
     }
 
     fun loadSubs() {
-        coroutineScope.launch {
+        viewModelScope.launch {
             exploreRepo.loadTrendingSubs()
         }
     }

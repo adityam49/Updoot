@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.ducktapedapps.updoot.data.local.model.FullComment
 import com.ducktapedapps.updoot.data.local.model.MoreComment
 import com.ducktapedapps.updoot.ui.common.AllGildings

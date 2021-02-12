@@ -8,8 +8,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.res.loadVectorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.Gildings
@@ -20,14 +20,14 @@ import com.ducktapedapps.updoot.utils.getCompactCountAsString
 @Composable
 fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Modifier) {
     Text(
-            text = upVotes?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
-            style = MaterialTheme.typography.overline,
-            color = when (userHasUpVoted) {
-                true -> upVoteColor
-                false -> downVoteColor
-                null -> MaterialTheme.colors.onBackground
-            },
-            modifier = modifier
+        text = upVotes?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
+        style = MaterialTheme.typography.overline,
+        color = when (userHasUpVoted) {
+            true -> upVoteColor
+            false -> downVoteColor
+            null -> MaterialTheme.colors.onBackground
+        },
+        modifier = modifier
     )
 }
 
@@ -35,23 +35,36 @@ fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Mo
 fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         if (gildings.silverAwardCount != 0) {
-            Text(text = gildings.silverAwardCount.toString(), style = MaterialTheme.typography.overline)
-            loadVectorResource(id = R.drawable.ic_silver_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it, contentDescription = AmbientContext.current.getString(R.string.silver_award))
-            }
+            Text(
+                text = gildings.silverAwardCount.toString(),
+                style = MaterialTheme.typography.overline
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_silver_gilding_14dp),
+                contentDescription = stringResource(R.string.silver_award)
+            )
         }
+
         if (gildings.goldAwardCount != 0) {
-            Text(text = gildings.goldAwardCount.toString(), style = MaterialTheme.typography.overline)
-            loadVectorResource(id = R.drawable.ic_gold_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it, AmbientContext.current.getString(R.string.gold_award))
-            }
+            Text(
+                text = gildings.goldAwardCount.toString(),
+                style = MaterialTheme.typography.overline
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_gold_gilding_14dp),
+                contentDescription = stringResource(R.string.gold_award)
+            )
 
         }
         if (gildings.platinumAwardCount != 0) {
-            Text(text = gildings.platinumAwardCount.toString(), style = MaterialTheme.typography.overline)
-            loadVectorResource(id = R.drawable.ic_platinum_gilding_14dp).resource.resource?.let {
-                Image(imageVector = it, AmbientContext.current.getString(R.string.platinum_award))
-            }
+            Text(
+                text = gildings.platinumAwardCount.toString(),
+                style = MaterialTheme.typography.overline
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_platinum_gilding_14dp),
+                contentDescription = stringResource(R.string.platinum_award)
+            )
         }
     }
 }

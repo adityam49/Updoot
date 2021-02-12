@@ -51,7 +51,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += [
-                "-Xallow-jvm-ir-dependencies",
                 "-Xskip-prerelease-check",
                 "-Xopt-in=kotlin.Experimental",
                 "-Xopt-in=kotlinx.coroutines.FlowPreview",
@@ -80,6 +79,8 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha02"
 
     //android lifecycle
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -110,11 +111,10 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
 
     //image loading
-    implementation "dev.chrisbanes.accompanist:accompanist-coil:0.5.0"
+    implementation "dev.chrisbanes.accompanist:accompanist-coil:0.5.1"
     implementation "com.github.bumptech.glide:glide:$glide_version"
     implementation "com.github.bumptech.glide:compiler:$glide_version"
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    implementation "dev.chrisbanes.accompanist:accompanist-glide:0.5.0"
 
     //video loading
     implementation "com.google.android.exoplayer:exoplayer:$exoPlayer_version"

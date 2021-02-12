@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.ActivityVM
@@ -29,87 +29,89 @@ import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun SubredditScreen(
-        viewModel: ISubredditVM,
-        openMedia: (PostMedia) -> Unit,
-        openComments: (subreddit: String, id: String) -> Unit,
-        openUser: (String) -> Unit,
-        openSubreddit: (String) -> Unit,
-        activityVM: ActivityVM,
+    viewModel: ISubredditVM,
+    openMedia: (PostMedia) -> Unit,
+    openComments: (subreddit: String, id: String) -> Unit,
+    openUser: (String) -> Unit,
+    openSubreddit: (String) -> Unit,
+    activityVM: ActivityVM,
 ) {
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = Unit) {
         activityVM
-                .shouldReload
-                .onEach { viewModel.reload() }
-                .launchIn(coroutineScope)
+            .shouldReload
+            .onEach { viewModel.reload() }
+            .launchIn(coroutineScope)
 
     }
     val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
     val activeContent = remember { mutableStateOf<ActiveContent?>(null) }
     if (bottomSheetState.isCollapsed) activeContent.value = null
     val subredditBottomBarActions = listOf(
-            BottomBarActions(Icons.Default.Info, "Info") {
-                activeContent.value = SubredditInfo
-                bottomSheetState.expand()
-            },
-            BottomBarActions(Icons.Default.Search, "Search") {
-                activeContent.value = Search
-                bottomSheetState.expand()
-            },
-            BottomBarActions(Icons.Default.Menu, "GlobalMenu") {
-                activeContent.value = GlobalMenu
-                bottomSheetState.expand()
-            }
+        BottomBarActions(Icons.Default.Info, "Info") {
+            activeContent.value = SubredditInfo
+            bottomSheetState.expand()
+        },
+        BottomBarActions(Icons.Default.Search, "Search") {
+            activeContent.value = Search
+            bottomSheetState.expand()
+        },
+        BottomBarActions(Icons.Default.Menu, "GlobalMenu") {
+            activeContent.value = GlobalMenu
+            bottomSheetState.expand()
+        }
     )
 
     BottomSheetScaffold(
-            sheetGesturesEnabled = bottomSheetState.isExpanded,
-            scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
-            sheetBackgroundColor = MaterialTheme.colors.BottomDrawerColor,
-            sheetShape = RoundedCornerShape(topLeft = 16.dp, topRight = 16.dp),
-            sheetPeekHeight = 64.dp,
-            sheetElevation = 1.dp,
-            sheetContent = {
-                FancyBottomBar(
-                        modifier = Modifier.padding(top = 8.dp),
-                        sheetProgress = bottomSheetState.progress,
-                        options = subredditBottomBarActions,
-                        title = when (activeContent.value) {
-                            SubredditInfo -> {
-                                if (viewModel.subredditName.isEmpty())
-                                    AmbientContext.current.getString(R.string.app_name)
-                                else viewModel.subredditName + "/info"
-                            }
-                            GlobalMenu -> AmbientContext.current.getString(R.string.app_name)
-                            Search -> "Search"
-                            null -> {
-                                if (viewModel.subredditName.isBlank())
-                                    AmbientContext.current.getString(R.string.app_name)
-                                else
-                                    viewModel.subredditName
-                            }
-                        },
-                        navigateUp = {},
-                )
-                Surface(color = MaterialTheme.colors.BottomDrawerColor, contentColor = UpdootDarkColors.onSurface) {
-                    when (activeContent.value) {
-                        GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
-                        SubredditInfo -> SubredditInfo(subredditVM = viewModel)
-                        else -> EmptyScreen()
+        sheetGesturesEnabled = bottomSheetState.isExpanded,
+        scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
+        sheetBackgroundColor = MaterialTheme.colors.BottomDrawerColor,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetPeekHeight = 64.dp,
+        sheetElevation = 1.dp,
+        sheetContent = {
+            FancyBottomBar(
+                modifier = Modifier.padding(top = 8.dp),
+                sheetProgress = bottomSheetState.progress,
+                options = subredditBottomBarActions,
+                title = when (activeContent.value) {
+                    SubredditInfo -> {
+                        if (viewModel.subredditName.isEmpty()) stringResource(R.string.app_name)
+                        else viewModel.subredditName + "/info"
                     }
+                    GlobalMenu -> stringResource(R.string.app_name)
+                    Search -> "Search"
+                    null -> {
+                        if (viewModel.subredditName.isBlank())
+                            stringResource(R.string.app_name)
+                        else
+                            viewModel.subredditName
+                    }
+                },
+                navigateUp = {},
+            )
+            Surface(
+                color = MaterialTheme.colors.BottomDrawerColor,
+                contentColor = UpdootDarkColors.onSurface
+            ) {
+                when (activeContent.value) {
+                    GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
+                    SubredditInfo -> SubredditInfo(subredditVM = viewModel)
+                    else -> EmptyScreen()
                 }
-            },
-            bodyContent = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
+            }
+        },
+        bodyContent = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
     )
 }
 
 @Composable
 fun Body(
-        viewModel: ISubredditVM,
-        openMedia: (PostMedia) -> Unit,
-        openComments: (subreddit: String, id: String) -> Unit,
-        openSubreddit: (String) -> Unit,
-        openUser: (String) -> Unit,
+    viewModel: ISubredditVM,
+    openMedia: (PostMedia) -> Unit,
+    openComments: (subreddit: String, id: String) -> Unit,
+    openSubreddit: (String) -> Unit,
+    openUser: (String) -> Unit,
 ) {
     val feed = viewModel.feedPages.collectAsState()
     val postType = viewModel.postViewType.collectAsState()
@@ -124,27 +126,29 @@ fun Body(
                 }
                 when (postType.value) {
                     COMPACT -> CompactPost(
-                            post = item,
-                            onClickMedia = { openMedia(item.postMedia) },
-                            onClickPost = { openComments(item.subredditName, item.id) },
-                            openSubreddit = openSubreddit,
-                            openUser = openUser,
+                        post = item,
+                        onClickMedia = { openMedia(item.postMedia) },
+                        onClickPost = { openComments(item.subredditName, item.id) },
+                        openSubreddit = openSubreddit,
+                        openUser = openUser,
                     )
                     LARGE -> LargePost(
-                            post = item,
-                            onClickMedia = { openMedia(item.postMedia) },
-                            openPost = { openComments(item.subredditName, item.id) },
-                            openSubreddit = openSubreddit,
-                            openUser = openUser,
+                        post = item,
+                        onClickMedia = { openMedia(item.postMedia) },
+                        openPost = { openComments(item.subredditName, item.id) },
+                        openSubreddit = openSubreddit,
+                        openUser = openUser,
                     )
                 }
                 Divider()
             }
             if (loading.value) item {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillParentMaxWidth()) {
-                    CircularProgressIndicator(modifier = Modifier
+                    CircularProgressIndicator(
+                        modifier = Modifier
                             .size(64.dp)
-                            .padding(16.dp))
+                            .padding(16.dp)
+                    )
                 }
             }
             item { Spacer(Modifier.height(200.dp)) }

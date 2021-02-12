@@ -5,8 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AmbientContentAlpha
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +14,7 @@ import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.loadVectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
@@ -26,42 +26,60 @@ import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
 
 @Composable
 fun StaticLinkPreview(
-        modifier: Modifier = Modifier,
-        url: String,
-        thumbnail: Thumbnail,
+    modifier: Modifier = Modifier,
+    url: String,
+    thumbnail: Thumbnail,
 ) {
-    Row(modifier = modifier
+    Row(
+        modifier = modifier
             .padding(8.dp)
             .clip(RoundedCornerShape(8.dp))
-            .border(0.5.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
-            verticalAlignment = Alignment.Top
+            .border(
+                0.5.dp,
+                MaterialTheme.colors.onBackground.copy(alpha = 0.5f),
+                RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.Top
     ) {
         when (thumbnail) {
             is Thumbnail.Remote -> CoilImage(
-                    data = thumbnail.url,
-                    requestBuilder = { transformations(CircleCropTransformation()) },
-                    modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
+                data = thumbnail.url,
+                requestBuilder = { transformations(CircleCropTransformation()) },
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(8.dp)
             ) { imageLoadState: ImageLoadState ->
                 when (imageLoadState) {
-                    is Success -> Image(painter = imageLoadState.painter, contentDescription = "Link thumbnail")
-                    is Error -> loadVectorResource(id = thumbnail.fallbackLocalThumbnail).resource.resource?.let {
-                        Image(imageVector = it, "Link preview icon")
-                    }
+                    is Success -> Image(
+                        painter = imageLoadState.painter,
+                        contentDescription = "Link thumbnail"
+                    )
+                    is Error -> Image(
+                        painter = painterResource(id = thumbnail.fallbackLocalThumbnail),
+                        "Link preview icon"
+                    )
+
                     else -> Unit
                 }
             }
-            is Thumbnail.LocalThumbnail -> loadVectorResource(id = thumbnail.imageResource).resource.resource?.let {
-                Image(imageVector = it, "Link preview icon")
-            }
+            is Thumbnail.LocalThumbnail -> Image(
+                painter = painterResource(id = thumbnail.imageResource),
+                "Link preview icon"
+            )
         }
-        Column(modifier = Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)) {
+                .padding(8.dp)
+        ) {
             Uri.parse(url).authority?.run { Text(text = this, style = MaterialTheme.typography.h6) }
-            Providers(AmbientContentAlpha provides ContentAlpha.medium) {
-                Text(text = url, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption)
+            Providers(LocalContentAlpha provides ContentAlpha.medium) {
+                Text(
+                    text = url,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.caption
+                )
             }
         }
     }

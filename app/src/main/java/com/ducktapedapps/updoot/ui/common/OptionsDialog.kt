@@ -9,10 +9,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.AndroidDialogProperties
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun OptionsDialog(
@@ -20,11 +20,11 @@ fun OptionsDialog(
         options: List<MenuItemModel>,
 ) {
     Dialog(
-            onDismissRequest = dismiss,
-            properties = AndroidDialogProperties(
-                    dismissOnBackPress = true,
-                    dismissOnClickOutside = true,
-            )
+        onDismissRequest = dismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+        )
     ) {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column {
@@ -48,9 +48,9 @@ fun MenuItem(menuItemModel: MenuItemModel) {
             verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = vectorResource(id = menuItemModel.icon),
-                contentDescription = menuItemModel.title,
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = menuItemModel.icon),
+            contentDescription = menuItemModel.title,
         )
         Text(modifier = Modifier.padding(8.dp), text = menuItemModel.title)
     }

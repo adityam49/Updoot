@@ -13,9 +13,11 @@ import androidx.lifecycle.lifecycleScope
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.databinding.ActivityMainBinding
 import com.ducktapedapps.updoot.ui.comments.CommentsFragment
+import com.ducktapedapps.updoot.ui.explore.ExploreFragment
 import com.ducktapedapps.updoot.ui.imagePreview.ImagePreviewFragment
 import com.ducktapedapps.updoot.ui.login.LoginFragment
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationDestination.*
+import com.ducktapedapps.updoot.ui.search.SearchFragment
 import com.ducktapedapps.updoot.ui.settings.SettingsFragment
 import com.ducktapedapps.updoot.ui.subreddit.PostMedia.ImageMedia
 import com.ducktapedapps.updoot.ui.subreddit.SubredditFragment
@@ -45,24 +47,44 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpViewModel() {
         viewModel
-                .theme
-                .onEach {
-                    setDefaultNightMode(when (it) {
+            .theme
+            .onEach {
+                setDefaultNightMode(
+                    when (it) {
                         DARK -> MODE_NIGHT_YES
                         LIGHT -> MODE_NIGHT_NO
                         AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
-                    })
-                }.launchIn(lifecycleScope)
-        viewModel
-                .navigationRequest
-                .onEach {
-                    when (it) {
-                        AddAccount -> openLoginScreen()
-                        Exit -> showExitDialog()
-                        Settings -> openSettings()
-                        else -> Unit
                     }
-                }.launchIn(lifecycleScope)
+                )
+            }.launchIn(lifecycleScope)
+        viewModel
+            .navigationRequest
+            .onEach {
+                when (it) {
+                    AddAccount -> openLoginScreen()
+                    Exit -> showExitDialog()
+                    Settings -> openSettings()
+                    Search -> openSearch()
+                    Explore -> openExplore()
+                    else -> Unit
+                }
+            }.launchIn(lifecycleScope)
+    }
+
+    private fun openExplore() {
+        supportFragmentManager
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragment_container, ExploreFragment())
+            .commit()
+    }
+
+    private fun openSearch() {
+        supportFragmentManager
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragment_container, SearchFragment())
+            .commit()
     }
 
     private fun setUpStatusBarColors() {
@@ -80,53 +102,53 @@ class MainActivity : AppCompatActivity() {
         with(supportFragmentManager) {
             if (findFragmentById(R.id.fragment_container) == null) {
                 beginTransaction()
-                        .add(R.id.fragment_container, SubredditFragment.newInstance(FRONTPAGE))
-                        .commit()
+                    .add(R.id.fragment_container, SubredditFragment.newInstance(FRONTPAGE))
+                    .commit()
             }
         }
     }
 
     private fun openSettings() {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.fragment_container, SettingsFragment())
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragment_container, SettingsFragment())
+            .commit()
     }
 
 
     private fun openLoginScreen() {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.fragment_container, LoginFragment())
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragment_container, LoginFragment())
+            .commit()
     }
 
     fun openSubreddit(name: String) {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .replace(R.id.fragment_container, SubredditFragment.newInstance(name))
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .replace(R.id.fragment_container, SubredditFragment.newInstance(name))
+            .commit()
     }
 
     fun openUser(name: String) {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .replace(R.id.fragment_container, UserFragment.newInstance(name))
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .replace(R.id.fragment_container, UserFragment.newInstance(name))
+            .commit()
     }
 
     fun openComments(subreddit: String, id: String) {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id))
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id))
+            .commit()
     }
 
     fun openLink(link: String) = startActivity(Intent().apply {
@@ -136,18 +158,21 @@ class MainActivity : AppCompatActivity() {
 
     fun openImage(media: ImageMedia) {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .add(R.id.fragment_container, ImagePreviewFragment.newInstance(media.url, media.url)) //TODO : put high res url in UI model
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .add(
+                R.id.fragment_container,
+                ImagePreviewFragment.newInstance(media.url, media.url)
+            ) //TODO : put high res url in UI model
+            .commit()
     }
 
     fun openVideo(videoUrl: String) {
         supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .add(R.id.fragment_container, VideoPreviewFragment.newInstance(videoUrl))
-                .commit()
+            .beginTransaction()
+            .addToBackStack(null)
+            .add(R.id.fragment_container, VideoPreviewFragment.newInstance(videoUrl))
+            .commit()
     }
 
     private fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)

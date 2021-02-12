@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.ducktapedapps.updoot.ui.ActivityVM
 import com.ducktapedapps.updoot.ui.MainActivity
+import com.ducktapedapps.updoot.ui.subreddit.PostMedia.*
 import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,28 +26,30 @@ class SubredditFragment : Fragment() {
     private val activityVM: ActivityVM by activityViewModels()
     private val subredditVM: ISubredditVM by viewModels<SubredditVMImpl>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                UpdootTheme {
-                    with((requireActivity() as MainActivity)) {
-                        SubredditScreen(
-                                viewModel = subredditVM,
-                                activityVM = activityVM,
-                                openMedia = { media ->
-                                    when (media) {
-                                        is PostMedia.TextMedia -> Unit
-                                        is PostMedia.ImageMedia -> openImage(media)
-                                        is PostMedia.LinkMedia -> openLink(media.url)
-                                        is PostMedia.VideoMedia -> openVideo(media.url)
-                                        PostMedia.NoMedia -> Unit
-                                    }
-                                },
-                                openComments = { subreddit, id -> openComments(subreddit, id) },
-                                openUser = ::openUser,
-                                openSubreddit = ::openSubreddit,
-                        )
-                    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = ComposeView(requireContext()).apply {
+        setContent {
+            UpdootTheme {
+                with((requireActivity() as MainActivity)) {
+                    SubredditScreen(
+                        viewModel = subredditVM,
+                        activityVM = activityVM,
+                        openMedia = {
+                            when (it) {
+                                is TextMedia -> Unit
+                                is ImageMedia -> openImage(it)
+                                is LinkMedia -> openLink(it.url)
+                                is VideoMedia -> openVideo(it.url)
+                                NoMedia -> Unit
+                            }
+                        },
+                        openComments = ::openComments,
+                        openUser = ::openUser,
+                        openSubreddit = ::openSubreddit,
+                    )
                 }
             }
         }
