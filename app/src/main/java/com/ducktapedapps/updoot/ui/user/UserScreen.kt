@@ -20,51 +20,60 @@ import com.ducktapedapps.updoot.ui.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.ui.theme.ScoreBackground
 import com.ducktapedapps.updoot.ui.user.UserContent.UserComment
 import com.ducktapedapps.updoot.ui.user.UserContent.UserPost
+import com.ducktapedapps.updoot.utils.Page.*
 
 @Composable
 fun UserInfoScreen(viewModel: UserViewModel) {
-    val content = viewModel.content.collectAsState()
-    val loading = viewModel.isLoading.collectAsState()
+    val content = viewModel.content.collectAsState(emptyList())
     val currentSection = viewModel.currentSection.collectAsState()
-
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
-        item {
+        stickyHeader {
             UserSections(
-                    sections = UserSection.values().asList(),
-                    currentSection = currentSection.value,
-                    onClick = { viewModel.setSection(it) }
+                sections = UserSection.values().asList(),
+                currentSection = currentSection.value,
+                onClick = { viewModel.setSection(it) }
             )
         }
 
         itemsIndexed(content.value) { index, item ->
             if (content.value.size - 5 <= index) viewModel.loadPage()
             when (item) {
-                is UserComment -> FullComment(
-                        threadWidth = 2.dp,
-                        threadSpacingWidth = 6.dp,
-                        singleThreadMode = false,
-                        comment = item.data,
-                        onClickComment = {}
-                )
-                is UserPost -> LargePost(
-                        post = item.data,
-                        onClickMedia = {},
-                        openPost = {},
-                        openSubreddit = {},
-                        openUser = {},
+                is ErrorPage -> LoadingFailed(
+                    performRetry = viewModel::loadPage,
+                    message = item.errorReason
                 )
 
+                is LoadedPage -> {
+                    item.content.forEach { userContent ->
+                        when (userContent) {
+                            is UserComment -> FullComment(
+                                threadWidth = 2.dp,
+                                threadSpacingWidth = 6.dp,
+                                singleThreadMode = false,
+                                comment = userContent.data,
+                                onClickComment = {}
+                            )
+                            is UserPost -> LargePost(
+                                post = userContent.data,
+                                onClickMedia = {},
+                                openPost = {},
+                                openSubreddit = {},
+                                openUser = {},
+                            )
+                        }
+                    }
+                }
+                LoadingPage -> Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                End -> PageEnd()
             }
             Divider()
-        }
-
-        if (loading.value) item {
-            Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
         }
 
         item { Spacer(Modifier.height(200.dp)) }
@@ -72,49 +81,64 @@ fun UserInfoScreen(viewModel: UserViewModel) {
 }
 
 @Composable
+fun LoadingFailed(performRetry: () -> Unit, message: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
+        Button(onClick = performRetry) {
+            Text(text = "Retry")
+        }
+        Text(text = message)
+    }
+}
+
+@Composable
+fun PageEnd() {
+    Text(text = "No more content", modifier = Modifier.padding(16.dp))
+}
+
+@Composable
 fun SectionChip(
-        section: UserSection,
-        isSelected: Boolean,
-        onClick: () -> Unit,
+    section: UserSection,
+    isSelected: Boolean,
+    onClick: () -> Unit,
 ) {
     Surface(
-            color =
-            if (isSelected)
-                MaterialTheme.colors.ScoreBackground
-            else
-                MaterialTheme.colors.surface,
-            contentColor =
-            if (isSelected)
-                MaterialTheme.colors.ColorOnScoreBackground
-            else
-                MaterialTheme.colors.onSurface,
-            modifier = Modifier
-                    .padding(8.dp)
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(50))
-                    .clickable(onClick = onClick)
+        color =
+        if (isSelected)
+            MaterialTheme.colors.ScoreBackground
+        else
+            MaterialTheme.colors.surface,
+        contentColor =
+        if (isSelected)
+            MaterialTheme.colors.ColorOnScoreBackground
+        else
+            MaterialTheme.colors.onSurface,
+        modifier = Modifier
+            .padding(8.dp)
+            .wrapContentSize()
+            .clip(RoundedCornerShape(50))
+            .clickable(onClick = onClick)
 
     ) {
         Text(
-                text = section.name,
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier.padding(8.dp)
+            text = section.name,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.padding(8.dp)
         )
     }
 }
 
 @Composable
 fun UserSections(
-        sections: List<UserSection>,
-        currentSection: UserSection,
-        onClick: (UserSection) -> Unit,
+    sections: List<UserSection>,
+    currentSection: UserSection,
+    onClick: (UserSection) -> Unit,
 ) {
     LazyRow {
         items(sections) {
             SectionChip(
-                    section = it,
-                    isSelected = it == currentSection,
-                    onClick = { onClick(it) }
+                section = it,
+                isSelected = it == currentSection,
+                onClick = { onClick(it) }
             )
         }
     }

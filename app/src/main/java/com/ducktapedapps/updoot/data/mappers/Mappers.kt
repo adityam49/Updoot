@@ -43,20 +43,20 @@ fun Comment.toLocalComment(): LocalComment = when (this) {
     is MoreCommentData -> toLocalMoreComment()
 }
 
-fun CommentData.toLocalFullComment(): LocalComment {
+fun CommentData.toLocalFullComment(): FullComment {
     return FullComment(
-            id = name,
-            depth = depth,
-            parentId = parent_id,
-            author = author,
-            body = body,
-            upVotes = ups,
-            userHasUpVoted = likes,
-            replies = replies.children.map { it.toLocalComment() },
-            gildings = Gildings(gildings.gid_1, gildings.gid_2, gildings.gid_3),
-            repliesExpanded = false,
-            userIsOriginalPoster = is_submitter,
-            userFlair = author_flair_text,
+        id = name,
+        depth = depth,
+        parentId = parent_id,
+        author = author,
+        body = body,
+        upVotes = ups,
+        userHasUpVoted = likes,
+        replies = replies.children.map { it.toLocalComment() },
+        gildings = Gildings(gildings.gid_1, gildings.gid_2, gildings.gid_3),
+        repliesExpanded = false,
+        userIsOriginalPoster = is_submitter,
+        userFlair = author_flair_text,
     )
 }
 
