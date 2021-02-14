@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
-import com.ducktapedapps.updoot.utils.SubmissionUiType
+import com.ducktapedapps.updoot.utils.PostViewType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -13,12 +13,12 @@ interface SubredditPrefsDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubredditPrefs(subredditPrefs: SubredditPrefs)
 
-    @Query("UPDATE SubredditPrefs SET viewType = :newViewType WHERE subreddit_name IS :subreddit")
-    suspend fun setUIType(newViewType: SubmissionUiType, subreddit: String)
+    @Query("UPDATE SubredditPrefs SET viewType = :newViewType WHERE subredditName IS :subreddit")
+    suspend fun setUIType(newViewType: PostViewType, subreddit: String)
 
-    @Query("UPDATE SubredditPrefs SET subredditSorting = :newSubredditSorting WHERE subreddit_name IS :subreddit ")
+    @Query("UPDATE SubredditPrefs SET subredditSorting = :newSubredditSorting WHERE subredditName IS :subreddit ")
     suspend fun setSorting(newSubredditSorting: SubredditSorting, subreddit: String)
 
-    @Query("SELECT * FROM SubredditPrefs WHERE subreddit_name IS :subreddit")
+    @Query("SELECT * FROM SubredditPrefs WHERE subredditName IS :subreddit")
     fun observeSubredditPrefs(subreddit: String): Flow<SubredditPrefs?>
 }

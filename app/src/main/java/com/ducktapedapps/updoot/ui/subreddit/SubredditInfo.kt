@@ -18,11 +18,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.ui.common.PageLoading
+import com.ducktapedapps.updoot.ui.common.PageLoadingFailed
+import com.ducktapedapps.updoot.ui.subreddit.SubredditInfoState.*
 import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
 import com.ducktapedapps.updoot.ui.theme.SurfaceOnDrawer
-import com.ducktapedapps.updoot.utils.SubmissionUiType
-import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
-import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
+import com.ducktapedapps.updoot.utils.PostViewType
+import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
+import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import dev.chrisbanes.accompanist.coil.CoilImage
@@ -34,35 +37,43 @@ import java.util.*
  *  Subreddit sidebar UI component
  */
 @Composable
-fun SubredditInfo(subredditVM: ISubredditVM) {
-    val subreddit = subredditVM.subredditInfo.collectAsState()
+fun SubredditInfo(subredditVM: SubredditVM) {
+    val subredditInfo = subredditVM.subredditInfo.collectAsState()
     val postType = subredditVM.postViewType.collectAsState()
+
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, info, footer) = createRefs()
 
-        subreddit.value?.let {
-            SubredditInfoHeader(
-                iconUrl = it.icon,
-                activeMembers = it.accountsActive,
-                subscribers = it.subscribers,
-                created = it.created,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(header) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(info.top)
-                        height = Dimension.wrapContent
-                    }
-            )
-            Info(
-                description = it.longDescription,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(info) {
-                        top.linkTo(header.bottom)
-                        bottom.linkTo(footer.top)
-                        height = Dimension.fillToConstraints
-                    }
+        when (val data = subredditInfo.value) {
+            Loading -> PageLoading()
+            is UiModel -> {
+                SubredditInfoHeader(
+                    iconUrl = data.icon,
+                    activeMembers = data.activeAccounts,
+                    subscribers = data.subscribers,
+                    created = data.created,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(header) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(info.top)
+                            height = Dimension.wrapContent
+                        }
+                )
+                Info(
+                    description = data.info,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(info) {
+                            top.linkTo(header.bottom)
+                            bottom.linkTo(footer.top)
+                            height = Dimension.fillToConstraints
+                        }
+                )
+            }
+            is LoadingFailed -> PageLoadingFailed(
+                performRetry = subredditVM::loadSubredditInfo,
+                message = data.reason
             )
         }
         SubmissionViewType(
@@ -124,8 +135,8 @@ private fun SubredditInfoHeader(
 @Composable
 private fun SubmissionViewType(
     modifier: Modifier,
-    type: SubmissionUiType,
-    setType: (SubmissionUiType) -> Unit
+    type: PostViewType,
+    setType: (PostViewType) -> Unit
 ) {
     DrawerCard(modifier = modifier) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -135,11 +146,11 @@ private fun SubmissionViewType(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 SelectableViewType(
-                    submissionUiType = COMPACT,
+                    postViewType = COMPACT,
                     isSelected = type == COMPACT,
                     selectViewType = { setType(COMPACT) })
                 SelectableViewType(
-                    submissionUiType = LARGE,
+                    postViewType = LARGE,
                     isSelected = type == LARGE,
                     selectViewType = { setType(LARGE) })
             }
@@ -150,7 +161,7 @@ private fun SubmissionViewType(
 
 @Composable
 fun SelectableViewType(
-    submissionUiType: SubmissionUiType,
+    postViewType: PostViewType,
     isSelected: Boolean,
     selectViewType: () -> Unit
 ) {
@@ -167,7 +178,7 @@ fun SelectableViewType(
     ) {
         Icon(
             painter = painterResource(
-                id = when (submissionUiType) {
+                id = when (postViewType) {
                     COMPACT -> R.drawable.ic_list_view_24dp
                     LARGE -> R.drawable.ic_card_view_24dp
                 }

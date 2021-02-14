@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,26 +10,25 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.common.BottomBarActions
-import com.ducktapedapps.updoot.ui.common.FancyBottomBar
+import com.ducktapedapps.updoot.ui.common.*
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationMenuScreen
 import com.ducktapedapps.updoot.ui.subreddit.ActiveContent.*
 import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
 import com.ducktapedapps.updoot.ui.theme.UpdootDarkColors
-import com.ducktapedapps.updoot.utils.SubmissionUiType.COMPACT
-import com.ducktapedapps.updoot.utils.SubmissionUiType.LARGE
+import com.ducktapedapps.updoot.utils.Page.*
+import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
+import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun SubredditScreen(
-    viewModel: ISubredditVM,
+    viewModel: SubredditVM,
     openMedia: (PostMedia) -> Unit,
     openComments: (subreddit: String, id: String) -> Unit,
     openUser: (String) -> Unit,
@@ -107,54 +106,54 @@ fun SubredditScreen(
 
 @Composable
 fun Body(
-    viewModel: ISubredditVM,
+    viewModel: SubredditVM,
     openMedia: (PostMedia) -> Unit,
     openComments: (subreddit: String, id: String) -> Unit,
     openSubreddit: (String) -> Unit,
     openUser: (String) -> Unit,
 ) {
-    val feed = viewModel.feedPages.collectAsState()
+    val feed = viewModel.pagesOfPosts.collectAsState()
     val postType = viewModel.postViewType.collectAsState()
-    val loading = viewModel.isLoading.collectAsState()
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-        LazyColumn {
-            itemsIndexed(items = feed.value) { index, item ->
-                LaunchedEffect(Unit) {
-                    viewModel.lastScrollPosition = index
-                    //TODO move paging stuff to viewModel
-                    if (index >= feed.value.size - 10 && viewModel.hasNextPage() && !viewModel.isLoading.value) viewModel.loadPage()
+
+    LazyColumn {
+        items(feed.value) { currentPage ->
+            when (currentPage) {
+                LoadingPage -> PageLoading()
+
+                is LoadedPage -> {
+                    LaunchedEffect(Unit) { if (currentPage.hasNextPage()) viewModel.loadPage() }
+                    currentPage.content.collectAsState(emptyList()).value.forEach { post ->
+                        when (postType.value) {
+                            COMPACT -> CompactPost(
+                                post = post,
+                                onClickMedia = { openMedia(post.postMedia) },
+                                onClickPost = { openComments(post.subredditName, post.id) },
+                                openSubreddit = openSubreddit,
+                                openUser = openUser,
+                            )
+
+                            LARGE -> LargePost(
+                                post = post,
+                                onClickMedia = { openMedia(post.postMedia) },
+                                openPost = { openComments(post.subredditName, post.id) },
+                                openSubreddit = openSubreddit,
+                                openUser = openUser,
+                            )
+                        }
+                    }
                 }
-                when (postType.value) {
-                    COMPACT -> CompactPost(
-                        post = item,
-                        onClickMedia = { openMedia(item.postMedia) },
-                        onClickPost = { openComments(item.subredditName, item.id) },
-                        openSubreddit = openSubreddit,
-                        openUser = openUser,
-                    )
-                    LARGE -> LargePost(
-                        post = item,
-                        onClickMedia = { openMedia(item.postMedia) },
-                        openPost = { openComments(item.subredditName, item.id) },
-                        openSubreddit = openSubreddit,
-                        openUser = openUser,
-                    )
-                }
-                Divider()
+                is ErrorPage -> PageLoadingFailed(
+                    performRetry = viewModel::loadPage,
+                    message = currentPage.errorReason
+                )
+                End -> PageEnd()
             }
-            if (loading.value) item {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillParentMaxWidth()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .padding(16.dp)
-                    )
-                }
-            }
-            item { Spacer(Modifier.height(200.dp)) }
+            Divider()
         }
+        item { Spacer(Modifier.height(500.dp)) }
     }
 }
+
 
 @Composable
 fun EmptyScreen() {

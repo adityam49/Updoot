@@ -1,3 +1,4 @@
+
 package com.ducktapedapps.updoot.utils
 
 import androidx.room.TypeConverter
@@ -50,11 +51,11 @@ class SubredditPrefsConverter {
     }
 
     @TypeConverter
-    fun viewTypeIntToEnum(viewType: Int): SubmissionUiType = when (viewType) {
-        0 -> SubmissionUiType.COMPACT
-        else -> SubmissionUiType.LARGE
+    fun viewTypeIntToEnum(viewType: Int): PostViewType = when (viewType) {
+        0 -> PostViewType.COMPACT
+        else -> PostViewType.LARGE
     }
 
     @TypeConverter
-    fun viewTypeEnumToInt(viewType: SubmissionUiType): Int = viewType.ordinal
+    fun viewTypeEnumToInt(viewType: PostViewType): Int = viewType.ordinal
 }

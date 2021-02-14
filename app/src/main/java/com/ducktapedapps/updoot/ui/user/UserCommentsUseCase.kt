@@ -7,6 +7,7 @@ import com.ducktapedapps.updoot.utils.Page.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 interface GetUserCommentsUseCase {
@@ -46,7 +47,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
                 val api = redditClient.api()
                 val result = api.getUserComments(userName, errorPage.currentPageKey)
                 LoadedPage(
-                    content = result.children.map { UserComment(it.toLocalFullComment()) },
+                    content = flow { emit(result.children.map { UserComment(it.toLocalFullComment()) }) },
                     nextPageKey = result.after
                 )
             } catch (e: Exception) {
@@ -66,7 +67,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
                 val api = redditClient.api()
                 val result = api.getUserComments(userName, page?.nextPageKey)
                 LoadedPage(
-                    result.children.map { UserComment(it.toLocalFullComment()) },
+                    flow { emit(result.children.map { UserComment(it.toLocalFullComment()) }) },
                     result.after
                 )
             } catch (e: Exception) {

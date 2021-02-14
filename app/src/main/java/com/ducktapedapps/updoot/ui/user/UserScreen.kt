@@ -5,16 +5,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.ui.comments.FullComment
+import com.ducktapedapps.updoot.ui.common.PageEnd
+import com.ducktapedapps.updoot.ui.common.PageLoading
+import com.ducktapedapps.updoot.ui.common.PageLoadingFailed
 import com.ducktapedapps.updoot.ui.subreddit.LargePost
 import com.ducktapedapps.updoot.ui.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.ui.theme.ScoreBackground
@@ -36,16 +41,18 @@ fun UserInfoScreen(viewModel: UserViewModel) {
             )
         }
 
-        itemsIndexed(content.value) { index, item ->
-            if (content.value.size - 5 <= index) viewModel.loadPage()
-            when (item) {
-                is ErrorPage -> LoadingFailed(
+        items(content.value) { page ->
+            when (page) {
+                is ErrorPage -> PageLoadingFailed(
                     performRetry = viewModel::loadPage,
-                    message = item.errorReason
+                    message = page.errorReason
                 )
 
                 is LoadedPage -> {
-                    item.content.forEach { userContent ->
+                    LaunchedEffect(Unit) {
+                        if (page.hasNextPage()) viewModel.loadPage()
+                    }
+                    page.content.collectAsState(emptyList()).value.forEach { userContent ->
                         when (userContent) {
                             is UserComment -> FullComment(
                                 threadWidth = 2.dp,
@@ -64,13 +71,8 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                         }
                     }
                 }
-                LoadingPage -> Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
+                LoadingPage -> PageLoading()
+
                 End -> PageEnd()
             }
             Divider()
@@ -80,20 +82,6 @@ fun UserInfoScreen(viewModel: UserViewModel) {
     }
 }
 
-@Composable
-fun LoadingFailed(performRetry: () -> Unit, message: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
-        Button(onClick = performRetry) {
-            Text(text = "Retry")
-        }
-        Text(text = message)
-    }
-}
-
-@Composable
-fun PageEnd() {
-    Text(text = "No more content", modifier = Modifier.padding(16.dp))
-}
 
 @Composable
 fun SectionChip(

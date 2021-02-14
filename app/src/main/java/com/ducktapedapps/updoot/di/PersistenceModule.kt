@@ -13,7 +13,7 @@ import com.ducktapedapps.updoot.ui.common.IThemeManager
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Constants.UPDOOT_DB
-import com.ducktapedapps.updoot.utils.SubmissionUiType
+import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.accountManagement.ICurrentAccountNameManager
 import dagger.Binds
 import dagger.Module
@@ -65,10 +65,10 @@ abstract class PersistenceModule {
                         )
                         updootDb.subredditPrefsDAO().insertSubredditPrefs(
                                 SubredditPrefs(
-                                        //reddit's api directs to frontpage if no subreddit name is specified
-                                        subreddit_name = FRONTPAGE,
-                                        viewType = SubmissionUiType.COMPACT,
-                                        subredditSorting = SubredditSorting.Hot
+                                    //reddit's api directs to frontpage if no subreddit name is specified
+                                    subredditName = FRONTPAGE,
+                                    viewType = PostViewType.COMPACT,
+                                    subredditSorting = SubredditSorting.Hot
                                 ))
                     }
                 }

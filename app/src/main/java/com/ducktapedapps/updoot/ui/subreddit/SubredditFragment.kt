@@ -4,6 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -24,7 +28,7 @@ class SubredditFragment : Fragment() {
     }
 
     private val activityVM: ActivityVM by activityViewModels()
-    private val subredditVM: ISubredditVM by viewModels<SubredditVMImpl>()
+    private val subredditVM: SubredditVM by viewModels<SubredditVMImpl>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,23 +37,28 @@ class SubredditFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setContent {
             UpdootTheme {
-                with((requireActivity() as MainActivity)) {
-                    SubredditScreen(
-                        viewModel = subredditVM,
-                        activityVM = activityVM,
-                        openMedia = {
-                            when (it) {
-                                is TextMedia -> Unit
-                                is ImageMedia -> openImage(it)
-                                is LinkMedia -> openLink(it.url)
-                                is VideoMedia -> openVideo(it.url)
-                                NoMedia -> Unit
-                            }
-                        },
-                        openComments = ::openComments,
-                        openUser = ::openUser,
-                        openSubreddit = ::openSubreddit,
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    with((requireActivity() as MainActivity)) {
+                        SubredditScreen(
+                            viewModel = subredditVM,
+                            activityVM = activityVM,
+                            openMedia = {
+                                when (it) {
+                                    is TextMedia -> Unit
+                                    is ImageMedia -> openImage(it)
+                                    is LinkMedia -> openLink(it.url)
+                                    is VideoMedia -> openVideo(it.url)
+                                    NoMedia -> Unit
+                                }
+                            },
+                            openComments = ::openComments,
+                            openUser = ::openUser,
+                            openSubreddit = ::openSubreddit,
+                        )
+                    }
                 }
             }
         }
