@@ -7,12 +7,11 @@ import com.ducktapedapps.updoot.utils.Page.*
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 interface GetUserCommentsUseCase {
 
-    val pagesOfComments: StateFlow<List<Page<UserComment>>>
+    val pagesOfComments: StateFlow<List<Page<List<UserComment>>>>
 
     suspend fun loadNextPage(userName: String)
 
@@ -23,7 +22,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
     private val redditClient: IRedditClient,
 ) : GetUserCommentsUseCase {
 
-    override val pagesOfComments: MutableStateFlow<List<Page<UserComment>>> =
+    override val pagesOfComments: MutableStateFlow<List<Page<List<UserComment>>>> =
         MutableStateFlow(emptyList())
 
     override suspend fun loadNextPage(userName: String) {
@@ -47,7 +46,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
                 val api = redditClient.api()
                 val result = api.getUserComments(userName, errorPage.currentPageKey)
                 LoadedPage(
-                    content = flow { emit(result.children.map { UserComment(it.toLocalFullComment()) }) },
+                    content = result.children.map { UserComment(it.toLocalFullComment()) },
                     nextPageKey = result.after
                 )
             } catch (e: Exception) {
@@ -57,7 +56,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
     }
 
     private suspend fun loadAfterNoError(
-        page: LoadedPage<UserComment>? = null,
+        page: LoadedPage<List<UserComment>>? = null,
         userName: String
     ) {
         pagesOfComments.value += LoadingPage
@@ -67,7 +66,7 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
                 val api = redditClient.api()
                 val result = api.getUserComments(userName, page?.nextPageKey)
                 LoadedPage(
-                    flow { emit(result.children.map { UserComment(it.toLocalFullComment()) }) },
+                    result.children.map { UserComment(it.toLocalFullComment()) },
                     result.after
                 )
             } catch (e: Exception) {

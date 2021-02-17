@@ -13,16 +13,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class UserViewModel @ViewModelInject constructor(
+interface UserViewModel {
+    val userName: String
+
+    val currentSection: StateFlow<UserSection>
+
+    val content: StateFlow<List<Page<List<UserContent>>>>
+
+    fun loadPage()
+
+    fun setSection(section: UserSection)
+}
+
+
+class UserViewModelImpl @ViewModelInject constructor(
     private val loadUserCommentsUseCase: GetUserCommentsUseCase,
     @Assisted savedStateHandle: SavedStateHandle,
-) : ViewModel(), IUserViewModel {
+) : ViewModel(), UserViewModel {
     override val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
 
     //TODO : sections should depend on logged in user
     override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(Comments)
 
-    override val content: StateFlow<List<Page<UserContent>>> = combine(
+    override val content: StateFlow<List<Page<List<UserContent>>>> = combine(
         currentSection,
         loadUserCommentsUseCase.pagesOfComments
     ) { currentSectionValue, pagesOfComments ->

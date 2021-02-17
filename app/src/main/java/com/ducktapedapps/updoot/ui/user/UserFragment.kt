@@ -25,16 +25,21 @@ class UserFragment : Fragment() {
         }
     }
 
-    private val viewModel: UserViewModel by viewModels()
+    private val viewModel: UserViewModel by viewModels<UserViewModelImpl>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            ComposeView(requireContext()).apply {
-                setContent {
-                    UpdootTheme {
-                        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                            UserInfoScreen(viewModel = viewModel)
-                        }
-                    }
-                }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = ComposeView(requireContext()).apply {
+        setContent {
+            UpdootTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background,
+                    content = { UserInfoScreen(viewModel = viewModel) }
+                )
             }
+        }
+    }
 }

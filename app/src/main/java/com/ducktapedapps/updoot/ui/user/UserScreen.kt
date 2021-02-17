@@ -49,10 +49,8 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                 )
 
                 is LoadedPage -> {
-                    LaunchedEffect(Unit) {
-                        if (page.hasNextPage()) viewModel.loadPage()
-                    }
-                    page.content.collectAsState(emptyList()).value.forEach { userContent ->
+                    LaunchedEffect(Unit) { if (page.hasNextPage()) viewModel.loadPage() }
+                    page.content.forEach { userContent ->
                         when (userContent) {
                             is UserComment -> FullComment(
                                 threadWidth = 2.dp,

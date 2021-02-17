@@ -2,15 +2,12 @@ package com.ducktapedapps.updoot.ui.subreddit
 
 import com.ducktapedapps.updoot.utils.Page
 import com.ducktapedapps.updoot.utils.Page.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 interface GetSubredditPostsUseCase {
 
-    val pagesOfPosts: StateFlow<List<Page<PostUiModel>>>
+    val pagesOfPosts: Flow<List<Page<List<PostUiModel>>>>
 
     suspend fun loadNextPage(
         subreddit: String,
@@ -22,9 +19,24 @@ interface GetSubredditPostsUseCase {
 class GetSubredditPostsUseCaseImpl @Inject constructor(
     private val postsRepo: PostsRepo
 ) : GetSubredditPostsUseCase {
-    override val pagesOfPosts: MutableStateFlow<List<Page<PostUiModel>>> = MutableStateFlow(
-        emptyList()
-    )
+    private val _pagesOfPosts: MutableStateFlow<List<Page<Flow<List<PostUiModel>>>>> =
+        MutableStateFlow(
+            emptyList()
+        )
+
+    override val pagesOfPosts: Flow<List<Page<List<PostUiModel>>>> = _pagesOfPosts.map { allPages ->
+        allPages.map { page ->
+            when (page) {
+                End -> End
+                is ErrorPage -> page
+                is LoadedPage -> LoadedPage(
+                    content = page.content.distinctUntilChanged().first(),
+                    nextPageKey = page.nextPageKey
+                )
+                LoadingPage -> LoadingPage
+            }
+        }
+    }
 
     override suspend fun loadNextPage(
         subreddit: String,
@@ -32,9 +44,9 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
         subredditSorting: SubredditSorting
     ) {
 
-        if (reload) pagesOfPosts.value = emptyList()
+        if (reload) _pagesOfPosts.value = emptyList()
 
-        when (val lastPage = pagesOfPosts.value.lastOrNull()) {
+        when (val lastPage = _pagesOfPosts.value.lastOrNull()) {
             null -> loadAfterNoError(subredditName = subreddit, subredditSorting = subredditSorting)
             is ErrorPage -> loadAfterError(
                 subredditName = subreddit,
@@ -56,14 +68,12 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
         sorting: SubredditSorting,
         errorPage: ErrorPage
     ) {
-        pagesOfPosts.value = pagesOfPosts.value.toMutableList().apply {
+        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
             removeLast()
             this += LoadingPage
         }
-        //TODO : Remove
-        delay(1000)
 
-        pagesOfPosts.value = pagesOfPosts.value.toMutableList().apply {
+        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
             val fetchedPage = getPageFromRepo(
                 subreddit = subredditName,
                 sorting = sorting,
@@ -74,17 +84,16 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
     }
 
     private suspend fun loadAfterNoError(
-        page: LoadedPage<PostUiModel>? = null,
+        page: LoadedPage<Flow<List<PostUiModel>>>? = null,
         subredditName: String,
         subredditSorting: SubredditSorting,
     ) {
-        pagesOfPosts.value += LoadingPage
+        _pagesOfPosts.value += LoadingPage
 
-        pagesOfPosts.value = pagesOfPosts.value.toMutableList().apply {
+        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
 
             val fetchedPage = getPageFromRepo(subredditName, page?.nextPageKey, subredditSorting)
 
-            delay(500)
             this[size - 1] = fetchedPage
 
             if (fetchedPage is LoadedPage && fetchedPage.nextPageKey == null)

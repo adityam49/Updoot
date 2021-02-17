@@ -122,7 +122,7 @@ fun Body(
 
                 is LoadedPage -> {
                     LaunchedEffect(Unit) { if (currentPage.hasNextPage()) viewModel.loadPage() }
-                    currentPage.content.collectAsState(emptyList()).value.forEach { post ->
+                    currentPage.content.forEach { post ->
                         when (postType.value) {
                             COMPACT -> CompactPost(
                                 post = post,
