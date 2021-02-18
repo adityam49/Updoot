@@ -1,4 +1,3 @@
-<img src="media/1.png" width="20%"> <img src="media/2.png" width="20%"> <img src="media/3.png" width="20%"> <img src="media/4.png" width="20%"> <img src="media/5.png" width="20%">
 # Development
 To build this app you need to have a Reddit account.  
 Once you have that, head over to [this](https://www.reddit.com/prefs/apps) page to get a client id for the app.  
