@@ -94,12 +94,10 @@ dependencies {
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
-    implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
 
     //persistence -> room
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-    implementation 'androidx.compose:compose-runtime:0.1.0-dev14'
     kapt "androidx.room:room-compiler:$room_version"
 
     //workManager for deferred work

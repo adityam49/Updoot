@@ -1,5 +1,7 @@
 package com.ducktapedapps.updoot.di
 
+import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCase
+import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCaseImpl
 import com.ducktapedapps.updoot.ui.subreddit.*
 import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCase
 import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCaseImpl
@@ -25,4 +27,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindSetSubredditPostViewTypeUseCase(useCase: SetSubredditPostViewTypeUseCaseImpl): SetSubredditPostViewTypeUseCase
+
+    @Binds
+    abstract fun bindGetUserSubscriptionsUseCase(useCase: GetUserSubscriptionsUseCaseImpl): GetUserSubscriptionsUseCase
 }

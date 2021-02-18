@@ -94,7 +94,10 @@ fun SubredditScreen(
                 contentColor = UpdootDarkColors.onSurface
             ) {
                 when (activeContent.value) {
-                    GlobalMenu -> NavigationMenuScreen(viewModel = activityVM)
+                    GlobalMenu -> NavigationMenuScreen(
+                        viewModel = activityVM,
+                        openSubreddit = openSubreddit
+                    )
                     SubredditInfo -> SubredditInfo(subredditVM = viewModel)
                     else -> EmptyScreen()
                 }
