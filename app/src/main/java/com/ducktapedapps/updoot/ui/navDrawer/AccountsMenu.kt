@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +33,11 @@ import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
 @Composable
 fun PreviewAccountsMenuDark() {
     val accounts = listOf(
-        AnonymousAccount(true),
-        UserModel("Someusername", false, ""),
+        AnonymousAccount(false),
+        UserModel("Someusername", true, ""),
     )
     UpdootTheme(isDarkTheme = true) {
-        AccountsMenu(accounts = accounts, removeAccount = {}, switch = {})
+        AccountsMenu(accounts = accounts, removeAccount = {}, switch = {}, {})
     }
 }
 
@@ -45,10 +46,10 @@ fun PreviewAccountsMenuDark() {
 @Composable
 fun PreviewAccountsMenu() {
     val accounts = listOf(
-        AnonymousAccount(true),
-        UserModel("Someusername", false, ""),
+        AnonymousAccount(false),
+        UserModel("Someusername", true, ""),
     )
-    AccountsMenu(accounts = accounts, removeAccount = {}, switch = {})
+    AccountsMenu(accounts = accounts, removeAccount = {}, switch = {}, {})
 }
 
 @Composable
@@ -56,6 +57,7 @@ fun AccountsMenu(
     accounts: List<AccountModel>,
     removeAccount: (accountName: String) -> Unit,
     switch: (accountName: String) -> Unit,
+    openAccountInfo: (String) -> Unit
 ) {
     val showAllAccounts = remember { mutableStateOf(false) }
     Card(
@@ -78,7 +80,8 @@ fun AccountsMenu(
                     if (accountModel.isCurrent) CurrentAccountItem(
                         accountModel = accountModel,
                         removeAccount = removeAccount,
-                        toggleAccountMenu = { showAllAccounts.value = !showAllAccounts.value }
+                        toggleAccountMenu = { showAllAccounts.value = !showAllAccounts.value },
+                        openAccountInfo = { openAccountInfo(accountModel.name) },
                     )
                     else NonCurrentAccountItem(
                         accountModel = accountModel,
@@ -86,7 +89,8 @@ fun AccountsMenu(
                         switch = {
                             showAllAccounts.value = false
                             switch(accountModel.name)
-                        }
+                        },
+                        openAccountInfo = { openAccountInfo(accountModel.name) },
                     )
                 }
         }
@@ -99,6 +103,7 @@ fun NonCurrentAccountItem(
     accountModel: AccountModel,
     removeAccount: (accountName: String) -> Unit,
     switch: (accountName: String) -> Unit,
+    openAccountInfo: () -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -145,6 +150,9 @@ fun NonCurrentAccountItem(
         }
 
         if (accountModel is UserModel) {
+            IconButton(onClick = openAccountInfo) {
+                Icon(imageVector = Icons.Default.Info, contentDescription = "User info Icon")
+            }
             IconButton(
                 modifier = Modifier.padding(end = 4.dp),
                 onClick = { removeAccount(accountModel.name) }
@@ -163,6 +171,7 @@ fun CurrentAccountItem(
     accountModel: AccountModel,
     removeAccount: (accountName: String) -> Unit,
     toggleAccountMenu: () -> Unit,
+    openAccountInfo: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -205,7 +214,10 @@ fun CurrentAccountItem(
         Providers(LocalContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
-        if (accountModel is UserModel)
+        if (accountModel is UserModel) {
+            IconButton(onClick = openAccountInfo) {
+                Icon(imageVector = Icons.Default.Info, contentDescription = "User info Icon")
+            }
             IconButton(
                 onClick = { removeAccount(accountModel.name) },
             ) {
@@ -214,6 +226,7 @@ fun CurrentAccountItem(
                     "Account Removal Icon"
                 )
             }
+        }
 
         IconButton(
             onClick = { toggleAccountMenu() },

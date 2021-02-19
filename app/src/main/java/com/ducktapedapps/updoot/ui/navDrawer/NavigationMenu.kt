@@ -41,7 +41,11 @@ fun DestinationItem(
 
 
 @Composable
-fun NavigationMenuScreen(viewModel: ActivityVM, openSubreddit: (String) -> Unit) {
+fun NavigationMenuScreen(
+    viewModel: ActivityVM,
+    openSubreddit: (String) -> Unit,
+    openUser: (String) -> Unit
+) {
     val accountsList = viewModel.accounts.collectAsState()
     val navDestinations = viewModel.navigationEntries.collectAsState()
     val subscriptions = viewModel.subscriptions.collectAsState()
@@ -50,7 +54,8 @@ fun NavigationMenuScreen(viewModel: ActivityVM, openSubreddit: (String) -> Unit)
             AccountsMenu(
                 accounts = accountsList.value,
                 removeAccount = viewModel::logout,
-                switch = viewModel::setCurrentAccount
+                switch = viewModel::setCurrentAccount,
+                openAccountInfo = openUser
             )
         }
         items(navDestinations.value) { DestinationItem(it, viewModel::navigateTo) }

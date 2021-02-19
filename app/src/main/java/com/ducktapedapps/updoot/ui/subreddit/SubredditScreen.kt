@@ -96,7 +96,8 @@ fun SubredditScreen(
                 when (activeContent.value) {
                     GlobalMenu -> NavigationMenuScreen(
                         viewModel = activityVM,
-                        openSubreddit = openSubreddit
+                        openSubreddit = openSubreddit,
+                        openUser = openUser
                     )
                     SubredditInfo -> SubredditInfo(subredditVM = viewModel)
                     else -> EmptyScreen()

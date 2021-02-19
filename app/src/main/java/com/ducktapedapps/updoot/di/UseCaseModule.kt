@@ -5,6 +5,8 @@ import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCaseImpl
 import com.ducktapedapps.updoot.ui.subreddit.*
 import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCase
 import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCaseImpl
+import com.ducktapedapps.updoot.ui.user.GetUserSectionsUseCase
+import com.ducktapedapps.updoot.ui.user.GetUserSectionsUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -30,4 +32,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserSubscriptionsUseCase(useCase: GetUserSubscriptionsUseCaseImpl): GetUserSubscriptionsUseCase
+
+    @Binds
+    abstract fun bindGetUserSectionsUseCase(useCase: GetUserSectionsUseCaseImpl): GetUserSectionsUseCase
 }

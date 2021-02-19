@@ -31,11 +31,12 @@ import com.ducktapedapps.updoot.utils.Page.*
 fun UserInfoScreen(viewModel: UserViewModel) {
     val content = viewModel.content.collectAsState(emptyList())
     val currentSection = viewModel.currentSection.collectAsState()
+    val userContentSections = viewModel.sections.collectAsState()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
         stickyHeader {
             UserSections(
-                sections = UserSection.values().asList(),
+                sections = userContentSections.value,
                 currentSection = currentSection.value,
                 onClick = { viewModel.setSection(it) }
             )
@@ -119,13 +120,15 @@ fun UserSections(
     currentSection: UserSection,
     onClick: (UserSection) -> Unit,
 ) {
-    LazyRow {
-        items(sections) {
-            SectionChip(
-                section = it,
-                isSelected = it == currentSection,
-                onClick = { onClick(it) }
-            )
+    Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colors.background) {
+        LazyRow {
+            items(sections) {
+                SectionChip(
+                    section = it,
+                    isSelected = it == currentSection,
+                    onClick = { onClick(it) }
+                )
+            }
         }
     }
 }
