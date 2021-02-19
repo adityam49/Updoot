@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.user
 
-import com.ducktapedapps.updoot.ui.user.UserSection.*
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
@@ -24,11 +23,10 @@ class GetUserSectionsUseCaseImpl @Inject constructor(
             }.map { currentLoggedInAccount ->
                 when (currentLoggedInAccount) {
                     is UserModel -> {
-                        if (userName == currentLoggedInAccount.name)
-                            UserSection.values().toList()
-                        else listOf(OverView, Posts, Comments, Gilded)
+                        if (userName == currentLoggedInAccount.name) getAllUserSections()
+                        else getNonUserSpecificSections()
                     }
-                    is AnonymousAccount -> listOf(OverView, Posts, Comments, Gilded)
+                    is AnonymousAccount -> getNonUserSpecificSections()
                 }
             }
 }

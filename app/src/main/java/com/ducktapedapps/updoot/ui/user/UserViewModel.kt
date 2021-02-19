@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.FullComment
 import com.ducktapedapps.updoot.ui.subreddit.PostUiModel
-import com.ducktapedapps.updoot.ui.user.UserSection.Comments
+import com.ducktapedapps.updoot.ui.user.UserSection.*
 import com.ducktapedapps.updoot.utils.Page
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -77,3 +77,9 @@ sealed class UserContent {
 enum class UserSection {
     OverView, Comments, Posts, UpVoted, DownVoted, Gilded, Saved
 }
+
+fun getNonUserSpecificSections() = listOf(
+    OverView, Posts, Comments, Gilded
+)
+
+fun getAllUserSections() = values().toList()
