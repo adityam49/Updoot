@@ -27,6 +27,15 @@ interface SubredditDAO {
     @Query("SELECT * FROM LocalSubreddit WHERE subredditName NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<LocalSubreddit>
 
+    @Query("SELECT * FROM SubredditSubscription WHERE subredditName = :subredditName AND userName = :currentUser")
+    fun observeSubredditSubscription(
+        subredditName: String,
+        currentUser: String
+    ): Flow<SubredditSubscription?>
+
+    @Query("DELETE FROM SubredditSubscription WHERE subredditName = :subredditName AND userName = :currentUser")
+    suspend fun deleteSubscription(subredditName: String, currentUser: String)
+
     @Query("DELETE  FROM LocalSubreddit WHERE subredditName is :name")
     suspend fun deleteSubreddit(name: String)
 

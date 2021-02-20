@@ -21,11 +21,15 @@ interface SubredditVM {
 
     val subredditInfo: StateFlow<SubredditInfoState?>
 
+    val subscriptionState: StateFlow<Boolean?>
+
     fun loadPage()
 
     fun reload()
 
     fun loadSubredditInfo()
+
+    fun toggleSubredditSubscription()
 
     fun setPostViewType(type: PostViewType)
 
@@ -41,10 +45,12 @@ interface SubredditVM {
 
 class SubredditVMImpl @ViewModelInject constructor(
     @Assisted savedStateHandle: SavedStateHandle,
-    private val getSubredditPreferencesUseCase: GetSubredditPreferencesUseCase,
+    getSubredditPreferencesUseCase: GetSubredditPreferencesUseCase,
     private val getSubredditInfoUseCase: GetSubredditInfoUseCase,
     private val getSubredditPostsUseCase: GetSubredditPostsUseCase,
     private val setSubredditViewTypeUseCase: SetSubredditPostViewTypeUseCase,
+    private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
+    getSubredditSubscriptionState: GetSubredditSubscriptionState,
 ) : ViewModel(), SubredditVM {
     override val subredditName: String =
         savedStateHandle.get<String>(SubredditFragment.SUBREDDIT_KEY)!!
@@ -75,6 +81,12 @@ class SubredditVMImpl @ViewModelInject constructor(
 
     override val subredditInfo: StateFlow<SubredditInfoState?> =
         getSubredditInfoUseCase.subredditInfo
+
+    override val subscriptionState: StateFlow<Boolean?> =
+        getSubredditSubscriptionState.getIsSubredditSubscribedState(subredditName)
+            .stateIn(
+                viewModelScope, SharingStarted.WhileSubscribed(), null
+            )
 
     override fun loadSubredditInfo() {
         viewModelScope.launch { getSubredditInfoUseCase.loadSubredditInfo(subredditName) }
@@ -111,6 +123,12 @@ class SubredditVMImpl @ViewModelInject constructor(
     override fun setPostViewType(type: PostViewType) {
         viewModelScope.launch {
             setSubredditViewTypeUseCase.setPostViewType(subredditName, type)
+        }
+    }
+
+    override fun toggleSubredditSubscription() {
+        viewModelScope.launch {
+            toggleSubscriptionUseCase.toggleSubscription(subredditName = subredditName)
         }
     }
 

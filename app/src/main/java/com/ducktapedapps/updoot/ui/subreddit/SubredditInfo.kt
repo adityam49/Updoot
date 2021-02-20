@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -40,6 +41,7 @@ import java.util.*
 fun SubredditInfo(subredditVM: SubredditVM) {
     val subredditInfo = subredditVM.subredditInfo.collectAsState()
     val postType = subredditVM.postViewType.collectAsState()
+    val subscriptionState = subredditVM.subscriptionState.collectAsState()
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, info, footer) = createRefs()
@@ -58,7 +60,9 @@ fun SubredditInfo(subredditVM: SubredditVM) {
                             top.linkTo(parent.top)
                             bottom.linkTo(info.top)
                             height = Dimension.wrapContent
-                        }
+                        },
+                    isSubscribed = subscriptionState.value,
+                    toggleSubscription = subredditVM::toggleSubredditSubscription,
                 )
                 Info(
                     description = data.info,
@@ -97,6 +101,8 @@ private fun SubredditInfoHeader(
     activeMembers: Long?,
     subscribers: Long?,
     created: Date,
+    isSubscribed: Boolean?,
+    toggleSubscription: () -> Unit,
 ) {
     DrawerCard(modifier = modifier) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -126,6 +132,15 @@ private fun SubredditInfoHeader(
                                 ?: "") +
                             created.run { "\n" + getCompactAge(time) },
                     style = MaterialTheme.typography.caption
+                )
+            }
+            Button(
+                onClick = { if (isSubscribed != null) toggleSubscription() },
+                enabled = isSubscribed != null
+            ) {
+                Text(
+                    text = if (isSubscribed == true) stringResource(R.string.leave)
+                    else stringResource(R.string.join)
                 )
             }
         }

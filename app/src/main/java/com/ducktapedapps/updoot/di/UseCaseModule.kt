@@ -35,4 +35,10 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserSectionsUseCase(useCase: GetUserSectionsUseCaseImpl): GetUserSectionsUseCase
+
+    @Binds
+    abstract fun bindEditSubredditSubscriptionUseCase(useCase: EditSubredditSubscriptionUseCaseImpl): EditSubredditSubscriptionUseCase
+
+    @Binds
+    abstract fun bindGetSubredditSubscriptionState(useCase: GetSubredditSubscriptionStateImpl): GetSubredditSubscriptionState
 }
