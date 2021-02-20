@@ -14,7 +14,7 @@ import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Constants.UPDOOT_DB
 import com.ducktapedapps.updoot.utils.PostViewType
-import com.ducktapedapps.updoot.utils.accountManagement.ICurrentAccountNameManager
+import com.ducktapedapps.updoot.utils.accountManagement.CurrentAccountNameManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,7 +34,7 @@ abstract class PersistenceModule {
     abstract fun bindThemeManager(dataStore: UpdootDataStore): IThemeManager
 
     @Binds
-    abstract fun bindCurrentAccountNameManager(dataStore: UpdootDataStore): ICurrentAccountNameManager
+    abstract fun bindCurrentAccountNameManager(dataStore: UpdootDataStore): CurrentAccountNameManager
 
     @Binds
     abstract fun bindCommentsPrefManager(dataStore: UpdootDataStore): ICommentPrefManager

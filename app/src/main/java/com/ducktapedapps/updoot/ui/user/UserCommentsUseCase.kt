@@ -4,7 +4,7 @@ import com.ducktapedapps.updoot.data.mappers.toLocalFullComment
 import com.ducktapedapps.updoot.ui.user.UserContent.UserComment
 import com.ducktapedapps.updoot.utils.Page
 import com.ducktapedapps.updoot.utils.Page.*
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -19,7 +19,7 @@ interface GetUserCommentsUseCase {
 
 //TODO : Use repository for caching
 class GetUserCommentsUseCaseImpl @Inject constructor(
-    private val redditClient: IRedditClient,
+    private val redditClient: RedditClient,
 ) : GetUserCommentsUseCase {
 
     override val pagesOfComments: MutableStateFlow<List<Page<List<UserComment>>>> =

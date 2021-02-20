@@ -19,17 +19,18 @@ import javax.inject.Singleton
 
 @Singleton
 class RedditClientImpl @Inject constructor(
-        private val androidAccountManager: AccountManager,
-        private val currentAccountNameManager: ICurrentAccountNameManager,
-        private val tokenInterceptor: TokenInterceptor,
-        private val redditAPI: RedditAPI,
-        private val authAPI: AuthAPI,
-) : IRedditClient {
+    private val androidAccountManager: AccountManager,
+    private val currentAccountNameManager: CurrentAccountNameManager,
+    private val tokenInterceptor: TokenInterceptor,
+    private val redditAPI: RedditAPI,
+    private val authAPI: AuthAPI,
+) : RedditClient, UpdootAccountsProvider, UpdootAccountManager {
 
-    private val _allAccounts: MutableStateFlow<List<android.accounts.Account>> = MutableStateFlow(emptyList())
+    private val _allAccounts: MutableStateFlow<List<android.accounts.Account>> =
+        MutableStateFlow(emptyList())
     override val allAccounts: StateFlow<List<AccountModel>> = combine(
-            _allAccounts,
-            currentAccountNameManager.currentAccountName()
+        _allAccounts,
+        currentAccountNameManager.currentAccountName()
     ) { accounts, currentAccountName ->
         if (accounts.isEmpty()) {
             createAnonAccount()
@@ -38,19 +39,19 @@ class RedditClientImpl @Inject constructor(
             when (it.name) {
                 Constants.ANON_USER -> AccountModel.AnonymousAccount(it.name == currentAccountName)
                 else -> AccountModel.UserModel(
-                        it.name,
-                        it.name == currentAccountName,
-                        androidAccountManager.getUserData(it, Constants.USER_ICON_KEY)
+                    it.name,
+                    it.name == currentAccountName,
+                    androidAccountManager.getUserData(it, Constants.USER_ICON_KEY)
                 )
             }
         }
     }.transform { accounts ->
         if (accounts.isNotEmpty())
             emit(
-                    mutableListOf<AccountModel>().apply {
-                        add(accounts.first { it.isCurrent })
-                        addAll(accounts.filterNot { it.isCurrent })
-                    }
+                mutableListOf<AccountModel>().apply {
+                    add(accounts.first { it.isCurrent })
+                    addAll(accounts.filterNot { it.isCurrent })
+                }
             )
 
     }.stateIn(GlobalScope, SharingStarted.Eagerly, emptyList())
@@ -75,13 +76,13 @@ class RedditClientImpl @Inject constructor(
 
     override suspend fun createAccount(username: String, icon: String, token: Token) {
         androidAccountManager
-                .addAccountExplicitly(
-                        android.accounts.Account(username, Constants.UPDOOT_ACCOUNT),
-                        null,
-                        Bundle().apply {
-                            putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
-                            putString(Constants.USER_ICON_KEY, icon)
-                        })
+            .addAccountExplicitly(
+                android.accounts.Account(username, Constants.UPDOOT_ACCOUNT),
+                null,
+                Bundle().apply {
+                    putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
+                    putString(Constants.USER_ICON_KEY, icon)
+                })
         currentAccountNameManager.setCurrentAccountName(username)
     }
 
@@ -98,11 +99,19 @@ class RedditClientImpl @Inject constructor(
     override suspend fun removeUser(accountName: String): Boolean {
         val accountToRemove = androidAccountManager.accounts.firstOrNull { it.name == accountName }
         return if (accountToRemove == null) {
-            Log.e("RedditClient", "removeUser: unable to remove account $accountName as it does not exist in system")
+            Log.e(
+                "RedditClient",
+                "removeUser: unable to remove account $accountName as it does not exist in system"
+            )
             false
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                val result = authAPI.logout(refresh_token = androidAccountManager.getUserData(accountToRemove, Constants.USER_TOKEN_REFRESH_KEY))
+                val result = authAPI.logout(
+                    refresh_token = androidAccountManager.getUserData(
+                        accountToRemove,
+                        Constants.USER_TOKEN_REFRESH_KEY
+                    )
+                )
                 if (result.code() in 200..299) {
                     invalidateToken()
                     currentAccountNameManager.setCurrentAccountName(Constants.ANON_USER)
@@ -131,7 +140,7 @@ class RedditClientImpl @Inject constructor(
 
     private suspend fun getUserLessToken(): Token = withContext(Dispatchers.IO) {
         authAPI.getUserLessToken(
-                device_id = currentAccountNameManager.deviceId().first()
+            device_id = currentAccountNameManager.deviceId().first()
         ).apply {
             setAbsoluteExpiry()
         }
@@ -139,46 +148,51 @@ class RedditClientImpl @Inject constructor(
 
     private fun listenToAccountChanges() {
         androidAccountManager.addOnAccountsUpdatedListener(
-                { accounts -> _allAccounts.value = accounts.toList() },
-                null,
-                true,
+            { accounts -> _allAccounts.value = accounts.toList() },
+            null,
+            true,
         )
     }
 
     private suspend fun createAnonAccount() {
         with(androidAccountManager) {
             if (accounts.none { it.name == Constants.ANON_USER }) {
-                addAccountExplicitly(android.accounts.Account(Constants.ANON_USER, Constants.UPDOOT_ACCOUNT), null, null)
+                addAccountExplicitly(
+                    android.accounts.Account(
+                        Constants.ANON_USER,
+                        Constants.UPDOOT_ACCOUNT
+                    ), null, null
+                )
                 currentAccountNameManager.setCurrentAccountName(Constants.ANON_USER)
             }
         }
     }
 
     private fun getAccountRefreshToken(accountName: String): String =
-            with(androidAccountManager) {
-                getUserData(accounts.first { it.name == accountName }, Constants.USER_TOKEN_REFRESH_KEY)
-            }
+        with(androidAccountManager) {
+            getUserData(accounts.first { it.name == accountName }, Constants.USER_TOKEN_REFRESH_KEY)
+        }
 
     companion object {
         private fun Token?.isExpiredOrInvalid() =
-                this == null || this.absoluteExpiry < System.currentTimeMillis()
+            this == null || this.absoluteExpiry < System.currentTimeMillis()
     }
 }
 
 sealed class AccountModel(
-        val name: String,
-        open val isCurrent: Boolean,
+    val name: String,
+    open val isCurrent: Boolean,
 ) {
     data class AnonymousAccount(
-            override val isCurrent: Boolean,
+        override val isCurrent: Boolean,
     ) : AccountModel(Constants.ANON_USER, isCurrent) {
         @DrawableRes
         val icon = R.drawable.ic_account_circle_24dp
     }
 
     data class UserModel(
-            private val _name: String,
-            override val isCurrent: Boolean,
-            val userIcon: String,
+        private val _name: String,
+        override val isCurrent: Boolean,
+        val userIcon: String,
     ) : AccountModel(_name, isCurrent)
 }

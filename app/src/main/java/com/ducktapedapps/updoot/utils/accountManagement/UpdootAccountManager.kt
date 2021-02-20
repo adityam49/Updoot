@@ -1,17 +1,8 @@
 package com.ducktapedapps.updoot.utils.accountManagement
 
-import com.ducktapedapps.updoot.data.remote.RedditAPI
 import com.ducktapedapps.updoot.data.remote.model.Token
-import kotlinx.coroutines.flow.StateFlow
 
-interface IRedditClient {
-
-    val allAccounts: StateFlow<List<AccountModel>>
-
-    /**
-     *  All api calls go should get api service object via this method
-     */
-    suspend fun api(): RedditAPI
+interface UpdootAccountManager {
 
     suspend fun setCurrentAccount(name: String)
 
@@ -21,4 +12,5 @@ interface IRedditClient {
      *  Removes user and sets Anonymous account as current
      */
     suspend fun removeUser(accountName: String): Boolean
+
 }

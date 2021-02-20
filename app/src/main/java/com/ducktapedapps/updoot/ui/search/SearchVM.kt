@@ -6,14 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.Constants.DEBOUNCE_TIME_OUT
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 
 class SearchVM @ViewModelInject constructor(
-        private val subredditDAO: SubredditDAO,
-        private val redditClient: IRedditClient,
+    private val subredditDAO: SubredditDAO,
+    private val redditClient: RedditClient,
 ) : ViewModel() {
     private val _searchQueryLoading = MutableStateFlow(false)
     val searchQueryLoading: StateFlow<Boolean> = _searchQueryLoading

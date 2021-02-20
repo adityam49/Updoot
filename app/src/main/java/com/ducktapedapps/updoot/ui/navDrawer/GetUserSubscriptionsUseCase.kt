@@ -4,7 +4,7 @@ import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -20,10 +20,10 @@ interface GetUserSubscriptionsUseCase {
 
 class GetUserSubscriptionsUseCaseImpl @Inject constructor(
     private val subredditDAO: SubredditDAO,
-    redditClient: IRedditClient,
+    updootAccountsProvider: UpdootAccountsProvider,
 ) : GetUserSubscriptionsUseCase {
 
-    override val subscriptions: Flow<List<LocalSubreddit>> = redditClient.allAccounts
+    override val subscriptions: Flow<List<LocalSubreddit>> = updootAccountsProvider.allAccounts
         .map { accounts -> accounts.first { account -> account.isCurrent } }
         .flatMapLatest {
             when (it) {

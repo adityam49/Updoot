@@ -20,60 +20,65 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class CacheCleanUpWorker @WorkerInject constructor(
-        @Assisted private val context: Context,
-        @Assisted workParas: WorkerParameters,
-        private val postCacheDAO: PostDAO,
-        private val subredditDAO: SubredditDAO,
+    @Assisted private val context: Context,
+    @Assisted workParas: WorkerParameters,
+    private val postCacheDAO: PostDAO,
+    private val subredditDAO: SubredditDAO,
 ) : CoroutineWorker(context, workParas) {
     override suspend fun doWork(): Result =
-            try {
-                findAndRemoveStaleSubmissions()
-                findAndRemoveStaleSubreddits()
-                Result.success()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                showFailureReportNotification(e)
-                Result.failure()
-            }
+        try {
+            findAndRemoveStaleSubmissions()
+            findAndRemoveStaleSubreddits()
+            Result.success()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showFailureReportNotification(e)
+            Result.failure()
+        }
 
     @Throws(Exception::class)
     private suspend fun findAndRemoveStaleSubmissions() {
         var totalSubmissions: Int
         var submissionsRemoved: Int
         postCacheDAO.getCachedPosts().also { totalSubmissions = it.size }
-                .filter { it.isStale() }
-                .also { submissionsRemoved = it.size }
-                .forEach { postCacheDAO.deletePost(it.id, it.subredditName) }
+            .filter { it.isStale() }
+            .also { submissionsRemoved = it.size }
+            .forEach { postCacheDAO.deletePost(it.id, it.subredditName) }
         showSubmissionsRemovedNotification(totalSubmissions, submissionsRemoved)
     }
 
     private fun showSubmissionsRemovedNotification(total: Int, removed: Int) =
-            with(context) {
-                buildNotificationAndShow(
-                        resources.getString(R.string.Submission_cache_cleanup),
-                        resources.getString(R.string.total_remove_submissions, total, removed, total - removed),
-                        this
-                )
-            }
+        with(context) {
+            buildNotificationAndShow(
+                resources.getString(R.string.Submission_cache_cleanup),
+                resources.getString(
+                    R.string.total_remove_submissions,
+                    total,
+                    removed,
+                    total - removed
+                ),
+                this
+            )
+        }
 
     private fun Post.isStale(): Boolean =
-            SUBMISSION_STALE_THRESHOLD_IN_HOURS < TimeUnit.HOURS.toHours(Date().time - lastUpdated.time)
+        SUBMISSION_STALE_THRESHOLD_IN_HOURS < TimeUnit.HOURS.toHours(Date().time - lastUpdated.time)
 
     private suspend fun findAndRemoveStaleSubreddits() {
         var subredditsRemovedCount: Int
         subredditDAO.getNonSubscribedSubreddits()
-                .filter { it.isStale() && it.subredditName != FRONTPAGE }
-                .also { subredditsRemovedCount = it.size }
-                .forEach { subredditDAO.deleteSubreddit(it.subredditName) }
+            .filter { it.isStale() && it.subredditName != FRONTPAGE }
+            .also { subredditsRemovedCount = it.size }
+            .forEach { subredditDAO.deleteSubreddit(it.subredditName) }
         showSubredditsRemovedNotification(subredditsRemovedCount)
     }
 
     private fun showSubredditsRemovedNotification(count: Int) {
         with(context) {
             buildNotificationAndShow(
-                    getString(R.string.subreddit_cache_removed),
-                    getString(R.string.subreddit_removed_count, count),
-                    context
+                getString(R.string.subreddit_cache_removed),
+                getString(R.string.subreddit_removed_count, count),
+                context
             )
         }
     }
@@ -85,20 +90,25 @@ class CacheCleanUpWorker @WorkerInject constructor(
 
     private fun showFailureReportNotification(e: Exception) = with(context) {
         buildNotificationAndShow(
-                resources.getString(R.string.something_went_wrong),
-                e.message.toString(),
-                this
+            resources.getString(R.string.something_went_wrong),
+            e.message.toString(),
+            this
         )
     }
 
-    private fun buildNotificationAndShow(title: String, message: String, context: Context, id: Int = Random.nextInt()) {
+    private fun buildNotificationAndShow(
+        title: String,
+        message: String,
+        context: Context,
+        id: Int = Random.nextInt()
+    ) {
         context.createNotificationChannel()
         val builder = NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_subreddit_default_24dp)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setSmallIcon(R.drawable.ic_subreddit_default_24dp)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
         NotificationManagerCompat.from(context).notify(id, builder.build())
     }
 
@@ -109,19 +119,19 @@ class CacheCleanUpWorker @WorkerInject constructor(
     }
 }
 
-fun Context.enqueueCleanUpWork() {
+fun WorkManager.enqueueCleanUpWork() {
     val constraints = Constraints.Builder()
-            .setRequiresBatteryNotLow(true)
+        .setRequiresBatteryNotLow(true)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) constraints.setRequiresDeviceIdle(true)
 
     val workRequest = PeriodicWorkRequestBuilder<CacheCleanUpWorker>(1, TimeUnit.DAYS)
-            .addTag(CacheCleanUpWorker.CACHED_SUBMISSIONS_CLEANUP_WORKER_TAG)
-            .setConstraints(constraints.build())
-            .build()
-    WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            CacheCleanUpWorker.CACHED_SUBMISSIONS_CLEANUP_WORKER_TAG,
-            ExistingPeriodicWorkPolicy.KEEP,
-            workRequest
+        .addTag(CacheCleanUpWorker.CACHED_SUBMISSIONS_CLEANUP_WORKER_TAG)
+        .setConstraints(constraints.build())
+        .build()
+    enqueueUniquePeriodicWork(
+        CacheCleanUpWorker.CACHED_SUBMISSIONS_CLEANUP_WORKER_TAG,
+        ExistingPeriodicWorkPolicy.KEEP,
+        workRequest
     )
 }

@@ -6,7 +6,7 @@ import com.ducktapedapps.updoot.data.local.model.LocalComment
 import com.ducktapedapps.updoot.data.local.model.MoreComment
 import com.ducktapedapps.updoot.data.mappers.toLocalComment
 import com.ducktapedapps.updoot.data.remote.model.Comment
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CommentsRepo @Inject constructor(
-        private val redditClient: IRedditClient
+    private val redditClient: RedditClient
 ) {
     private val _allComments = MutableStateFlow<List<LocalComment>>(emptyList())
     val visibleComments: Flow<List<LocalComment>> = _allComments

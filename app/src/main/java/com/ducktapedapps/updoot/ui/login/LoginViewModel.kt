@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.login
 
-import android.content.Context
 import android.net.Uri
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
@@ -18,9 +17,8 @@ import com.ducktapedapps.updoot.ui.login.LoginState.*
 import com.ducktapedapps.updoot.ui.login.ResultState.Finished
 import com.ducktapedapps.updoot.ui.login.ResultState.Running
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +31,11 @@ import java.util.*
 
 
 class LoginViewModel @ViewModelInject constructor(
-        private val redditClient: IRedditClient,
-        private val redditAPI: RedditAPI,
-        private val authAPI: AuthAPI,
-        private val interceptor: TokenInterceptor,
-        @ApplicationContext private val context: Context,
-        private val workManager: WorkManager
+    private val redditAPI: RedditAPI,
+    private val authAPI: AuthAPI,
+    private val interceptor: TokenInterceptor,
+    private val updootAccountManager: UpdootAccountManager,
+    private val workManager: WorkManager
 ) : ViewModel() {
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(NotLoggedIn)
@@ -64,27 +61,27 @@ class LoginViewModel @ViewModelInject constructor(
     }
 
     private val subscribedSubreddits: Flow<List<WorkInfo>> = workManager
-            .getWorkInfosByTagLiveData(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
-            .asFlow()
+        .getWorkInfosByTagLiveData(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
+        .asFlow()
 
     val authUrl: String
         get() {
             //TODO check state query param on redirect
             val state = UUID.randomUUID().toString()
             return Uri.Builder()
-                    .scheme("https")
-                    .authority("www.reddit.com")
-                    .appendPath("api")
-                    .appendPath("v1")
-                    .appendPath("authorize.compact")
-                    .appendQueryParameter("client_id", Constants.client_id)
-                    .appendQueryParameter("response_type", "code")
-                    .appendQueryParameter("state", state)
-                    .appendQueryParameter("redirect_uri", Constants.redirect_uri)
-                    .appendQueryParameter("duration", "permanent")
-                    .appendQueryParameter("scope", Constants.scopes)
-                    .build()
-                    .toString()
+                .scheme("https")
+                .authority("www.reddit.com")
+                .appendPath("api")
+                .appendPath("v1")
+                .appendPath("authorize.compact")
+                .appendQueryParameter("client_id", Constants.client_id)
+                .appendQueryParameter("response_type", "code")
+                .appendQueryParameter("state", state)
+                .appendQueryParameter("redirect_uri", Constants.redirect_uri)
+                .appendQueryParameter("duration", "permanent")
+                .appendQueryParameter("scope", Constants.scopes)
+                .build()
+                .toString()
         }
 
     fun parseUrl(uri: Uri?) {
@@ -130,21 +127,26 @@ class LoginViewModel @ViewModelInject constructor(
     private fun loadUserSubscribedSubreddits(userName: String) {
         workManager.apply {
             pruneWork()
-            context.enqueueOneOffSubscriptionsSyncFor(userName)
+            enqueueOneOffSubscriptionsSyncFor(userName)
             viewModelScope.launch {
                 subscribedSubreddits.collect {
                     val workState = it.firstOrNull()
                     workState?.state?.let { workStatus ->
                         when (workStatus) {
                             WorkInfo.State.ENQUEUED,
-                            WorkInfo.State.RUNNING -> _loginState.value = FetchingSubscriptions(Running)
+                            WorkInfo.State.RUNNING -> _loginState.value =
+                                FetchingSubscriptions(Running)
                             WorkInfo.State.SUCCEEDED -> {
-                                val count = workState.outputData.getInt(SubscriptionSyncWorker.SYNC_UPDATED_COUNT_KEY, -1)
+                                val count = workState.outputData.getInt(
+                                    SubscriptionSyncWorker.SYNC_UPDATED_COUNT_KEY,
+                                    -1
+                                )
                                 _loginState.value = FetchingSubscriptions(Finished(count))
                             }
                             WorkInfo.State.FAILED,
                             WorkInfo.State.BLOCKED,
-                            WorkInfo.State.CANCELLED -> _loginState.value = Error("Unable to fetch user subscriptions")
+                            WorkInfo.State.CANCELLED -> _loginState.value =
+                                Error("Unable to fetch user subscriptions")
                         }
                     }
                 }
@@ -153,7 +155,7 @@ class LoginViewModel @ViewModelInject constructor(
     }
 
     private suspend fun saveAccount(account: Account, token: Token) {
-        redditClient.createAccount(account.name, account.icon_img, token)
+        updootAccountManager.createAccount(account.name, account.icon_img, token)
     }
 }
 

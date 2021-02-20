@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.utils.accountManagement
 
 import kotlinx.coroutines.flow.Flow
 
-interface ICurrentAccountNameManager {
+interface CurrentAccountNameManager {
 
     fun currentAccountName(): Flow<String>
 

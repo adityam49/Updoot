@@ -14,17 +14,19 @@ import com.ducktapedapps.updoot.data.local.SubredditSubscription
 import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import com.ducktapedapps.updoot.utils.createNotificationChannel
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class SubscriptionSyncWorker @WorkerInject constructor(
-        @Assisted workerParameters: WorkerParameters,
-        @Assisted private val context: Context,
-        private val subredditDAO: SubredditDAO,
-        private val redditClient: IRedditClient,
+    @Assisted workerParameters: WorkerParameters,
+    @Assisted private val context: Context,
+    private val subredditDAO: SubredditDAO,
+    private val redditClient: RedditClient,
+    private val updootAccountManager: UpdootAccountManager,
 ) : CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = try {
         val accountsToSync = mutableListOf<String>().apply {
@@ -34,11 +36,20 @@ class SubscriptionSyncWorker @WorkerInject constructor(
             else
                 listOf(accountSyncRequestedFor)
         }
-        buildNotificationAndShow("Found ${accountsToSync.size} accounts", "names are :$accountsToSync", context)
+        buildNotificationAndShow(
+            "Found ${accountsToSync.size} accounts",
+            "names are :$accountsToSync",
+            context
+        )
         var count = 0
         accountsToSync.reversed().forEach { user ->
             val notificationId = Random.nextInt()
-            buildNotificationAndShow("Syncing $user's subreddits", "Found ${getSubredditCount(user)}'s subreddits", context, notificationId)
+            buildNotificationAndShow(
+                "Syncing $user's subreddits",
+                "Found ${getSubredditCount(user)}'s subreddits",
+                context,
+                notificationId
+            )
             val subs = loadUserSubscribedSubreddits(user)
             count += subs.size
             subs.forEach { subreddit ->
@@ -47,7 +58,12 @@ class SubscriptionSyncWorker @WorkerInject constructor(
                     insertSubscription(SubredditSubscription(subreddit.display_name, user))
                 }
             }
-            buildNotificationAndShow("Finished syncing $user's subreddits", "Updated ${subs.size} subreddits", context, notificationId)
+            buildNotificationAndShow(
+                "Finished syncing $user's subreddits",
+                "Updated ${subs.size} subreddits",
+                context,
+                notificationId
+            )
         }
         Result.success(workDataOf(SYNC_UPDATED_COUNT_KEY to count))
     } catch (e: Exception) {
@@ -55,12 +71,12 @@ class SubscriptionSyncWorker @WorkerInject constructor(
     }
 
     private fun findAllLoggedInUsers(): List<String> =
-            AccountManager.get(context).accounts.map { it.name }.filter { it != Constants.ANON_USER }
+        AccountManager.get(context).accounts.map { it.name }.filter { it != Constants.ANON_USER }
 
 
     private suspend fun loadUserSubscribedSubreddits(user: String): List<RemoteSubreddit> {
         try {
-            redditClient.setCurrentAccount(user)
+            updootAccountManager.setCurrentAccount(user)
             val redditAPI = redditClient.api()
             var result = redditAPI.getSubscribedSubreddits(null)
             val allSubs = mutableListOf<RemoteSubreddit>().apply {
@@ -79,16 +95,21 @@ class SubscriptionSyncWorker @WorkerInject constructor(
     }
 
     private suspend fun getSubredditCount(user: String) =
-            subredditDAO.observeSubscribedSubredditsFor(user).first().size
+        subredditDAO.observeSubscribedSubredditsFor(user).first().size
 
-    private fun buildNotificationAndShow(title: String, message: String, context: Context, id: Int = Random.nextInt()) {
+    private fun buildNotificationAndShow(
+        title: String,
+        message: String,
+        context: Context,
+        id: Int = Random.nextInt()
+    ) {
         context.createNotificationChannel()
         val builder = NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_subreddit_default_24dp)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setSmallIcon(R.drawable.ic_subreddit_default_24dp)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
         NotificationManagerCompat.from(context).notify(id, builder.build())
     }
 
@@ -100,36 +121,32 @@ class SubscriptionSyncWorker @WorkerInject constructor(
     }
 }
 
-fun Context.enqueueSubscriptionSyncWork() {
+fun WorkManager.enqueueSubscriptionSyncWork() {
     val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiresBatteryNotLow(true)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) constraints.setRequiresDeviceIdle(true)
     val workRequest = PeriodicWorkRequestBuilder<SubscriptionSyncWorker>(1, TimeUnit.DAYS)
-            .addTag(SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG)
-            .setConstraints(constraints.build()).build()
+        .addTag(SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG)
+        .setConstraints(constraints.build()).build()
 
-    WorkManager
-            .getInstance(this)
-            .enqueueUniquePeriodicWork(
-                    SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG,
-                    ExistingPeriodicWorkPolicy.KEEP,
-                    workRequest
-            )
+    enqueueUniquePeriodicWork(
+        SubscriptionSyncWorker.SUBSCRIPTION_SYNC_TAG,
+        ExistingPeriodicWorkPolicy.KEEP,
+        workRequest
+    )
 }
 
-fun Context.enqueueOneOffSubscriptionsSyncFor(account: String) {
+fun WorkManager.enqueueOneOffSubscriptionsSyncFor(account: String) {
     val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiredNetworkType(NetworkType.CONNECTED)
     val workRequest = OneTimeWorkRequestBuilder<SubscriptionSyncWorker>()
-            .addTag(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
-            .setInputData(workDataOf(SubscriptionSyncWorker.ACCOUNT_NAME_KEY to account))
-            .setConstraints(constraints.build()).build()
-    WorkManager
-            .getInstance(this)
-            .enqueueUniqueWork(
-                    SubscriptionSyncWorker.ONE_OFF_SYNC_JOB,
-                    ExistingWorkPolicy.REPLACE,
-                    workRequest
-            )
+        .addTag(SubscriptionSyncWorker.ONE_OFF_SYNC_JOB)
+        .setInputData(workDataOf(SubscriptionSyncWorker.ACCOUNT_NAME_KEY to account))
+        .setConstraints(constraints.build()).build()
+    enqueueUniqueWork(
+        SubscriptionSyncWorker.ONE_OFF_SYNC_JOB,
+        ExistingWorkPolicy.REPLACE,
+        workRequest
+    )
 }

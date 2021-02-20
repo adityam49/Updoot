@@ -5,7 +5,7 @@ import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.ui.subreddit.SubredditInfoState.*
 import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ interface GetSubredditInfoUseCase {
 }
 
 class GetSubredditInfoUseCaseImpl @Inject constructor(
-    private val redditClient: IRedditClient,
+    private val redditClient: RedditClient,
 ) : GetSubredditInfoUseCase {
 
     override val subredditInfo: MutableStateFlow<SubredditInfoState?> = MutableStateFlow(null)

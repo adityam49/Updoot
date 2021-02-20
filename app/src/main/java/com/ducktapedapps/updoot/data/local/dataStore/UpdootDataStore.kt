@@ -15,7 +15,7 @@ import com.ducktapedapps.updoot.ui.comments.ICommentPrefManager
 import com.ducktapedapps.updoot.ui.common.IThemeManager
 import com.ducktapedapps.updoot.utils.Constants.ANON_USER
 import com.ducktapedapps.updoot.utils.ThemeType
-import com.ducktapedapps.updoot.utils.accountManagement.ICurrentAccountNameManager
+import com.ducktapedapps.updoot.utils.accountManagement.CurrentAccountNameManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,17 +26,17 @@ import javax.inject.Singleton
 
 @Singleton
 class UpdootDataStore @Inject constructor(
-        @ApplicationContext context: Context
-) : ICurrentAccountNameManager,
-        IThemeManager,
-        ICommentPrefManager {
+    @ApplicationContext context: Context
+) : CurrentAccountNameManager,
+    IThemeManager,
+    ICommentPrefManager {
     private val dataStore = context.createDataStore(
-            name = DATA_STORE_NAME,
+        name = DATA_STORE_NAME,
     )
 
     override fun themeType(): Flow<ThemeType> = dataStore.data
-            .map { it[THEME_KEY] ?: ThemeType.AUTO.ordinal }
-            .map { ThemeType.values()[it] }
+        .map { it[THEME_KEY] ?: ThemeType.AUTO.ordinal }
+        .map { ThemeType.values()[it] }
 
     override suspend fun setThemeType(newType: ThemeType) {
         dataStore.edit { it[THEME_KEY] = newType.ordinal }

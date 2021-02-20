@@ -10,14 +10,14 @@ import com.ducktapedapps.updoot.ui.subreddit.PageResource.Success
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class PostsRepo @Inject constructor(
-    private val redditClient: IRedditClient,
+    private val redditClient: RedditClient,
     private val postDAO: PostDAO,
 ) {
 

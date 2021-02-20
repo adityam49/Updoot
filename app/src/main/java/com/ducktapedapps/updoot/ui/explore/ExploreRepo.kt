@@ -6,7 +6,7 @@ import com.ducktapedapps.updoot.data.local.TrendingSubreddit
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
-import com.ducktapedapps.updoot.utils.accountManagement.IRedditClient
+import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ExploreRepo @Inject constructor(
-        private val redditClient: IRedditClient,
-        private val subredditDAO: SubredditDAO,
+    private val redditClient: RedditClient,
+    private val subredditDAO: SubredditDAO,
 ) {
 
     private val _isLoading = MutableStateFlow(false)
