@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.ui.search
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -29,9 +28,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
-import com.ducktapedapps.updoot.utils.getCompactAge
-import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import dev.chrisbanes.accompanist.coil.CoilImage
 import dev.chrisbanes.accompanist.imageloading.ImageLoadState
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +45,7 @@ fun SearchScreen(
         viewModel.searchSubreddit(value.text)
         setFieldQueryValue(value)
     }
-    val showNsfw = viewModel.includeOver18.collectAsState(true)
+    val showNsfw = viewModel.includeNsfw.collectAsState(true)
     Column(modifier = Modifier.fillMaxSize()) {
         ComposeSearchView(
             performSearch = viewModel::searchSubreddit,
@@ -68,7 +64,7 @@ fun SearchScreen(
                 .height(48.dp)
                 .fillMaxWidth(),
             showNsfw = showNsfw.value,
-            toggleNsfwPref = { viewModel.toggleIncludeOver18() }
+            toggleNsfwPref = { viewModel.toggleIncludeNsfw() }
         )
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
@@ -111,28 +107,29 @@ fun NsfwCheckRow(
 }
 
 @Composable
-private fun SubredditItem(remoteSubreddit: RemoteSubreddit, openSubreddit: (String) -> Unit) {
+private fun SubredditItem(
+    subreddit: SearchedSubredditResultsUiModel,
+    openSubreddit: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { openSubreddit(remoteSubreddit.display_name) })
+            .clickable(onClick = { openSubreddit(subreddit.subredditName) })
             .padding(top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Log.i("SearchScreen", "url : ${remoteSubreddit.community_icon}")
         CoilImage(
-            data = remoteSubreddit.community_icon,
+            data = subreddit.icon,
             requestBuilder = {
                 transformations(CircleCropTransformation())
             },
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .preferredSize(32.dp)
-        ) { imageLoadState ->
-            when (imageLoadState) {
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                .size(32.dp)
+        ) { state ->
+            when (state) {
                 is ImageLoadState.Success -> Image(
-                    painter = imageLoadState.painter,
-                    contentDescription = stringResource(id = R.string.subreddit_icon)
+                    painter = state.painter,
+                    contentDescription = stringResource(R.string.subreddit_icon)
                 )
                 else -> Icon(
                     painter = painterResource(id = R.drawable.ic_subreddit_default_24dp),
@@ -146,14 +143,10 @@ private fun SubredditItem(remoteSubreddit: RemoteSubreddit, openSubreddit: (Stri
                 .padding(start = 16.dp)
                 .align(Alignment.CenterVertically)
         ) {
-            Text(text = remoteSubreddit.display_name)
+            Text(text = subreddit.subredditName)
             Providers(LocalContentAlpha provides ContentAlpha.disabled) {
                 Text(
-                    text = "${
-                        remoteSubreddit.subscribers?.run { getCompactCountAsString(this) + " Subscribers" }
-                    } ${
-                        " • " + getCompactAge(remoteSubreddit.created)
-                    }",
+                    text = "${subreddit.subscriberCount} ${" • " + subreddit.age}",
                     style = MaterialTheme.typography.caption
                 )
             }

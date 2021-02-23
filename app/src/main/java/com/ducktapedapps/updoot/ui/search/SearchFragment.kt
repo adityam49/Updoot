@@ -16,7 +16,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
 
-    private val viewModel: SearchVM by viewModels()
+    private val viewModel: SearchVM by viewModels<SearchVMImpl>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

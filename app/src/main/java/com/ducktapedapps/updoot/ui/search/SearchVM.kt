@@ -3,73 +3,65 @@ package com.ducktapedapps.updoot.ui.search
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.data.local.SubredditDAO
-import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
+import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.utils.Constants.DEBOUNCE_TIME_OUT
-import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import kotlinx.coroutines.Dispatchers
+import com.ducktapedapps.updoot.utils.getCompactAge
+import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 
-class SearchVM @ViewModelInject constructor(
-    private val subredditDAO: SubredditDAO,
-    private val redditClient: RedditClient,
-) : ViewModel() {
-    private val _searchQueryLoading = MutableStateFlow(false)
-    val searchQueryLoading: StateFlow<Boolean> = _searchQueryLoading
+interface SearchVM {
+
+    val searchQueryLoading: StateFlow<Boolean>
+
+    val includeNsfw: StateFlow<Boolean>
+
+    val results: StateFlow<List<SearchedSubredditResultsUiModel>>
+
+    fun searchSubreddit(queryString: String)
+
+    fun toggleIncludeNsfw()
+
+}
+
+class SearchVMImpl @ViewModelInject constructor(
+    private val searchSubredditUseCase: SearchSubredditUseCase,
+) : ViewModel(), SearchVM {
+    //TODO fix loading indicator
+    override val searchQueryLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     private val query: MutableStateFlow<String> = MutableStateFlow("")
 
-    private val _includeOver18: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val includeOver18: StateFlow<Boolean> = _includeOver18
+    override val includeNsfw: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    private val remoteResults: Flow<List<RemoteSubreddit>> = query
-            .debounce(DEBOUNCE_TIME_OUT)
-            .combine(includeOver18) { keyWord, nsfwPref ->
-                if (keyWord.isEmpty()) emptyList()
-                else getSubredditsWithKeywords(keyWord.trim(), nsfwPref)
-            }
-            .catch { throwable ->
-                throwable.printStackTrace()
-                _searchQueryLoading.value = false
-            }
-
-    //TODO : currentUser flow required to injected, refactor required :/
-//    private val localResults: Flow<List<Subreddit>> =
-//            combine(currentUser, query.debounce(DEBOUNCE_TIME_OUT)) { user: User, keyWord: String ->
-//                subredditDAO
-//                        .observeSubscribedSubredditsFor(user.name)
-//                        .distinctUntilChanged()
-//                        .flowOn(Dispatchers.IO)
-//                        .map {
-//                            it.filter { subreddit ->
-//                                subreddit.display_name.contains(keyWord)
-//                            }
-//                        }
-//            }.flattenMerge()
-
-    private suspend fun getSubredditsWithKeywords(keyword: String, nsfwPref: Boolean): List<RemoteSubreddit> = withContext(Dispatchers.IO) {
-        _searchQueryLoading.value = true
-        val redditAPI = redditClient.api()
-        val results = redditAPI.search(query = keyword, includeOver18 = nsfwPref)
-        _searchQueryLoading.value = false
-        results.children
-    }
-
-    fun searchSubreddit(queryString: String) {
+    override fun searchSubreddit(queryString: String) {
         query.value = queryString
     }
 
-    fun toggleIncludeOver18() {
-        _includeOver18.value = !includeOver18.value
+    override fun toggleIncludeNsfw() {
+        includeNsfw.value = !includeNsfw.value
     }
 
-    val results: StateFlow<List<RemoteSubreddit>> = remoteResults.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-//            combine(localResults, remoteResults) { localSubs: List<Subreddit>, remoteSubs: List<Subreddit> ->
-//                localSubs + remoteSubs.filterNot { remoteSub ->
-//                    localSubs.any { localSub ->
-//                        localSub.display_name == remoteSub.display_name
-//                    }
-//                }
-//            }
+    override val results: StateFlow<List<SearchedSubredditResultsUiModel>> = combine(
+        query.debounce(DEBOUNCE_TIME_OUT),
+        includeNsfw
+    ) { keyWork, isNsfw -> searchSubredditUseCase.getSubreddits(keyWork, isNsfw) }
+        .flattenMerge()
+        .map { subreddits ->
+            subreddits.map { subreddit -> subreddit.toSearchedSubredditResultsUiModel() }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 }
+
+data class SearchedSubredditResultsUiModel(
+    val subredditName: String,
+    val icon: String,
+    val subscriberCount: String,
+    val age: String
+)
+
+fun LocalSubreddit.toSearchedSubredditResultsUiModel() = SearchedSubredditResultsUiModel(
+    subredditName = subredditName,
+    icon = icon,
+    subscriberCount = subscribers?.run { getCompactCountAsString(this) } ?: "",
+    age = getCompactAge(created.time)
+)
