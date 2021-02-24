@@ -131,6 +131,8 @@ dependencies {
 
     //testing
     testImplementation 'junit:junit:4.13.1'
+    testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines"
 }

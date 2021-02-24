@@ -36,7 +36,7 @@ class SearchSubredditUseCaseImpl @Inject constructor(
     ): Flow<List<LocalSubreddit>> =
         if (query.isNotBlank()) subredditDAO
             .observeSubredditWithKeyword(keyword = query.trim())
-            .take(2)
+            .map { it.take(2) }
             .distinctUntilChanged()
         else
             subredditDAO.observeTrendingSubreddits()
