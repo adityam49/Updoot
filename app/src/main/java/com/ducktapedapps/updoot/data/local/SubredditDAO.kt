@@ -21,8 +21,14 @@ interface SubredditDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubredditSubscription)
 
-    @Query("SELECT * FROM LocalSubreddit JOIN SubredditSubscription ON SubredditSubscription.subredditName = LocalSubreddit.subredditName WHERE userName == :user")
+    @Query("SELECT LocalSubreddit.* FROM LocalSubreddit JOIN SubredditSubscription ON SubredditSubscription.subredditName = LocalSubreddit.subredditName WHERE userName == :user")
     fun observeSubscribedSubredditsFor(user: String): Flow<List<LocalSubreddit>>
+
+    @Query("DELETE FROM SubredditSubscription WHERE userName = :user")
+    suspend fun deleteUserSubscriptions(user: String)
+
+    @Query("SELECT COUNT(*) FROM SubredditSubscription WHERE userName = :user")
+    suspend fun getSubscriptionCountFor(user: String): Int
 
     @Query("SELECT * FROM LocalSubreddit WHERE subredditName NOT IN (SELECT subredditName from SubredditSubscription)")
     suspend fun getNonSubscribedSubreddits(): List<LocalSubreddit>
@@ -39,7 +45,7 @@ interface SubredditDAO {
     @Query("DELETE  FROM LocalSubreddit WHERE subredditName is :name")
     suspend fun deleteSubreddit(name: String)
 
-    @Query("SELECT * FROM LocalSubreddit JOIN TrendingSubreddit ON LocalSubreddit.subredditName == TrendingSubreddit.id")
+    @Query("SELECT LocalSubreddit.* FROM LocalSubreddit JOIN TrendingSubreddit ON LocalSubreddit.subredditName == TrendingSubreddit.id")
     fun observeTrendingSubreddits(): Flow<List<LocalSubreddit>>
 
     @Query("DELETE FROM TrendingSubreddit")

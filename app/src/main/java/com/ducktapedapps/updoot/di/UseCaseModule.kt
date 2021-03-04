@@ -2,6 +2,8 @@ package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCase
 import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCaseImpl
+import com.ducktapedapps.updoot.ui.navDrawer.UpdateUserSubscriptionUseCase
+import com.ducktapedapps.updoot.ui.navDrawer.UpdateUserSubscriptionUseCaseImpl
 import com.ducktapedapps.updoot.ui.search.SearchSubredditUseCase
 import com.ducktapedapps.updoot.ui.search.SearchSubredditUseCaseImpl
 import com.ducktapedapps.updoot.ui.subreddit.*
@@ -12,10 +14,10 @@ import com.ducktapedapps.updoot.ui.user.GetUserSectionsUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.components.SingletonComponent
 
 @Module
-@InstallIn(ActivityComponent::class)
+@InstallIn(SingletonComponent::class)
 abstract class UseCaseModule {
     @Binds
     abstract fun bindGetUserCommentsUseCase(useCase: GetUserCommentsUseCaseImpl): GetUserCommentsUseCase
@@ -37,6 +39,9 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserSectionsUseCase(useCase: GetUserSectionsUseCaseImpl): GetUserSectionsUseCase
+
+    @Binds
+    abstract fun bindUpdateUserSubscriptionUseCase(useCase: UpdateUserSubscriptionUseCaseImpl): UpdateUserSubscriptionUseCase
 
     @Binds
     abstract fun bindEditSubredditSubscriptionUseCase(useCase: EditSubredditSubscriptionUseCaseImpl): EditSubredditSubscriptionUseCase

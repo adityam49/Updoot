@@ -28,10 +28,10 @@ class ActivityVM @ViewModelInject constructor(
     private val _shouldReload: MutableSharedFlow<Boolean> = MutableSharedFlow()
     val shouldReload: SharedFlow<Boolean> = _shouldReload
 
-    val currentAccount: StateFlow<AccountModel?> = updootAccountsProvider.allAccounts
-        .map { it.firstOrNull { account -> account.isCurrent } }
+    private val currentAccount: StateFlow<AccountModel> = updootAccountsProvider
+        .getCurrentAccount()
         .onEach { reloadContent() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, AnonymousAccount(true))
+        .stateIn(viewModelScope, SharingStarted.Lazily, AnonymousAccount(true))
 
     val accounts: StateFlow<List<AccountModel>> = updootAccountsProvider.allAccounts
 
@@ -42,7 +42,7 @@ class ActivityVM @ViewModelInject constructor(
         getUserSubscriptionsUseCase.subscriptions.map {
             it.map { subreddit -> subreddit.toSubscriptionSubredditUiModel() }
         }.stateIn(
-            viewModelScope, SharingStarted.WhileSubscribed(), emptyList()
+            viewModelScope, SharingStarted.Lazily, emptyList()
         )
 
     private val _navigationRequest: MutableSharedFlow<NavigationDestination> = MutableSharedFlow()
@@ -58,7 +58,7 @@ class ActivityVM @ViewModelInject constructor(
         }
     }
 
-    fun reloadContent() {
+    private fun reloadContent() {
         viewModelScope.launch { _shouldReload.emit(true) }
     }
 
@@ -75,7 +75,6 @@ class ActivityVM @ViewModelInject constructor(
         when (currentAccount) {
             is AnonymousAccount -> allEntries.filterNot { it.isUserSpecific }
             is UserModel -> allEntries
-            null -> emptyList()
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
