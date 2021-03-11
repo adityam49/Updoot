@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.LinearProgressIndicator
@@ -40,7 +39,6 @@ fun ExploreScreen(
         if (viewModel.isLoading.collectAsState(true).value)
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         else {
-            rememberScrollState(0f)
             LazyRow {
                 item {
                     viewModel.trendingSubs
@@ -63,7 +61,7 @@ fun TrendingSub(subreddit: LocalSubreddit, onClickSubreddit: (String) -> Unit) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
-            .preferredWidth((screenWidth / 1.2).dp)
+            .requiredWidth((screenWidth / 1.2).dp)
             .wrapContentHeight()
             .padding(8.dp),
     ) {

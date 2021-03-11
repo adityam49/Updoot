@@ -46,25 +46,25 @@ val UpdootDarkColors = darkColors(
         onError = Color.White
 )
 
-@Composable
-val Colors.BottomDrawerColor: Color
-    get() = UpdootDarkColors.surface
 
-@Composable
-val Colors.SurfaceOnDrawer: Color
-    get() = Color(0xFF4F4F4F)
+val @Composable Colors.BottomDrawerColor: Color
+        get() = UpdootDarkColors.surface
 
-@Composable
-val Colors.ScoreBackground: Color
-    get() = if (isLight) Color(0xFFffd700) else Color(0xFFf9d276)
 
-@Composable
-val Colors.ColorOnScoreBackground: Color
-    get() = Color.Black
+val @Composable Colors.SurfaceOnDrawer: Color
+        get() = Color(0xFF4F4F4F)
 
-@Composable
-val Colors.StickyPostColor: Color
-    get() = if (isLight) Color(0xFF388E3C) else Color(0xFF69F0AE)
+
+val @Composable Colors.ScoreBackground: Color
+        get() = if (isLight) Color(0xFFffd700) else Color(0xFFf9d276)
+
+
+val @Composable Colors.ColorOnScoreBackground: Color
+        get() = Color.Black
+
+
+val @Composable Colors.StickyPostColor: Color
+        get() = if (isLight) Color(0xFF388E3C) else Color(0xFF69F0AE)
 
 val LightThreadColors = arrayOf(
         Color(0xFF7b1fa2),

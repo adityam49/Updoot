@@ -6,18 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import dev.chrisbanes.accompanist.coil.CoilImage
@@ -35,9 +36,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun SearchScreen(
-    goBack: () -> Unit,
     openSubreddit: (String) -> Unit,
-    viewModel: SearchVM,
+    viewModel: SearchVM = viewModel<SearchVMImpl>(),
 ) {
     val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
     val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
@@ -53,7 +53,6 @@ fun SearchScreen(
                 .fillMaxWidth()
                 .padding(8.dp)
                 .height(48.dp),
-            goBack = goBack,
             isLoading = viewModel.searchQueryLoading,
             queryString = queryString,
             setQuery = setQuery,
@@ -123,7 +122,8 @@ private fun SubredditItem(
             requestBuilder = {
                 transformations(CircleCropTransformation())
             },
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .size(32.dp)
         ) { state ->
             when (state) {
@@ -144,7 +144,7 @@ private fun SubredditItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(text = subreddit.subredditName)
-            Providers(LocalContentAlpha provides ContentAlpha.disabled) {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
                 Text(
                     text = "${subreddit.subscriberCount} ${" • " + subreddit.age}",
                     style = MaterialTheme.typography.caption
@@ -162,28 +162,21 @@ fun ComposeSearchView(
     queryString: TextFieldValue,
     setQuery: (TextFieldValue) -> Unit,
     modifier: Modifier,
-    goBack: () -> Unit,
     isLoading: Flow<Boolean>
 ) {
     ConstraintLayout(modifier) {
-        val (backButton, searchField, searchActions) = createRefs()
-        BackButton(
-            Modifier.constrainAs(backButton) {
-                start.linkTo(parent.start)
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-            }, goBack
-        )
-
+        val (searchField, searchActions) = createRefs()
         SearchField(
-            modifier = Modifier.constrainAs(searchField) {
-                start.linkTo(backButton.end, margin = 8.dp)
-                end.linkTo(searchActions.start, margin = 8.dp)
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                width = Dimension.fillToConstraints
-                height = Dimension.fillToConstraints
-            }.focusable(true),
+            modifier = Modifier
+                .constrainAs(searchField) {
+                    start.linkTo(parent.start, margin = 8.dp)
+                    end.linkTo(searchActions.start, margin = 8.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+                .focusable(true),
             queryString = queryString,
             setQuery = setQuery,
             performSearch = performSearch
@@ -211,22 +204,38 @@ fun SearchField(
     setQuery: (TextFieldValue) -> Unit,
     performSearch: (query: String) -> Unit,
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(50),
-    ) {
-        BasicTextField(
-            value = queryString,
-            onValueChange = setQuery,
-            singleLine = true,
-            cursorColor = MaterialTheme.colors.primary,
-            modifier = modifier.padding(start = 32.dp, top = 16.dp, bottom = 16.dp, end = 16.dp),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Search,
-            ),
-        )
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
+    BasicTextField(
+        value = queryString,
+        onValueChange = setQuery,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.button,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search,
+        ),
+        modifier = modifier.focusRequester(focusRequester = focusRequester),
+        decorationBox = { searchField ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Spacer(modifier = Modifier.width(16.dp))
+                    searchField()
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
+            }
+        },
+    )
 }
 
 @Composable
@@ -261,24 +270,5 @@ fun SearchActions(
                     content = { Icon(Icons.Default.Search, contentDescription = "Search Icon") }
                 )
         }
-    }
-
-}
-
-@Composable
-private fun BackButton(modifier: Modifier, goBack: () -> Unit) {
-    Card(
-        modifier = modifier,
-        shape = CircleShape,
-    ) {
-        IconButton(
-            onClick = goBack,
-            content = {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = Icons.Default.ArrowBack.name
-                )
-            }
-        )
     }
 }

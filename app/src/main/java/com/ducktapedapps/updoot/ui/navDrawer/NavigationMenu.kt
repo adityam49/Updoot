@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +33,7 @@ fun DestinationItem(
             contentDescription = "${destination.title} Icon",
             modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp),
         )
-        Providers(LocalContentAlpha provides ContentAlpha.high) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
             Text(text = destination.title, modifier = Modifier.padding(start = 16.dp))
         }
     }
@@ -60,21 +60,24 @@ fun NavigationMenuScreen(
         }
         items(navDestinations.value) { DestinationItem(it, viewModel::navigateTo) }
 
-        item { Header("Subscriptions") }
-
-        items(subscriptions.value) { SubredditItem(it, openSubreddit) }
-
+        subscriptions.value.run {
+            if (this.isNotEmpty()) {
+                stickyHeader { Header("Subscriptions") }
+                items(this) { SubredditItem(it, openSubreddit) }
+            }
+        }
     }
 }
 
 @Composable
 fun Header(title: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Divider(modifier = Modifier.weight(1f))
         Text(
             modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 16.dp, end = 16.dp),
             text = title,
             style = MaterialTheme.typography.overline
         )
-        Divider()
+        Divider(modifier = Modifier.weight(1f))
     }
 }

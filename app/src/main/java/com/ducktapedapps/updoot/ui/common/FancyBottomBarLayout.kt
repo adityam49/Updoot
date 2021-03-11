@@ -3,6 +3,8 @@ package com.ducktapedapps.updoot.ui.common
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.*
+import androidx.compose.material.BottomSheetValue.Collapsed
+import androidx.compose.material.BottomSheetValue.Expanded
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -55,10 +57,10 @@ private fun AnimatedBottomBarLayout(
 ) {
     val progress = with(sheetProgress) {
         when {
-            from == BottomSheetValue.Collapsed && to == BottomSheetValue.Collapsed -> 0f
-            from == BottomSheetValue.Expanded && to == BottomSheetValue.Expanded -> 1f
-            from == BottomSheetValue.Expanded && to == BottomSheetValue.Collapsed -> 1f - fraction
-            else -> fraction
+            from == Collapsed && to == Expanded -> fraction
+            from == Expanded && to == Collapsed -> 1f - fraction
+            from == Collapsed && to == Collapsed -> 0f
+            else -> 1f
         }
     }
     Layout(

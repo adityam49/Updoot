@@ -33,15 +33,15 @@ fun SettingsRow(
         controlUiElement: @Composable () -> Unit,
 ) {
     Row(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clickable { onClick() }
-            .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween) {
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .clickable { onClick() }
+        .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
             Text(text = title, style = MaterialTheme.typography.h5)
             Spacer(modifier = Modifier.padding(8.dp))
-            Providers(AmbientContentAlpha provides ContentAlpha.disabled) {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
                 Text(text = subTitle, style = MaterialTheme.typography.subtitle2)
             }
         }

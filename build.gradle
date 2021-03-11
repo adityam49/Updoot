@@ -2,8 +2,8 @@
 
 buildscript {
     ext {
-        compose_version = '1.0.0-alpha12'
-        kotlin_version = "1.4.30"
+        compose_version = '1.0.0-beta02'
+        kotlin_version = "1.4.31"
         kotlin_coroutines = "1.4.2"
         lifecycle_version = "2.3.0"
         retrofit_version = '2.9.0'
@@ -20,11 +20,11 @@ buildscript {
     }
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.0.0-alpha07'
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha09'
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }
@@ -32,8 +32,9 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url "https://jitpack.io" }
+        jcenter()
     }
 }
 

@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -102,7 +102,7 @@ fun TextPost(text: String) {
             .border(0.5.dp, MaterialTheme.colors.onBackground, RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp)),
         content = {
-            Providers(LocalContentAlpha provides ContentAlpha.medium) {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     text = text,
                     modifier = Modifier.padding(8.dp),

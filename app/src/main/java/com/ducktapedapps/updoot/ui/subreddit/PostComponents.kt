@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -70,7 +70,7 @@ fun CompactPost(
             post = post,
             modifier = Modifier
                 .clip(CircleShape)
-                .preferredSize(48.dp)
+                .requiredSize(48.dp)
                 .clickable(onClick = onClickMedia)
                 .constrainAs(mediaThumbnail) {
                     start.linkTo(parent.start, margin = 8.dp)
@@ -161,7 +161,7 @@ fun SubmissionTitle(
     isSticky: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Providers(LocalContentAlpha provides ContentAlpha.high) {
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
         Text(
             text = title,
             color = if (isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
@@ -173,7 +173,7 @@ fun SubmissionTitle(
 
 @Composable
 private fun MetaData(post: PostUiModel, modifier: Modifier) {
-    Providers(LocalContentAlpha provides ContentAlpha.disabled) {
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
         Text(
             style = MaterialTheme.typography.caption,
             text = "${post.subredditName} • ${getCompactCountAsString(post.replyCount.toLong())} Replies • ${
@@ -336,7 +336,7 @@ fun TextPostMedia(text: String, modifier: Modifier) {
                 RoundedCornerShape(8.dp)
             ),
     ) {
-        Providers(LocalContentAlpha provides ContentAlpha.medium) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.body2,

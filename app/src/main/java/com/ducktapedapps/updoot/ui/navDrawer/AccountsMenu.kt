@@ -10,7 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -141,7 +141,7 @@ fun NonCurrentAccountItem(
                 }
         }
 
-        Providers(LocalContentAlpha provides ContentAlpha.high) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
             Text(
                 text = accountModel.name, modifier = Modifier
                     .padding(start = 8.dp)
@@ -186,21 +186,18 @@ fun CurrentAccountItem(
             CoilImage(
                 data = accountModel.userIcon,
                 modifier = userIconModifier,
-                requestBuilder = {
-                    transformations(CircleCropTransformation())
-                }
+                requestBuilder = { transformations(CircleCropTransformation()) }
             ) { imageLoadState ->
                 when (imageLoadState) {
                     is Success -> Image(
                         painter = imageLoadState.painter,
                         contentDescription = "Account Icon"
                     )
-                    is Error -> Image(
+                    else -> Image(
                         painter = painterResource(id = R.drawable.ic_account_circle_24dp),
                         contentDescription = "Account Icon",
                         modifier = userIconModifier,
                     )
-                    else -> Unit
                 }
 
             }
@@ -211,7 +208,7 @@ fun CurrentAccountItem(
                 modifier = userIconModifier,
             )
 
-        Providers(LocalContentAlpha provides ContentAlpha.high) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
             Text(text = accountModel.name, modifier = Modifier.weight(1f))
         }
         if (accountModel is UserModel) {

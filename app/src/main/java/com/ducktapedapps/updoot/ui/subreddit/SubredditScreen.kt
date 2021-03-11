@@ -25,6 +25,7 @@ import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @Composable
 fun SubredditScreen(
@@ -49,15 +50,15 @@ fun SubredditScreen(
     val subredditBottomBarActions = listOf(
         BottomBarActions(Icons.Default.Info, "Info") {
             activeContent.value = SubredditInfo
-            bottomSheetState.expand()
+            coroutineScope.launch { bottomSheetState.expand() }
         },
         BottomBarActions(Icons.Default.Search, "Search") {
             activeContent.value = Search
-            bottomSheetState.expand()
+            coroutineScope.launch { bottomSheetState.expand() }
         },
         BottomBarActions(Icons.Default.Menu, "GlobalMenu") {
             activeContent.value = GlobalMenu
-            bottomSheetState.expand()
+            coroutineScope.launch { bottomSheetState.expand() }
         }
     )
 
@@ -81,10 +82,8 @@ fun SubredditScreen(
                     GlobalMenu -> stringResource(R.string.app_name)
                     Search -> "Search"
                     null -> {
-                        if (viewModel.subredditName.isBlank())
-                            stringResource(R.string.app_name)
-                        else
-                            viewModel.subredditName
+                        if (viewModel.subredditName.isBlank()) stringResource(R.string.app_name)
+                        else viewModel.subredditName
                     }
                 },
                 navigateUp = {},
@@ -104,7 +103,7 @@ fun SubredditScreen(
                 }
             }
         },
-        bodyContent = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
+        content = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
     )
 }
 
