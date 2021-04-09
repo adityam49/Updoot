@@ -2,10 +2,10 @@
 
 buildscript {
     ext {
-        compose_version = '1.0.0-beta02'
+        compose_version = '1.0.0-beta03'
         kotlin_version = "1.4.31"
         kotlin_coroutines = "1.4.2"
-        lifecycle_version = "2.3.0"
+        lifecycle_version = "2.3.1"
         retrofit_version = '2.9.0'
         hilt_version = '2.30.1-alpha'
         hilt_jetpack_version = '1.0.0-alpha02'
@@ -14,7 +14,7 @@ buildscript {
         room_version = '2.2.6'
         work_manager_version = "2.5.0"
         jsoup_version = '1.13.1'
-        exoPlayer_version = '2.11.8'
+        exoPlayer_version = '2.13.2'
         dataStore_version ='1.0.0-alpha06'
         mockk_version = '1.10.6'
     }
@@ -24,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.0.0-alpha09'
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha14'
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }
@@ -34,6 +34,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }
+        //noinspection JcenterRepositoryObsolete
         jcenter()
     }
 }

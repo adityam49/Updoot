@@ -19,10 +19,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.ui.subreddit.Thumbnail
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Error
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.imageloading.ImageLoadState.Success
 
 @Composable
 fun StaticLinkPreview(

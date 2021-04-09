@@ -25,8 +25,8 @@ import com.ducktapedapps.updoot.ui.subreddit.PostMedia
 import com.ducktapedapps.updoot.ui.subreddit.PostMedia.*
 import com.ducktapedapps.updoot.ui.subreddit.PostUiModel
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState
 
 @Composable
 fun CommentsScreen(viewModel: ICommentsVM, openContent: (PostMedia) -> Unit) {

@@ -15,8 +15,8 @@ import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.utils.getCompactAge
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 @Composable

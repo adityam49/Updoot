@@ -25,9 +25,8 @@ import com.ducktapedapps.updoot.ui.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Error
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.Success
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.Success
 
 @Preview
 @Composable

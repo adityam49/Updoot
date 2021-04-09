@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 
@@ -81,7 +81,7 @@ fun TrendingSub(subreddit: LocalSubreddit, onClickSubreddit: (String) -> Unit) {
                 }
             ) { imageLoadState ->
                 when (imageLoadState) {
-                    is ImageLoadState.Success -> Image(
+                    is Success -> Image(
                         painter = imageLoadState.painter,
                         contentDescription = stringResource(id = R.string.subreddit_icon),
                     )

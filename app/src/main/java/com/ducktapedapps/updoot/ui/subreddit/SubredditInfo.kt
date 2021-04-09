@@ -29,8 +29,8 @@ import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 
@@ -44,7 +44,7 @@ fun SubredditInfo(subredditVM: SubredditVM) {
     val subscriptionState = subredditVM.subscriptionState.collectAsState()
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val (header, info, footer) = createRefs()
+        val (header, info, viewType) = createRefs()
 
         when (val data = subredditInfo.value) {
             Loading -> PageLoading()
@@ -58,20 +58,30 @@ fun SubredditInfo(subredditVM: SubredditVM) {
                         .fillMaxWidth()
                         .constrainAs(header) {
                             top.linkTo(parent.top)
-                            bottom.linkTo(info.top)
+                            bottom.linkTo(viewType.top)
                             height = Dimension.wrapContent
                         },
                     isSubscribed = subscriptionState.value,
                     toggleSubscription = subredditVM::toggleSubredditSubscription,
+                )
+                SubmissionViewType(
+                    type = postType.value,
+                    setType = subredditVM::setPostViewType,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .constrainAs(viewType) {
+                            top.linkTo(header.bottom)
+                            bottom.linkTo(info.top)
+                            height = Dimension.wrapContent
+                        }
                 )
                 Info(
                     description = data.info,
                     modifier = Modifier
                         .fillMaxWidth()
                         .constrainAs(info) {
-                            top.linkTo(header.bottom)
-                            bottom.linkTo(footer.top)
-                            height = Dimension.fillToConstraints
+                            top.linkTo(viewType.bottom)
                         }
                 )
             }
@@ -80,17 +90,6 @@ fun SubredditInfo(subredditVM: SubredditVM) {
                 message = data.reason
             )
         }
-        SubmissionViewType(
-            type = postType.value,
-            setType = subredditVM::setPostViewType,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .constrainAs(footer) {
-                    bottom.linkTo(parent.bottom)
-                    height = Dimension.fillToConstraints
-                }
-        )
     }
 }
 
@@ -112,7 +111,7 @@ private fun SubredditInfoHeader(
                 modifier = Modifier.size(48.dp),
             ) { imageLoadState ->
                 when (imageLoadState) {
-                    is ImageLoadState.Success -> Image(
+                    is Success -> Image(
                         painter = imageLoadState.painter,
                         contentDescription = "Subreddit Icon"
                     )
@@ -224,7 +223,13 @@ private fun Info(modifier: Modifier, description: String?) {
                 .padding(8.dp)
                 .fillMaxSize()
         ) {
-            item { Text(text = description ?: "", style = MaterialTheme.typography.body1) }
+            item {
+                Text(
+                    text = description ?: "",
+                    style = MaterialTheme.typography.body1
+                )
+            }
+            item { Spacer(modifier = Modifier.padding(100.dp)) }
         }
     }
 }

@@ -29,8 +29,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.Success
 import kotlinx.coroutines.flow.Flow
 
 
@@ -127,7 +127,7 @@ private fun SubredditItem(
                 .size(32.dp)
         ) { state ->
             when (state) {
-                is ImageLoadState.Success -> Image(
+                is Success -> Image(
                     painter = state.painter,
                     contentDescription = stringResource(R.string.subreddit_icon)
                 )

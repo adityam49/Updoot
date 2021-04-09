@@ -1,23 +1,25 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.ui.ActivityVM
-import com.ducktapedapps.updoot.ui.common.*
+import com.ducktapedapps.updoot.ui.common.PageEnd
+import com.ducktapedapps.updoot.ui.common.PageLoading
+import com.ducktapedapps.updoot.ui.common.PageLoadingFailed
+import com.ducktapedapps.updoot.ui.common.SubredditBottomBar
 import com.ducktapedapps.updoot.ui.navDrawer.NavigationMenuScreen
-import com.ducktapedapps.updoot.ui.subreddit.ActiveContent.*
+import com.ducktapedapps.updoot.ui.subreddit.ActiveContent.SubredditInfo
 import com.ducktapedapps.updoot.ui.theme.BottomDrawerColor
 import com.ducktapedapps.updoot.ui.theme.UpdootDarkColors
 import com.ducktapedapps.updoot.utils.Page.*
@@ -45,61 +47,39 @@ fun SubredditScreen(
 
     }
     val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    val activeContent = remember { mutableStateOf<ActiveContent?>(null) }
-    if (bottomSheetState.isCollapsed) activeContent.value = null
-    val subredditBottomBarActions = listOf(
-        BottomBarActions(Icons.Default.Info, "Info") {
-            activeContent.value = SubredditInfo
-            coroutineScope.launch { bottomSheetState.expand() }
-        },
-        BottomBarActions(Icons.Default.Search, "Search") {
-            activeContent.value = Search
-            coroutineScope.launch { bottomSheetState.expand() }
-        },
-        BottomBarActions(Icons.Default.Menu, "GlobalMenu") {
-            activeContent.value = GlobalMenu
-            coroutineScope.launch { bottomSheetState.expand() }
-        }
-    )
+    val activeContent = remember { mutableStateOf<ActiveContent>(SubredditInfo) }
+    if (bottomSheetState.isCollapsed) activeContent.value = SubredditInfo
 
     BottomSheetScaffold(
-        sheetGesturesEnabled = bottomSheetState.isExpanded,
         scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
         sheetBackgroundColor = MaterialTheme.colors.BottomDrawerColor,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         sheetPeekHeight = 64.dp,
         sheetElevation = 1.dp,
         sheetContent = {
-            FancyBottomBar(
-                modifier = Modifier.padding(top = 8.dp),
-                sheetProgress = bottomSheetState.progress,
-                options = subredditBottomBarActions,
-                title = when (activeContent.value) {
-                    SubredditInfo -> {
-                        if (viewModel.subredditName.isEmpty()) stringResource(R.string.app_name)
-                        else viewModel.subredditName + "/info"
-                    }
-                    GlobalMenu -> stringResource(R.string.app_name)
-                    Search -> "Search"
-                    null -> {
-                        if (viewModel.subredditName.isBlank()) stringResource(R.string.app_name)
-                        else viewModel.subredditName
-                    }
-                },
-                navigateUp = {},
-            )
             Surface(
                 color = MaterialTheme.colors.BottomDrawerColor,
                 contentColor = UpdootDarkColors.onSurface
             ) {
-                when (activeContent.value) {
-                    GlobalMenu -> NavigationMenuScreen(
-                        viewModel = activityVM,
-                        openSubreddit = openSubreddit,
-                        openUser = openUser
+                Column {
+                    SubredditBottomBar(
+                        modifier = Modifier.padding(4.dp),
+                        navigateUp = { },
+                        openMenu = {
+                            activeContent.value = ActiveContent.Menu
+                            coroutineScope.launch { bottomSheetState.expand() }
+                        },
+                        subredditName = if (viewModel.subredditName.isBlank()) stringResource(R.string.app_name) else viewModel.subredditName,
+                        showActionIcons = !bottomSheetState.isExpanded
                     )
-                    SubredditInfo -> SubredditInfo(subredditVM = viewModel)
-                    else -> EmptyScreen()
+                    when (activeContent.value) {
+                        ActiveContent.Menu -> NavigationMenuScreen(
+                            viewModel = activityVM,
+                            openSubreddit = openSubreddit,
+                            openUser = openUser
+                        )
+                        SubredditInfo -> SubredditInfo(subredditVM = viewModel)
+                    }
                 }
             }
         },
@@ -157,14 +137,7 @@ fun Body(
     }
 }
 
-
-@Composable
-fun EmptyScreen() {
-    Box(modifier = Modifier.fillMaxSize()) { }
-}
-
 sealed class ActiveContent {
     object SubredditInfo : ActiveContent()
-    object Search : ActiveContent()
-    object GlobalMenu : ActiveContent()
+    object Menu : ActiveContent()
 }

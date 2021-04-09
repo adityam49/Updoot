@@ -26,9 +26,9 @@ import com.ducktapedapps.updoot.ui.common.*
 import com.ducktapedapps.updoot.ui.theme.StickyPostColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.ducktapedapps.updoot.utils.getCompactDateAsString
-import dev.chrisbanes.accompanist.coil.CoilImage
-import dev.chrisbanes.accompanist.imageloading.ImageLoadState.*
-import dev.chrisbanes.accompanist.imageloading.MaterialLoadingImage
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState.*
+import com.google.accompanist.imageloading.MaterialLoadingImage
 import kotlin.math.absoluteValue
 
 
