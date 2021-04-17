@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
+import com.ducktapedapps.updoot.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.PostViewType
 import kotlinx.coroutines.flow.Flow
 

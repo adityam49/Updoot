@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.ducktapedapps.updoot.comments.ICommentPrefManager
+import com.ducktapedapps.updoot.common.IThemeManager
 import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.UpdootDB
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
-import com.ducktapedapps.updoot.ui.comments.ICommentPrefManager
-import com.ducktapedapps.updoot.ui.common.IThemeManager
-import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
+import com.ducktapedapps.updoot.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Constants.UPDOOT_DB
 import com.ducktapedapps.updoot.utils.PostViewType

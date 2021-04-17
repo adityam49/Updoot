@@ -8,7 +8,7 @@ import androidx.hilt.Assisted
 import androidx.hilt.work.WorkerInject
 import androidx.work.*
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.ui.navDrawer.UpdateUserSubscriptionUseCase
+import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCase
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider

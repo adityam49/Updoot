@@ -31,7 +31,7 @@
             tools:node="remove" />
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
 

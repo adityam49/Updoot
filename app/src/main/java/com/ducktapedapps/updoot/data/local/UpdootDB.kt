@@ -4,7 +4,7 @@ import androidx.room.*
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.data.remote.LinkModel
-import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
+import com.ducktapedapps.updoot.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.DateConverter
 import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.SubredditPrefsConverter

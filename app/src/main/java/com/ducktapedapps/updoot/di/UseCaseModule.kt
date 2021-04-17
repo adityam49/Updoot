@@ -1,16 +1,16 @@
 package com.ducktapedapps.updoot.di
 
-import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCase
-import com.ducktapedapps.updoot.ui.navDrawer.GetUserSubscriptionsUseCaseImpl
-import com.ducktapedapps.updoot.ui.navDrawer.UpdateUserSubscriptionUseCase
-import com.ducktapedapps.updoot.ui.navDrawer.UpdateUserSubscriptionUseCaseImpl
-import com.ducktapedapps.updoot.ui.search.SearchSubredditUseCase
-import com.ducktapedapps.updoot.ui.search.SearchSubredditUseCaseImpl
-import com.ducktapedapps.updoot.ui.subreddit.*
-import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCase
-import com.ducktapedapps.updoot.ui.user.GetUserCommentsUseCaseImpl
-import com.ducktapedapps.updoot.ui.user.GetUserSectionsUseCase
-import com.ducktapedapps.updoot.ui.user.GetUserSectionsUseCaseImpl
+import com.ducktapedapps.updoot.navDrawer.GetUserSubscriptionsUseCase
+import com.ducktapedapps.updoot.navDrawer.GetUserSubscriptionsUseCaseImpl
+import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCase
+import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCaseImpl
+import com.ducktapedapps.updoot.search.SearchSubredditUseCase
+import com.ducktapedapps.updoot.search.SearchSubredditUseCaseImpl
+import com.ducktapedapps.updoot.subreddit.*
+import com.ducktapedapps.updoot.user.GetUserCommentsUseCase
+import com.ducktapedapps.updoot.user.GetUserCommentsUseCaseImpl
+import com.ducktapedapps.updoot.user.GetUserSectionsUseCase
+import com.ducktapedapps.updoot.user.GetUserSectionsUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

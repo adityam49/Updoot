@@ -2,8 +2,8 @@
 package com.ducktapedapps.updoot.utils
 
 import androidx.room.TypeConverter
-import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting
-import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
+import com.ducktapedapps.updoot.subreddit.SubredditSorting
+import com.ducktapedapps.updoot.subreddit.SubredditSorting.*
 
 class SubredditPrefsConverter {
     @TypeConverter

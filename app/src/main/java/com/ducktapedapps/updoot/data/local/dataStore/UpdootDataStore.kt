@@ -6,13 +6,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.createDataStore
+import com.ducktapedapps.updoot.comments.ICommentPrefManager
+import com.ducktapedapps.updoot.common.IThemeManager
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.CURRENT_ACCOUNT_NAME
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.DEVICE_ID
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.SHOW_SINGLE_THREAD
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.SHOW_SINGLE_THREAD_COLOR
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.THEME_KEY
-import com.ducktapedapps.updoot.ui.comments.ICommentPrefManager
-import com.ducktapedapps.updoot.ui.common.IThemeManager
 import com.ducktapedapps.updoot.utils.Constants.ANON_USER
 import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.accountManagement.CurrentAccountNameManager
