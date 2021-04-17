@@ -1,13 +1,16 @@
 package com.ducktapedapps.updoot.ui.subreddit
 
-import com.ducktapedapps.updoot.utils.Page
-import com.ducktapedapps.updoot.utils.Page.*
+import com.ducktapedapps.updoot.data.local.model.Post
+import com.ducktapedapps.updoot.utils.PagingModel
+import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
+import com.ducktapedapps.updoot.utils.Result
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 interface GetSubredditPostsUseCase {
 
-    val pagesOfPosts: Flow<List<Page<List<PostUiModel>>>>
+    val pagingModel: Flow<PagingModel<Flow<List<Post>>>>
 
     suspend fun loadNextPage(
         subreddit: String,
@@ -19,23 +22,21 @@ interface GetSubredditPostsUseCase {
 class GetSubredditPostsUseCaseImpl @Inject constructor(
     private val postsRepo: PostsRepo
 ) : GetSubredditPostsUseCase {
-    private val _pagesOfPosts: MutableStateFlow<List<Page<Flow<List<PostUiModel>>>>> =
-        MutableStateFlow(
-            emptyList()
+    private val _pagingModel: MutableStateFlow<PagingModel<List<String>>> = MutableStateFlow(
+        PagingModel(
+            content = emptyList(),
+            footer = UnLoadedPage(null)
         )
+    )
 
-    override val pagesOfPosts: Flow<List<Page<List<PostUiModel>>>> = _pagesOfPosts.map { allPages ->
-        allPages.map { page ->
-            when (page) {
-                End -> End
-                is ErrorPage -> page
-                is LoadedPage -> LoadedPage(
-                    content = page.content.distinctUntilChanged().first(),
-                    nextPageKey = page.nextPageKey
-                )
-                LoadingPage -> LoadingPage
-            }
-        }
+    override val pagingModel = _pagingModel.mapLatest {
+        PagingModel(
+            content = if (it.content.isNotEmpty()) postsRepo
+                .observeCachedPosts(it.content)
+                .distinctUntilChanged()
+            else emptyFlow(),
+            footer = it.footer
+        )
     }
 
     override suspend fun loadNextPage(
@@ -43,83 +44,42 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
         reload: Boolean,
         subredditSorting: SubredditSorting
     ) {
+        when (val data = _pagingModel.value.footer) {
+            is UnLoadedPage -> {
+                _pagingModel.value = _pagingModel.value.copy(footer = Loading)
+                delay(100) // TODO : remove this
+                val result = postsRepo.getPage(
+                    subreddit = subreddit,
+                    sorting = subredditSorting,
+                    nextPageKey = data.pageKey
+                )
+                when (result) {
+                    is Result.Error -> _pagingModel.value =
+                        _pagingModel.value.copy(footer = Error(result.exception, data.pageKey))
+                    is Result.Success -> _pagingModel.value = _pagingModel.value.copy(
+                        content = _pagingModel.value.content + result.data.ids,
+                        footer = if (result.data.hasNextPage()) UnLoadedPage(result.data.nextPageKey) else End
+                    )
+                }
+            }
+            is Error -> {
 
-        if (reload) _pagesOfPosts.value = emptyList()
-
-        when (val lastPage = _pagesOfPosts.value.lastOrNull()) {
-            null -> loadAfterNoError(subredditName = subreddit, subredditSorting = subredditSorting)
-            is ErrorPage -> loadAfterError(
-                subredditName = subreddit,
-                errorPage = lastPage,
-                sorting = subredditSorting
-            )
-            is LoadedPage -> loadAfterNoError(
-                subredditName = subreddit,
-                page = lastPage,
-                subredditSorting = subredditSorting
-            )
-            LoadingPage -> Unit
-            End -> Unit
+                _pagingModel.value = _pagingModel.value.copy(footer = Loading)
+                val result = postsRepo.getPage(
+                    subreddit = subreddit,
+                    sorting = subredditSorting,
+                    nextPageKey = data.pageKey
+                )
+                when (result) {
+                    is Result.Error -> _pagingModel.value =
+                        _pagingModel.value.copy(footer = Error(result.exception, data.pageKey))
+                    is Result.Success -> _pagingModel.value = _pagingModel.value.copy(
+                        content = _pagingModel.value.content + result.data.ids,
+                        footer = if (result.data.hasNextPage()) UnLoadedPage(result.data.nextPageKey) else End
+                    )
+                }
+            }
+            else -> Unit
         }
-    }
-
-    private suspend fun loadAfterError(
-        subredditName: String,
-        sorting: SubredditSorting,
-        errorPage: ErrorPage
-    ) {
-        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
-            removeLast()
-            this += LoadingPage
-        }
-
-        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
-            val fetchedPage = getPageFromRepo(
-                subreddit = subredditName,
-                sorting = sorting,
-                pageKey = errorPage.currentPageKey
-            )
-            this[size - 1] = fetchedPage
-        }
-    }
-
-    private suspend fun loadAfterNoError(
-        page: LoadedPage<Flow<List<PostUiModel>>>? = null,
-        subredditName: String,
-        subredditSorting: SubredditSorting,
-    ) {
-        _pagesOfPosts.value += LoadingPage
-
-        _pagesOfPosts.value = _pagesOfPosts.value.toMutableList().apply {
-
-            val fetchedPage = getPageFromRepo(subredditName, page?.nextPageKey, subredditSorting)
-
-            this[size - 1] = fetchedPage
-
-            if (fetchedPage is LoadedPage && fetchedPage.nextPageKey == null)
-                this += End
-
-        }
-    }
-
-    private suspend fun getPageFromRepo(
-        subreddit: String,
-        pageKey: String?,
-        sorting: SubredditSorting,
-    ) = when (
-        val response = postsRepo.getPage(
-            subreddit = subreddit,
-            nextPageKey = pageKey,
-            sorting = sorting
-        )
-    ) {
-        is PageResource.Error -> ErrorPage(
-            currentPageKey = pageKey,
-            errorReason = response.reason
-        )
-        is PageResource.Success -> LoadedPage(
-            content = response.content.map { it.map { post -> post.toUiModel() } },
-            nextPageKey = response.nextPageKey,
-        )
     }
 }

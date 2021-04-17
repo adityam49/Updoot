@@ -2,16 +2,18 @@ package com.ducktapedapps.updoot.ui.user
 
 import com.ducktapedapps.updoot.data.mappers.toLocalFullComment
 import com.ducktapedapps.updoot.ui.user.UserContent.UserComment
-import com.ducktapedapps.updoot.utils.Page
-import com.ducktapedapps.updoot.utils.Page.*
+import com.ducktapedapps.updoot.utils.PagingModel
+import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
+import com.ducktapedapps.updoot.utils.Result
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 interface GetUserCommentsUseCase {
 
-    val pagesOfComments: StateFlow<List<Page<List<UserComment>>>>
+    val pagingModel: StateFlow<PagingModel<List<UserComment>>>
 
     suspend fun loadNextPage(userName: String)
 
@@ -21,65 +23,55 @@ interface GetUserCommentsUseCase {
 class GetUserCommentsUseCaseImpl @Inject constructor(
     private val redditClient: RedditClient,
 ) : GetUserCommentsUseCase {
-
-    override val pagesOfComments: MutableStateFlow<List<Page<List<UserComment>>>> =
-        MutableStateFlow(emptyList())
+    override val pagingModel: MutableStateFlow<PagingModel<List<UserComment>>> = MutableStateFlow(
+        PagingModel(content = emptyList(), footer = UnLoadedPage(null))
+    )
 
     override suspend fun loadNextPage(userName: String) {
-        when (val lastPage = pagesOfComments.value.lastOrNull()) {
-            is LoadedPage -> loadAfterNoError(lastPage, userName)
-            is ErrorPage -> loadAfterError(lastPage, userName)
-            LoadingPage -> Unit
-            End -> Unit
-            else -> loadAfterNoError(userName = userName)
+        when (val footer = pagingModel.value.footer) {
+            is UnLoadedPage -> {
+                pagingModel.value = pagingModel.value.copy(footer = Loading)
+                delay(100) // TODO : remove this
+                val result = getComments(userName, footer.pageKey)
+                when (result) {
+                    is Result.Error -> pagingModel.value =
+                        pagingModel.value.copy(footer = Error(result.exception, footer.pageKey))
+                    is Result.Success -> pagingModel.value = pagingModel.value.copy(
+                        content = pagingModel.value.content + result.data.content,
+                        footer = result.data.footer
+                    )
+                }
+            }
+            is Error -> {
+                pagingModel.value = pagingModel.value.copy(footer = Loading)
+                val result = getComments(userName, footer.pageKey)
+                when (result) {
+                    is Result.Error -> pagingModel.value =
+                        pagingModel.value.copy(footer = Error(result.exception, footer.pageKey))
+                    is Result.Success -> pagingModel.value = pagingModel.value.copy(
+                        content = pagingModel.value.content + result.data.content,
+                        footer = result.data.footer
+                    )
+                }
+            }
+            else -> Unit
         }
     }
 
-    private suspend fun loadAfterError(errorPage: ErrorPage, userName: String) {
-        pagesOfComments.value = pagesOfComments.value.toMutableList().apply {
-            removeLast()
-            this += LoadingPage
-        }
-
-        pagesOfComments.value = pagesOfComments.value.toMutableList().apply {
-            this[size - 1] = try {
-                val api = redditClient.api()
-                val result = api.getUserComments(userName, errorPage.currentPageKey)
-                LoadedPage(
+    private suspend fun getComments(
+        userName: String,
+        nextPageKey: String?
+    ): Result<PagingModel<List<UserComment>>> =
+        try {
+            val api = redditClient.api()
+            val result = api.getUserComments(userName, nextPageKey)
+            Result.Success(
+                PagingModel(
                     content = result.children.map { UserComment(it.toLocalFullComment()) },
-                    nextPageKey = result.after
+                    footer = if (result.after != null) UnLoadedPage(pageKey = result.after) else End
                 )
-            } catch (e: Exception) {
-                errorPage.copy(errorReason = e.message ?: "Something went wrong")
-            }
+            )
+        } catch (exception: Exception) {
+            Result.Error(exception)
         }
-    }
-
-    private suspend fun loadAfterNoError(
-        page: LoadedPage<List<UserComment>>? = null,
-        userName: String
-    ) {
-        pagesOfComments.value += LoadingPage
-
-        pagesOfComments.value = pagesOfComments.value.toMutableList().apply {
-            val fetchedPage = try {
-                val api = redditClient.api()
-                val result = api.getUserComments(userName, page?.nextPageKey)
-                LoadedPage(
-                    result.children.map { UserComment(it.toLocalFullComment()) },
-                    result.after
-                )
-            } catch (e: Exception) {
-                ErrorPage(
-                    currentPageKey = page?.nextPageKey,
-                    errorReason = e.message ?: "Something went wrong"
-                )
-            }
-            this[size - 1] = fetchedPage
-
-            if (fetchedPage is LoadedPage && fetchedPage.nextPageKey == null)
-                this += End
-
-        }
-    }
 }

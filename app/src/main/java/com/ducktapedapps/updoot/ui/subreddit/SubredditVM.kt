@@ -5,7 +5,8 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ducktapedapps.updoot.utils.Page
+import com.ducktapedapps.updoot.utils.PagingModel
+import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
 import com.ducktapedapps.updoot.utils.PostViewType
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ interface SubredditVM {
 
     val postViewType: StateFlow<PostViewType>
 
-    val pagesOfPosts: StateFlow<List<Page<List<PostUiModel>>>>
+    val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>>
 
     val subredditInfo: StateFlow<SubredditInfoState?>
 
@@ -73,11 +74,19 @@ class SubredditVMImpl @ViewModelInject constructor(
             initialValue = PostViewType.COMPACT
         )
 
-    override val pagesOfPosts: StateFlow<List<Page<List<PostUiModel>>>> =
-        getSubredditPostsUseCase.pagesOfPosts
-            .stateIn(
-                viewModelScope, SharingStarted.Eagerly, emptyList()
-            )
+    override val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>> =
+        getSubredditPostsUseCase
+            .pagingModel
+            .transformLatest { pagingModel ->
+                pagingModel.content.collect { posts ->
+                    emit(
+                        PagingModel(
+                            posts.map { post -> post.toUiModel() },
+                            pagingModel.footer
+                        )
+                    )
+                }
+            }.stateIn(viewModelScope, SharingStarted.Lazily, PagingModel(emptyList(), Loading))
 
     override val subredditInfo: StateFlow<SubredditInfoState?> =
         getSubredditInfoUseCase.subredditInfo

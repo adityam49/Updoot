@@ -5,11 +5,12 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ducktapedapps.updoot.data.local.PostDAO
 import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.data.mappers.toPost
-import com.ducktapedapps.updoot.ui.subreddit.PageResource.Error
-import com.ducktapedapps.updoot.ui.subreddit.PageResource.Success
 import com.ducktapedapps.updoot.ui.subreddit.SubredditSorting.*
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.Result
+import com.ducktapedapps.updoot.utils.Result.Error
+import com.ducktapedapps.updoot.utils.Result.Success
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +27,7 @@ class PostsRepo @Inject constructor(
         subreddit: String,
         nextPageKey: String?,
         sorting: SubredditSorting,
-    ): PageResource = withContext(Dispatchers.IO) {
+    ): Result<IdsPage> = withContext(Dispatchers.IO) {
         try {
             val redditAPI = redditClient.api()
             val s = sorting.mapSorting()
@@ -42,13 +43,19 @@ class PostsRepo @Inject constructor(
             fetchedPosts.cache()
 
             Success(
-                content = postDAO.observeCachedPosts(buildSqlQuery(fetchedPosts.map { it.id })),
-                nextPageKey = listing.after
+                IdsPage(
+                    ids = fetchedPosts.map { it.id },
+                    nextPageKey = listing.after
+                )
             )
         } catch (e: Exception) {
-            Error(e.message ?: "Something went wrong")
+            Error(e)
         }
     }
+
+    fun observeCachedPosts(ids: List<String>): Flow<List<Post>> = postDAO.observeCachedPosts(
+        buildSqlQuery(ids)
+    )
 
     private fun buildSqlQuery(ids: List<String>): SimpleSQLiteQuery =
         SimpleSQLiteQuery(
@@ -89,10 +96,6 @@ class PostsRepo @Inject constructor(
     }
 }
 
-sealed class PageResource {
-
-    data class Success(val content: Flow<List<Post>>, val nextPageKey: String?) : PageResource()
-
-    data class Error(val reason: String) : PageResource()
-
+data class IdsPage(val ids: List<String>, val nextPageKey: String? = null) {
+    fun hasNextPage() = nextPageKey != null
 }

@@ -8,8 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.FullComment
 import com.ducktapedapps.updoot.ui.subreddit.PostUiModel
 import com.ducktapedapps.updoot.ui.user.UserSection.*
-import com.ducktapedapps.updoot.utils.Page
-import kotlinx.coroutines.Dispatchers
+import com.ducktapedapps.updoot.utils.PagingModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -20,7 +19,7 @@ interface UserViewModel {
 
     val currentSection: StateFlow<UserSection>
 
-    val content: StateFlow<List<Page<List<UserContent>>>>
+    val content: StateFlow<PagingModel<List<UserContent>>>
 
     fun loadPage()
 
@@ -41,22 +40,26 @@ class UserViewModelImpl @ViewModelInject constructor(
 
     override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(Comments)
 
-    override val content: StateFlow<List<Page<List<UserContent>>>> = combine(
+    override val content: StateFlow<PagingModel<List<UserContent>>> = combine(
         currentSection,
-        loadUserCommentsUseCase.pagesOfComments
-    ) { currentSectionValue, pagesOfComments ->
+        loadUserCommentsUseCase.pagingModel
+    ) { currentSectionValue, userComments ->
         when (currentSectionValue) {
-            Comments -> pagesOfComments
-            else -> emptyList()
+            Comments -> userComments.copy(content = userComments.content.map { comment ->
+                UserContent.UserComment(
+                    comment.data
+                )
+            })
+            else -> PagingModel(emptyList<UserContent>(), PagingModel.Footer.End)
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    init {
-        loadPage()
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Lazily,
+        PagingModel(emptyList(), PagingModel.Footer.End)
+    )
 
     override fun loadPage() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             when (currentSection.value) {
                 Comments -> loadUserCommentsUseCase.loadNextPage(userName)
                 else -> Unit
