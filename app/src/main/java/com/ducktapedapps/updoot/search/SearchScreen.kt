@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,6 +30,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.theme.UpdootTypography
 import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.imageloading.ImageLoadState.Success
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +41,8 @@ fun SearchScreen(
     openSubreddit: (String) -> Unit,
     viewModel: SearchVM = viewModel<SearchVMImpl>(),
 ) {
-    val searchResults = viewModel.results.collectAsState(initial = emptyList()).value
+    val searchResults = viewModel.results.collectAsState().value
+    val trendingSubreddits = viewModel.trendingSubreddits.collectAsState()
     val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
     val setQuery: (TextFieldValue) -> Unit = { value ->
         viewModel.searchSubreddit(value.text)
@@ -68,7 +71,22 @@ fun SearchScreen(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            item {
+            if (queryString.text.isBlank()) {
+                with(trendingSubreddits.value) {
+                    if (this.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(id = R.string.trending_subs),
+                                style = UpdootTypography.overline,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                        items(this) {
+                            SubredditItem(subreddit = it, openSubreddit = openSubreddit)
+                        }
+                    }
+                }
+            } else item {
                 searchResults.forEach { SubredditItem(it, openSubreddit) }
             }
         }

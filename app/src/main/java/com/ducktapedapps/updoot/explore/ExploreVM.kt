@@ -3,22 +3,13 @@ package com.ducktapedapps.updoot.explore
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 class ExploreVM @ViewModelInject constructor(
-    private val exploreRepo: ExploreRepo
+    getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
 ) : ViewModel() {
-    val isLoading = exploreRepo.isLoading
-    val trendingSubs = exploreRepo.trendingSubs.distinctUntilChanged()
-
-    init {
-        loadSubs()
-    }
-
-    fun loadSubs() {
-        viewModelScope.launch {
-            exploreRepo.loadTrendingSubs()
-        }
-    }
+    val trendingSubs = getTrendingSubredditsUseCase
+        .trendingSubreddits
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 }

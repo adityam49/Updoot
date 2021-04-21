@@ -6,7 +6,6 @@ import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -25,20 +24,21 @@ class GetUserSubscriptionsUseCaseImpl @Inject constructor(
 
     override val subscriptions: Flow<List<LocalSubreddit>> = updootAccountsProvider
         .getCurrentAccount()
-        .flatMapLatest { currentAccount ->
-            when (currentAccount) {
-                is AnonymousAccount -> flowOf(emptyList())
-                is UserModel -> subredditDAO
-                    .observeSubscribedSubredditsFor(currentAccount.name)
-                    .distinctUntilChanged()
-                    .onEach {
-                        //TODO fix this so that cached subscriptions don't get blocked while syncing new subscriptions
-                        if (it.isStale()) updateUserSubscriptionUseCase.updateUserSubscription(
-                            currentAccount.name
-                        )
-                    }
-            }
-        }.flowOn(Dispatchers.IO)
+        .transformLatest { currentAccount ->
+            emitAll(
+                when (currentAccount) {
+                    is AnonymousAccount -> flow { emit(emptyList<LocalSubreddit>()) }
+                    is UserModel -> subredditDAO
+                        .observeSubscribedSubredditsFor(currentAccount.name)
+                        .distinctUntilChanged()
+                        .onEach {
+                            //TODO fix this so that cached subscriptions don't get blocked while syncing new subscriptions
+                            if (it.isStale()) updateUserSubscriptionUseCase.updateUserSubscription(
+                                currentAccount.name
+                            )
+                        }
+                })
+        }
 
     private fun List<LocalSubreddit>.isStale(): Boolean = any {
         val diff = System.currentTimeMillis() - it.lastUpdated.time

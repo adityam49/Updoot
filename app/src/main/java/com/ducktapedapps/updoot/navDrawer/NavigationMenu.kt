@@ -49,6 +49,8 @@ fun NavigationMenuScreen(
     val accountsList = viewModel.accounts.collectAsState()
     val navDestinations = viewModel.navigationEntries.collectAsState()
     val subscriptions = viewModel.subscriptions.collectAsState()
+    val trendingSubreddits = viewModel.trending.collectAsState()
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         stickyHeader {
             AccountsMenu(
@@ -58,12 +60,27 @@ fun NavigationMenuScreen(
                 openAccountInfo = openUser
             )
         }
+
         items(navDestinations.value) { DestinationItem(it, viewModel::navigateTo) }
+
 
         subscriptions.value.run {
             if (this.isNotEmpty()) {
                 stickyHeader { Header("Subscriptions") }
-                items(this) { SubredditItem(it, openSubreddit) }
+                items(this) { subscribedSubreddit ->
+                    SubredditItem(
+                        subscribedSubreddit,
+                        openSubreddit
+                    )
+                }
+            } else {
+                stickyHeader { Header("Subreddits Trending Today") }
+                items(trendingSubreddits.value) { trendingSubreddit ->
+                    SubredditItem(
+                        trendingSubreddit,
+                        openSubreddit
+                    )
+                }
             }
         }
     }

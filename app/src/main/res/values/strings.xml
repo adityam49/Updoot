@@ -61,5 +61,6 @@
     <string name="gold_award">Gold Award</string>
     <string name="platinum_award">Platinum Award</string>
     <string name="leave">Leave</string>
-
+    <string name="trending_subs">Subreddits Trending Today</string>
+    <string name="subscriptions">Subscription</string>
 </resources>

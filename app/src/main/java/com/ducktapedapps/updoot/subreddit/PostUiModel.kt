@@ -93,18 +93,33 @@ fun Post.toMedia(): PostMedia = with(URI.create(postContentUrl)) {
 
 private fun Post.getImgurMedia(): PostMedia = with(URI.create(postContentUrl)) {
     when {
-        path.hasImageExtension() -> ImageMedia(mediaImage?.lowResUrl!!, mediaImage.lowResHeight!!, mediaImage.lowResWidth!!)
-        path.hasVideoExtension() -> VideoMedia(postContentUrl.replace(".gifv", ".mp4"), getThumbnail())
-        else -> if (!mediaVideo?.dashUrl.isNullOrBlank()) VideoMedia(mediaVideo!!.dashUrl!!, getThumbnail()) else LinkMedia(postContentUrl, getThumbnail())
+        path.hasImageExtension() -> ImageMedia(
+            mediaImage?.lowResUrl ?: this.toString(),
+            mediaImage?.lowResHeight ?: 0,
+            mediaImage?.lowResWidth ?: 0
+        )
+        path.hasVideoExtension() -> VideoMedia(
+            postContentUrl.replace(".gifv", ".mp4"),
+            getThumbnail()
+        )
+        else -> if (!mediaVideo?.dashUrl.isNullOrBlank()) VideoMedia(
+            mediaVideo!!.dashUrl!!,
+            getThumbnail()
+        ) else LinkMedia(postContentUrl, getThumbnail())
     }
 }
 
 private fun Post.getRedditMedia(): PostMedia = with(URI.create(postContentUrl)) {
     when {
-        path.hasImageExtension() -> ImageMedia(mediaImage?.lowResUrl!!, mediaImage.lowResHeight!!, mediaImage.lowResWidth!!)
+        path.hasImageExtension() -> ImageMedia(
+            mediaImage?.lowResUrl ?: this.toString(),
+            mediaImage?.lowResHeight ?: 0,
+            mediaImage?.lowResWidth ?: 0
+        )
         authority.startsWith("v.") -> VideoMedia(
-                url = mediaVideo?.dashUrl ?: postContentUrl,
-                thumbnail = getThumbnail())
+            url = mediaVideo?.dashUrl ?: postContentUrl,
+            thumbnail = getThumbnail()
+        )
         else -> LinkMedia(postContentUrl, getThumbnail())
     }
 }

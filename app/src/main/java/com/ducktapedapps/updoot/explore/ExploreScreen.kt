@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,18 +35,14 @@ fun ExploreScreen(
             modifier = Modifier.padding(16.dp),
             style = MaterialTheme.typography.overline
         )
-        if (viewModel.isLoading.collectAsState(true).value)
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        else {
-            LazyRow {
-                item {
-                    viewModel.trendingSubs
-                        .collectAsState(initial = emptyList())
-                        .value
-                        .forEach {
-                            TrendingSub(subreddit = it, onClickSubreddit)
-                        }
-                }
+        LazyRow {
+            item {
+                viewModel.trendingSubs
+                    .collectAsState(initial = emptyList())
+                    .value
+                    .forEach {
+                        TrendingSub(subreddit = it, onClickSubreddit)
+                    }
             }
         }
     }

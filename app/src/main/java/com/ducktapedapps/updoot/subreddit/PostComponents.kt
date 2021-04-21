@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.subreddit
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -296,8 +295,8 @@ fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
 
 @Composable
 fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
-    val ratio = (media.width.toFloat() / media.height.toFloat()).absoluteValue
-    Log.i("AspectRatio", "ratio :$ratio")
+    val ratio =
+        (if (media.width == 0) 1f else media.width.toFloat() / if (media.height == 0) 1f else media.height.toFloat()).absoluteValue
     CoilImage(
         data = media.url,
         modifier = modifier

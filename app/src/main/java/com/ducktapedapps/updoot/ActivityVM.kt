@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.common.IThemeManager
+import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCase
 import com.ducktapedapps.updoot.navDrawer.*
 import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
@@ -24,6 +25,7 @@ class ActivityVM @ViewModelInject constructor(
     updootAccountsProvider: UpdootAccountsProvider,
     themeManager: IThemeManager,
     getUserSubscriptionsUseCase: GetUserSubscriptionsUseCase,
+    getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
 ) : ViewModel() {
     private val _shouldReload: MutableSharedFlow<Boolean> = MutableSharedFlow()
     val shouldReload: SharedFlow<Boolean> = _shouldReload
@@ -44,6 +46,11 @@ class ActivityVM @ViewModelInject constructor(
         }.stateIn(
             viewModelScope, SharingStarted.Lazily, emptyList()
         )
+
+    val trending: StateFlow<List<SubscriptionSubredditUiModel>> = getTrendingSubredditsUseCase
+        .trendingSubreddits
+        .map { subs -> subs.map { it.toSubscriptionSubredditUiModel() } }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _navigationRequest: MutableSharedFlow<NavigationDestination> = MutableSharedFlow()
     val navigationRequest: SharedFlow<NavigationDestination> = _navigationRequest

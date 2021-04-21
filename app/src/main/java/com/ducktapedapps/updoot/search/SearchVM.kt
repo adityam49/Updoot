@@ -4,12 +4,15 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
+import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCase
 import com.ducktapedapps.updoot.utils.Constants.DEBOUNCE_TIME_OUT
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import kotlinx.coroutines.flow.*
 
 interface SearchVM {
+
+    val trendingSubreddits: StateFlow<List<SearchedSubredditResultsUiModel>>
 
     val searchQueryLoading: StateFlow<Boolean>
 
@@ -25,9 +28,15 @@ interface SearchVM {
 
 class SearchVMImpl @ViewModelInject constructor(
     private val searchSubredditUseCase: SearchSubredditUseCase,
+    private val getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
 ) : ViewModel(), SearchVM {
     //TODO fix loading indicator
     override val searchQueryLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val trendingSubreddits: StateFlow<List<SearchedSubredditResultsUiModel>> =
+        getTrendingSubredditsUseCase
+            .trendingSubreddits
+            .mapLatest { it.map { subreddit -> subreddit.toSearchedSubredditResultsUiModel() } }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val query: MutableStateFlow<String> = MutableStateFlow("")
 
