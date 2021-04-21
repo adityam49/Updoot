@@ -1,29 +1,33 @@
 package com.ducktapedapps.updoot.user
 
 import com.ducktapedapps.updoot.data.mappers.toLocalFullComment
-import com.ducktapedapps.updoot.user.UserContent.UserComment
+import com.ducktapedapps.updoot.data.mappers.toPost
+import com.ducktapedapps.updoot.data.remote.model.Comment
+import com.ducktapedapps.updoot.data.remote.model.LinkData
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
+import com.ducktapedapps.updoot.utils.RedditItem
+import com.ducktapedapps.updoot.utils.RedditItem.CommentData
+import com.ducktapedapps.updoot.utils.RedditItem.PostData
 import com.ducktapedapps.updoot.utils.Result
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-interface GetUserCommentsUseCase {
-
-    val pagingModel: StateFlow<PagingModel<List<UserComment>>>
+interface GetUserGildedUseCase {
+    val pagingModel: Flow<PagingModel<List<RedditItem>>>
 
     suspend fun loadNextPage(userName: String)
 
 }
 
-//TODO : Use repository for caching
-class GetUserCommentsUseCaseImpl @Inject constructor(
+class GetUserGildedUseCaseImpl @Inject constructor(
     private val redditClient: RedditClient,
-) : GetUserCommentsUseCase {
-    override val pagingModel: MutableStateFlow<PagingModel<List<UserComment>>> = MutableStateFlow(
+) : GetUserGildedUseCase {
+
+    override val pagingModel: MutableStateFlow<PagingModel<List<RedditItem>>> = MutableStateFlow(
         PagingModel(content = emptyList(), footer = UnLoadedPage(null))
     )
 
@@ -32,10 +36,15 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
             is UnLoadedPage -> {
                 pagingModel.value = pagingModel.value.copy(footer = Loading)
                 delay(100) // TODO : remove this
-                val result = getComments(userName, footer.pageKey)
+                val result = getOverViewItems(userName, footer.pageKey)
                 when (result) {
                     is Result.Error -> pagingModel.value =
-                        pagingModel.value.copy(footer = Error(result.exception, footer.pageKey))
+                        pagingModel.value.copy(
+                            footer = Error(
+                                result.exception,
+                                footer.pageKey
+                            )
+                        )
                     is Result.Success -> pagingModel.value = pagingModel.value.copy(
                         content = pagingModel.value.content + result.data.content,
                         footer = result.data.footer
@@ -44,10 +53,15 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
             }
             is Error -> {
                 pagingModel.value = pagingModel.value.copy(footer = Loading)
-                val result = getComments(userName, footer.pageKey)
+                val result = getOverViewItems(userName, footer.pageKey)
                 when (result) {
                     is Result.Error -> pagingModel.value =
-                        pagingModel.value.copy(footer = Error(result.exception, footer.pageKey))
+                        pagingModel.value.copy(
+                            footer = Error(
+                                result.exception,
+                                footer.pageKey
+                            )
+                        )
                     is Result.Success -> pagingModel.value = pagingModel.value.copy(
                         content = pagingModel.value.content + result.data.content,
                         footer = result.data.footer
@@ -58,20 +72,27 @@ class GetUserCommentsUseCaseImpl @Inject constructor(
         }
     }
 
-    private suspend fun getComments(
+    private suspend fun getOverViewItems(
         userName: String,
         nextPageKey: String?
-    ): Result<PagingModel<List<UserComment>>> =
+    ): Result<PagingModel<List<RedditItem>>> =
         try {
             val api = redditClient.api()
-            val result = api.getUserComments(userName, nextPageKey)
+            val result = api.getUserGildedThings(userName, nextPageKey)
+            val items = mutableListOf<RedditItem>()
+            result.children.forEach {
+                if (it is Comment.CommentData) items.add(CommentData(it.toLocalFullComment()))
+                else if (it is LinkData) items.add(PostData(it.toPost()))
+            }
             Result.Success(
                 PagingModel(
-                    content = result.children.map { UserComment(it.toLocalFullComment()) },
-                    footer = if (result.after != null) UnLoadedPage(pageKey = result.after) else End
+                    content = items,
+                    footer = if (result.after != null) UnLoadedPage(pageKey = result.after)
+                    else End
                 )
             )
         } catch (exception: Exception) {
             Result.Error(exception)
         }
+
 }

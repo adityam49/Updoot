@@ -77,16 +77,13 @@ class SubredditVMImpl @ViewModelInject constructor(
     override val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>> =
         getSubredditPostsUseCase
             .pagingModel
-            .transformLatest { pagingModel ->
-                pagingModel.content.collect { posts ->
-                    emit(
-                        PagingModel(
-                            posts.map { post -> post.toUiModel() },
-                            pagingModel.footer
-                        )
-                    )
-                }
-            }.stateIn(viewModelScope, SharingStarted.Lazily, PagingModel(emptyList(), Loading))
+            .map { model ->
+                PagingModel(
+                    model.content.map { post -> post.toUiModel() },
+                    model.footer
+                )
+            }
+            .stateIn(viewModelScope, SharingStarted.Lazily, PagingModel(emptyList(), Loading))
 
     override val subredditInfo: StateFlow<SubredditInfoState?> =
         getSubredditInfoUseCase.subredditInfo

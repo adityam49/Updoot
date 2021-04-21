@@ -34,7 +34,6 @@ fun UserInfoScreen(viewModel: UserViewModel) {
     val pagedData = viewModel.content.collectAsState()
     val currentSection = viewModel.currentSection.collectAsState()
     val userContentSections = viewModel.sections.collectAsState()
-    LaunchedEffect(key1 = Unit) { viewModel.loadPage() }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
         stickyHeader {

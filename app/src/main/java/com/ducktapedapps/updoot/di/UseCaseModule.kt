@@ -7,10 +7,7 @@ import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCaseImpl
 import com.ducktapedapps.updoot.search.SearchSubredditUseCase
 import com.ducktapedapps.updoot.search.SearchSubredditUseCaseImpl
 import com.ducktapedapps.updoot.subreddit.*
-import com.ducktapedapps.updoot.user.GetUserCommentsUseCase
-import com.ducktapedapps.updoot.user.GetUserCommentsUseCaseImpl
-import com.ducktapedapps.updoot.user.GetUserSectionsUseCase
-import com.ducktapedapps.updoot.user.GetUserSectionsUseCaseImpl
+import com.ducktapedapps.updoot.user.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -51,4 +48,22 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindSearchSubredditUseCase(useCase: SearchSubredditUseCaseImpl): SearchSubredditUseCase
+
+    @Binds
+    abstract fun bindGetUserPostsUseCase(useCase: GetUserPostsUseCaseImpl): GetUserPostsUseCase
+
+    @Binds
+    abstract fun bindGetUserOverViewUseCase(useCase: GetUserOverviewUseCaseImpl): GetUserOverviewUseCase
+
+    @Binds
+    abstract fun bindGetUserUpVotedUseCase(useCase: GetUserUpVotedUseCaseImpl): GetUserUpVotedUseCase
+
+    @Binds
+    abstract fun bindGetUserDownVotedUseCase(useCase: GetUserDownVotedUseCaseImpl): GetUserDownVotedUseCase
+
+    @Binds
+    abstract fun bindGetUserSavedUseCase(useCase: GetUserSavedUseCaseImpl): GetUserSavedUseCase
+
+    @Binds
+    abstract fun bindGetUserGildedUseCase(useCase: GetUserGildedUseCaseImpl): GetUserGildedUseCase
 }

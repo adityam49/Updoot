@@ -11,3 +11,7 @@ data class PagingModel<out T : Any>(
         object End : Footer()
     }
 }
+
+data class IdsPage(val ids: List<String>, val nextPageKey: String? = null) {
+    fun hasNextPage() = nextPageKey != null
+}

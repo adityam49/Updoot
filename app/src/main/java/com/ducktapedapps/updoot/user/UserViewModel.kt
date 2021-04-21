@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.FullComment
 import com.ducktapedapps.updoot.subreddit.PostUiModel
+import com.ducktapedapps.updoot.subreddit.toUiModel
 import com.ducktapedapps.updoot.user.UserSection.*
 import com.ducktapedapps.updoot.utils.PagingModel
+import com.ducktapedapps.updoot.utils.RedditItem
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -28,7 +30,13 @@ interface UserViewModel {
 
 
 class UserViewModelImpl @ViewModelInject constructor(
-    private val loadUserCommentsUseCase: GetUserCommentsUseCase,
+    private val getUserOverviewUseCase: GetUserOverviewUseCase,
+    private val getUserCommentsUseCase: GetUserCommentsUseCase,
+    private val getUserPostsUseCase: GetUserPostsUseCase,
+    private val getUserUpVotedUseCase: GetUserUpVotedUseCase,
+    private val getUserDownVotedUseCase: GetUserDownVotedUseCase,
+    private val getUserGildedUseCase: GetUserGildedUseCase,
+    private val getUserSavedUseCase: GetUserSavedUseCase,
     getUseSectionsUseCase: GetUserSectionsUseCase,
     @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel(), UserViewModel {
@@ -38,31 +46,47 @@ class UserViewModelImpl @ViewModelInject constructor(
         .getUserSections(userName)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(Comments)
+    override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
 
-    override val content: StateFlow<PagingModel<List<UserContent>>> = combine(
-        currentSection,
-        loadUserCommentsUseCase.pagingModel
-    ) { currentSectionValue, userComments ->
-        when (currentSectionValue) {
-            Comments -> userComments.copy(content = userComments.content.map { comment ->
-                UserContent.UserComment(
-                    comment.data
+    override val content: StateFlow<PagingModel<List<UserContent>>> =
+        currentSection
+            .onEach { loadPage() }
+            .flatMapLatest { section ->
+                when (section) {
+                    OverView -> getUserOverviewUseCase.pagingModel
+                    Comments -> getUserCommentsUseCase.pagingModel
+                    Posts -> getUserPostsUseCase.pagingModel
+                    UpVoted -> getUserUpVotedUseCase.pagingModel
+                    DownVoted -> getUserDownVotedUseCase.pagingModel
+                    Gilded -> getUserGildedUseCase.pagingModel
+                    Saved -> getUserSavedUseCase.pagingModel
+                }
+            }.map {
+                PagingModel(
+                    it.content.map { element ->
+                        when (element) {
+                            is RedditItem.CommentData -> UserContent.UserComment(element.data)
+                            is RedditItem.PostData -> UserContent.UserPost(element.data.toUiModel())
+                        }
+                    },
+                    it.footer
                 )
-            })
-            else -> PagingModel(emptyList<UserContent>(), PagingModel.Footer.End)
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        PagingModel(emptyList(), PagingModel.Footer.End)
-    )
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(),
+                PagingModel(emptyList(), PagingModel.Footer.End)
+            )
 
     override fun loadPage() {
         viewModelScope.launch {
             when (currentSection.value) {
-                Comments -> loadUserCommentsUseCase.loadNextPage(userName)
-                else -> Unit
+                OverView -> getUserOverviewUseCase.loadNextPage(userName)
+                Comments -> getUserCommentsUseCase.loadNextPage(userName)
+                Posts -> getUserPostsUseCase.loadNextPage(userName)
+                UpVoted -> getUserUpVotedUseCase.loadNextPage(userName)
+                DownVoted -> getUserDownVotedUseCase.loadNextPage(userName)
+                Saved -> getUserSavedUseCase.loadNextPage(userName)
+                Gilded -> getUserGildedUseCase.loadNextPage(userName)
             }
         }
     }
