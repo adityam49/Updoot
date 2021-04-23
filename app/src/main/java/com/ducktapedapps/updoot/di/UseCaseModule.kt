@@ -71,4 +71,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetTrendingSubredditUseCase(useCase: GetTrendingSubredditsUseCaseImpl): GetTrendingSubredditsUseCase
+
+    @Binds
+    abstract fun bindGetUserTrophiesUseCase(useCase: GetUserTrophiesUseCaseImpl): GetUserTrophiesUseCase
 }

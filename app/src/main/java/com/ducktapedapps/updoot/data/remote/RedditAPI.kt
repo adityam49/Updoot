@@ -117,5 +117,10 @@ interface RedditAPI {
         @Path("username") username: String,
         @Query("after") after: String? = null
     ): Listing<RedditThing>
+
+    @GET("api/v1/user/{username}/trophies")
+    suspend fun getUserTrophies(
+        @Path("username") userName: String,
+    ): TrophyList
 }
 

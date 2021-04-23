@@ -5,6 +5,8 @@ import com.ducktapedapps.updoot.data.remote.model.Comment.CommentData
 import com.ducktapedapps.updoot.data.remote.model.Comment.MoreCommentData
 import com.ducktapedapps.updoot.data.remote.model.LinkData
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
+import com.ducktapedapps.updoot.data.remote.model.Trophy
+import com.ducktapedapps.updoot.data.remote.model.TrophyList
 import com.ducktapedapps.updoot.data.remote.moshiAdapters.ImageJsonAdapterFactory
 import com.ducktapedapps.updoot.data.remote.moshiAdapters.UpdootAdapterFactory
 import com.ducktapedapps.updoot.data.remote.moshiAdapters.VideoJsonAdapterFactory
@@ -55,11 +57,13 @@ object NetworkModule {
             .add(VideoJsonAdapterFactory())
             .add(ImageJsonAdapterFactory())
             .add(
-                    UpdootAdapterFactory.of("kind", "data")
-                            .withSubType("t1", CommentData::class.java)
-                            .withSubType("t3", LinkData::class.java)
-                            .withSubType("t5", RemoteSubreddit::class.java)
-                            .withSubType("more", MoreCommentData::class.java)
+                UpdootAdapterFactory.of("kind", "data")
+                    .withSubType("t1", CommentData::class.java)
+                    .withSubType("more", MoreCommentData::class.java)
+                    .withSubType("t3", LinkData::class.java)
+                    .withSubType("t5", RemoteSubreddit::class.java)
+                    .withSubType("TrophyList", TrophyList::class.java)
+                    .withSubType("t6", Trophy::class.java)
             )
             .build()
 

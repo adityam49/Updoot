@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.user
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,14 +8,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ducktapedapps.updoot.R
@@ -22,20 +22,29 @@ import com.ducktapedapps.updoot.comments.FullComment
 import com.ducktapedapps.updoot.common.PageEnd
 import com.ducktapedapps.updoot.common.PageLoading
 import com.ducktapedapps.updoot.common.PageLoadingFailed
+import com.ducktapedapps.updoot.data.remote.model.Trophy
 import com.ducktapedapps.updoot.subreddit.LargePost
 import com.ducktapedapps.updoot.theme.ColorOnScoreBackground
 import com.ducktapedapps.updoot.theme.ScoreBackground
 import com.ducktapedapps.updoot.user.UserContent.UserComment
 import com.ducktapedapps.updoot.user.UserContent.UserPost
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.imageloading.ImageLoadState
+import com.google.accompanist.imageloading.ImageLoadState.Empty
+import com.google.accompanist.imageloading.ImageLoadState.Success
 
 @Composable
 fun UserInfoScreen(viewModel: UserViewModel) {
     val pagedData = viewModel.content.collectAsState()
     val currentSection = viewModel.currentSection.collectAsState()
     val userContentSections = viewModel.sections.collectAsState()
+    val trophies = viewModel.userTrophies.collectAsState()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
+        stickyHeader {
+            UserTrophies(trophies = trophies.value)
+        }
         stickyHeader {
             UserSections(
                 sections = userContentSections.value,
@@ -131,6 +140,39 @@ fun UserSections(
                     onClick = { onClick(it) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun UserTrophies(trophies: List<Trophy>) {
+
+    LazyRow {
+        items(trophies) { trophy ->
+            Column(Modifier.padding(4.dp)) {
+                CoilImage(data = trophy.icon, modifier = Modifier.size(48.dp)) { imageState ->
+                    when (imageState) {
+                        Empty -> CircularProgressIndicator()
+                        ImageLoadState.Loading -> CircularProgressIndicator()
+                        is Success -> Image(
+                            painter = imageState.painter,
+                            contentDescription = trophy.name
+                        )
+                        is ImageLoadState.Error -> Icon(
+                            painter = painterResource(id = R.drawable.ic_image_error_24dp),
+                            contentDescription = "Error",
+                            tint = MaterialTheme.colors.error
+                        )
+                    }
+                }
+
+                Text(
+                    text = trophy.name,
+                    modifier = Modifier.padding(top = 8.dp),
+                    style = MaterialTheme.typography.overline
+                )
+            }
+
         }
     }
 }

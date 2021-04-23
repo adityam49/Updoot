@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.FullComment
+import com.ducktapedapps.updoot.data.remote.model.Trophy
 import com.ducktapedapps.updoot.subreddit.PostUiModel
 import com.ducktapedapps.updoot.subreddit.toUiModel
 import com.ducktapedapps.updoot.user.UserSection.*
@@ -18,6 +19,8 @@ interface UserViewModel {
     val userName: String
 
     val sections: StateFlow<List<UserSection>>
+
+    val userTrophies: StateFlow<List<Trophy>>
 
     val currentSection: StateFlow<UserSection>
 
@@ -37,6 +40,7 @@ class UserViewModelImpl @ViewModelInject constructor(
     private val getUserDownVotedUseCase: GetUserDownVotedUseCase,
     private val getUserGildedUseCase: GetUserGildedUseCase,
     private val getUserSavedUseCase: GetUserSavedUseCase,
+    private val getUserTrophiesUseCase: GetUserTrophiesUseCase,
     getUseSectionsUseCase: GetUserSectionsUseCase,
     @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel(), UserViewModel {
@@ -44,6 +48,13 @@ class UserViewModelImpl @ViewModelInject constructor(
 
     override val sections: StateFlow<List<UserSection>> = getUseSectionsUseCase
         .getUserSections(userName)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    override val userTrophies: StateFlow<List<Trophy>> = getUserTrophiesUseCase
+        .trophies
+        .onStart {
+            getUserTrophiesUseCase.loadUserTrophies(userName)
+        }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
