@@ -2,10 +2,7 @@ package com.ducktapedapps.updoot.di
 
 import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCase
 import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCaseImpl
-import com.ducktapedapps.updoot.navDrawer.GetUserSubscriptionsUseCase
-import com.ducktapedapps.updoot.navDrawer.GetUserSubscriptionsUseCaseImpl
-import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCase
-import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCaseImpl
+import com.ducktapedapps.updoot.navDrawer.*
 import com.ducktapedapps.updoot.search.SearchSubredditUseCase
 import com.ducktapedapps.updoot.search.SearchSubredditUseCaseImpl
 import com.ducktapedapps.updoot.subreddit.*
@@ -74,4 +71,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserTrophiesUseCase(useCase: GetUserTrophiesUseCaseImpl): GetUserTrophiesUseCase
+
+    @Binds
+    abstract fun bindGetUserMultiRedditsUseCase(useCase: GetUserMultiRedditsUseCaseImpl): GetUserMultiRedditsUseCase
 }

@@ -68,6 +68,12 @@ data class SubscriptionSubredditUiModel(
     val created: Date,
 )
 
+data class MultiRedditUiModel(
+    val multiRedditName: String,
+    val multiRedditIcon: String,
+    val subreddits: List<SubscriptionSubredditUiModel>
+)
+
 fun LocalSubreddit.toSubscriptionSubredditUiModel(): SubscriptionSubredditUiModel =
     SubscriptionSubredditUiModel(
         icon = icon,

@@ -26,6 +26,7 @@ class ActivityVM @ViewModelInject constructor(
     themeManager: IThemeManager,
     getUserSubscriptionsUseCase: GetUserSubscriptionsUseCase,
     getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
+    getUserMultiRedditsUseCase: GetUserMultiRedditsUseCase,
 ) : ViewModel() {
     private val _shouldReload: MutableSharedFlow<Boolean> = MutableSharedFlow()
     val shouldReload: SharedFlow<Boolean> = _shouldReload
@@ -46,6 +47,28 @@ class ActivityVM @ViewModelInject constructor(
         }.stateIn(
             viewModelScope, SharingStarted.Lazily, emptyList()
         )
+
+    val userMultiRedditSubscription: StateFlow<List<MultiRedditUiModel>> =
+        currentAccount.flatMapLatest { currentAccount ->
+            when (currentAccount) {
+                is AnonymousAccount -> flow { emit(emptyList<MultiRedditUiModel>()) }
+                is UserModel -> getUserMultiRedditsUseCase
+                    .multiReddits
+                    .map { allMultiReddits ->
+                        allMultiReddits
+                            .map {
+                                MultiRedditUiModel(
+                                    multiRedditName = it.multiRedditName,
+                                    multiRedditIcon = it.multiRedditIcon,
+                                    subreddits = it.subreddits.map { sub -> sub.toSubscriptionSubredditUiModel() }
+                                )
+                            }
+                    }
+                    .onStart {
+                        getUserMultiRedditsUseCase.loadMultiReddits()
+                    }
+            }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val trending: StateFlow<List<SubscriptionSubredditUiModel>> = getTrendingSubredditsUseCase
         .trendingSubreddits

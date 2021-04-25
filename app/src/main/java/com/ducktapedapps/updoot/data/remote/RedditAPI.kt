@@ -122,5 +122,8 @@ interface RedditAPI {
     suspend fun getUserTrophies(
         @Path("username") userName: String,
     ): TrophyList
+
+    @GET("api/multi/mine?expand_srs=true")
+    suspend fun getUserMultiReddits(): List<LabeledMulti>
 }
 
