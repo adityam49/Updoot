@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.createDataStore
+import androidx.datastore.preferences.preferencesDataStore
 import com.ducktapedapps.updoot.comments.ICommentPrefManager
 import com.ducktapedapps.updoot.common.IThemeManager
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.CURRENT_ACCOUNT_NAME
@@ -26,50 +26,51 @@ import javax.inject.Singleton
 
 @Singleton
 class UpdootDataStore @Inject constructor(
-    @ApplicationContext context: Context
+    @ApplicationContext private val context: Context
 ) : CurrentAccountNameManager,
     IThemeManager,
-    ICommentPrefManager {
-    private val dataStore = context.createDataStore(
-        name = DATA_STORE_NAME,
+    ICommentPrefManager
+{
+    private val Context.dataStore by preferencesDataStore(
+        name = DATA_STORE_NAME
     )
 
-    override fun themeType(): Flow<ThemeType> = dataStore.data
+    override fun themeType(): Flow<ThemeType> = context.dataStore.data
         .map { it[THEME_KEY] ?: ThemeType.AUTO.ordinal }
         .map { ThemeType.values()[it] }
 
     override suspend fun setThemeType(newType: ThemeType) {
-        dataStore.edit { it[THEME_KEY] = newType.ordinal }
+        context.dataStore.edit { it[THEME_KEY] = newType.ordinal }
     }
 
-    override fun showSingleThread(): Flow<Boolean> = dataStore.data
+    override fun showSingleThread(): Flow<Boolean> = context.dataStore.data
             .map { it[SHOW_SINGLE_THREAD] ?: true }
 
     override suspend fun toggleSingleThread() {
-        dataStore.edit { it[SHOW_SINGLE_THREAD] = !(it[SHOW_SINGLE_THREAD] ?: true) }
+        context.dataStore.edit { it[SHOW_SINGLE_THREAD] = !(it[SHOW_SINGLE_THREAD] ?: true) }
     }
 
-    override fun showSingleThreadColor(): Flow<Boolean> = dataStore.data
+    override fun showSingleThreadColor(): Flow<Boolean> = context.dataStore.data
             .map { it[SHOW_SINGLE_THREAD_COLOR] ?: true }
 
     override suspend fun toggleSingleThreadColor() {
-        dataStore.edit { it[SHOW_SINGLE_THREAD_COLOR] = !(it[SHOW_SINGLE_THREAD_COLOR] ?: true) }
+        context.dataStore.edit { it[SHOW_SINGLE_THREAD_COLOR] = !(it[SHOW_SINGLE_THREAD_COLOR] ?: true) }
     }
 
-    override fun currentAccountName(): Flow<String> = dataStore.data.map {
+    override fun currentAccountName(): Flow<String> = context.dataStore.data.map {
         it[CURRENT_ACCOUNT_NAME] ?: ANON_USER
     }
 
-    override fun deviceId(): Flow<String> = dataStore
+    override fun deviceId(): Flow<String> = context.dataStore
             .data
             .transform {
                 val deviceId = it[DEVICE_ID]
-                if (deviceId == null) dataStore.edit { prefs -> prefs[DEVICE_ID] = UUID.randomUUID().toString() }
+                if (deviceId == null) context.dataStore.edit { prefs -> prefs[DEVICE_ID] = UUID.randomUUID().toString() }
                 else emit(deviceId)
             }
 
     override suspend fun setCurrentAccountName(user: String) {
-        dataStore.edit {
+        context.dataStore.edit {
             it[CURRENT_ACCOUNT_NAME] = user
         }
     }
