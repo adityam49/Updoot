@@ -41,7 +41,6 @@ fun SearchScreen(
     viewModel: SearchVM = viewModel<SearchVMImpl>(),
 ) {
     val searchResults = viewModel.results.collectAsState().value
-    val trendingSubreddits = viewModel.trendingSubreddits.collectAsState()
     val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
     val setQuery: (TextFieldValue) -> Unit = { value ->
         viewModel.searchSubreddit(value.text)
@@ -70,24 +69,7 @@ fun SearchScreen(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (queryString.text.isBlank()) {
-                with(trendingSubreddits.value) {
-                    if (this.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = stringResource(id = R.string.trending_subs),
-                                style = UpdootTypography.overline,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                        items(this) {
-                            SubredditItem(subreddit = it, openSubreddit = openSubreddit)
-                        }
-                    }
-                }
-            } else item {
-                searchResults.forEach { SubredditItem(it, openSubreddit) }
-            }
+            item { searchResults.forEach { SubredditItem(it, openSubreddit) } }
         }
         Spacer(
             Modifier

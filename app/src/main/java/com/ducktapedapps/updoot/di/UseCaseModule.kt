@@ -1,7 +1,5 @@
 package com.ducktapedapps.updoot.di
 
-import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCase
-import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCaseImpl
 import com.ducktapedapps.updoot.navDrawer.*
 import com.ducktapedapps.updoot.search.SearchSubredditUseCase
 import com.ducktapedapps.updoot.search.SearchSubredditUseCaseImpl
@@ -65,9 +63,6 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserGildedUseCase(useCase: GetUserGildedUseCaseImpl): GetUserGildedUseCase
-
-    @Binds
-    abstract fun bindGetTrendingSubredditUseCase(useCase: GetTrendingSubredditsUseCaseImpl): GetTrendingSubredditsUseCase
 
     @Binds
     abstract fun bindGetUserTrophiesUseCase(useCase: GetUserTrophiesUseCaseImpl): GetUserTrophiesUseCase

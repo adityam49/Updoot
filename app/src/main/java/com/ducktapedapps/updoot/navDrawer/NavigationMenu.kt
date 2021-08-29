@@ -56,7 +56,6 @@ fun NavigationMenuScreen(
     val accountsList = viewModel.accounts.collectAsState()
     val navDestinations = viewModel.navigationEntries.collectAsState()
     val subscriptions = viewModel.subscriptions.collectAsState()
-    val trendingSubreddits = viewModel.trending.collectAsState()
     val multiReddits = viewModel
         .userMultiRedditSubscription
         .map { allMultiReddits ->
@@ -95,7 +94,7 @@ fun NavigationMenuScreen(
                 }
             }
         }
-        subscriptions.value.run {
+        with(subscriptions.value) {
             if (this.isNotEmpty()) {
                 stickyHeader {
                     SubscriptionGroupHeaders(
@@ -110,22 +109,6 @@ fun NavigationMenuScreen(
                     Row {
                         Spacer(modifier = Modifier.padding(16.dp))
                         SubredditItem(subreddit = subscribedSubreddit, openSubreddit)
-                    }
-                }
-            } else {
-                stickyHeader {
-                    SubscriptionGroupHeaders(
-                        iconName = "",
-                        groupName = "Subreddits Trending Today",
-                        toggleExpand = {},
-                        onClickAction = {},
-                        isExpanded = true
-                    )
-                }
-                items(trendingSubreddits.value) { trendingSubreddit ->
-                    Row {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        SubredditItem(subreddit = trendingSubreddit, openSubreddit)
                     }
                 }
             }
@@ -149,7 +132,7 @@ fun SubscriptionGroupHeaders(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = rememberImagePainter(data=iconName){
+            painter = rememberImagePainter(data = iconName) {
                 error(R.drawable.ic_subreddit_default_24dp)
                 transformations(CircleCropTransformation())
             },
