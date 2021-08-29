@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
@@ -15,11 +14,14 @@ import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAc
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ActivityVM @ViewModelInject constructor(
+@HiltViewModel
+class ActivityVM @Inject constructor(
     private val workManager: WorkManager,
     private val updootAccountManager: UpdootAccountManager,
     updootAccountsProvider: UpdootAccountsProvider,

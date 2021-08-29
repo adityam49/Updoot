@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.search
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
@@ -8,7 +7,9 @@ import com.ducktapedapps.updoot.explore.GetTrendingSubredditsUseCase
 import com.ducktapedapps.updoot.utils.Constants.DEBOUNCE_TIME_OUT
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import javax.inject.Inject
 
 interface SearchVM {
 
@@ -26,7 +27,8 @@ interface SearchVM {
 
 }
 
-class SearchVMImpl @ViewModelInject constructor(
+@HiltViewModel
+class SearchVMImpl @Inject constructor(
     private val searchSubredditUseCase: SearchSubredditUseCase,
     private val getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
 ) : ViewModel(), SearchVM {

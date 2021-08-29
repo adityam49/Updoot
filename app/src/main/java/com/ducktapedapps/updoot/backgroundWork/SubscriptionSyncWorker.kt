@@ -4,8 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.hilt.Assisted
-import androidx.hilt.work.WorkerInject
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCase
@@ -13,13 +12,17 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import com.ducktapedapps.updoot.utils.createNotificationChannel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlin.random.Random
 
-class SubscriptionSyncWorker @WorkerInject constructor(
-    @Assisted workerParameters: WorkerParameters,
+@HiltWorker
+class SubscriptionSyncWorker @AssistedInject constructor(
     @Assisted private val context: Context,
+    @Assisted workerParameters: WorkerParameters,
     private val updateUserSubscriptionUseCase: UpdateUserSubscriptionUseCase,
     private val updootAccountManager: UpdootAccountManager,
     private val updootAccountsProvider: UpdootAccountsProvider,

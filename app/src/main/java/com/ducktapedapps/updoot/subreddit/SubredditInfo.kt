@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.PageLoading
@@ -29,8 +30,6 @@ import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import com.ducktapedapps.updoot.utils.getCompactAge
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 
@@ -105,23 +104,14 @@ private fun SubredditInfoHeader(
 ) {
     DrawerCard(modifier = modifier) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            CoilImage(
-                data = iconUrl ?: "",
-                requestBuilder = { transformations(CircleCropTransformation()) },
-                modifier = Modifier.size(48.dp),
-            ) { imageLoadState ->
-                when (imageLoadState) {
-                    is Success -> Image(
-                        painter = imageLoadState.painter,
-                        contentDescription = "Subreddit Icon"
-                    )
-                    else -> Icon(
-                        painter = painterResource(id = R.drawable.ic_subreddit_default_24dp),
-                        "Subreddit Icon"
-                    )
-                }
-            }
-
+            Image(
+                painter= rememberImagePainter(data = iconUrl){
+                    error(R.drawable.ic_subreddit_default_24dp)
+                    transformations(CircleCropTransformation())
+                },
+                contentDescription= stringResource(id = R.string.subreddit_icon),
+                modifier =Modifier.size(48.dp),
+            )
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     modifier = Modifier.padding(start = 16.dp),

@@ -1,15 +1,17 @@
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
 import com.ducktapedapps.updoot.utils.PostViewType
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 interface SubredditVM {
     val subredditName: String
@@ -43,9 +45,9 @@ interface SubredditVM {
     fun save(id: String)
 }
 
-
-class SubredditVMImpl @ViewModelInject constructor(
-    @Assisted savedStateHandle: SavedStateHandle,
+@HiltViewModel
+class SubredditVMImpl @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     getSubredditPreferencesUseCase: GetSubredditPreferencesUseCase,
     private val getSubredditInfoUseCase: GetSubredditInfoUseCase,
     private val getSubredditPostsUseCase: GetSubredditPostsUseCase,

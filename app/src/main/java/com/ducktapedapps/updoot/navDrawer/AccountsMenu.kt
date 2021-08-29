@@ -16,8 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.theme.SurfaceOnDrawer
@@ -25,8 +27,6 @@ import com.ducktapedapps.updoot.theme.UpdootTheme
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 
 @Preview
 @Composable
@@ -119,25 +119,15 @@ fun NonCurrentAccountItem(
                     modifier = paddingModifier,
                 )
             is UserModel ->
-                CoilImage(
-                    data = accountModel.userIcon,
-                    modifier = paddingModifier.size(24.dp),
-                    requestBuilder = {
-                        transformations(CircleCropTransformation())
-                    }
-                ) { imageLoadState ->
-                    when (imageLoadState) {
-                        is Success -> Image(
-                            painter = imageLoadState.painter,
-                            contentDescription = "Account Image"
-                        )
-                        is Error -> Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = Icons.Default.AccountCircle.name
-                        )
-                        else -> Unit
-                    }
-                }
+            Image(
+                painter = rememberImagePainter(data=accountModel.userIcon){
+                    fallback(R.drawable.ic_account_circle_24dp)
+                    error(R.drawable.ic_account_circle_24dp)
+                    transformations(CircleCropTransformation())
+                },
+                contentDescription ="Account Image" ,
+                modifier = paddingModifier.size(24.dp),
+            )
         }
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
@@ -182,24 +172,14 @@ fun CurrentAccountItem(
             .size(64.dp)
             .padding(8.dp)
         if (accountModel is UserModel)
-            CoilImage(
-                data = accountModel.userIcon,
+        Image(
+            painter = rememberImagePainter(data=accountModel.userIcon){
+                error(R.drawable.ic_account_circle_24dp)
+                transformations(CircleCropTransformation())
+            },
+            contentDescription ="Account Image" ,
                 modifier = userIconModifier,
-                requestBuilder = { transformations(CircleCropTransformation()) }
-            ) { imageLoadState ->
-                when (imageLoadState) {
-                    is Success -> Image(
-                        painter = imageLoadState.painter,
-                        contentDescription = "Account Icon"
-                    )
-                    else -> Image(
-                        painter = painterResource(id = R.drawable.ic_account_circle_24dp),
-                        contentDescription = "Account Icon",
-                        modifier = userIconModifier,
-                    )
-                }
-
-            }
+        )
         else
             Image(
                 painter = painterResource(id = R.drawable.ic_account_circle_24dp),

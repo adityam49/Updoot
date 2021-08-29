@@ -15,19 +15,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.*
 import com.ducktapedapps.updoot.theme.StickyPostColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 import com.ducktapedapps.updoot.utils.getCompactDateAsString
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.*
-import com.google.accompanist.imageloading.MaterialLoadingImage
 import kotlin.math.absoluteValue
 
 
@@ -123,27 +122,15 @@ fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
     )
     else {
         when (post.thumbnail) {
-            is Thumbnail.Remote -> CoilImage(
-                data = post.thumbnail.url,
-                modifier = modifier,
-                requestBuilder = {
-                    transformations(CircleCropTransformation())
-                }
-            ) { imageLoadState ->
-                when (imageLoadState) {
-                    is Success -> Image(
-                        painter = imageLoadState.painter,
-                        contentDescription = "Post Thumbnail"
-                    )
-                    is Error -> Image(
-                        painterResource(id = post.thumbnail.fallbackLocalThumbnail),
-                        contentDescription = "Error Icon",
-                        modifier = modifier
-                    )
-                    else -> Unit
-                }
-            }
-
+            is Thumbnail.Remote ->
+                Image(
+                    painter = rememberImagePainter(data = post.thumbnail.url) {
+                        error(post.thumbnail.fallbackLocalThumbnail)
+                        transformations(CircleCropTransformation())
+                    },
+                    contentDescription = stringResource(R.string.post_thumbnail),
+                    modifier = modifier,
+                )
             is Thumbnail.LocalThumbnail -> Image(
                 painter = painterResource(id = post.thumbnail.imageResource),
                 contentDescription = "Error Icon",
@@ -297,30 +284,17 @@ fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
 fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
     val ratio =
         (if (media.width == 0) 1f else media.width.toFloat() / if (media.height == 0) 1f else media.height.toFloat()).absoluteValue
-    CoilImage(
-        data = media.url,
+    Image(
+        painter = rememberImagePainter(data = media.url) {
+            error(R.drawable.ic_image_error_24dp)
+        },
+        contentDescription = stringResource(id = R.string.submission_image),
         modifier = modifier
             .padding(8.dp)
             .fillMaxWidth()
             .aspectRatio(if (ratio < 1.0) 1f else ratio)
             .clip(RoundedCornerShape(8.dp)),
-    ) { imageLoadState ->
-        when (imageLoadState) {
-            Empty -> Unit
-            Loading -> Unit
-            is Success -> MaterialLoadingImage(
-                result = imageLoadState,
-                fadeInEnabled = true,
-                contentDescription = "Post Image"
-            )
-            is Error -> Icon(
-                painter = painterResource(id = R.drawable.ic_image_error_24dp),
-                modifier = modifier,
-                contentDescription = "Error Icon"
-            )
-
-        }
-    }
+    )
 }
 
 @Composable

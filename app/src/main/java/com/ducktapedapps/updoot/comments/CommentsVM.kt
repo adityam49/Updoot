@@ -1,7 +1,5 @@
 package com.ducktapedapps.updoot.comments
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,15 +7,20 @@ import com.ducktapedapps.updoot.data.local.LinkMetaDataDAO
 import com.ducktapedapps.updoot.data.local.PostDAO
 import com.ducktapedapps.updoot.data.local.model.MoreComment
 import com.ducktapedapps.updoot.subreddit.toUiModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CommentsVMImpl @ViewModelInject constructor(
-        private val repo: CommentsRepo,
-        postCacheDAO: PostDAO,
-        private val linkMetaDataDAO: LinkMetaDataDAO,
-        @Assisted savedStateHandle: SavedStateHandle,
-        prefManager: ICommentPrefManager,
+@HiltViewModel
+class CommentsVMImpl @Inject constructor(
+    private val repo: CommentsRepo,
+    postCacheDAO: PostDAO,
+    private val linkMetaDataDAO: LinkMetaDataDAO,
+    savedStateHandle: SavedStateHandle,
+    prefManager: ICommentPrefManager,
 ) : ViewModel(), ICommentsVM {
 
     private val id: String = savedStateHandle.get<String>(CommentsFragment.COMMENTS_KEY)!!

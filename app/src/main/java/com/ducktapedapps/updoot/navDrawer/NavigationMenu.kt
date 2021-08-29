@@ -18,11 +18,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.ActivityVM
 import com.ducktapedapps.updoot.R
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 import kotlinx.coroutines.flow.map
 
 @Composable
@@ -149,23 +148,16 @@ fun SubscriptionGroupHeaders(
             .clickable(onClick = onClickAction),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CoilImage(
-            data = iconName,
-            requestBuilder = {
+        Image(
+            painter = rememberImagePainter(data=iconName){
+                error(R.drawable.ic_subreddit_default_24dp)
                 transformations(CircleCropTransformation())
             },
+            contentDescription = stringResource(id = R.string.subreddit_icon),
             modifier = Modifier
                 .padding(start = 28.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
-                .size(32.dp)
-        ) {
-            when (it) {
-                is Success -> Image(it.painter, stringResource(id = R.string.subreddit_icon))
-                else -> Icon(
-                    painterResource(id = R.drawable.ic_subreddit_default_24dp),
-                    stringResource(id = R.string.subreddit_icon)
-                )
-            }
-        }
+                .size(32.dp),
+        )
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
             Text(text = groupName, style = MaterialTheme.typography.body1)
         }

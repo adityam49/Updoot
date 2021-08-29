@@ -1,7 +1,6 @@
 package com.ducktapedapps.updoot.login
 
 import android.net.Uri
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
@@ -19,6 +18,7 @@ import com.ducktapedapps.updoot.login.ResultState.Running
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +28,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+import javax.inject.Inject
 
 
-class LoginViewModel @ViewModelInject constructor(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val redditAPI: RedditAPI,
     private val authAPI: AuthAPI,
     private val interceptor: TokenInterceptor,

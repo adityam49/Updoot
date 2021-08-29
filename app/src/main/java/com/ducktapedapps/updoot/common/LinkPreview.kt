@@ -5,10 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -17,11 +14,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.subreddit.Thumbnail
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState
-import com.google.accompanist.imageloading.ImageLoadState.Success
 
 @Composable
 fun StaticLinkPreview(
@@ -41,26 +37,35 @@ fun StaticLinkPreview(
         verticalAlignment = Alignment.Top
     ) {
         when (thumbnail) {
-            is Thumbnail.Remote -> CoilImage(
-                data = thumbnail.url,
-                requestBuilder = { transformations(CircleCropTransformation()) },
-                modifier = Modifier
+            is Thumbnail.Remote ->
+                Icon(
+                    painter = rememberImagePainter(data = thumbnail.fallbackLocalThumbnail),
+                    contentDescription = "Link preview icon",
+                    modifier = Modifier
                     .size(48.dp)
                     .padding(8.dp)
-            ) { imageLoadState: ImageLoadState ->
-                when (imageLoadState) {
-                    is Success -> Image(
-                        painter = imageLoadState.painter,
-                        contentDescription = "Link thumbnail"
-                    )
-                    is Error -> Image(
-                        painter = painterResource(id = thumbnail.fallbackLocalThumbnail),
-                        "Link preview icon"
-                    )
+                )
 
-                    else -> Unit
-                }
-            }
+//                CoilImage(
+//                data = thumbnail.url,
+//                requestBuilder = { transformations(CircleCropTransformation()) },
+//                modifier = Modifier
+//                    .size(48.dp)
+//                    .padding(8.dp)
+//            ) { imageLoadState: ImageLoadState ->
+//                when (imageLoadState) {
+//                    is Success -> Image(
+//                        painter = imageLoadState.painter,
+//                        contentDescription = "Link thumbnail"
+//                    )
+//                    is Error -> Image(
+//                        painter = painterResource(id = thumbnail.fallbackLocalThumbnail),
+//                        "Link preview icon"
+//                    )
+//
+//                    else -> Unit
+//                }
+//            }
             is Thumbnail.LocalThumbnail -> Image(
                 painter = painterResource(id = thumbnail.imageResource),
                 "Link preview icon"

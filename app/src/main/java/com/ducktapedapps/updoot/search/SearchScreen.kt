@@ -28,11 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.theme.UpdootTypography
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 import kotlinx.coroutines.flow.Flow
 
 
@@ -135,26 +134,16 @@ private fun SubredditItem(
             .padding(top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CoilImage(
-            data = subreddit.icon,
-            requestBuilder = {
+        Image(
+            painter = rememberImagePainter(data = subreddit.icon){
+                error(R.drawable.ic_subreddit_default_24dp)
                 transformations(CircleCropTransformation())
             },
+            contentDescription = stringResource(R.string.subreddit_icon),
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .size(32.dp)
-        ) { state ->
-            when (state) {
-                is Success -> Image(
-                    painter = state.painter,
-                    contentDescription = stringResource(R.string.subreddit_icon)
-                )
-                else -> Icon(
-                    painter = painterResource(id = R.drawable.ic_subreddit_default_24dp),
-                    contentDescription = stringResource(id = R.string.subreddit_icon)
-                )
-            }
-        }
+        )
         Column(
             modifier = Modifier
                 .wrapContentWidth()

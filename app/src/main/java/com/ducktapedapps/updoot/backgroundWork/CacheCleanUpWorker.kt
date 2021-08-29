@@ -4,8 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.hilt.Assisted
-import androidx.hilt.work.WorkerInject
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.PostDAO
@@ -15,11 +14,15 @@ import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.createNotificationChannel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlin.random.Random
 
-class CacheCleanUpWorker @WorkerInject constructor(
+@HiltWorker
+class CacheCleanUpWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workParas: WorkerParameters,
     private val postCacheDAO: PostDAO,

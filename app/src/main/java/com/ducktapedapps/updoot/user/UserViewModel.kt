@@ -1,7 +1,5 @@
 package com.ducktapedapps.updoot.user
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +10,12 @@ import com.ducktapedapps.updoot.subreddit.toUiModel
 import com.ducktapedapps.updoot.user.UserSection.*
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.RedditItem
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 interface UserViewModel {
     val userName: String
@@ -31,8 +33,8 @@ interface UserViewModel {
     fun setSection(section: UserSection)
 }
 
-
-class UserViewModelImpl @ViewModelInject constructor(
+@HiltViewModel
+class UserViewModelImpl @Inject constructor(
     private val getUserOverviewUseCase: GetUserOverviewUseCase,
     private val getUserCommentsUseCase: GetUserCommentsUseCase,
     private val getUserPostsUseCase: GetUserPostsUseCase,
@@ -42,7 +44,7 @@ class UserViewModelImpl @ViewModelInject constructor(
     private val getUserSavedUseCase: GetUserSavedUseCase,
     private val getUserTrophiesUseCase: GetUserTrophiesUseCase,
     getUseSectionsUseCase: GetUserSectionsUseCase,
-    @Assisted savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel(), UserViewModel {
     override val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
 

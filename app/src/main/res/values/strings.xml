@@ -63,4 +63,5 @@
     <string name="leave">Leave</string>
     <string name="trending_subs">Subreddits Trending Today</string>
     <string name="subscriptions">Subscription</string>
+    <string name="post_thumbnail">Post thumbnail</string>
 </resources>

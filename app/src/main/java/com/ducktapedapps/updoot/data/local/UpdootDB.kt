@@ -29,38 +29,47 @@ abstract class UpdootDB : RoomDatabase() {
     abstract fun linkMetaDataCacheDAO(): LinkMetaDataDAO
 }
 
-@Entity(primaryKeys = ["subredditName", "userName"])
+@Entity(
+    primaryKeys = ["subredditName", "userName"],
+    foreignKeys = [
+        ForeignKey(
+            entity = LocalSubreddit::class,
+            parentColumns = ["subredditName"],
+            childColumns = ["subredditName"],
+            onDelete = ForeignKey.NO_ACTION
+        )
+    ]
+)
 data class SubredditSubscription(
-    @ForeignKey(
-        entity = LocalSubreddit::class,
-        parentColumns = ["subredditName"],
-        childColumns = ["subredditName"],
-        onDelete = ForeignKey.NO_ACTION
-    )
     val subredditName: String,
     val userName: String,
 )
 
-@Entity
-data class SubredditPrefs(
-    @ForeignKey(
+@Entity(foreignKeys = [
+    ForeignKey(
         entity = LocalSubreddit::class,
         parentColumns = ["subredditName"],
         childColumns = ["subredditName"],
         onDelete = ForeignKey.CASCADE
     )
+])
+data class SubredditPrefs(
     @PrimaryKey val subredditName: String,
     val viewType: PostViewType,
     val subredditSorting: SubredditSorting,
 )
 
-@Entity
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = LocalSubreddit::class,
+            parentColumns = ["subredditName"],
+            childColumns = ["id"],
+            onDelete = ForeignKey.NO_ACTION
+        )
+    ]
+)
 data class TrendingSubreddit(
     @PrimaryKey
-    @ForeignKey(
-        entity = LocalSubreddit::class,
-        parentColumns = ["subredditName"],
-        childColumns = ["id"],
-        onDelete = ForeignKey.NO_ACTION
-    ) val id: String,
+    val id: String,
 )

@@ -15,7 +15,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.Coil
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.StaticLinkPreview
@@ -25,8 +29,6 @@ import com.ducktapedapps.updoot.subreddit.PostMedia
 import com.ducktapedapps.updoot.subreddit.PostMedia.*
 import com.ducktapedapps.updoot.subreddit.PostUiModel
 import com.ducktapedapps.updoot.theme.StickyPostColor
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState
 
 @Composable
 fun CommentsScreen(viewModel: ICommentsVM, openContent: (PostMedia) -> Unit) {
@@ -115,29 +117,18 @@ fun TextPost(text: String) {
 
 @Composable
 fun ContentImage(image: ImageMedia, openImage: () -> Unit) {
-    CoilImage(
-        data = image.url,
+    Image(
+        painter = rememberImagePainter(data=image.url){
+            error(R.drawable.ic_image_error_24dp)
+            transformations(RoundedCornersTransformation(8.dp.value))
+        },
+        contentDescription = stringResource(R.string.submission_image),
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .aspectRatio(image.width / image.height.toFloat())
-            .clickable(onClick = openImage),
-        requestBuilder = {
-            transformations(RoundedCornersTransformation(8.dp.value))
-        }
-    ) { imageLoadState ->
-        when (imageLoadState) {
-            is ImageLoadState.Success -> Image(
-                painter = imageLoadState.painter,
-                contentDescription = "Post Image"
-            )
-            is ImageLoadState.Error -> Icon(
-                painter = painterResource(id = R.drawable.ic_image_error_24dp),
-                "Error Icon"
-            )
-            else -> Unit
-        }
-    }
+            .clickable(onClick = openImage)
+    )
 }
 
 @Composable

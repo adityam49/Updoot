@@ -1,12 +1,14 @@
 package com.ducktapedapps.updoot.explore
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class ExploreVM @ViewModelInject constructor(
+@HiltViewModel
+class ExploreVM @Inject constructor(
     getTrendingSubredditsUseCase: GetTrendingSubredditsUseCase,
 ) : ViewModel() {
     val trendingSubs = getTrendingSubredditsUseCase

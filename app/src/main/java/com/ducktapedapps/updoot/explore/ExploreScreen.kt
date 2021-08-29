@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,11 +17,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 
@@ -66,27 +66,17 @@ fun TrendingSub(subreddit: LocalSubreddit, onClickSubreddit: (String) -> Unit) {
                 .wrapContentHeight()
                 .clickable { onClickSubreddit(subreddit.subredditName) },
         ) {
-            CoilImage(
-                data = subreddit.icon,
+            Image(
+                painter = rememberImagePainter(data=subreddit.icon){
+                    error(R.drawable.ic_image_error_24dp)
+                    transformations(CircleCropTransformation())
+                },
+                contentDescription = stringResource(id = R.string.subreddit_icon),
                 modifier = Modifier
                     .size(48.dp)
                     .padding(start = 16.dp, top = 16.dp),
-                requestBuilder = {
-                    transformations(CircleCropTransformation())
-                }
-            ) { imageLoadState ->
-                when (imageLoadState) {
-                    is Success -> Image(
-                        painter = imageLoadState.painter,
-                        contentDescription = stringResource(id = R.string.subreddit_icon),
-                    )
-                    else -> Image(
-                        painter = painterResource(id = R.drawable.ic_subreddit_default_24dp),
-                        contentDescription = stringResource(id = R.string.subreddit_icon),
-                    )
+            )
 
-                }
-            }
             Column {
                 Text(
                     text = subreddit.subredditName,

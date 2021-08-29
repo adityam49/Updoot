@@ -1,17 +1,19 @@
 package com.ducktapedapps.updoot.settings
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.comments.ICommentPrefManager
 import com.ducktapedapps.updoot.common.IThemeManager
 import com.ducktapedapps.updoot.utils.ThemeType
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingsVM @ViewModelInject constructor(
+@HiltViewModel
+class SettingsVM @Inject constructor(
         private val themeManager: IThemeManager,
         private val commentPrefsManager: ICommentPrefManager,
 ) : ViewModel() {

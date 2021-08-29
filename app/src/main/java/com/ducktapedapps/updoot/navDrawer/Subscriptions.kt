@@ -11,12 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.utils.getCompactAge
-import com.google.accompanist.coil.CoilImage
-import com.google.accompanist.imageloading.ImageLoadState.Success
 import java.util.*
 
 @Composable
@@ -27,27 +26,16 @@ fun SubredditItem(subreddit: SubscriptionSubredditUiModel, openSubreddit: (Strin
             .clickable { openSubreddit(subreddit.subredditName) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CoilImage(
-            data = subreddit.icon ?: "",
-            requestBuilder = {
+        Image(
+            painter = rememberImagePainter(data=subreddit.icon){
+                error(R.drawable.ic_subreddit_default_24dp)
                 transformations(CircleCropTransformation())
             },
+            contentDescription = stringResource(R.string.subreddit_icon),
             modifier = Modifier
                 .padding(start = 28.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .size(32.dp)
-        ) { state ->
-            when (state) {
-                is Success -> Image(
-                    painter = state.painter,
-                    contentDescription = stringResource(R.string.subreddit_icon)
-                )
-                else -> Icon(
-                    painter = painterResource(id = R.drawable.ic_subreddit_default_24dp),
-                    contentDescription = stringResource(id = R.string.subreddit_icon)
-                )
-            }
-        }
-
+        )
         Column {
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
                 Text(text = subreddit.subredditName, style = MaterialTheme.typography.body1)
