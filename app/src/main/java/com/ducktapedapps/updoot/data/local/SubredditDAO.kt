@@ -44,13 +44,4 @@ interface SubredditDAO {
 
     @Query("DELETE  FROM LocalSubreddit WHERE subredditName is :name")
     suspend fun deleteSubreddit(name: String)
-
-    @Query("SELECT LocalSubreddit.* FROM LocalSubreddit JOIN TrendingSubreddit ON LocalSubreddit.subredditName == TrendingSubreddit.id")
-    fun observeTrendingSubreddits(): Flow<List<LocalSubreddit>>
-
-    @Query("DELETE FROM TrendingSubreddit")
-    suspend fun removeAllTrendingSubs()
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertTrendingSubreddit(subreddit: TrendingSubreddit)
 }

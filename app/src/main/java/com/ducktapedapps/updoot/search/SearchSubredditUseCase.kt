@@ -38,14 +38,13 @@ class SearchSubredditUseCaseImpl @Inject constructor(
             .observeSubredditWithKeyword(keyword = query.trim())
             .map { it.take(2) }
             .distinctUntilChanged()
-        else
-            subredditDAO.observeTrendingSubreddits()
+        else emptyFlow()
 
     private fun getRemoteSubreddits(
         query: String,
         includeNsfw: Boolean
     ): Flow<List<LocalSubreddit>> = flow {
-        emit(emptyList<LocalSubreddit>())
+        emit(emptyList())
         if (query.isNotBlank()) try {
             val api = redditClient.api()
             val results = api.search(query = query, includeOver18 = includeNsfw)

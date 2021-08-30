@@ -17,7 +17,6 @@ import com.ducktapedapps.updoot.utils.SubredditPrefsConverter
         SubredditPrefs::class,
         Post::class,
         LinkModel::class,
-        TrendingSubreddit::class,
     ],
     version = 1,
     exportSchema = false
@@ -45,31 +44,9 @@ data class SubredditSubscription(
     val userName: String,
 )
 
-@Entity(foreignKeys = [
-    ForeignKey(
-        entity = LocalSubreddit::class,
-        parentColumns = ["subredditName"],
-        childColumns = ["subredditName"],
-        onDelete = ForeignKey.CASCADE
-    )
-])
+@Entity
 data class SubredditPrefs(
     @PrimaryKey val subredditName: String,
     val viewType: PostViewType,
     val subredditSorting: SubredditSorting,
-)
-
-@Entity(
-    foreignKeys = [
-        ForeignKey(
-            entity = LocalSubreddit::class,
-            parentColumns = ["subredditName"],
-            childColumns = ["id"],
-            onDelete = ForeignKey.NO_ACTION
-        )
-    ]
-)
-data class TrendingSubreddit(
-    @PrimaryKey
-    val id: String,
 )

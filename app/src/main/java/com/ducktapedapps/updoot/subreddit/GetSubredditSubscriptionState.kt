@@ -21,16 +21,17 @@ class GetSubredditSubscriptionStateImpl @Inject constructor(
     private val subredditDAO: SubredditDAO,
 ) : GetSubredditSubscriptionState {
     override fun getIsSubredditSubscribedState(subredditName: String): Flow<Boolean?> {
-        return updootAccountsProvider.allAccounts.map {
-            it.first { account -> account.isCurrent }
-        }.flatMapLatest { currentUser ->
-            when (currentUser) {
-                is AnonymousAccount -> flow { emit(null) }
-                is UserModel -> subredditDAO.observeSubredditSubscription(
-                    subredditName = subredditName,
-                    currentUser = currentUser.name
-                ).map { it != null }
+
+        return updootAccountsProvider
+            .getCurrentAccount()
+            .flatMapLatest { currentUser ->
+                when (currentUser) {
+                    is AnonymousAccount -> flow { emit(null) }
+                    is UserModel -> subredditDAO.observeSubredditSubscription(
+                        subredditName = subredditName,
+                        currentUser = currentUser.name
+                    ).map { it != null }
+                }
             }
-        }
     }
 }
