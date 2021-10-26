@@ -2,7 +2,7 @@ package com.ducktapedapps.updoot.comments
 
 import kotlinx.coroutines.flow.Flow
 
-interface ICommentPrefManager {
+interface CommentPrefManager {
 
     fun showSingleThread(): Flow<Boolean>
 

@@ -7,6 +7,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.MenuItemModel
 import com.ducktapedapps.updoot.common.OptionsDialog
@@ -14,23 +16,42 @@ import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.ThemeType.*
 
 @Composable
-fun SettingsScreen(viewModel: SettingsVM) {
-    val theme = viewModel.theme.collectAsState()
-    val isSingleColorMode = viewModel.showSingleColorThread.collectAsState()
-    val isSingleThreadMode = viewModel.showSingleThreadIndicator.collectAsState()
+fun SettingsScreen(viewModel: SettingsVM = hiltViewModel<SettingsVMImpl>()) {
+    val viewState = viewModel.viewState.collectAsState()
+    SettingsScreen(
+        viewState = viewState.value,
+        setTheme = viewModel::setTheme,
+        toggleSingleThreadColor = viewModel::toggleSingleThreadColor,
+        toggleSingleThreadIndicator = viewModel::toggleSingleThreadIndicator
+    )
+}
+
+@Composable
+private fun SettingsScreen(
+    viewState: ViewState,
+    setTheme: (ThemeType) -> Unit,
+    toggleSingleThreadColor: () -> Unit,
+    toggleSingleThreadIndicator: () -> Unit
+) {
     Column {
-        ThemePreferenceRow(currentTheme = theme.value, setTheme = viewModel::setTheme)
-        CommentThreadColorMode(isSingleColorMode = isSingleColorMode.value, toggleMode = viewModel::toggleSingleThreadColor)
-        CommentThreadModeRow(isSingleThreadMode = isSingleThreadMode.value, toggleMode = viewModel::toggleSingleThreadIndicator)
+        ThemePreferenceRow(themePrefs = viewState.themePref, setTheme)
+        CommentThreadColorMode(
+            isSingleColorMode = viewState.isSingleColorCommentThreadColorPref,
+            toggleMode = toggleSingleThreadColor
+        )
+        CommentThreadModeRow(
+            isSingleThreadMode = viewState.isSingleThreadComment,
+            toggleMode = toggleSingleThreadIndicator
+        )
     }
 }
 
 @Composable
 fun SettingsRow(
-        onClick: () -> Unit,
-        title: String,
-        subTitle: String,
-        controlUiElement: @Composable () -> Unit,
+    onClick: () -> Unit,
+    title: String,
+    subTitle: String,
+    controlUiElement: @Composable () -> Unit,
 ) {
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -53,12 +74,12 @@ fun SettingsRow(
 @Composable
 fun CommentThreadColorMode(isSingleColorMode: Boolean, toggleMode: () -> Unit) {
     SettingsRow(
-            title = stringResource(id = R.string.using_single_color_thread),
-            subTitle = stringResource(
-                    if (isSingleColorMode) R.string.using_single_color_thread
-                    else R.string.using_multiple_color_thread
-            ),
-            onClick = toggleMode,
+        title = stringResource(id = R.string.using_single_color_thread),
+        subTitle = stringResource(
+            if (isSingleColorMode) R.string.using_single_color_thread
+            else R.string.using_multiple_color_thread
+        ),
+        onClick = toggleMode,
     ) {
         Switch(checked = isSingleColorMode, onCheckedChange = { toggleMode() })
     }
@@ -67,12 +88,12 @@ fun CommentThreadColorMode(isSingleColorMode: Boolean, toggleMode: () -> Unit) {
 @Composable
 fun CommentThreadModeRow(isSingleThreadMode: Boolean, toggleMode: () -> Unit) {
     SettingsRow(
-            title = stringResource(id = R.string.single_thread_indicator),
-            subTitle = stringResource(
-                    if (isSingleThreadMode) R.string.using_single_thread
-                    else R.string.using_multiple_threads
-            ),
-            onClick = toggleMode,
+        title = stringResource(id = R.string.single_thread_indicator),
+        subTitle = stringResource(
+            if (isSingleThreadMode) R.string.using_single_thread
+            else R.string.using_multiple_threads
+        ),
+        onClick = toggleMode,
     ) {
         Switch(checked = isSingleThreadMode, onCheckedChange = { toggleMode() })
     }
@@ -80,46 +101,42 @@ fun CommentThreadModeRow(isSingleThreadMode: Boolean, toggleMode: () -> Unit) {
 
 
 @Composable
-fun ThemePreferenceRow(currentTheme: ThemeType, setTheme: (ThemeType) -> Unit) {
+fun ThemePreferenceRow(
+    themePrefs: Pair<ThemeType, List<ThemeType>>,
+    setTheme: (ThemeType) -> Unit
+) {
     val dialogVisible = remember { mutableStateOf(false) }
     SettingsRow(
-            onClick = { dialogVisible.value = true },
-            title = stringResource(id = R.string.theme),
-            subTitle = stringResource(id = when (currentTheme) {
+        onClick = { dialogVisible.value = true },
+        title = stringResource(id = R.string.theme),
+        subTitle = stringResource(
+            id = when (themePrefs.first) {
                 DARK -> R.string.dark_theme
                 LIGHT -> R.string.light_theme
                 AUTO -> R.string.follow_system
-            })
+            }
+        )
     ) {}
 
     if (dialogVisible.value) {
-        val listOfThemes = listOf(
+        val listOfThemes = themePrefs
+            .second
+            .map {
                 MenuItemModel(
-                        onClick = {
-                            dialogVisible.value = false
-                            setTheme(DARK)
-                        },
-                        title = stringResource(id = R.string.dark_theme),
-                        icon = R.drawable.ic_theme_icon_24dp,
-                ),
-                MenuItemModel(
-                        onClick = {
-                            dialogVisible.value = false
-                            setTheme(LIGHT)
-                        },
-                        title = stringResource(id = R.string.light_theme),
-                        icon = R.drawable.ic_theme_icon_24dp,
-                ),
-                MenuItemModel(
-                        onClick = {
-                            dialogVisible.value = false
-                            setTheme(AUTO)
-                        },
-                        title = stringResource(id = R.string.follow_system),
-                        icon = R.drawable.ic_theme_icon_24dp,
+                    onClick = {
+                        dialogVisible.value = false
+                        setTheme(it)
+                    },
+                    title = stringResource(
+                        id = when (it) {
+                            DARK -> R.string.dark_theme
+                            LIGHT -> R.string.light_theme
+                            AUTO -> R.string.follow_system
+                        }
+                    ),
+                    icon = R.drawable.ic_theme_icon_24dp,
                 )
-
-        )
+            }
         OptionsDialog(dismiss = { dialogVisible.value = false }, options = listOfThemes)
     }
 }

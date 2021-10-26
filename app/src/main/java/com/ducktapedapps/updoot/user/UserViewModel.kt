@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.user
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,15 +19,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface UserViewModel {
-    val userName: String
+    val viewState: StateFlow<ViewState>
 
-    val sections: StateFlow<List<UserSection>>
-
-    val userTrophies: StateFlow<List<Trophy>>
-
-    val currentSection: StateFlow<UserSection>
-
-    val content: StateFlow<PagingModel<List<UserContent>>>
+    fun setUserName(user: String)
 
     fun loadPage()
 
@@ -44,24 +39,28 @@ class UserViewModelImpl @Inject constructor(
     private val getUserSavedUseCase: GetUserSavedUseCase,
     private val getUserTrophiesUseCase: GetUserTrophiesUseCase,
     getUseSectionsUseCase: GetUserSectionsUseCase,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel(), UserViewModel {
-    override val userName = savedStateHandle.get<String>(UserFragment.USERNAME_KEY)!!
-
-    override val sections: StateFlow<List<UserSection>> = getUseSectionsUseCase
-        .getUserSections(userName)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    override val userTrophies: StateFlow<List<Trophy>> = getUserTrophiesUseCase
-        .trophies
-        .onStart {
-            getUserTrophiesUseCase.loadUserTrophies(userName)
+    private val userName: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
+    private val sections: Flow<List<UserSection>> = userName
+        .filterNotNull()
+        .flatMapLatest {
+            getUseSectionsUseCase
+                .getUserSections(it)
         }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    override val currentSection: MutableStateFlow<UserSection> = MutableStateFlow(OverView)
+    private val userTrophies: Flow<List<Trophy>> = userName
+        .filterNotNull()
+        .flatMapLatest {
+            getUserTrophiesUseCase
+                .trophies
+                .onStart {
+                    getUserTrophiesUseCase.loadUserTrophies(it)
+                }
+        }
 
-    override val content: StateFlow<PagingModel<List<UserContent>>> =
+
+    private val content: StateFlow<PagingModel<List<UserContent>>> =
         currentSection
             .onEach { loadPage() }
             .flatMapLatest { section ->
@@ -89,19 +88,44 @@ class UserViewModelImpl @Inject constructor(
                 SharingStarted.WhileSubscribed(),
                 PagingModel(emptyList(), PagingModel.Footer.End)
             )
+    override val viewState: StateFlow<ViewState> = combine(
+        userName.filterNotNull(), content, sections, currentSection, userTrophies
+    ) { name, contentValue, sectionsValue, currentSectionValue, userTrophiesValue ->
+        ViewState(
+            userName = name,
+            content = contentValue,
+            sections = sectionsValue,
+            currentSection = currentSectionValue,
+            userTrophies = userTrophiesValue
+        )
+    }.stateIn(
+        viewModelScope, SharingStarted.Lazily, ViewState(
+            userName = "",
+            content = content.value,
+            sections = listOf(OverView),
+            currentSection = OverView,
+            userTrophies = emptyList()
+        )
+    )
 
     override fun loadPage() {
         viewModelScope.launch {
-            when (currentSection.value) {
-                OverView -> getUserOverviewUseCase.loadNextPage(userName)
-                Comments -> getUserCommentsUseCase.loadNextPage(userName)
-                Posts -> getUserPostsUseCase.loadNextPage(userName)
-                UpVoted -> getUserUpVotedUseCase.loadNextPage(userName)
-                DownVoted -> getUserDownVotedUseCase.loadNextPage(userName)
-                Saved -> getUserSavedUseCase.loadNextPage(userName)
-                Gilded -> getUserGildedUseCase.loadNextPage(userName)
+            userName.value?.let {
+                when (currentSection.value) {
+                    OverView -> getUserOverviewUseCase.loadNextPage(it)
+                    Comments -> getUserCommentsUseCase.loadNextPage(it)
+                    Posts -> getUserPostsUseCase.loadNextPage(it)
+                    UpVoted -> getUserUpVotedUseCase.loadNextPage(it)
+                    DownVoted -> getUserDownVotedUseCase.loadNextPage(it)
+                    Saved -> getUserSavedUseCase.loadNextPage(it)
+                    Gilded -> getUserGildedUseCase.loadNextPage(it)
+                }
             }
         }
+    }
+
+    override fun setUserName(user: String) {
+        userName.value = user
     }
 
     override fun setSection(section: UserSection) {
@@ -118,8 +142,10 @@ enum class UserSection {
     OverView, Comments, Posts, UpVoted, DownVoted, Gilded, Saved
 }
 
-fun getNonUserSpecificSections() = listOf(
-    OverView, Posts, Comments, Gilded
+data class ViewState(
+    val userName: String,
+    val sections: List<UserSection>,
+    val userTrophies: List<Trophy>,
+    val currentSection: UserSection,
+    val content: PagingModel<List<UserContent>>,
 )
-
-fun getAllUserSections() = values().toList()

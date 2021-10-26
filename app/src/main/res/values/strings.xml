@@ -64,4 +64,5 @@
     <string name="trending_subs">Subreddits Trending Today</string>
     <string name="subscriptions">Subscription</string>
     <string name="post_thumbnail">Post thumbnail</string>
+    <string name="add_account">Add account</string>
 </resources>

@@ -40,7 +40,7 @@ object Constants {
     const val THIS_YEAR = "year"
     const val ALL_TIME = "all"
 
-    const val FRONTPAGE = ""
+    const val FRONTPAGE = "#"
 
     const val UPDOOT_ACCOUNT = "updoot_account"
     const val ADD_ACCOUNT = "Add account"

@@ -4,11 +4,11 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "com.ducktapedapps.updoot"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.3"
         vectorDrawables.useSupportLibrary = true
@@ -68,8 +68,11 @@ dependencies {
     //android support libs
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.core:core-ktx:1.6.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation "androidx.fragment:fragment-ktx:1.3.6"
+    implementation 'androidx.activity:activity-compose:1.3.1'
+
+    implementation project('path': ':navigation')
 
     //compose stuff
     implementation "androidx.compose.runtime:runtime:$compose_version"
@@ -84,7 +87,7 @@ dependencies {
     //android lifecycle
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0-rc01"
 
     //kotlin-coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines"
@@ -138,6 +141,11 @@ dependencies {
 
     //leak canary for detecting memory leaks
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
+
+    //navigation
+    implementation "androidx.navigation:navigation-compose:${versions.compose_navigation}"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0-alpha03"
 
     //testing
     testImplementation 'junit:junit:4.13.1'

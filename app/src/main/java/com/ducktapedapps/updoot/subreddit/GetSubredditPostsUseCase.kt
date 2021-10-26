@@ -104,7 +104,7 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
             val redditAPI = redditClient.api()
             val s = sorting.mapSorting()
             val listing = redditAPI.getSubmissions(
-                subreddit = "${if (subreddit != Constants.FRONTPAGE) "r/" else ""}$subreddit",
+                subreddit = if (subreddit != Constants.FRONTPAGE) "r/$subreddit" else "",
                 sort = s.first,
                 time = s.second,
                 after = nextPageKey

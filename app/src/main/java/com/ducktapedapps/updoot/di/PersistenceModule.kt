@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.ducktapedapps.updoot.comments.ICommentPrefManager
-import com.ducktapedapps.updoot.common.IThemeManager
+import com.ducktapedapps.updoot.comments.CommentPrefManager
+import com.ducktapedapps.updoot.common.ThemeManager
 import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.UpdootDB
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
@@ -31,13 +31,13 @@ import javax.inject.Singleton
 @Module
 abstract class PersistenceModule {
     @Binds
-    abstract fun bindThemeManager(dataStore: UpdootDataStore): IThemeManager
+    abstract fun bindThemeManager(dataStore: UpdootDataStore): ThemeManager
 
     @Binds
     abstract fun bindCurrentAccountNameManager(dataStore: UpdootDataStore): CurrentAccountNameManager
 
     @Binds
-    abstract fun bindCommentsPrefManager(dataStore: UpdootDataStore): ICommentPrefManager
+    abstract fun bindCommentsPrefManager(dataStore: UpdootDataStore): CommentPrefManager
 
     companion object {
         private lateinit var updootDb: UpdootDB

@@ -20,7 +20,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
+import com.ducktapedapps.navigation.NavigationDirections
+import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.comments.FullComment
 import com.ducktapedapps.updoot.common.PageEnd
@@ -35,27 +40,31 @@ import com.ducktapedapps.updoot.user.UserContent.UserPost
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
 
 @Composable
-fun UserInfoScreen(viewModel: UserViewModel) {
-    val pagedData = viewModel.content.collectAsState()
-    val currentSection = viewModel.currentSection.collectAsState()
-    val userContentSections = viewModel.sections.collectAsState()
-    val trophies = viewModel.userTrophies.collectAsState()
+fun UserInfoScreen(
+    userName: String,
+    publishEvent: (Event) -> Unit,
+) {
+    val viewModel: UserViewModel = hiltViewModel<UserViewModelImpl>().apply {
+        setUserName(userName)
+    }
+
+    val viewState = viewModel.viewState.collectAsState()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         //TODO put username somewhere
         stickyHeader {
-            UserTrophies(trophies = trophies.value)
+            UserTrophies(trophies = viewState.value.userTrophies)
         }
         stickyHeader {
             UserSections(
-                sections = userContentSections.value,
-                currentSection = currentSection.value,
-                onClick = { viewModel.setSection(it) }
+                sections = viewState.value.sections,
+                currentSection = viewState.value.currentSection,
+                onClick = viewModel::setSection
             )
         }
 
-        itemsIndexed(pagedData.value.content) { index, item ->
+        itemsIndexed(viewState.value.content.content) { index, item ->
             LaunchedEffect(key1 = Unit) {
-                with(pagedData.value) {
+                with(viewState.value.content) {
                     if (index >= content.size - 10 && footer is UnLoadedPage) viewModel.loadPage()
                 }
             }
@@ -65,19 +74,26 @@ fun UserInfoScreen(viewModel: UserViewModel) {
                     threadSpacingWidth = 6.dp,
                     singleThreadMode = false,
                     comment = item.data,
-                    onClickComment = {}
+                    onClickComment = {
+                        publishEvent(Event.ToastEvent(item.data.body ?: ""))
+                    }
                 )
                 is UserPost -> LargePost(
                     post = item.data,
-                    onClickMedia = {},
-                    openPost = {},
-                    openSubreddit = {},
-                    openUser = {},
+                    publishEvent = {
+                        publishEvent(
+                            ScreenNavigationEvent(
+                                CommentScreenNavigation.open(
+                                    item.data.subredditName, item.data.id
+                                )
+                            )
+                        )
+                    }
                 )
             }
         }
         item {
-            when (val footer = pagedData.value.footer) {
+            when (val footer = viewState.value.content.footer) {
                 End -> PageEnd()
                 is Error -> PageLoadingFailed(
                     performRetry = viewModel::loadPage,
@@ -151,7 +167,7 @@ fun UserTrophies(trophies: List<Trophy>) {
         items(trophies) { trophy ->
             Column(Modifier.padding(4.dp)) {
                 Image(
-                    painter = rememberImagePainter(data=trophy.icon){
+                    painter = rememberImagePainter(data = trophy.icon) {
                         error(R.drawable.ic_image_error_24dp)
                     },
                     contentDescription = trophy.name,

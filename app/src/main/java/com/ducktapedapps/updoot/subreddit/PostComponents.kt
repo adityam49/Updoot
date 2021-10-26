@@ -22,6 +22,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.Event.*
+import com.ducktapedapps.navigation.NavigationDirections
+import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.*
 import com.ducktapedapps.updoot.theme.StickyPostColor
@@ -33,22 +37,18 @@ import kotlin.math.absoluteValue
 @Composable
 fun CompactPost(
     post: PostUiModel,
-    onClickMedia: () -> Unit,
-    onClickPost: () -> Unit,
-    openSubreddit: (String) -> Unit,
-    openUser: (String) -> Unit,
+    publishEvent: (Event) -> Unit
 ) {
     val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
     val list = listOf(
-        MenuItemModel({ setOptionsDialogVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
         MenuItemModel({
             setOptionsDialogVisibility(false)
-            openSubreddit(post.subredditName)
+            publishEvent(post.openSubreddit())
         }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
         MenuItemModel({
             setOptionsDialogVisibility(false)
-            openUser(post.author)
+            publishEvent(post.openAuthorScreen())
         }, post.author, R.drawable.ic_account_circle_24dp),
     )
 
@@ -60,7 +60,7 @@ fun CompactPost(
             .fillMaxWidth()
             .wrapContentHeight()
             .combinedClickable(
-                onClick = onClickPost,
+                onClick = { publishEvent(post.openComments()) },
                 onLongClick = { setOptionsDialogVisibility(true) })
     ) {
         val (mediaThumbnail, title, metaData, voteCounter, gildings) = createRefs()
@@ -69,7 +69,7 @@ fun CompactPost(
             modifier = Modifier
                 .clip(CircleShape)
                 .requiredSize(48.dp)
-                .clickable(onClick = onClickMedia)
+                .clickable(onClick = { publishEvent(post.showMediaResourceToast()) })
                 .constrainAs(mediaThumbnail) {
                     start.linkTo(parent.start, margin = 8.dp)
                     top.linkTo(parent.top, margin = 8.dp)
@@ -175,22 +175,18 @@ private fun MetaData(post: PostUiModel, modifier: Modifier) {
 @Composable
 fun LargePost(
     post: PostUiModel,
-    onClickMedia: () -> Unit,
-    openPost: () -> Unit,
-    openSubreddit: (String) -> Unit,
-    openUser: (String) -> Unit,
+    publishEvent: (Event) -> Unit,
 ) {
     val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
     val list = listOf(
-        MenuItemModel({ setOptionsDialogVisibility(false) }, "Copy Link", R.drawable.ic_link_24dp),
         MenuItemModel({
             setOptionsDialogVisibility(false)
-            openSubreddit(post.subredditName)
+            publishEvent(post.openSubreddit())
         }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
         MenuItemModel({
             setOptionsDialogVisibility(false)
-            openUser(post.author)
+            publishEvent(post.openAuthorScreen())
         }, post.author, R.drawable.ic_account_circle_24dp),
     )
     if (optionsDialog) OptionsDialog(
@@ -202,7 +198,7 @@ fun LargePost(
             .fillMaxWidth()
             .wrapContentHeight()
             .combinedClickable(
-                onClick = openPost,
+                onClick = { publishEvent(post.openComments()) },
                 onLongClick = { setOptionsDialogVisibility(true) })
     ) {
         val (media, title, metaData, voteCounter, gildings) = createRefs()
@@ -230,7 +226,7 @@ fun LargePost(
                     height = Dimension.wrapContent
                 }
                 .combinedClickable(
-                    onClick = onClickMedia,
+                    onClick = { publishEvent(post.showMediaResourceToast()) },
                     onLongClick = { setOptionsDialogVisibility(true) }
                 )
         )
@@ -320,3 +316,15 @@ fun TextPostMedia(text: String, modifier: Modifier) {
         }
     }
 }
+
+private fun PostUiModel.openComments(): Event =
+    ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+
+private fun PostUiModel.openAuthorScreen(): Event =
+    ScreenNavigationEvent(UserScreenNavigation.open(author))
+
+private fun PostUiModel.openSubreddit(): Event =
+    ScreenNavigationEvent(SubredditScreenNavigation.open(subredditName))
+
+private fun PostUiModel.showMediaResourceToast(): Event =
+    ToastEvent(content = postMedia.toString())

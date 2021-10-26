@@ -4,7 +4,7 @@ import com.ducktapedapps.updoot.data.remote.RedditAPI
 
 interface RedditClient {
     /**
-     *  All api calls go should get api service object via this method
+     *  All api calls should get api service object via this method
      */
     suspend fun api(): RedditAPI
 }

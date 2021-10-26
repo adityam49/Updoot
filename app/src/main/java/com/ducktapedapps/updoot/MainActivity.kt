@@ -1,178 +1,57 @@
 package com.ducktapedapps.updoot
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.lifecycleScope
-import com.ducktapedapps.updoot.comments.CommentsFragment
-import com.ducktapedapps.updoot.databinding.ActivityMainBinding
-import com.ducktapedapps.updoot.explore.ExploreFragment
-import com.ducktapedapps.updoot.imagePreview.ImagePreviewFragment
-import com.ducktapedapps.updoot.login.LoginFragment
-import com.ducktapedapps.updoot.navDrawer.NavigationDestination.*
-import com.ducktapedapps.updoot.search.SearchFragment
-import com.ducktapedapps.updoot.settings.SettingsFragment
-import com.ducktapedapps.updoot.subreddit.PostMedia.ImageMedia
-import com.ducktapedapps.updoot.subreddit.SubredditFragment
-import com.ducktapedapps.updoot.user.UserFragment
-import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
-import com.ducktapedapps.updoot.utils.ThemeType.*
+import androidx.lifecycle.asLiveData
+import androidx.work.WorkManager
+import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
+import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
+import com.ducktapedapps.updoot.home.HomeScreen
+import com.ducktapedapps.updoot.theme.UpdootTheme
+import com.ducktapedapps.updoot.utils.ThemeType.DARK
+import com.ducktapedapps.updoot.utils.ThemeType.LIGHT
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+class MainActivity : ComponentActivity() {
     private val viewModel: ActivityVM by viewModels()
+
+    @Inject lateinit var workManager: WorkManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setUpFragments()
-
         setUpViewModel()
-
-        setUpStatusBarColors()
+        setContent {
+            UpdootTheme { HomeScreen(activityViewModel = viewModel) }
+        }
     }
 
     private fun setUpViewModel() {
         viewModel
             .theme
-            .onEach {
+            .asLiveData()
+            .observe(this) { theme ->
+                Log.d("MainActivity", "setUpViewModel: theme :${theme.name}")
                 setDefaultNightMode(
-                    when (it) {
+                    when (theme) {
                         DARK -> MODE_NIGHT_YES
-                        LIGHT -> MODE_NIGHT_NO
-                        AUTO -> MODE_NIGHT_FOLLOW_SYSTEM
+                        LIGHT -> MODE_NIGHT_YES
+                        else -> MODE_NIGHT_FOLLOW_SYSTEM
                     }
                 )
-            }.launchIn(lifecycleScope)
-        viewModel
-            .navigationRequest
-            .onEach {
-                when (it) {
-                    AddAccount -> openLoginScreen()
-                    Exit -> showExitDialog()
-                    Settings -> openSettings()
-                    Search -> openSearch()
-                    Explore -> openExplore()
-                    else -> Unit
-                }
-            }.launchIn(lifecycleScope)
-    }
-
-    private fun openExplore() {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, ExploreFragment())
-            .commit()
-    }
-
-    private fun openSearch() {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, SearchFragment())
-            .commit()
-    }
-
-    private fun setUpStatusBarColors() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            window.statusBarColor = ContextCompat.getColor(this, R.color.color_status_bar)
-        }
-    }
-
-    override fun onBackPressed() {
-        if (onBackPressedDispatcher.hasEnabledCallbacks()) super.onBackPressed()
-        else showExitDialog()
-    }
-
-    private fun setUpFragments() {
-        with(supportFragmentManager) {
-            if (findFragmentById(R.id.fragment_container) == null) {
-                beginTransaction()
-                    .add(R.id.fragment_container, SubredditFragment.newInstance(FRONTPAGE))
-                    .commit()
             }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        workManager.apply {
+            enqueueCleanUpWork()
+            enqueueSubscriptionSyncWork()
         }
     }
-
-    private fun openSettings() {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, SettingsFragment())
-            .commit()
-    }
-
-
-    private fun openLoginScreen() {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, LoginFragment())
-            .commit()
-    }
-
-    fun openSubreddit(name: String) {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            .replace(R.id.fragment_container, SubredditFragment.newInstance(name))
-            .commit()
-    }
-
-    fun openUser(name: String) {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            .replace(R.id.fragment_container, UserFragment.newInstance(name))
-            .commit()
-    }
-
-    fun openComments(subreddit: String, id: String) {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.fragment_container, CommentsFragment.newInstance(subreddit, id))
-            .commit()
-    }
-
-    fun openLink(link: String) = startActivity(Intent().apply {
-        action = Intent.ACTION_VIEW
-        data = Uri.parse(link)
-    })
-
-    fun openImage(media: ImageMedia) {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .add(
-                R.id.fragment_container,
-                ImagePreviewFragment.newInstance(media.url, media.url)
-            ) //TODO : put high res url in UI model
-            .commit()
-    }
-
-    fun openVideo(videoUrl: String) {
-        supportFragmentManager
-            .beginTransaction()
-            .addToBackStack(null)
-            .add(R.id.fragment_container, VideoPreviewFragment.newInstance(videoUrl))
-            .commit()
-    }
-
-    private fun showExitDialog() = ExitDialogFragment().show(supportFragmentManager, null)
 }

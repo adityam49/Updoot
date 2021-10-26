@@ -27,7 +27,7 @@ class SearchFragment : Fragment() {
             UpdootTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     SearchScreen(
-                        openSubreddit = (requireActivity() as MainActivity)::openSubreddit,
+                        openSubreddit = {},
                         viewModel = viewModel,
                     )
                 }

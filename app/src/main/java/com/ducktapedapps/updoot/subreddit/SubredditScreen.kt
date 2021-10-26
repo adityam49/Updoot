@@ -1,131 +1,91 @@
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ducktapedapps.updoot.ActivityVM
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
+import com.ducktapedapps.navigation.NavigationDirections
+import com.ducktapedapps.navigation.NavigationDirections.CommentScreenNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.PageEnd
 import com.ducktapedapps.updoot.common.PageLoading
 import com.ducktapedapps.updoot.common.PageLoadingFailed
-import com.ducktapedapps.updoot.common.SubredditBottomBar
-import com.ducktapedapps.updoot.navDrawer.NavigationMenuScreen
-import com.ducktapedapps.updoot.subreddit.ActiveContent.SubredditInfo
-import com.ducktapedapps.updoot.theme.BottomDrawerColor
-import com.ducktapedapps.updoot.theme.UpdootDarkColors
+import com.ducktapedapps.updoot.utils.Constants
+import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
+import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 @Composable
 fun SubredditScreen(
-    viewModel: SubredditVM,
-    openMedia: (PostMedia) -> Unit,
-    openComments: (subreddit: String, id: String) -> Unit,
-    openUser: (String) -> Unit,
-    openSubreddit: (String) -> Unit,
-    activityVM: ActivityVM,
+    subredditName: String,
+    publishEvent: (Event) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(key1 = Unit) {
-        activityVM
-            .shouldReload
-            .onEach { viewModel.reload() }
-            .launchIn(coroutineScope)
-
+    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>().apply {
+        setSubredditName(subredditName)
     }
-    val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    val activeContent = remember { mutableStateOf<ActiveContent>(SubredditInfo) }
-    if (bottomSheetState.isCollapsed) activeContent.value = SubredditInfo
-
-    BottomSheetScaffold(
-        scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
-        sheetBackgroundColor = MaterialTheme.colors.BottomDrawerColor,
-        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        sheetPeekHeight = 64.dp,
-        sheetElevation = 1.dp,
-        sheetContent = {
-            Surface(
-                color = MaterialTheme.colors.BottomDrawerColor,
-                contentColor = UpdootDarkColors.onSurface
-            ) {
-                Column {
-                    SubredditBottomBar(
-                        modifier = Modifier.padding(4.dp),
-                        navigateUp = { },
-                        openMenu = {
-                            activeContent.value = ActiveContent.Menu
-                            coroutineScope.launch { bottomSheetState.expand() }
-                        },
-                        subredditName = if (viewModel.subredditName.isBlank()) stringResource(R.string.app_name) else viewModel.subredditName,
-                        showActionIcons = !bottomSheetState.isExpanded
-                    )
-                    when (activeContent.value) {
-                        ActiveContent.Menu -> NavigationMenuScreen(
-                            viewModel = activityVM,
-                            openSubreddit = openSubreddit,
-                            openUser = openUser
-                        )
-                        SubredditInfo -> SubredditInfo(subredditVM = viewModel)
-                    }
-                }
-            }
-        },
-        content = { Body(viewModel, openMedia, openComments, openSubreddit, openUser) }
-    )
+    val viewState = viewModel.viewState.collectAsState()
+    Scaffold(
+        topBar = { SubredditTopBar(subredditName = viewState.value.subredditName) }
+    ) {
+        SubredditFeed(
+            feed = viewState.value.feed,
+            postViewType = viewState.value.subredditPrefs.viewType,
+            loadPage = viewModel::loadPage,
+            publishEvent = publishEvent
+        )
+    }
 }
 
 @Composable
-fun Body(
-    viewModel: SubredditVM,
-    openMedia: (PostMedia) -> Unit,
-    openComments: (subreddit: String, id: String) -> Unit,
-    openSubreddit: (String) -> Unit,
-    openUser: (String) -> Unit,
-) {
-    val feed = viewModel.pagesOfPosts.collectAsState()
-    val postType = viewModel.postViewType.collectAsState()
+private fun SubredditTopBar(subredditName: String) {
+    Surface(elevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) { Text(text = subredditName) }
+    }
+}
 
+@Composable
+private fun SubredditFeed(
+    feed: PagingModel<List<PostUiModel>>,
+    postViewType: PostViewType,
+    loadPage: () -> Unit,
+    publishEvent: (Event) -> Unit,
+) {
     LazyColumn {
-        itemsIndexed(feed.value.content) { index, post ->
+        itemsIndexed(feed.content) { index, post ->
             LaunchedEffect(key1 = Unit) {
-                with(feed.value) {
-                    if (index >= content.size - 10 && footer is UnLoadedPage) viewModel.loadPage()
+                with(feed) {
+                    if (index >= content.size - 10 && footer is UnLoadedPage) loadPage()
                 }
             }
-            when (postType.value) {
-                COMPACT -> CompactPost(
-                    post = post,
-                    onClickMedia = { openMedia(post.postMedia) },
-                    onClickPost = { openComments(post.subredditName, post.id) },
-                    openSubreddit = openSubreddit,
-                    openUser = openUser,
-                )
-                LARGE -> LargePost(
-                    post = post,
-                    onClickMedia = { openMedia(post.postMedia) },
-                    openPost = { openComments(post.subredditName, post.id) },
-                    openSubreddit = openSubreddit,
-                    openUser = openUser
-                )
+            when (postViewType) {
+                COMPACT -> CompactPost(post = post, publishEvent = publishEvent)
+                LARGE -> LargePost(post = post, publishEvent = publishEvent)
             }
         }
         item {
-            when (val footer = feed.value.footer) {
+            when (val footer = feed.footer) {
                 End -> PageEnd()
                 is Error -> PageLoadingFailed(
-                    performRetry = viewModel::loadPage,
+                    performRetry = loadPage,
                     message = footer.exception.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 )
@@ -137,9 +97,4 @@ fun Body(
             Spacer(modifier = Modifier.padding(64.dp))
         }
     }
-}
-
-sealed class ActiveContent {
-    object SubredditInfo : ActiveContent()
-    object Menu : ActiveContent()
 }

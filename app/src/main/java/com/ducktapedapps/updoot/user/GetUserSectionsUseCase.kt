@@ -30,3 +30,9 @@ class GetUserSectionsUseCaseImpl @Inject constructor(
                 }
             }
 }
+
+private fun getNonUserSpecificSections() = listOf(
+    UserSection.OverView, UserSection.Posts, UserSection.Comments, UserSection.Gilded
+)
+
+private fun getAllUserSections() = UserSection.values().toList()

@@ -15,6 +15,6 @@ interface UpdootAccountsProvider {
     }
 
     fun getCurrentAccount(): Flow<AccountModel> = allAccounts.transform {
-        emit(it.first { account -> account.isCurrent })
+        if (it.any { account -> account.isCurrent }) emit(it.first { account -> account.isCurrent })
     }
 }

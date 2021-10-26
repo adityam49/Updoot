@@ -68,9 +68,6 @@ interface RedditAPI {
         @Query("sr_name") subredditName: String,
     ): retrofit2.Response<Unit>
 
-    @GET
-    suspend fun getTrendingSubredditNames(@Url fullUrl: String = Constants.TRENDING_API_URL): TrendingSubredditNames
-
     @GET("/subreddits/mine/subscriber")
     suspend fun getSubscribedSubreddits(
         @Query("after") after: String? = null,

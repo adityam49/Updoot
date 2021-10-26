@@ -1,30 +1,23 @@
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ducktapedapps.updoot.data.local.SubredditPrefs
+import com.ducktapedapps.updoot.subreddit.SubredditSorting.*
+import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
 import com.ducktapedapps.updoot.utils.PostViewType
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface SubredditVM {
-    val subredditName: String
 
-    val sorting: StateFlow<SubredditSorting>
+    val viewState: StateFlow<ViewState>
 
-    val postViewType: StateFlow<PostViewType>
-
-    val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>>
-
-    val subredditInfo: StateFlow<SubredditInfoState?>
-
-    val subscriptionState: StateFlow<Boolean?>
+    fun setSubredditName(name: String = "")
 
     fun loadPage()
 
@@ -47,7 +40,6 @@ interface SubredditVM {
 
 @HiltViewModel
 class SubredditVMImpl @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     getSubredditPreferencesUseCase: GetSubredditPreferencesUseCase,
     private val getSubredditInfoUseCase: GetSubredditInfoUseCase,
     private val getSubredditPostsUseCase: GetSubredditPostsUseCase,
@@ -55,28 +47,18 @@ class SubredditVMImpl @Inject constructor(
     private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
     getSubredditSubscriptionState: GetSubredditSubscriptionState,
 ) : ViewModel(), SubredditVM {
-    override val subredditName: String =
-        savedStateHandle.get<String>(SubredditFragment.SUBREDDIT_KEY)!!
+    private val subredditName: MutableStateFlow<String> = MutableStateFlow("")
 
-    override val sorting: StateFlow<SubredditSorting> = getSubredditPreferencesUseCase
-        .getSubredditPrefsFlow(subredditName)
-        .map { it.subredditSorting }
-        .stateIn(
+    private val subredditPrefs: StateFlow<SubredditPrefs> = subredditName
+        .flatMapLatest { name ->
+            getSubredditPreferencesUseCase.getSubredditPrefsFlow(name)
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = SubredditSorting.Hot
+            initialValue = SubredditPrefs("", viewType = PostViewType.LARGE, subredditSorting = Hot)
         )
 
-    override val postViewType: StateFlow<PostViewType> = getSubredditPreferencesUseCase
-        .getSubredditPrefsFlow(subredditName)
-        .map { it.viewType }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = PostViewType.COMPACT
-        )
-
-    override val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>> =
+    private val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>> =
         getSubredditPostsUseCase
             .pagingModel
             .map { model ->
@@ -87,33 +69,46 @@ class SubredditVMImpl @Inject constructor(
             }
             .stateIn(viewModelScope, SharingStarted.Lazily, PagingModel(emptyList(), Loading))
 
-    override val subredditInfo: StateFlow<SubredditInfoState?> =
+    private val subredditInfo: StateFlow<SubredditInfoState?> =
         getSubredditInfoUseCase.subredditInfo
 
-    override val subscriptionState: StateFlow<Boolean?> =
-        getSubredditSubscriptionState.getIsSubredditSubscribedState(subredditName)
-            .stateIn(
-                viewModelScope, SharingStarted.WhileSubscribed(), null
-            )
+    private val subscriptionState: StateFlow<Boolean?> =
+        subredditName
+            .flatMapLatest { name ->
+                getSubredditSubscriptionState
+                    .getIsSubredditSubscribedState(name)
+                    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+            }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+
+    override val viewState: StateFlow<ViewState> = combine(
+        subredditName, subredditPrefs, pagesOfPosts, subredditInfo, subscriptionState
+    ) { subredditNameValue, subredditPrefsValue, feed, subredditInfoValue, subscriptionStateValue ->
+        ViewState(
+            subredditName = if (subredditNameValue == FRONTPAGE) "Frontpage" else subredditNameValue,
+            subredditPrefs = subredditPrefsValue,
+            feed = feed,
+            subredditInfo = subredditInfoValue,
+            subscriptionState = subscriptionStateValue
+        )
+    }.stateIn(
+        viewModelScope, SharingStarted.Lazily, ViewState.defaultState("")
+    )
 
     override fun loadSubredditInfo() {
-        viewModelScope.launch { getSubredditInfoUseCase.loadSubredditInfo(subredditName) }
+        viewModelScope.launch { getSubredditInfoUseCase.loadSubredditInfo(subredditName.value) }
     }
 
-    init {
-        sorting
-            .filterNotNull()
-            .onEach { reload() }
-            .launchIn(viewModelScope)
-        loadSubredditInfo()
+    override fun setSubredditName(name: String) {
+        subredditName.value = name
+        reload()
     }
-
 
     override fun loadPage() {
         viewModelScope.launch {
             getSubredditPostsUseCase.loadNextPage(
-                subredditSorting = sorting.value,
-                subreddit = subredditName
+                subredditSorting = subredditPrefs.value.subredditSorting,
+                subreddit = subredditName.value
             )
         }
     }
@@ -122,31 +117,51 @@ class SubredditVMImpl @Inject constructor(
         viewModelScope.launch {
             getSubredditPostsUseCase.loadNextPage(
                 reload = true,
-                subredditSorting = sorting.value,
-                subreddit = subredditName
+                subredditSorting = subredditPrefs.value.subredditSorting,
+                subreddit = subredditName.value
             )
         }
     }
 
     override fun setPostViewType(type: PostViewType) {
         viewModelScope.launch {
-            setSubredditViewTypeUseCase.setPostViewType(subredditName, type)
+            setSubredditViewTypeUseCase.setPostViewType(subredditName.value, type)
         }
     }
 
     override fun toggleSubredditSubscription() {
         viewModelScope.launch {
-            toggleSubscriptionUseCase.toggleSubscription(subredditName = subredditName)
+            toggleSubscriptionUseCase.toggleSubscription(subredditName = subredditName.value)
         }
     }
 
-    override fun changeSorting(newSubredditSorting: SubredditSorting) {
-        //TODO
-    }
+    override fun changeSorting(newSubredditSorting: SubredditSorting) {}
 
     override fun upVote(id: String) {}
 
     override fun downVote(id: String) {}
 
     override fun save(id: String) {}
+}
+
+data class ViewState(
+    val subredditName: String,
+    val subredditPrefs: SubredditPrefs,
+    val feed: PagingModel<List<PostUiModel>>,
+    val subredditInfo: SubredditInfoState?,
+    val subscriptionState: Boolean?
+) {
+    companion object {
+        fun defaultState(subredditName: String) = ViewState(
+            subredditName = "",
+            subredditPrefs = SubredditPrefs(
+                subredditName = subredditName,
+                viewType = PostViewType.LARGE,
+                subredditSorting = Hot
+            ),
+            feed = PagingModel(content = emptyList(), footer = Loading),
+            subredditInfo = SubredditInfoState.Loading,
+            subscriptionState = null
+        )
+    }
 }

@@ -3,7 +3,7 @@ package com.ducktapedapps.updoot.common
 import com.ducktapedapps.updoot.utils.ThemeType
 import kotlinx.coroutines.flow.Flow
 
-interface IThemeManager {
+interface ThemeManager {
 
     fun themeType(): Flow<ThemeType>
 

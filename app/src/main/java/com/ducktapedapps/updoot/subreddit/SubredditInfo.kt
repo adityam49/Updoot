@@ -17,8 +17,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.PageLoading
 import com.ducktapedapps.updoot.common.PageLoadingFailed
@@ -37,15 +39,17 @@ import java.util.*
  *  Subreddit sidebar UI component
  */
 @Composable
-fun SubredditInfo(subredditVM: SubredditVM) {
-    val subredditInfo = subredditVM.subredditInfo.collectAsState()
-    val postType = subredditVM.postViewType.collectAsState()
-    val subscriptionState = subredditVM.subscriptionState.collectAsState()
+fun SubredditInfo(subredditName: String,publishEvent : (Event) -> Unit) {
+    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>().apply {
+        setSubredditName(subredditName)
+    }
+
+    val viewState = viewModel.viewState.collectAsState()
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, info, viewType) = createRefs()
 
-        when (val data = subredditInfo.value) {
+        when (val data = viewState.value.subredditInfo) {
             Loading -> PageLoading()
             is UiModel -> {
                 SubredditInfoHeader(
@@ -60,12 +64,12 @@ fun SubredditInfo(subredditVM: SubredditVM) {
                             bottom.linkTo(viewType.top)
                             height = Dimension.wrapContent
                         },
-                    isSubscribed = subscriptionState.value,
-                    toggleSubscription = subredditVM::toggleSubredditSubscription,
+                    isSubscribed = viewState.value.subscriptionState,
+                    toggleSubscription = viewModel::toggleSubredditSubscription,
                 )
                 SubmissionViewType(
-                    type = postType.value,
-                    setType = subredditVM::setPostViewType,
+                    type = viewState.value.subredditPrefs.viewType,
+                    setType = viewModel::setPostViewType,
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
@@ -85,7 +89,7 @@ fun SubredditInfo(subredditVM: SubredditVM) {
                 )
             }
             is LoadingFailed -> PageLoadingFailed(
-                performRetry = subredditVM::loadSubredditInfo,
+                performRetry = viewModel::loadSubredditInfo,
                 message = data.reason
             )
         }
@@ -105,12 +109,12 @@ private fun SubredditInfoHeader(
     DrawerCard(modifier = modifier) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter= rememberImagePainter(data = iconUrl){
+                painter = rememberImagePainter(data = iconUrl) {
                     error(R.drawable.ic_subreddit_default_24dp)
                     transformations(CircleCropTransformation())
                 },
-                contentDescription= stringResource(id = R.string.subreddit_icon),
-                modifier =Modifier.size(48.dp),
+                contentDescription = stringResource(id = R.string.subreddit_icon),
+                modifier = Modifier.size(48.dp),
             )
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(

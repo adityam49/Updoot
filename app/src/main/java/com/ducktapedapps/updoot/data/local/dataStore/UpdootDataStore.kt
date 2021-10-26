@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.ducktapedapps.updoot.comments.ICommentPrefManager
-import com.ducktapedapps.updoot.common.IThemeManager
+import com.ducktapedapps.updoot.comments.CommentPrefManager
+import com.ducktapedapps.updoot.common.ThemeManager
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.CURRENT_ACCOUNT_NAME
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.DEVICE_ID
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.SHOW_SINGLE_THREAD
@@ -28,8 +28,8 @@ import javax.inject.Singleton
 class UpdootDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) : CurrentAccountNameManager,
-    IThemeManager,
-    ICommentPrefManager
+    ThemeManager,
+    CommentPrefManager
 {
     private val Context.dataStore by preferencesDataStore(
         name = DATA_STORE_NAME

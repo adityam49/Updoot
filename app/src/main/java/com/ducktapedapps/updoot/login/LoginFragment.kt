@@ -67,6 +67,7 @@ class LoginFragment : Fragment() {
                             Glide.with(this@LoginFragment)
                                     .load(R.drawable.ic_account_circle_24dp)
                                     .apply(RequestOptions.circleCropTransform())
+                                    .apply(RequestOptions.circleCropTransform())
                                     .into(userNameStatusIcon)
                             userNameStatus.apply {
                                 visibility = View.VISIBLE
@@ -81,23 +82,23 @@ class LoginFragment : Fragment() {
                                     .into(userNameStatusIcon)
                         }
                     }
-                    is FetchingSubscriptions -> when (it.subscriptionSync) {
-                        Running -> binding.apply {
-                            subredditStatusIcon.apply {
-                                visibility = View.VISIBLE
-                                Glide.with(this@LoginFragment)
-                                        .load(R.drawable.ic_subreddit_default_24dp)
-                                        .into(this)
-                            }
-                            subredditStatus.apply {
-                                visibility = View.VISIBLE
-                                text = context.getString(R.string.subreddit_syncing)
-                            }
-                        }
-                        is Finished -> binding.subredditStatus.apply {
-                            text = getString(R.string.synced_count_subreddits, it.subscriptionSync.value)
-                        }
-                    }
+//                    is FetchingSubscriptions -> when (it.subscriptionSync) {
+//                        Running -> binding.apply {
+//                            subredditStatusIcon.apply {
+//                                visibility = View.VISIBLE
+//                                Glide.with(this@LoginFragment)
+//                                        .load(R.drawable.ic_subreddit_default_24dp)
+//                                        .into(this)
+//                            }
+//                            subredditStatus.apply {
+//                                visibility = View.VISIBLE
+//                                text = context.getString(R.string.subreddit_syncing)
+//                            }
+//                        }
+//                        is Finished -> binding.subredditStatus.apply {
+//                            text = getString(R.string.synced_count_subreddits, it.subscriptionSync.value)
+//                        }
+//                    }
                     is Error -> {
                         Toast.makeText(requireContext(), it.errorMessage, Toast.LENGTH_SHORT).show()
                         requireActivity().supportFragmentManager.popBackStack()

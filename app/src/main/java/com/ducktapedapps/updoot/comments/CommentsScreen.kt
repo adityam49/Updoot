@@ -14,13 +14,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.Coil
-import coil.annotation.ExperimentalCoilApi
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
+import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.StaticLinkPreview
 import com.ducktapedapps.updoot.data.local.model.FullComment
@@ -31,53 +31,79 @@ import com.ducktapedapps.updoot.subreddit.PostUiModel
 import com.ducktapedapps.updoot.theme.StickyPostColor
 
 @Composable
-fun CommentsScreen(viewModel: ICommentsVM, openContent: (PostMedia) -> Unit) {
-    val loading = viewModel.isLoading.collectAsState()
-    val linkData = viewModel.post.collectAsState()
-    val allComments = viewModel.comments.collectAsState()
-    val singleThreadMode = viewModel.singleThreadMode.collectAsState()
+fun CommentsScreen(
+    subredditId: String,
+    postId: String,
+    publishEvent: (Event) -> Unit
+) {
+    val viewModel: CommentsVM = hiltViewModel<CommentsVMImpl>().apply {
+        setPageKey(subredditId, postId)
 
+    }
+    val viewState = viewModel.viewState.collectAsState()
+    CommentsScreen(
+        viewState = viewState.value,
+        publishEvent = publishEvent,
+        toggleChildrenVisibility = viewModel::toggleChildrenVisibility,
+        loadMoreComment = viewModel::loadMoreComment
+    )
+}
 
+@Composable
+private fun CommentsScreen(
+    viewState: ViewState,
+    publishEvent: (Event) -> Unit,
+    toggleChildrenVisibility: (Int) -> Unit,
+    loadMoreComment: (comment: MoreComment, index: Int) -> Unit,
+) {
 //TODO : val singleColorThread = viewModel.singleColorThreadMode.collectAsState()
-    val listState = rememberLazyListState()
-    Surface(color = MaterialTheme.colors.background) {
-        LazyColumn(state = listState) {
-            if (loading.value) item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
-            linkData.value?.run {
-                item {
-                    Header(post = this@run)
-                }
-                item {
-                    Content(content = postMedia, onClick = openContent)
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        if (viewState.isLoading) item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+        viewState.post?.run {
+            item {
+                Header(post = this@run)
             }
-            itemsIndexed(items = allComments.value) { index, comment ->
-                when (comment) {
-                    is FullComment -> FullComment(
-                        comment = comment,
-                        onClickComment = { viewModel.toggleChildrenVisibility(index) },
-                        singleThreadMode = singleThreadMode.value,
-                        threadSpacingWidth = 6.dp,
-                        threadWidth = 2.dp,
+            item {
+                Content(content = postMedia, onClick = {
+                    publishEvent(
+                        Event.ToastEvent(
+                            when (postMedia) {
+                                is ImageMedia -> postMedia.url
+                                is LinkMedia -> postMedia.url
+                                NoMedia -> "No media to open"
+                                is TextMedia -> postMedia.text
+                                is VideoMedia -> postMedia.url
+                            }
+                        )
                     )
-                    is MoreComment -> MoreComment(
-                        data = comment,
-                        loadMoreComments = { viewModel.loadMoreComment(comment, index) },
-                        singleThreadMode = singleThreadMode.value,
-                        threadSpacingWidth = 6.dp,
-                        threadWidth = 2.dp,
-                    )
-                }
+                })
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
+        itemsIndexed(items = viewState.comments) { index, comment ->
+            when (comment) {
+                is FullComment -> FullComment(
+                    comment = comment,
+                    onClickComment = { toggleChildrenVisibility(index) },
+                    singleThreadMode = viewState.isSingleThreadMode,
+                    threadSpacingWidth = 6.dp,
+                    threadWidth = 2.dp,
+                )
+                is MoreComment -> MoreComment(
+                    data = comment,
+                    loadMoreComments = { loadMoreComment(comment, index) },
+                    singleThreadMode = viewState.isSingleThreadMode,
+                    threadSpacingWidth = 6.dp,
+                    threadWidth = 2.dp,
+                )
+            }
+        }
+        item { Spacer(modifier = Modifier.height(100.dp)) }
     }
 }
 
 @Composable
-fun Content(content: PostMedia, onClick: (PostMedia) -> Unit) {
+private fun Content(content: PostMedia, onClick: (PostMedia) -> Unit) {
     when (content) {
         is TextMedia -> TextPost(text = content.text)
         is ImageMedia -> ContentImage(image = content, openImage = { onClick(content) })
@@ -95,7 +121,7 @@ fun Content(content: PostMedia, onClick: (PostMedia) -> Unit) {
 }
 
 @Composable
-fun TextPost(text: String) {
+private fun TextPost(text: String) {
     Box(
         modifier = Modifier
             .padding(8.dp)
@@ -118,7 +144,7 @@ fun TextPost(text: String) {
 @Composable
 fun ContentImage(image: ImageMedia, openImage: () -> Unit) {
     Image(
-        painter = rememberImagePainter(data=image.url){
+        painter = rememberImagePainter(data = image.url) {
             error(R.drawable.ic_image_error_24dp)
             transformations(RoundedCornersTransformation(8.dp.value))
         },
