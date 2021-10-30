@@ -1,9 +1,9 @@
 package com.ducktapedapps.updoot.di
 
-import com.ducktapedapps.updoot.navDrawer.*
 import com.ducktapedapps.updoot.search.SearchSubredditUseCase
 import com.ducktapedapps.updoot.search.SearchSubredditUseCaseImpl
 import com.ducktapedapps.updoot.subreddit.*
+import com.ducktapedapps.updoot.subscriptions.*
 import com.ducktapedapps.updoot.user.*
 import dagger.Binds
 import dagger.Module

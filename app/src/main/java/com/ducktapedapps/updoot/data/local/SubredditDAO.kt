@@ -12,6 +12,9 @@ interface SubredditDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubreddit(subreddit: LocalSubreddit)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubreddits(subreddits: List<LocalSubreddit>)
+
     @Query("SELECT * FROM LocalSubreddit WHERE subredditName IS :name")
     fun observeSubredditInfo(name: String): Flow<LocalSubreddit?>
 
@@ -20,6 +23,9 @@ interface SubredditDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubredditSubscription)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubscriptions(subscriptions: List<SubredditSubscription>)
 
     @Query("SELECT LocalSubreddit.* FROM LocalSubreddit JOIN SubredditSubscription ON SubredditSubscription.subredditName = LocalSubreddit.subredditName WHERE userName == :user")
     fun observeSubscribedSubredditsFor(user: String): Flow<List<LocalSubreddit>>

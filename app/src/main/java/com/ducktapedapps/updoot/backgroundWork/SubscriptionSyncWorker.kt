@@ -7,7 +7,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.navDrawer.UpdateUserSubscriptionUseCase
+import com.ducktapedapps.updoot.subscriptions.UpdateUserSubscriptionUseCase
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
@@ -16,7 +16,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlin.random.Random
 
 @HiltWorker

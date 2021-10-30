@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.navDrawer
+package com.ducktapedapps.updoot.subscriptions
 
 import android.util.Log
 import com.ducktapedapps.updoot.data.local.SubredditDAO

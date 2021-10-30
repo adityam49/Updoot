@@ -1,106 +1,95 @@
 package com.ducktapedapps.updoot.search
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
+import com.ducktapedapps.navigation.NavigationDirections.SubredditScreenNavigation
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.theme.UpdootTypography
-import kotlinx.coroutines.flow.Flow
 
 
 @Composable
 fun SearchScreen(
-    openSubreddit: (String) -> Unit,
-    viewModel: SearchVM = viewModel<SearchVMImpl>(),
+    publishEvent: (Event) -> Unit,
 ) {
-    val searchResults = viewModel.results.collectAsState().value
-    val (queryString, setFieldQueryValue) = remember { mutableStateOf(TextFieldValue("")) }
-    val setQuery: (TextFieldValue) -> Unit = { value ->
-        viewModel.searchSubreddit(value.text)
-        setFieldQueryValue(value)
-    }
-    val showNsfw = viewModel.includeNsfw.collectAsState(true)
-    Column(modifier = Modifier.fillMaxSize()) {
-        ComposeSearchView(
-            performSearch = viewModel::searchSubreddit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .height(48.dp),
-            isLoading = viewModel.searchQueryLoading,
-            queryString = queryString,
-            setQuery = setQuery,
-        )
-        NsfwCheckRow(
-            modifier = Modifier
-                .padding(8.dp)
-                .height(48.dp)
-                .fillMaxWidth(),
-            showNsfw = showNsfw.value,
-            toggleNsfwPref = { viewModel.toggleIncludeNsfw() }
-        )
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            item { searchResults.forEach { SubredditItem(it, openSubreddit) } }
+    val viewModel: ExploreVM = hiltViewModel<ExploreVMImpl>()
+    val viewState = viewModel.viewState.collectAsState()
+    LazyColumn {
+        stickyHeader {
+            SearchBar(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                setQuery = viewModel::searchSubreddit,
+                query = viewState.value.searchQuery
+            )
         }
-        Spacer(
-            Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.4f)
-        )
+        items(viewState.value.subredditSearchResults) { subredditItem ->
+            SubredditItem(
+                subreddit = subredditItem,
+                openSubreddit = {
+                    publishEvent(
+                        ScreenNavigationEvent(
+                            SubredditScreenNavigation.open(
+                                subredditItem.subredditName
+                            )
+                        )
+                    )
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun NsfwCheckRow(
+@Preview(backgroundColor = 0xFFFFFF)
+fun SearchBarPreview() {
+    SearchBar(setQuery = { _ -> }, query = "")
+}
+
+@Composable
+private fun SearchBar(
     modifier: Modifier = Modifier,
-    showNsfw: Boolean,
-    toggleNsfwPref: (Boolean) -> Unit
+    setQuery: (String) -> Unit,
+    query: String,
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
+    Surface(
+        elevation = 8.dp,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(50)
     ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "Show NSFW results")
-            Checkbox(checked = showNsfw, onCheckedChange = {
-                toggleNsfwPref(
-                    true /* won't matter as viewModel is changing this value */
-                )
-            })
-        }
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            value = query,
+            onValueChange = setQuery,
+            label = {
+                Text(text = "Search Subreddits")
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search,
+            ),
+        )
     }
 }
 
@@ -117,7 +106,7 @@ private fun SubredditItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = rememberImagePainter(data = subreddit.icon){
+            painter = rememberImagePainter(data = subreddit.icon) {
                 error(R.drawable.ic_subreddit_default_24dp)
                 transformations(CircleCropTransformation())
             },
@@ -142,122 +131,6 @@ private fun SubredditItem(
         }
         Spacer(modifier = Modifier.weight(1f))
     }
-
 }
 
-@Composable
-fun ComposeSearchView(
-    performSearch: (query: String) -> Unit,
-    queryString: TextFieldValue,
-    setQuery: (TextFieldValue) -> Unit,
-    modifier: Modifier,
-    isLoading: Flow<Boolean>
-) {
-    ConstraintLayout(modifier) {
-        val (searchField, searchActions) = createRefs()
-        SearchField(
-            modifier = Modifier
-                .constrainAs(searchField) {
-                    start.linkTo(parent.start, margin = 8.dp)
-                    end.linkTo(searchActions.start, margin = 8.dp)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
-                }
-                .focusable(true),
-            queryString = queryString,
-            setQuery = setQuery,
-            performSearch = performSearch
-        )
-        SearchActions(
-            modifier = Modifier.constrainAs(searchActions) {
-                start.linkTo(searchField.end)
-                end.linkTo(parent.end)
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-            },
-            queryString = queryString,
-            setQuery = setQuery,
-            isLoading = isLoading,
-            performSearch = performSearch
-        )
 
-    }
-}
-
-@Composable
-fun SearchField(
-    modifier: Modifier,
-    queryString: TextFieldValue,
-    setQuery: (TextFieldValue) -> Unit,
-    performSearch: (query: String) -> Unit,
-) {
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-    BasicTextField(
-        value = queryString,
-        onValueChange = setQuery,
-        singleLine = true,
-        textStyle = MaterialTheme.typography.button,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Search,
-        ),
-        modifier = modifier.focusRequester(focusRequester = focusRequester),
-        decorationBox = { searchField ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                shape = RoundedCornerShape(50)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Spacer(modifier = Modifier.width(16.dp))
-                    searchField()
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-            }
-        },
-    )
-}
-
-@Composable
-fun SearchActions(
-    modifier: Modifier,
-    queryString: TextFieldValue,
-    setQuery: (TextFieldValue) -> Unit,
-    isLoading: Flow<Boolean>,
-    performSearch: (query: String) -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(50),
-        modifier = modifier
-            .animateContentSize()
-    ) {
-        Row {
-            if (queryString.text.isNotBlank()) IconButton(
-                onClick = { setQuery(TextFieldValue("")) },
-                content = { Icon(Icons.Default.Clear, contentDescription = "Clear Icon") }
-            )
-
-            if (isLoading.collectAsState(initial = true).value)
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp)
-                        .align(Alignment.CenterVertically)
-                )
-            else
-                IconButton(
-                    onClick = { performSearch(queryString.text) },
-                    content = { Icon(Icons.Default.Search, contentDescription = "Search Icon") }
-                )
-        }
-    }
-}

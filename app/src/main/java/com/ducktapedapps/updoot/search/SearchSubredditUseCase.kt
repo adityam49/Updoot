@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.search
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
+import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -26,7 +27,8 @@ class SearchSubredditUseCaseImpl @Inject constructor(
         includeNsfw: Boolean
     ): Flow<List<LocalSubreddit>> = combine(
         getLocalSubreddits(query),
-        getRemoteSubreddits(query, includeNsfw),
+        getRemoteSubreddits(query, includeNsfw)
+            .debounce(Constants.DEBOUNCE_TIME_OUT),
     ) { localSubs, remoteSubs ->
         localSubs + remoteSubs.filterNot { it.subredditName in localSubs.map { subs -> subs.subredditName } }
     }

@@ -10,6 +10,7 @@ import com.ducktapedapps.updoot.data.local.SubredditPrefs
 import com.ducktapedapps.updoot.data.local.UpdootDB
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore
 import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
+import com.ducktapedapps.updoot.search.SearchPrefsManager
 import com.ducktapedapps.updoot.subreddit.SubredditSorting
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.Constants.UPDOOT_DB
@@ -21,6 +22,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -39,37 +41,42 @@ abstract class PersistenceModule {
     @Binds
     abstract fun bindCommentsPrefManager(dataStore: UpdootDataStore): CommentPrefManager
 
+    @Binds
+    abstract fun bindSearchPrefs(dataStore: UpdootDataStore): SearchPrefsManager
+    
     companion object {
         private lateinit var updootDb: UpdootDB
 
+        @DelicateCoroutinesApi
         @Provides
         @Singleton
         fun provideDB(@ApplicationContext context: Context): UpdootDB {
             updootDb = Room.databaseBuilder(
-                    context.applicationContext,
-                    UpdootDB::class.java,
-                    UPDOOT_DB
+                context.applicationContext,
+                UpdootDB::class.java,
+                UPDOOT_DB
             ).addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     GlobalScope.launch {
                         updootDb.subredditDAO().insertSubreddit(
-                                LocalSubreddit(
-                                        subredditName = FRONTPAGE,
-                                        icon = "",
-                                        subscribers = -1,
-                                        shortDescription = "The front page of the internet",
-                                        created = Date(1137566705),
-                                        lastUpdated = Date(System.currentTimeMillis()),
-                                        longDescription = ""
-                                )
+                            LocalSubreddit(
+                                subredditName = FRONTPAGE,
+                                icon = "",
+                                subscribers = -1,
+                                shortDescription = "The front page of the internet",
+                                created = Date(1137566705),
+                                lastUpdated = Date(),
+                                longDescription = ""
+                            )
                         )
                         updootDb.subredditPrefsDAO().insertSubredditPrefs(
-                                SubredditPrefs(
-                                    //reddit's api directs to frontpage if no subreddit name is specified
-                                    subredditName = FRONTPAGE,
-                                    viewType = PostViewType.COMPACT,
-                                    subredditSorting = SubredditSorting.Hot
-                                ))
+                            SubredditPrefs(
+                                //reddit's api directs to frontpage if no subreddit name is specified
+                                subredditName = FRONTPAGE,
+                                viewType = PostViewType.COMPACT,
+                                subredditSorting = SubredditSorting.Hot
+                            )
+                        )
                     }
                 }
             }).build()

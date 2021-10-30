@@ -4,12 +4,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -28,8 +24,10 @@ import com.ducktapedapps.updoot.ActivityVM
 import com.ducktapedapps.updoot.accounts.AccountsMenu
 import com.ducktapedapps.updoot.comments.CommentsScreen
 import com.ducktapedapps.updoot.login.LoginScreen
+import com.ducktapedapps.updoot.search.SearchScreen
 import com.ducktapedapps.updoot.settings.SettingsScreen
 import com.ducktapedapps.updoot.subreddit.SubredditScreen
+import com.ducktapedapps.updoot.subscriptions.SubscriptionsScreen
 import com.ducktapedapps.updoot.user.UserInfoScreen
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -39,7 +37,7 @@ private const val TAG = "HomeScreen"
 @Composable
 fun HomeScreen(activityViewModel: ActivityVM) {
     val navController = rememberNavController()
-
+    val publishEvent = { event: Event -> activityViewModel.sendEvent(event) }
     val context = LocalContext.current
     LaunchedEffect(key1 = Unit) {
         activityViewModel
@@ -65,8 +63,6 @@ fun HomeScreen(activityViewModel: ActivityVM) {
                 }
             }
     }
-    val publishEvent = { event: Event -> activityViewModel.sendEvent(event) }
-
 
     Surface(color = MaterialTheme.colors.background) {
         Scaffold(
@@ -95,10 +91,11 @@ fun HomeScreen(activityViewModel: ActivityVM) {
             NavHost(
                 navController = navController,
                 startDestination = SubredditScreenNavigation.destination
-            ) {
-                //replace with bottomSheet
+            ) { //replace with bottomSheet
                 accountsScreen(publishEvent)
+                subscriptionsScreenComposable(publishEvent)
 
+                searchScreenComposable(publishEvent)
                 subredditScreenComposable(publishEvent)
                 commentsScreenComposable(publishEvent)
                 userScreenComposable(publishEvent)
@@ -109,6 +106,13 @@ fun HomeScreen(activityViewModel: ActivityVM) {
     }
 }
 
+private fun NavGraphBuilder.subscriptionsScreenComposable(publishEvent: (Event) -> Unit) {
+    composable(
+        route = SubscriptionScreenNavigation.destination,
+        arguments = SubscriptionScreenNavigation.args
+    ) { SubscriptionsScreen(publishEvent = publishEvent) }
+}
+
 private fun NavGraphBuilder.accountsScreen(publishEvent: (Event) -> Unit) {
     composable(
         route = AccountSelectionNavigation.destination,
@@ -116,6 +120,12 @@ private fun NavGraphBuilder.accountsScreen(publishEvent: (Event) -> Unit) {
     ) { AccountsMenu(publishEvent = publishEvent) }
 }
 
+private fun NavGraphBuilder.searchScreenComposable(publishEvent: (Event) -> Unit) {
+    composable(
+        route = SearchNavigation.destination,
+        arguments = SearchNavigation.args
+    ) { SearchScreen(publishEvent) }
+}
 
 private fun NavGraphBuilder.loginScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
@@ -174,10 +184,14 @@ sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: 
     object Accounts :
         UpdootBottomNavigationItem(Outlined.AccountCircle, AccountSelectionNavigation.destination)
 
+    object Search : UpdootBottomNavigationItem(Outlined.Search, SearchNavigation.destination)
+    object Subscriptions :
+        UpdootBottomNavigationItem(Outlined.Menu, SubscriptionScreenNavigation.destination)
+
     object Settings :
         UpdootBottomNavigationItem(Outlined.Settings, SettingsScreenNavigation.destination)
 
     companion object {
-        fun getItems() = listOf(Posts, Accounts, Settings)
+        fun getItems() = listOf(Posts, Subscriptions, Search, Settings, Accounts)
     }
 }

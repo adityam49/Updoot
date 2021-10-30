@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.navDrawer
+package com.ducktapedapps.updoot.subscriptions
 
 import com.ducktapedapps.updoot.data.local.model.LocalMultiReddit
 import com.ducktapedapps.updoot.data.remote.model.mapToLocalSubreddit

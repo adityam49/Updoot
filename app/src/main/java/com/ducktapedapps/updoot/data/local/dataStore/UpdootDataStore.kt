@@ -13,6 +13,8 @@ import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.DE
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.SHOW_SINGLE_THREAD
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.SHOW_SINGLE_THREAD_COLOR
 import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.THEME_KEY
+import com.ducktapedapps.updoot.data.local.dataStore.UpdootDataStore.PrefKeys.showNsfwResults
+import com.ducktapedapps.updoot.search.SearchPrefsManager
 import com.ducktapedapps.updoot.utils.Constants.ANON_USER
 import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.accountManagement.CurrentAccountNameManager
@@ -29,8 +31,8 @@ class UpdootDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) : CurrentAccountNameManager,
     ThemeManager,
-    CommentPrefManager
-{
+    CommentPrefManager,
+    SearchPrefsManager {
     private val Context.dataStore by preferencesDataStore(
         name = DATA_STORE_NAME
     )
@@ -44,17 +46,19 @@ class UpdootDataStore @Inject constructor(
     }
 
     override fun showSingleThread(): Flow<Boolean> = context.dataStore.data
-            .map { it[SHOW_SINGLE_THREAD] ?: true }
+        .map { it[SHOW_SINGLE_THREAD] ?: true }
 
     override suspend fun toggleSingleThread() {
         context.dataStore.edit { it[SHOW_SINGLE_THREAD] = !(it[SHOW_SINGLE_THREAD] ?: true) }
     }
 
     override fun showSingleThreadColor(): Flow<Boolean> = context.dataStore.data
-            .map { it[SHOW_SINGLE_THREAD_COLOR] ?: true }
+        .map { it[SHOW_SINGLE_THREAD_COLOR] ?: true }
 
     override suspend fun toggleSingleThreadColor() {
-        context.dataStore.edit { it[SHOW_SINGLE_THREAD_COLOR] = !(it[SHOW_SINGLE_THREAD_COLOR] ?: true) }
+        context.dataStore.edit {
+            it[SHOW_SINGLE_THREAD_COLOR] = !(it[SHOW_SINGLE_THREAD_COLOR] ?: true)
+        }
     }
 
     override fun currentAccountName(): Flow<String> = context.dataStore.data.map {
@@ -62,12 +66,14 @@ class UpdootDataStore @Inject constructor(
     }
 
     override fun deviceId(): Flow<String> = context.dataStore
-            .data
-            .transform {
-                val deviceId = it[DEVICE_ID]
-                if (deviceId == null) context.dataStore.edit { prefs -> prefs[DEVICE_ID] = UUID.randomUUID().toString() }
-                else emit(deviceId)
+        .data
+        .transform {
+            val deviceId = it[DEVICE_ID]
+            if (deviceId == null) context.dataStore.edit { prefs ->
+                prefs[DEVICE_ID] = UUID.randomUUID().toString()
             }
+            else emit(deviceId)
+        }
 
     override suspend fun setCurrentAccountName(user: String) {
         context.dataStore.edit {
@@ -76,6 +82,7 @@ class UpdootDataStore @Inject constructor(
     }
 
     private object PrefKeys {
+        val showNsfwResults = booleanPreferencesKey("show_nsfw_results")
         val DEVICE_ID = stringPreferencesKey("device_id")
         val CURRENT_ACCOUNT_NAME = stringPreferencesKey("currentAccount_key")
         val THEME_KEY = intPreferencesKey("theme_key")
@@ -85,6 +92,24 @@ class UpdootDataStore @Inject constructor(
 
     private companion object {
         const val DATA_STORE_NAME = "updoot_data_store"
+    }
+
+    override fun includeNsfwSearchResults(): Flow<Boolean> = context
+        .dataStore
+        .data
+        .transform {
+            val currentValue = it[showNsfwResults]
+            if (currentValue == null) context.dataStore.edit { prefs ->
+                prefs[showNsfwResults] = false
+            } else {
+                emit(currentValue)
+            }
+        }
+
+    override suspend fun toggleNsfwResultsPrefs() {
+        context.dataStore.edit { prefs ->
+            prefs[showNsfwResults] = prefs[showNsfwResults] != true
+        }
     }
 }
 

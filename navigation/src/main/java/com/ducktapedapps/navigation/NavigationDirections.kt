@@ -5,9 +5,33 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
 sealed class NavigationDirections {
+    object SubscriptionScreenNavigation : NavigationDirections() {
+        const val destination = "subscriptions"
+
+        val args = emptyList<NamedNavArgument>()
+
+        fun open() = object : ScreenNavigationCommand {
+
+            override val arguments = args
+
+            override val route: String = destination
+        }
+    }
 
     object AccountSelectionNavigation : NavigationDirections() {
         const val destination = "accounts"
+
+        val args = emptyList<NamedNavArgument>()
+
+        fun open() = object : ScreenNavigationCommand {
+
+            override val arguments = args
+
+            override val route: String = destination
+        }
+    }
+    object SearchNavigation : NavigationDirections() {
+        const val destination = "search"
 
         val args = emptyList<NamedNavArgument>()
 

@@ -1,4 +1,4 @@
-package com.ducktapedapps.updoot.navDrawer
+package com.ducktapedapps.updoot.subscriptions
 
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.SubredditSubscription
@@ -48,19 +48,22 @@ class UpdateUserSubscriptionUseCaseImpl @Inject constructor(
     }
 
     private suspend fun List<RemoteSubreddit>.cacheSubreddits(): List<LocalSubreddit> {
-        return map { subreddits -> subreddits.toLocalSubreddit().copy(lastUpdated = Date()) }
-            .onEach { localSub -> subredditDAO.insertSubreddit(localSub) }
+        return map { subreddits ->
+            subreddits.toLocalSubreddit().copy(lastUpdated = Date())
+        }.apply {
+            subredditDAO.insertSubreddits(this)
+        }
     }
 
     private suspend fun editLocalSubscriptions(userName: String, subs: List<LocalSubreddit>) {
         subredditDAO.deleteUserSubscriptions(userName)
-        subs.forEach {
-            subredditDAO.insertSubscription(
-                SubredditSubscription(
-                    userName = userName,
-                    subredditName = it.subredditName
-                )
+        subs.map {
+            SubredditSubscription(
+                userName = userName,
+                subredditName = it.subredditName
             )
+        }.apply {
+            subredditDAO.insertSubscriptions(this)
         }
     }
 }

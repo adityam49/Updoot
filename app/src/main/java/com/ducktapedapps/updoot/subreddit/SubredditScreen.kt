@@ -14,15 +14,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ducktapedapps.navigation.Event
-import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
-import com.ducktapedapps.navigation.NavigationDirections
-import com.ducktapedapps.navigation.NavigationDirections.CommentScreenNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.PageEnd
 import com.ducktapedapps.updoot.common.PageLoading
 import com.ducktapedapps.updoot.common.PageLoadingFailed
-import com.ducktapedapps.updoot.utils.Constants
-import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
 import com.ducktapedapps.updoot.utils.PostViewType
@@ -49,6 +44,7 @@ fun SubredditScreen(
         )
     }
 }
+
 
 @Composable
 private fun SubredditTopBar(subredditName: String) {
