@@ -5,6 +5,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ducktapedapps.updoot.data.local.PostDAO
 import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.data.mappers.toPost
+import com.ducktapedapps.updoot.subreddit.SubredditSorting.Companion.mapSorting
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.IdsPage
 import com.ducktapedapps.updoot.utils.PagingModel
@@ -125,7 +126,7 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
         }
     }
 
-    fun observeCachedPosts(ids: List<String>): Flow<List<Post>> =
+    private fun observeCachedPosts(ids: List<String>): Flow<List<Post>> =
         if (ids.isNotEmpty())
             postDAO.observeCachedPosts(buildSqlQuery(ids))
         else
@@ -146,26 +147,5 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
 
     private suspend fun List<Post>.cache() {
         forEach { postDAO.insertPost(it) }
-    }
-
-    private fun SubredditSorting.mapSorting(): Pair<String, String?> = when (this) {
-        SubredditSorting.Rising -> Pair(Constants.RISING, null)
-        SubredditSorting.Best -> Pair(Constants.BEST, null)
-        SubredditSorting.New -> Pair(Constants.NEW, null)
-        SubredditSorting.Hot -> Pair(Constants.HOT, null)
-
-        SubredditSorting.TopHour -> Pair(Constants.TOP, Constants.NOW)
-        SubredditSorting.TopDay -> Pair(Constants.TOP, Constants.TODAY)
-        SubredditSorting.TopWeek -> Pair(Constants.TOP, Constants.THIS_WEEK)
-        SubredditSorting.TopMonth -> Pair(Constants.TOP, Constants.THIS_MONTH)
-        SubredditSorting.TopYear -> Pair(Constants.TOP, Constants.THIS_YEAR)
-        SubredditSorting.TopAll -> Pair(Constants.TOP, Constants.ALL_TIME)
-
-        SubredditSorting.ControversialHour -> Pair(Constants.CONTROVERSIAL, Constants.NOW)
-        SubredditSorting.ControversialDay -> Pair(Constants.CONTROVERSIAL, Constants.TODAY)
-        SubredditSorting.ControversialWeek -> Pair(Constants.CONTROVERSIAL, Constants.THIS_WEEK)
-        SubredditSorting.ControversialMonth -> Pair(Constants.CONTROVERSIAL, Constants.THIS_MONTH)
-        SubredditSorting.ControversialYear -> Pair(Constants.CONTROVERSIAL, Constants.THIS_YEAR)
-        SubredditSorting.ControversialAll -> Pair(Constants.CONTROVERSIAL, Constants.ALL_TIME)
     }
 }

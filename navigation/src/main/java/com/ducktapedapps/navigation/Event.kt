@@ -1,7 +1,7 @@
 package com.ducktapedapps.navigation
 
 sealed class Event {
-    data class ScreenNavigationEvent(val data: ScreenNavigationCommand) : Event()
+    data class ScreenNavigationEvent(val data: NavigationCommand) : Event()
 
     sealed class AuthEvent : Event() {
         object NewAccountAdded : AuthEvent()

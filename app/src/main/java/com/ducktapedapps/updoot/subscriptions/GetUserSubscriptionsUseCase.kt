@@ -31,8 +31,8 @@ class GetUserSubscriptionsUseCaseImpl @Inject constructor(
                     is UserModel -> subredditDAO
                         .observeSubscribedSubredditsFor(currentAccount.name)
                         .distinctUntilChanged()
-                        .onEach {
-                            //TODO fix this so that cached subscriptions don't get blocked while syncing new subscriptions
+                        .transform {
+                            emit(it)
                             if (it.isStale()) updateUserSubscriptionUseCase.updateUserSubscription(
                                 currentAccount.name
                             )

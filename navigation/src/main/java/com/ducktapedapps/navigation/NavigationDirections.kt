@@ -5,12 +5,12 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
 sealed class NavigationDirections {
-    object SubscriptionScreenNavigation : NavigationDirections() {
-        const val destination = "subscriptions"
+    object SubscriptionsNavigation : NavigationDirections() {
+        const val destination = "bottomSheet/subscriptions"
 
         val args = emptyList<NamedNavArgument>()
 
-        fun open() = object : ScreenNavigationCommand {
+        fun open() = object : NavigationCommand {
 
             override val arguments = args
 
@@ -19,23 +19,24 @@ sealed class NavigationDirections {
     }
 
     object AccountSelectionNavigation : NavigationDirections() {
-        const val destination = "accounts"
+        const val destination = "bottomSheet/accounts"
 
         val args = emptyList<NamedNavArgument>()
 
-        fun open() = object : ScreenNavigationCommand {
+        fun open() = object : NavigationCommand {
 
             override val arguments = args
 
             override val route: String = destination
         }
     }
+
     object SearchNavigation : NavigationDirections() {
         const val destination = "search"
 
         val args = emptyList<NamedNavArgument>()
 
-        fun open() = object : ScreenNavigationCommand {
+        fun open() = object : NavigationCommand {
 
             override val arguments = args
 
@@ -54,13 +55,33 @@ sealed class NavigationDirections {
             }
         )
 
-        fun open(subredditName: String) = object : ScreenNavigationCommand {
+        fun open(subredditName: String) = object : NavigationCommand {
 
             override val arguments = args
 
             override val route: String = "subreddit/$subredditName"
         }
     }
+
+    object SubredditOptionsNavigation : NavigationDirections() {
+        const val SUBREDDIT_NAME_KEY = "subreddit_name"
+        const val destination = "subreddit/options/{$SUBREDDIT_NAME_KEY}"
+
+        val args = listOf(
+            navArgument(SUBREDDIT_NAME_KEY) {
+                type = NavType.StringType
+                nullable = true
+            }
+        )
+
+        fun open(subredditName: String) = object : NavigationCommand {
+
+            override val arguments = args
+
+            override val route: String = "subreddit/options/$subredditName"
+        }
+    }
+
 
     object CommentScreenNavigation : NavigationDirections() {
         const val SUBREDDIT_ID_KEY = "subreddit_name"
@@ -78,7 +99,7 @@ sealed class NavigationDirections {
             }
         )
 
-        fun open(subredditID: String, postID: String) = object : ScreenNavigationCommand {
+        fun open(subredditID: String, postID: String) = object : NavigationCommand {
 
             override val arguments = args
 
@@ -97,7 +118,7 @@ sealed class NavigationDirections {
             }
         )
 
-        fun open(userName: String) = object : ScreenNavigationCommand {
+        fun open(userName: String) = object : NavigationCommand {
 
             override val arguments = args
 
@@ -109,7 +130,7 @@ sealed class NavigationDirections {
         const val destination = "login"
         val args = emptyList<NamedNavArgument>()
 
-        fun open() = object : ScreenNavigationCommand {
+        fun open() = object : NavigationCommand {
 
             override val arguments = args
 
@@ -121,7 +142,7 @@ sealed class NavigationDirections {
     object SettingsScreenNavigation : NavigationDirections() {
         const val destination = "settings"
         val args = emptyList<NamedNavArgument>()
-        fun open() = object : ScreenNavigationCommand {
+        fun open() = object : NavigationCommand {
 
             override val arguments = args
 

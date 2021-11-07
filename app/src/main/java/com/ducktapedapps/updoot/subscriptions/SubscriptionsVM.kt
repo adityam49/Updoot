@@ -1,13 +1,16 @@
 package com.ducktapedapps.updoot.subscriptions
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
-import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.*
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.AnonymousAccount
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.UserModel
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

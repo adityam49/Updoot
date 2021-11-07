@@ -3,17 +3,20 @@ package com.ducktapedapps.updoot.subreddit
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
+import com.ducktapedapps.navigation.NavigationDirections.SubredditOptionsNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.PageEnd
 import com.ducktapedapps.updoot.common.PageLoading
@@ -34,7 +37,24 @@ fun SubredditScreen(
     }
     val viewState = viewModel.viewState.collectAsState()
     Scaffold(
-        topBar = { SubredditTopBar(subredditName = viewState.value.subredditName) }
+        modifier = Modifier.padding(bottom = 50.dp),
+        topBar = {
+            SubredditTopBar(
+                modifier = Modifier.fillMaxWidth(),
+                subredditName = viewState.value.subredditName
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                publishEvent(
+                    ScreenNavigationEvent(
+                        SubredditOptionsNavigation.open(subredditName)
+                    )
+                )
+            }) {
+                Icon(Icons.Outlined.Menu, Icons.Outlined.Menu.name)
+            }
+        }
     ) {
         SubredditFeed(
             feed = viewState.value.feed,
@@ -47,12 +67,13 @@ fun SubredditScreen(
 
 
 @Composable
-private fun SubredditTopBar(subredditName: String) {
-    Surface(elevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
+private fun SubredditTopBar(
+    modifier: Modifier = Modifier,
+    subredditName: String
+) {
+    Surface(modifier = modifier, elevation = 8.dp) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.Center
         ) { Text(text = subredditName) }
     }
@@ -60,6 +81,7 @@ private fun SubredditTopBar(subredditName: String) {
 
 @Composable
 private fun SubredditFeed(
+    modifier: Modifier = Modifier,
     feed: PagingModel<List<PostUiModel>>,
     postViewType: PostViewType,
     loadPage: () -> Unit,
