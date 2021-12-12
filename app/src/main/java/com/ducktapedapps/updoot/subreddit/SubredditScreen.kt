@@ -37,7 +37,6 @@ fun SubredditScreen(
     }
     val viewState = viewModel.viewState.collectAsState()
     Scaffold(
-        modifier = Modifier.padding(bottom = 50.dp),
         topBar = {
             SubredditTopBar(
                 modifier = Modifier.fillMaxWidth(),

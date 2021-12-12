@@ -4,6 +4,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.outlined.*
@@ -103,21 +105,23 @@ fun HomeScreen(activityViewModel: ActivityVM) {
                         }
                     }
                 }
-            ) {
-                NavHost(
-                    navController = navController,
-                    startDestination = SubredditScreenNavigation.destination
-                ) {
-                    accountsSwitcherBottomSheet(publishEvent)
-                    subscriptionsBottomSheet(publishEvent)
+            ) { innerPadding ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = SubredditScreenNavigation.destination
+                    ) {
+                        accountsSwitcherBottomSheet(publishEvent)
+                        subscriptionsBottomSheet(publishEvent)
 
-                    searchScreenComposable(publishEvent)
-                    subredditOptions(publishEvent)
-                    subredditScreenComposable(publishEvent)
-                    commentsScreenComposable(publishEvent)
-                    userScreenComposable(publishEvent)
-                    settingScreenComposable(publishEvent)
-                    loginScreenComposable(publishEvent)
+                        searchScreenComposable(publishEvent)
+                        subredditOptions(publishEvent)
+                        subredditScreenComposable(publishEvent)
+                        commentsScreenComposable(publishEvent)
+                        userScreenComposable(publishEvent)
+                        settingScreenComposable(publishEvent)
+                        loginScreenComposable(publishEvent)
+                    }
                 }
             }
         }
