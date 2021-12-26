@@ -1,6 +1,6 @@
-![Imgur GIF](https://i.imgur.com/46fPSDf.mp4)
-
-![Screenshot](https://i.imgur.com/jmTx2RZ.png)
+Draggable FAB for scrolling         |Comments
+:----------------------------------:|:----------------------------------:
+![](https://i.imgur.com/iAfLVBM.gif)|![](https://i.imgur.com/jmTx2RZ.png)
 
 # Development
 To build this app you need to have a Reddit account.  
