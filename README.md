@@ -1,3 +1,8 @@
+
+![Imgur GIF](https://imgur.com/a/BxwtBXx.gif)
+
+![Screenshot](https://imgur.com/a/K4csMCa.png)
+
 # Development
 To build this app you need to have a Reddit account.  
 Once you have that, head over to [this](https://www.reddit.com/prefs/apps) page to get a client id for the app.  
@@ -14,6 +19,6 @@ and then add the following 2 lines to gradle.properties file (create one if it d
 `UPDOOT_REDIRECT_URI = "https://redirecturl.com"`
 
 where `xxxxxxxxxxxxxx` is the client id that you got after creating a new installed type app  
-and `https://redirecturl.com` is the redirect url spicified while creating the installed type app.    
+and `https://redirecturl.com` is the redirect url specified while creating the installed type app.    
 
 For further information on Reddit’s oauth usage use [this guide](https://github.com/reddit-archive/reddit/wiki/oauth2).
