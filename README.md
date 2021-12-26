@@ -1,3 +1,7 @@
+![Imgur GIF](https://imgur.com/a/BxwtBXx.gif)
+
+![Screenshot](https://imgur.com/a/K4csMCa.png)
+
 # Development
 To build this app you need to have a Reddit account.  
 Once you have that, head over to [this](https://www.reddit.com/prefs/apps) page to get a client id for the app.  
