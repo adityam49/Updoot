@@ -1,6 +1,6 @@
-![Imgur GIF](https://imgur.com/a/BxwtBXx.gif)
+![Imgur GIF](https://i.imgur.com/46fPSDf.mp4)
 
-![Screenshot](https://imgur.com/a/K4csMCa.png)
+![Screenshot](https://i.imgur.com/jmTx2RZ.png)
 
 # Development
 To build this app you need to have a Reddit account.  
