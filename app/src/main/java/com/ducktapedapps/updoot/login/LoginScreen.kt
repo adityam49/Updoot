@@ -73,7 +73,6 @@ fun ComposableWebView(
 
     AndroidView(
         modifier = Modifier
-            .padding(bottom = 32.dp)
             .fillMaxSize(),
         factory = { context ->
             WebView(context).apply {

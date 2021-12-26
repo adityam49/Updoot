@@ -45,14 +45,12 @@ fun SubredditScreen(
     val parentSize = remember { mutableStateOf(Size.Zero) }
     val listState = rememberLazyListState()
     Scaffold(
-            modifier = Modifier.padding(bottom = 50.dp),
             topBar = {
                 SubredditTopBar(
                         modifier = Modifier.fillMaxWidth(),
                         subredditName = viewState.value.subredditName
                 )
             }) { scaffoldPaddingValues ->
-
         Box(
                 Modifier
                         .onGloballyPositioned {
