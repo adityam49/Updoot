@@ -1,6 +1,6 @@
 Draggable FAB for scrolling         |Comments
 :----------------------------------:|:----------------------------------:
-![](https://i.imgur.com/iAfLVBM.gif)|![](https://i.imgur.com/jmTx2RZ.png)
+<img width=300 height=600 src="https://media.giphy.com/media/45MMnExV2p7ZGtRPDj/giphy.gif"/> | <img width=300 height=600 src="https://i.imgur.com/jmTx2RZ.png"/>
 
 # Development
 To build this app you need to have a Reddit account.  
