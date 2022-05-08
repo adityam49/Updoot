@@ -34,7 +34,7 @@ class VideoPreviewFragment : Fragment() {
         }
     }
 
-    private val playBackListener = object : EventListener {
+    private val playBackListener = object : Listener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             when (playbackState) {
                 STATE_BUFFERING -> {
@@ -68,7 +68,11 @@ class VideoPreviewFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentVideoPreviewBinding.inflate(inflater, container, false)
         exoPlayer.addListener(playBackListener)
         return binding.root
@@ -97,7 +101,11 @@ class VideoPreviewFragment : Fragment() {
                     .createMediaSource(MediaItem.fromUri(uri))
             }
             else -> {
-                Toast.makeText(requireContext(), "${uri.authority} not supported yet!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "${uri.authority} not supported yet!",
+                    Toast.LENGTH_SHORT
+                ).show()
                 throw Exception("unknown url! $uri")
             }
         }
