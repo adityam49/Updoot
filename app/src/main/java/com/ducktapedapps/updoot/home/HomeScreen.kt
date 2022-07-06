@@ -36,6 +36,7 @@ import com.ducktapedapps.updoot.subreddit.options.SubredditOptions
 import com.ducktapedapps.updoot.subscriptions.SubscriptionsScreen
 import com.ducktapedapps.updoot.user.UserInfoScreen
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
+import com.ducktapedapps.updoot.video.VideoScreen
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
@@ -121,6 +122,7 @@ fun HomeScreen(activityViewModel: ActivityVM) {
                         userScreenComposable(publishEvent)
                         settingScreenComposable(publishEvent)
                         loginScreenComposable(publishEvent)
+                        videoScreenComposable(publishEvent)
                     }
                 }
             }
@@ -214,6 +216,16 @@ private fun NavGraphBuilder.settingScreenComposable(publishEvent: (Event) -> Uni
         route = SettingsScreenNavigation.destination,
         arguments = SettingsScreenNavigation.args
     ) { SettingsScreen() }
+}
+
+private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit){
+    composable(
+        route = VideoScreenNavigation.destination,
+        arguments = VideoScreenNavigation.args
+    ){
+        val url = it.arguments?.getString(VideoScreenNavigation.URL_KEY) ?: "#"
+        VideoScreen(publishEvent = publishEvent, videoUrl = url)
+    }
 }
 
 sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: String) {

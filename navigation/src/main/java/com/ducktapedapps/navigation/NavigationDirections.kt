@@ -3,6 +3,8 @@ package com.ducktapedapps.navigation
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 sealed class NavigationDirections {
     object SubscriptionsNavigation : NavigationDirections() {
@@ -150,4 +152,23 @@ sealed class NavigationDirections {
         }
     }
 
+    object VideoScreenNavigation : NavigationDirections() {
+        const val URL_KEY = "URL_KEY"
+        const val destination = "video/{$URL_KEY}"
+        val args = listOf(
+            navArgument(URL_KEY) {
+                type = NavType.StringType
+                nullable = false
+            }
+        )
+
+        fun open(url: String) = object : NavigationCommand {
+
+            override val arguments = args
+
+            override val route: String =
+                "video/${URLEncoder.encode(url, StandardCharsets.UTF_8.toString())}"
+        }
+
+    }
 }
