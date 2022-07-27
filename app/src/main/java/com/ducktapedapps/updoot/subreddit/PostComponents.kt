@@ -24,7 +24,6 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.*
-import com.ducktapedapps.navigation.NavigationDirections
 import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.*
@@ -69,7 +68,7 @@ fun CompactPost(
             modifier = Modifier
                 .clip(CircleShape)
                 .requiredSize(48.dp)
-                .clickable(onClick = { publishEvent(post.showMediaResourceToast()) })
+                .clickable(onClick = { publishEvent(post.openPostMedia()) })
                 .constrainAs(mediaThumbnail) {
                     start.linkTo(parent.start, margin = 8.dp)
                     top.linkTo(parent.top, margin = 8.dp)
@@ -226,7 +225,7 @@ fun LargePost(
                     height = Dimension.wrapContent
                 }
                 .combinedClickable(
-                    onClick = { publishEvent(post.showMediaResourceToast()) },
+                    onClick = { publishEvent(post.openPostMedia()) },
                     onLongClick = { setOptionsDialogVisibility(true) }
                 )
         )
@@ -326,5 +325,13 @@ private fun PostUiModel.openAuthorScreen(): Event =
 private fun PostUiModel.openSubreddit(): Event =
     ScreenNavigationEvent(SubredditScreenNavigation.open(subredditName))
 
-private fun PostUiModel.showMediaResourceToast(): Event =
-    ToastEvent(content = postMedia.toString())
+private fun PostUiModel.openPostMedia(): Event =
+    when(this.postMedia){
+        is PostMedia.ImageMedia -> {
+            ToastEvent(toString())
+        }
+        is PostMedia.LinkMedia -> ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+        PostMedia.NoMedia -> ToastEvent(toString())
+        is PostMedia.TextMedia -> ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+        is PostMedia.VideoMedia -> ScreenNavigationEvent(VideoScreenNavigation.open(postMedia.url))
+    }
