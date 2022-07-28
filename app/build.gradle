@@ -2,6 +2,9 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
 
 android {
     compileSdkVersion 32
@@ -146,6 +149,10 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:${versions.compose_navigation}"
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
     implementation("com.google.accompanist:accompanist-navigation-material:0.21.0-beta")
+
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.12'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.1.0'
+
 
     //testing
     testImplementation 'junit:junit:4.13.1'
