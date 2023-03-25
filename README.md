@@ -1,7 +1,3 @@
-Draggable FAB for scrolling         |Comments
-:----------------------------------:|:----------------------------------:
-<img width=300 height=600 src="https://media.giphy.com/media/45MMnExV2p7ZGtRPDj/giphy.gif"/> | <img width=300 height=600 src="https://i.imgur.com/jmTx2RZ.png"/>
-
 # Development
 To build this app you need to have a Reddit account.  
 Once you have that, head over to [this](https://www.reddit.com/prefs/apps) page to get a client id for the app.  
