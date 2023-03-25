@@ -92,6 +92,7 @@ fun SubredditInfo(subredditName: String,publishEvent : (Event) -> Unit) {
                 performRetry = viewModel::loadSubredditInfo,
                 message = data.reason
             )
+            null -> TODO()
         }
     }
 }

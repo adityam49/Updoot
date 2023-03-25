@@ -4,8 +4,8 @@ plugins {
 }
 
 android {
+    namespace = "com.ducktapedapps.navigation"
     compileSdk = 33
-
     defaultConfig {
         minSdk = 21
         targetSdk = 33
