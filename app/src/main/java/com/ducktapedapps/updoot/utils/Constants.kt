@@ -10,8 +10,8 @@ object Constants {
     const val CACHED_ACCOUNT_COUNT = "cached_account_count"
 
     const val DEVICE_ID_KEY = "deviceIdKey"
-    const val client_id = BuildConfig.CLIENT_ID
-    const val redirect_uri = BuildConfig.REDIRECT_URI
+    var  client_id = BuildConfig.CLIENT_ID
+    var redirect_uri = BuildConfig.REDIRECT_URI
     const val API_BASE_URL = "https://oauth.reddit.com/"
     const val BASE_URL = "https://www.reddit.com"
 
