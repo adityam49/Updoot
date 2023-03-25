@@ -7,7 +7,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -20,10 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
+import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
-import com.ducktapedapps.navigation.Event.*
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
+import com.ducktapedapps.navigation.Event.ToastEvent
 import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.*
@@ -122,18 +125,17 @@ fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
     else {
         when (post.thumbnail) {
             is Thumbnail.Remote ->
-                Image(
-                    painter = rememberImagePainter(data = post.thumbnail.url) {
-                        error(post.thumbnail.fallbackLocalThumbnail)
-                        transformations(CircleCropTransformation())
-                    },
+                AsyncImage(
+                    model = post.thumbnail.url,
                     contentDescription = stringResource(R.string.post_thumbnail),
-                    modifier = modifier,
+                    modifier = modifier.clip(shape = CircleShape),
+                    error = painterResource(id = post.thumbnail.fallbackLocalThumbnail),
                 )
+
             is Thumbnail.LocalThumbnail -> Image(
                 painter = painterResource(id = post.thumbnail.imageResource),
                 contentDescription = "Error Icon",
-                modifier = modifier
+                modifier = modifier.clip(shape = CircleShape)
             )
         }
     }
@@ -279,10 +281,9 @@ fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
 fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
     val ratio =
         (if (media.width == 0) 1f else media.width.toFloat() / if (media.height == 0) 1f else media.height.toFloat()).absoluteValue
-    Image(
-        painter = rememberImagePainter(data = media.url) {
-            error(R.drawable.ic_image_error_24dp)
-        },
+    AsyncImage(
+        model = media.url,
+        error = painterResource(id = R.drawable.ic_image_error_24dp),
         contentDescription = stringResource(id = R.string.submission_image),
         modifier = modifier
             .padding(8.dp)
@@ -317,7 +318,7 @@ fun TextPostMedia(text: String, modifier: Modifier) {
 }
 
 private fun PostUiModel.openComments(): Event =
-    ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+    ScreenNavigationEvent(CommentScreenNavigation.open(subredditName, id))
 
 private fun PostUiModel.openAuthorScreen(): Event =
     ScreenNavigationEvent(UserScreenNavigation.open(author))
@@ -326,12 +327,22 @@ private fun PostUiModel.openSubreddit(): Event =
     ScreenNavigationEvent(SubredditScreenNavigation.open(subredditName))
 
 private fun PostUiModel.openPostMedia(): Event =
-    when(this.postMedia){
+    when (this.postMedia) {
         is PostMedia.ImageMedia -> {
-            ToastEvent(toString())
+            ScreenNavigationEvent(ImageScreenNavigation.open(this.postMedia.url))
         }
-        is PostMedia.LinkMedia -> ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+        is PostMedia.LinkMedia -> ScreenNavigationEvent(
+            CommentScreenNavigation.open(
+                subredditName,
+                id
+            )
+        )
         PostMedia.NoMedia -> ToastEvent(toString())
-        is PostMedia.TextMedia -> ScreenNavigationEvent(CommentScreenNavigation.open(subredditName,id))
+        is PostMedia.TextMedia -> ScreenNavigationEvent(
+            CommentScreenNavigation.open(
+                subredditName,
+                id
+            )
+        )
         is PostMedia.VideoMedia -> ScreenNavigationEvent(VideoScreenNavigation.open(postMedia.url))
     }

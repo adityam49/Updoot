@@ -1,12 +1,10 @@
 package com.ducktapedapps.updoot.comments
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -14,13 +12,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import coil.compose.rememberImagePainter
-import coil.transform.RoundedCornersTransformation
+import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.navigation.NavigationDirections
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.StaticLinkPreview
 import com.ducktapedapps.updoot.data.local.model.FullComment
@@ -64,19 +62,7 @@ private fun CommentsScreen(
                 Header(post = this@run)
             }
             item {
-                Content(content = postMedia, onClick = {
-                    publishEvent(
-                        Event.ToastEvent(
-                            when (postMedia) {
-                                is ImageMedia -> postMedia.url
-                                is LinkMedia -> postMedia.url
-                                NoMedia -> "No media to open"
-                                is TextMedia -> postMedia.text
-                                is VideoMedia -> postMedia.url
-                            }
-                        )
-                    )
-                })
+                Content(content = postMedia, onClick = { media -> publishEvent( media.open()) })
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -143,16 +129,15 @@ private fun TextPost(text: String) {
 
 @Composable
 fun ContentImage(image: ImageMedia, openImage: () -> Unit) {
-    Image(
-        painter = rememberImagePainter(data = image.url) {
-            error(R.drawable.ic_image_error_24dp)
-            transformations(RoundedCornersTransformation(8.dp.value))
-        },
+    AsyncImage(
+        model = image.url,
+        error = painterResource(id = R.drawable.ic_image_error_24dp),
         contentDescription = stringResource(R.string.submission_image),
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .aspectRatio(image.width / image.height.toFloat())
+            .clip(shape = RoundedCornerShape(8.dp))
             .clickable(onClick = openImage)
     )
 }

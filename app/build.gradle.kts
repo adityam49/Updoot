@@ -6,6 +6,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -15,7 +16,6 @@ android {
         minSdk = 21
         targetSdk = 33
         versionCode = 1
-        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         getByName("debug") {
@@ -45,7 +45,6 @@ android {
 
     buildFeatures {
         compose = true
-        viewBinding = true
     }
 
     composeOptions {
@@ -99,7 +98,7 @@ dependencies {
     debugImplementation(libs.leakCanary)
     implementation(libs.bundles.crashlytics)
     implementation(libs.bundles.navigation)
-
+    implementation(libs.timber)
     testImplementation(libs.test.kotlin)
     testImplementation(libs.test.junit)
     testImplementation(libs.test.mockk)

@@ -26,7 +26,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.extra.get("kotlin_version") as String}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
         classpath("com.android.tools.build:gradle:7.4.2")
         classpath("com.google.dagger:hilt-android-gradle-plugin:${rootProject.extra.get("hilt_version") as String}")
         classpath("com.google.gms:google-services:4.3.13")

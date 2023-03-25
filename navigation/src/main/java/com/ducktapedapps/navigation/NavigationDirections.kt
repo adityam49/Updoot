@@ -171,4 +171,24 @@ sealed class NavigationDirections {
         }
 
     }
+
+    object ImageScreenNavigation : NavigationDirections() {
+        const val URL_KEY = "URL_KEY"
+        const val destination = "image/{$URL_KEY}"
+        val args = listOf(
+            navArgument(URL_KEY) {
+                type = NavType.StringType
+                nullable = false
+            }
+        )
+
+        fun open(url: String) = object : NavigationCommand {
+
+            override val arguments = args
+
+            override val route: String =
+                "image/${URLEncoder.encode(url, StandardCharsets.UTF_8.toString())}"
+        }
+
+    }
 }

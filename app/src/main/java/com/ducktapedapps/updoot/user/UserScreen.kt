@@ -1,14 +1,13 @@
 package com.ducktapedapps.updoot.user
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -21,11 +20,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
-import com.ducktapedapps.navigation.NavigationDirections
-import com.ducktapedapps.navigation.NavigationDirections.*
+import com.ducktapedapps.navigation.NavigationDirections.CommentScreenNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.comments.FullComment
 import com.ducktapedapps.updoot.common.PageEnd
@@ -166,14 +164,14 @@ fun UserTrophies(trophies: List<Trophy>) {
     LazyRow {
         items(trophies) { trophy ->
             Column(Modifier.padding(4.dp)) {
-                Image(
-                    painter = rememberImagePainter(data = trophy.icon) {
-                        error(R.drawable.ic_image_error_24dp)
-                    },
+                AsyncImage(
+                    model = trophy.icon,
+                    error = painterResource(id = R.drawable.ic_image_error_24dp),
                     contentDescription = trophy.name,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(shape = CircleShape)
                 )
-
                 Text(
                     text = trophy.name,
                     modifier = Modifier.padding(top = 8.dp),

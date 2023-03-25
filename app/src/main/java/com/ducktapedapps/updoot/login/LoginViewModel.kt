@@ -2,12 +2,7 @@ package com.ducktapedapps.updoot.login
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.ducktapedapps.updoot.backgroundWork.SubscriptionSyncWorker
-import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.data.remote.AuthAPI
 import com.ducktapedapps.updoot.data.remote.RedditAPI
 import com.ducktapedapps.updoot.data.remote.model.Account
@@ -19,11 +14,9 @@ import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.TokenInterceptor
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 

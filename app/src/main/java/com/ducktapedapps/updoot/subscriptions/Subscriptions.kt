@@ -1,10 +1,10 @@
 package com.ducktapedapps.updoot.subscriptions
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
@@ -13,12 +13,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
+import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.NavigationDirections
 import com.ducktapedapps.updoot.R
@@ -78,15 +78,14 @@ fun SubredditItem(subreddit: SubscriptionSubredditUiModel, openSubreddit: (Strin
             .clickable { openSubreddit(subreddit.subredditName) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = rememberImagePainter(data = subreddit.icon) {
-                error(R.drawable.ic_subreddit_default_24dp)
-                transformations(CircleCropTransformation())
-            },
+        AsyncImage(
+            model = subreddit.icon,
+            error = painterResource(R.drawable.ic_subreddit_default_24dp),
             contentDescription = stringResource(R.string.subreddit_icon),
             modifier = Modifier
                 .padding(start = 28.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .size(32.dp)
+                .clip(shape = CircleShape),
         )
         Column {
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {

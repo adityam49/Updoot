@@ -10,4 +10,5 @@ sealed class Event {
     }
 
     data class ToastEvent(val content: String) : Event()
+    data class OpenWebLink(val url:String) :Event()
 }

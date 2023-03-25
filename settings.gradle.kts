@@ -6,22 +6,21 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
 
-            version("lifecycle-version", "2.5.0")
+            version("lifecycle-version", "2.6.0")
             version("coroutines-version", "1.6.0")
             version("room-version", "2.4.2")
             version("retrofit-version", "2.9.0")
             version("moshi-version", "1.14.0")
             version("hilt-version", "2.44")
             version("hilt-jetpack-version", "1.0.0")
-            version("coil-version", "1.4.0")
+            version("coil-version", "2.2.2")
             version("kotlinVersion", "1.8.10")
             //android core libs
             library("appcompat", "androidx.appcompat:appcompat:1.4.2")
-            library("core-ktx", "androidx.core:core-ktx:1.8.0")
-            library("fragment-ktx", "androidx.fragment:fragment-ktx:1.4.1")
+            library("core-ktx", "androidx.core:core-ktx:1.9.0")
             library("activity-compose", "androidx.activity:activity-compose:1.5.0")
             bundle(
-                "android-core", listOf("appcompat", "core-ktx", "fragment-ktx", "activity-compose")
+                "android-core", listOf("appcompat", "core-ktx", "activity-compose")
             )
 
             library("compose-bom", "androidx.compose:compose-bom:2023.01.00")
@@ -53,7 +52,9 @@ dependencyResolutionManagement {
 
             //todo remove when view based ui is removed
             library(
-                "livedata-ktx", "androidx.lifecycle", "lifecycle-livedata-ktx"
+                "lifecycle-compose",
+                "androidx.lifecycle",
+                "lifecycle-runtime-compose"
             ).versionRef("lifecycle-version")
             library(
                 "livedata-viewmodel-ktx", "androidx.lifecycle", "lifecycle-viewmodel-ktx"
@@ -63,7 +64,7 @@ dependencyResolutionManagement {
             ).versionRef("lifecycle-version")
             bundle(
                 "lifecycle", listOf(
-                    "livedata-ktx",
+                    "lifecycle-compose",
                     "livedata-viewmodel-ktx",
                     "livedata-viewmodel-compose",
                 )
@@ -149,7 +150,7 @@ dependencyResolutionManagement {
 
             library("crashlyticsKtx", "com.google.firebase:firebase-crashlytics-ktx:18.2.12")
             library("analyticsKtx", "com.google.firebase:firebase-analytics-ktx:21.1.0")
-            bundle("crashlytics", kotlin.collections.listOf("analyticsKtx", "crashlyticsKtx"))
+            bundle("crashlytics", listOf("analyticsKtx", "crashlyticsKtx"))
             library("composeNavigation", "androidx.navigation:navigation-compose:2.5.0")
             library("hiltComposeNavigation", "androidx.hilt:hilt-navigation-compose:1.0.0")
             library(
@@ -157,7 +158,7 @@ dependencyResolutionManagement {
                 "com.google.accompanist:accompanist-navigation-material:0.21.0-beta"
             )
             bundle(
-                "navigation", kotlin.collections.listOf(
+                "navigation", listOf(
                     "composeNavigation", "hiltComposeNavigation", "accompanistNavigationMaterial"
                 )
             )
@@ -169,6 +170,7 @@ dependencyResolutionManagement {
                 "kotlin-test"
             ).versionRef("kotlinVersion")
             library("test-junit", "junit:junit:4.13.1")
+            library("timber", "com.jakewharton.timber:timber:5.0.1")
         }
     }
 }

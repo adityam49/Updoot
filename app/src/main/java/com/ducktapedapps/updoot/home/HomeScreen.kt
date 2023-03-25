@@ -1,18 +1,15 @@
 package com.ducktapedapps.updoot.home
 
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -22,12 +19,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.plusAssign
 import com.ducktapedapps.navigation.Event
-import com.ducktapedapps.navigation.Event.*
 import com.ducktapedapps.navigation.Event.AuthEvent.*
+import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.ActivityVM
 import com.ducktapedapps.updoot.accounts.AccountsMenu
 import com.ducktapedapps.updoot.comments.CommentsScreen
+import com.ducktapedapps.updoot.imagePreview.ImagePreviewScreen
 import com.ducktapedapps.updoot.login.LoginScreen
 import com.ducktapedapps.updoot.search.SearchScreen
 import com.ducktapedapps.updoot.settings.SettingsScreen
@@ -38,21 +36,19 @@ import com.ducktapedapps.updoot.user.UserInfoScreen
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.video.VideoScreen
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import timber.log.Timber
 
-private const val TAG = "HomeScreen"
 
 @ExperimentalMaterialNavigationApi
 @Composable
-fun HomeScreen(activityViewModel: ActivityVM) {
-    val context = LocalContext.current
-
-    val publishEvent = { event: Event -> activityViewModel.sendEvent(event) }
-
+fun HomeScreen(
+    activityViewModel: ActivityVM,
+    publishEvent: (Event) -> Unit
+) {
     val navController = rememberNavController()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     navController.navigatorProvider += bottomSheetNavigator
@@ -64,11 +60,9 @@ fun HomeScreen(activityViewModel: ActivityVM) {
             .collect { event ->
                 when (event) {
                     is ScreenNavigationEvent -> {
-                        Log.d(TAG, "screen nav event collected -> ${event.data.route}")
+                        Timber.d( "screen nav event collected -> ${event.data.route}")
                         navController.navigate(route = event.data.route)
                     }
-                    is ToastEvent -> Toast.makeText(context, event.content, Toast.LENGTH_SHORT)
-                        .show()
                     AccountSwitched -> navController.popBackStack(
                         SubredditScreenNavigation.destination,
                         false
@@ -78,6 +72,7 @@ fun HomeScreen(activityViewModel: ActivityVM) {
                         false
                     )
                     NewAccountAdded -> navController.popBackStack()
+                    else -> publishEvent(event)
                 }
             }
     }
@@ -123,6 +118,7 @@ fun HomeScreen(activityViewModel: ActivityVM) {
                         settingScreenComposable(publishEvent)
                         loginScreenComposable(publishEvent)
                         videoScreenComposable(publishEvent)
+                        imageScreenComposable(publishEvent)
                     }
                 }
             }
@@ -227,7 +223,15 @@ private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit)
         VideoScreen(publishEvent = publishEvent, videoUrl = url)
     }
 }
-
+private fun NavGraphBuilder.imageScreenComposable(publishEvent: (Event) -> Unit){
+    composable(
+        route = ImageScreenNavigation.destination,
+        arguments = ImageScreenNavigation.args
+    ){
+        val url = it.arguments?.getString(ImageScreenNavigation.URL_KEY) ?: "#"
+        ImagePreviewScreen(publishEvent = publishEvent, imageUrl = url)
+    }
+}
 sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: String) {
     object Posts : UpdootBottomNavigationItem(Outlined.Home, SubredditScreenNavigation.destination)
     object Accounts :
