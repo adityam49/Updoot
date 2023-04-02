@@ -1,7 +1,7 @@
 package com.ducktapedapps.updoot.home
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -28,7 +29,7 @@ import com.ducktapedapps.updoot.ActivityVM
 import com.ducktapedapps.updoot.accounts.AccountsMenu
 import com.ducktapedapps.updoot.comments.CommentsScreen
 import com.ducktapedapps.updoot.imagePreview.ImagePreviewScreen
-import com.ducktapedapps.updoot.login.LoginScreen
+import com.ducktapedapps.updoot.login.LoginActivity
 import com.ducktapedapps.updoot.search.SearchScreen
 import com.ducktapedapps.updoot.settings.SettingsScreen
 import com.ducktapedapps.updoot.subreddit.SubredditScreen
@@ -55,7 +56,7 @@ fun HomeScreen(
     val navController = rememberNavController()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     navController.navigatorProvider += bottomSheetNavigator
-
+    val context = LocalContext.current
     LaunchedEffect(key1 = Unit) {
         activityViewModel
             .eventChannel
@@ -63,8 +64,11 @@ fun HomeScreen(
             .collect { event ->
                 when (event) {
                     is ScreenNavigationEvent -> {
-                        Timber.d( "screen nav event collected -> ${event.data.route}")
-                        navController.navigate(route = event.data.route)
+                        Timber.d("screen nav event collected -> ${event.data.route}")
+                        if (event.data.route != LoginScreenNavigation.destination)
+                            navController.navigate(route = event.data.route)
+                        else
+                            context.startActivity(Intent(context, LoginActivity::class.java))
                     }
                     AccountSwitched -> navController.popBackStack(
                         SubredditScreenNavigation.destination,
@@ -119,7 +123,6 @@ fun HomeScreen(
                         commentsScreenComposable(publishEvent)
                         userScreenComposable(publishEvent)
                         settingScreenComposable(publishEvent)
-                        loginScreenComposable(publishEvent)
                         videoScreenComposable(publishEvent)
                         imageScreenComposable(publishEvent)
                     }
@@ -128,6 +131,7 @@ fun HomeScreen(
         }
     }
 }
+
 @ExperimentalMaterialNavigationApi
 private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {
     bottomSheet(
@@ -161,15 +165,6 @@ private fun NavGraphBuilder.searchScreenComposable(publishEvent: (Event) -> Unit
         route = SearchNavigation.destination,
         arguments = SearchNavigation.args
     ) { SearchScreen(publishEvent) }
-}
-
-private fun NavGraphBuilder.loginScreenComposable(publishEvent: (Event) -> Unit) {
-    composable(
-        route = LoginScreenNavigation.destination,
-        arguments = LoginScreenNavigation.args,
-    ) {
-        LoginScreen(publishEvent)
-    }
 }
 
 private fun NavGraphBuilder.userScreenComposable(publishEvent: (Event) -> Unit) {
@@ -215,24 +210,26 @@ private fun NavGraphBuilder.settingScreenComposable(publishEvent: (Event) -> Uni
     ) { SettingsScreen() }
 }
 
-private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit){
+private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
         route = VideoScreenNavigation.destination,
         arguments = VideoScreenNavigation.args
-    ){
+    ) {
         val url = it.arguments?.getString(VideoScreenNavigation.URL_KEY) ?: "#"
         VideoScreen(publishEvent = publishEvent, videoUrl = url)
     }
 }
-private fun NavGraphBuilder.imageScreenComposable(publishEvent: (Event) -> Unit){
+
+private fun NavGraphBuilder.imageScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
         route = ImageScreenNavigation.destination,
         arguments = ImageScreenNavigation.args
-    ){
+    ) {
         val url = it.arguments?.getString(ImageScreenNavigation.URL_KEY) ?: "#"
         ImagePreviewScreen(publishEvent = publishEvent, imageUrl = url)
     }
 }
+
 sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: String) {
     object Posts : UpdootBottomNavigationItem(Outlined.Home, SubredditScreenNavigation.destination)
     object Accounts :

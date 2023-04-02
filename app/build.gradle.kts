@@ -114,7 +114,7 @@ dependencies {
     testImplementation(libs.test.kotlin)
     testImplementation(libs.test.junit)
     testImplementation(libs.test.mockk)
-    implementation(libs.chucker)
+    debugImplementation(libs.chucker)
     releaseImplementation(libs.chuckerNoOp)
 }
 

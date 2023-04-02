@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
@@ -64,7 +65,7 @@ class LoginViewModel @Inject constructor(
                 .appendQueryParameter("duration", "permanent")
                 .appendQueryParameter("scope", Constants.scopes)
                 .build()
-                .toString()
+                .toString().also { Timber.d("generated auth url $it") }
         }
 
     fun parseUrl(uri: Uri?) {
@@ -99,6 +100,7 @@ class LoginViewModel @Inject constructor(
             val account = redditAPI.userIdentity()
             _loginState.value = FetchingUserName(Finished(account))
             saveAccount(account, token)
+            _loginState.value = LoggedIn
         } catch (exception: Exception) {
             exception.printStackTrace()
             _loginState.value = Error(exception.message!!)
