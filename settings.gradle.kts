@@ -17,6 +17,8 @@ dependencyResolutionManagement {
             version("hilt-jetpack-version", "1.0.0")
             version("coil-version", "2.2.2")
             version("kotlinVersion", "1.8.10")
+            version("chuckerVersion","3.5.2")
+            version("accompanistVersion","0.30.0")
             //android core libs
             library("appcompat", "androidx.appcompat:appcompat:1.4.2")
             library("core-ktx", "androidx.core:core-ktx:1.9.0")
@@ -41,7 +43,7 @@ dependencyResolutionManagement {
                 "androidx.constraintlayout:constraintlayout-compose:1.0.1"
             )
             library("compose-Material3","androidx.compose.material3:material3:1.0.1")
-            library("compose-flowRow","com.google.accompanist","accompanist-flowlayout").version("0.30.0")
+            library("compose-flowRow","com.google.accompanist","accompanist-flowlayout").versionRef("accompanistVersion")
             bundle(
                 "compose", listOf(
                     "compose-runtime",
@@ -159,8 +161,8 @@ dependencyResolutionManagement {
             library("hiltComposeNavigation", "androidx.hilt:hilt-navigation-compose:1.0.0")
             library(
                 "accompanistNavigationMaterial",
-                "com.google.accompanist:accompanist-navigation-material:0.21.0-beta"
-            )
+                "com.google.accompanist","accompanist-navigation-material"
+            ).versionRef("accompanistVersion")
             bundle(
                 "navigation", listOf(
                     "composeNavigation", "hiltComposeNavigation", "accompanistNavigationMaterial"
@@ -175,6 +177,9 @@ dependencyResolutionManagement {
             ).versionRef("kotlinVersion")
             library("test-junit", "junit:junit:4.13.1")
             library("timber", "com.jakewharton.timber:timber:5.0.1")
+
+            library("chucker","com.github.chuckerteam.chucker","library").versionRef("chuckerVersion")
+            library("chuckerNoOp","com.github.chuckerteam.chucker","library-no-op").versionRef("chuckerVersion")
         }
     }
 }

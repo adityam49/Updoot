@@ -94,24 +94,27 @@ dependencies {
     kapt(libs.hilt.android.compiler)
 
     implementation(libs.bundles.coil)
+
     implementation(libs.exoPlayer)
 
     implementation(libs.dataStore)
+
     implementation(libs.workManager)
+
     implementation(libs.jsoup)
+
     debugImplementation(libs.leakCanary)
+
     implementation(libs.bundles.crashlytics)
+
     implementation(libs.bundles.navigation)
+
     implementation(libs.timber)
+
     testImplementation(libs.test.kotlin)
     testImplementation(libs.test.junit)
     testImplementation(libs.test.mockk)
-
-    //todo remove
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    val glide_version = rootProject.extra.get("glide_version") as String
-    //glide
-    implementation("com.github.bumptech.glide:glide:$glide_version")
-    kapt("com.github.bumptech.glide:compiler:$glide_version")
+    implementation(libs.chucker)
+    releaseImplementation(libs.chuckerNoOp)
 }
 
