@@ -7,9 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +74,6 @@ private fun SearchBar(
     query: String,
 ) {
     Surface(
-        elevation = 8.dp,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(50)
     ) {
@@ -122,12 +123,10 @@ private fun SubredditItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(text = subreddit.subredditName)
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
-                Text(
-                    text = "${subreddit.subscriberCount} ${" • " + subreddit.age}",
-                    style = MaterialTheme.typography.caption
-                )
-            }
+            Text(
+                text = "${subreddit.subscriberCount} ${" • " + subreddit.age}",
+                style = MaterialTheme.typography.labelMedium
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
     }

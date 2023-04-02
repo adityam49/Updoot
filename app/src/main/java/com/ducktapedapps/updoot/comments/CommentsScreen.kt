@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
-import com.ducktapedapps.navigation.NavigationDirections
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.StaticLinkPreview
 import com.ducktapedapps.updoot.data.local.model.FullComment
@@ -113,16 +113,14 @@ private fun TextPost(text: String) {
             .padding(8.dp)
             .fillMaxWidth()
             .wrapContentHeight()
-            .border(0.5.dp, MaterialTheme.colors.onBackground, RoundedCornerShape(8.dp))
+            .border(0.5.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp)),
         content = {
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     text = text,
                     modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
                 )
-            }
         }
     )
 }
@@ -145,9 +143,9 @@ fun ContentImage(image: ImageMedia, openImage: () -> Unit) {
 @Composable
 fun Header(post: PostUiModel) {
     Text(
-        color = if (post.isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
+        color = if (post.isSticky) MaterialTheme.colorScheme.StickyPostColor else MaterialTheme.colorScheme.onBackground,
         text = post.title,
-        style = MaterialTheme.typography.h5,
+        style = MaterialTheme.typography.headlineLarge,
         modifier = Modifier.padding(8.dp)
     )
 }

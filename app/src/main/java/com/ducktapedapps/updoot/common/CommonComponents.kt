@@ -2,10 +2,10 @@ package com.ducktapedapps.updoot.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,11 +23,11 @@ import com.ducktapedapps.updoot.utils.getCompactCountAsString
 fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Modifier) {
     Text(
         text = upVotes?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
-        style = MaterialTheme.typography.overline,
+        style = MaterialTheme.typography.labelMedium,
         color = when (userHasUpVoted) {
             true -> upVoteColor
             false -> downVoteColor
-            null -> MaterialTheme.colors.onBackground
+            null -> MaterialTheme.colorScheme.onBackground
         },
         modifier = modifier
     )
@@ -35,11 +35,14 @@ fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Mo
 
 @Composable
 fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
         if (gildings.silverAwardCount != 0) {
             Text(
                 text = gildings.silverAwardCount.toString(),
-                style = MaterialTheme.typography.overline
+                style = MaterialTheme.typography.labelMedium
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_silver_gilding_14dp),
@@ -50,7 +53,7 @@ fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
         if (gildings.goldAwardCount != 0) {
             Text(
                 text = gildings.goldAwardCount.toString(),
-                style = MaterialTheme.typography.overline
+                style = MaterialTheme.typography.labelSmall
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_gold_gilding_14dp),
@@ -61,7 +64,7 @@ fun AllGildings(gildings: Gildings, modifier: Modifier = Modifier) {
         if (gildings.platinumAwardCount != 0) {
             Text(
                 text = gildings.platinumAwardCount.toString(),
-                style = MaterialTheme.typography.overline
+                style = MaterialTheme.typography.labelMedium
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_platinum_gilding_14dp),

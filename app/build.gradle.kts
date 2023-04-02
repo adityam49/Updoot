@@ -8,7 +8,7 @@ plugins {
     id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.android")
 }
-
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = 33
     defaultConfig {
@@ -20,13 +20,21 @@ android {
     buildTypes {
         getByName("debug") {
             buildConfigField("String", "CLIENT_ID", project.property("UPDOOT_CLIENT_ID") as String)
-            buildConfigField("String", "REDIRECT_URI", project.property("UPDOOT_REDIRECT_URI") as String)
+            buildConfigField(
+                "String",
+                "REDIRECT_URI",
+                project.property("UPDOOT_REDIRECT_URI") as String
+            )
         }
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             buildConfigField("String", "CLIENT_ID", project.property("UPDOOT_CLIENT_ID") as String)
-            buildConfigField("String", "REDIRECT_URI", project.property("UPDOOT_REDIRECT_URI") as String)
+            buildConfigField(
+                "String",
+                "REDIRECT_URI",
+                project.property("UPDOOT_REDIRECT_URI") as String
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -43,13 +51,10 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
-    buildFeatures {
-        compose = true
-    }
+    buildFeatures.compose = true
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
-    }
+    composeOptions.kotlinCompilerExtensionVersion = "1.4.4"
+
     namespace = "com.ducktapedapps.updoot"
 }
 
@@ -57,9 +62,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf(
-            "-opt-in=kotlinx.coroutines.FlowPreview",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"
         )
     }

@@ -2,10 +2,10 @@ package com.ducktapedapps.updoot.common
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +16,8 @@ import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun OptionsDialog(
-        dismiss: () -> Unit,
-        options: List<MenuItemModel>,
+    dismiss: () -> Unit,
+    options: List<MenuItemModel>,
 ) {
     Dialog(
         onDismissRequest = dismiss,
@@ -29,9 +29,15 @@ fun OptionsDialog(
         Card(modifier = Modifier.fillMaxWidth()) {
             Column {
                 options.forEach {
-                    DropdownMenuItem(onClick = it.onClick) {
-                        MenuItem(menuItemModel = it)
-                    }
+                    DropdownMenuItem(
+                        onClick = it.onClick,
+                        trailingIcon = {
+                            Icon(painterResource(id = it.icon), it.title)
+                        },
+                        text = {
+                            Text(text = it.title)
+                        }
+                    )
                 }
             }
         }
@@ -57,8 +63,8 @@ fun MenuItem(menuItemModel: MenuItemModel) {
 }
 
 data class MenuItemModel(
-        val onClick: () -> Unit,
-        val title: String,
-        @DrawableRes val icon: Int,
+    val onClick: () -> Unit,
+    val title: String,
+    @DrawableRes val icon: Int,
 )
 

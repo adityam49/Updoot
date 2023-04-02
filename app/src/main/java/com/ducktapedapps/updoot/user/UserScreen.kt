@@ -8,9 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -86,7 +86,7 @@ fun UserInfoScreen(
                                 )
                             )
                         )
-                    }
+                    },
                 )
             }
         }
@@ -116,14 +116,14 @@ fun SectionChip(
     Surface(
         color =
         if (isSelected)
-            MaterialTheme.colors.ScoreBackground
+            MaterialTheme.colorScheme.ScoreBackground
         else
-            MaterialTheme.colors.surface,
+            MaterialTheme.colorScheme.surface,
         contentColor =
         if (isSelected)
-            MaterialTheme.colors.ColorOnScoreBackground
+            MaterialTheme.colorScheme.ColorOnScoreBackground
         else
-            MaterialTheme.colors.onSurface,
+            MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
             .padding(8.dp)
             .wrapContentSize()
@@ -133,7 +133,7 @@ fun SectionChip(
     ) {
         Text(
             text = section.name,
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(8.dp)
         )
     }
@@ -145,7 +145,7 @@ fun UserSections(
     currentSection: UserSection,
     onClick: (UserSection) -> Unit,
 ) {
-    Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colors.background) {
+    Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.background) {
         LazyRow {
             items(sections) {
                 SectionChip(
@@ -175,7 +175,7 @@ fun UserTrophies(trophies: List<Trophy>) {
                 Text(
                     text = trophy.name,
                     modifier = Modifier.padding(top = 8.dp),
-                    style = MaterialTheme.typography.overline
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
 

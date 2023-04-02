@@ -7,22 +7,19 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
@@ -32,15 +29,16 @@ import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.*
 import com.ducktapedapps.updoot.theme.StickyPostColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import com.ducktapedapps.updoot.utils.getCompactDateAsString
 import kotlin.math.absoluteValue
 
 
 @Composable
-fun CompactPost(
+fun LargePost(
+    modifier: Modifier = Modifier,
     post: PostUiModel,
-    publishEvent: (Event) -> Unit
+    publishEvent: (Event) -> Unit,
 ) {
+    val boundaryPadding = 16.dp
     val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
     val list = listOf(
@@ -53,65 +51,105 @@ fun CompactPost(
             publishEvent(post.openAuthorScreen())
         }, post.author, R.drawable.ic_account_circle_24dp),
     )
+    if (optionsDialog) OptionsDialog(
+        dismiss = { setOptionsDialogVisibility(false) },
+        options = list
+    )
+    Column(
+        modifier.combinedClickable(
+            onClick = { publishEvent(post.openComments()) },
+            onLongClick = { setOptionsDialogVisibility(true) })
+    ) {
+        SubmissionTitle(
+            title = post.title,
+            isSticky = post.isSticky,
+            modifier = Modifier.padding(
+                start = boundaryPadding,
+                end = boundaryPadding
+            )
+        )
 
+        LargePostMedia(
+            postMedia = post.postMedia,
+            modifier = Modifier
+                .padding(horizontal = boundaryPadding,vertical = boundaryPadding / 2)
+                .combinedClickable(
+                    onClick = { publishEvent(post.openPostMedia()) },
+                    onLongClick = { setOptionsDialogVisibility(true) }
+                )
+        )
+
+        FlowRow(
+            modifier = Modifier.padding(horizontal = boundaryPadding),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MetaData(post = post, modifier = Modifier.wrapContentSize())
+            AllGildings(gildings = post.gildings, modifier = Modifier.wrapContentSize())
+        }
+
+    }
+}
+
+@Composable
+fun CompactPost(
+    modifier: Modifier = Modifier,
+    post: PostUiModel,
+    publishEvent: (Event) -> Unit
+) {
+    val boundaryPadding = 16.dp
+    val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
+
+    val list = listOf(
+        MenuItemModel({
+            setOptionsDialogVisibility(false)
+            publishEvent(post.openSubreddit())
+        }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
+        MenuItemModel({
+            setOptionsDialogVisibility(false)
+            publishEvent(post.openAuthorScreen())
+        }, post.author, R.drawable.ic_account_circle_24dp),
+    )
     if (optionsDialog) OptionsDialog(
         options = list,
         dismiss = { setOptionsDialogVisibility(false) })
-    ConstraintLayout(
-        modifier = Modifier
+    Row(
+        modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .combinedClickable(
                 onClick = { publishEvent(post.openComments()) },
                 onLongClick = { setOptionsDialogVisibility(true) })
+
     ) {
-        val (mediaThumbnail, title, metaData, voteCounter, gildings) = createRefs()
         CompactMediaThumbnail(
             post = post,
             modifier = Modifier
+                .padding(start = boundaryPadding)
                 .clip(CircleShape)
-                .requiredSize(48.dp)
+                .size(48.dp)
                 .clickable(onClick = { publishEvent(post.openPostMedia()) })
-                .constrainAs(mediaThumbnail) {
-                    start.linkTo(parent.start, margin = 8.dp)
-                    top.linkTo(parent.top, margin = 8.dp)
-                    end.linkTo(title.start)
-                })
-        SubmissionTitle(
-            title = post.title,
-            isSticky = post.isSticky,
-            modifier = Modifier.constrainAs(title) {
-                start.linkTo(mediaThumbnail.end, 8.dp)
-                top.linkTo(parent.top, margin = 8.dp)
-                end.linkTo(voteCounter.start, margin = 8.dp)
-                bottom.linkTo(metaData.top, margin = 8.dp)
-                height = Dimension.wrapContent
-                width = Dimension.fillToConstraints
-            })
-
-        MetaData(post = post, modifier = Modifier.constrainAs(metaData) {
-            start.linkTo(title.start)
-            top.linkTo(title.bottom, margin = 8.dp)
-            bottom.linkTo(parent.bottom, margin = 8.dp)
-            end.linkTo(gildings.start, margin = 8.dp)
-            width = Dimension.fillToConstraints
-            height = Dimension.wrapContent
-        })
-        VoteCounter(
-            upVotes = post.upVotes,
-            userHasUpVoted = post.userHasUpVoted,
-            modifier = Modifier.constrainAs(voteCounter) {
-                top.linkTo(parent.top, margin = 8.dp)
-                end.linkTo(parent.end, margin = 8.dp)
-                start.linkTo(title.end)
-                width = Dimension.wrapContent
-            }
         )
-        AllGildings(gildings = post.gildings, modifier = Modifier.constrainAs(gildings) {
-            end.linkTo(parent.end, margin = 8.dp)
-            top.linkTo(metaData.top)
-            bottom.linkTo(metaData.bottom)
-        })
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(start = boundaryPadding, end = boundaryPadding)
+        ) {
+            SubmissionTitle(
+                title = post.title,
+                isSticky = post.isSticky,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MetaData(post = post, modifier = Modifier.wrapContentSize())
+                AllGildings(gildings = post.gildings, modifier = Modifier.wrapContentSize())
+            }
+        }
     }
 }
 
@@ -130,6 +168,7 @@ fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
                     contentDescription = stringResource(R.string.post_thumbnail),
                     modifier = modifier.clip(shape = CircleShape),
                     error = painterResource(id = post.thumbnail.fallbackLocalThumbnail),
+                    contentScale = ContentScale.FillBounds,
                 )
 
             is Thumbnail.LocalThumbnail -> Image(
@@ -141,119 +180,40 @@ fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
     }
 }
 
-
 @Composable
 fun SubmissionTitle(
     title: String,
     isSticky: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
-        Text(
-            text = title,
-            color = if (isSticky) MaterialTheme.colors.StickyPostColor else MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h5,
-            modifier = modifier
-        )
-    }
+    Text(
+        text = title,
+        color = if (isSticky) MaterialTheme.colorScheme.StickyPostColor else MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun MetaData(post: PostUiModel, modifier: Modifier) {
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
+    Row(modifier) {
         Text(
-            style = MaterialTheme.typography.caption,
-            text = "${post.subredditName} • ${getCompactCountAsString(post.replyCount.toLong())} Replies • ${
-                getCompactDateAsString(
-                    post.creationDate.time
-                )
-            }",
-            modifier = modifier
-        )
-    }
-}
-
-@Composable
-fun LargePost(
-    post: PostUiModel,
-    publishEvent: (Event) -> Unit,
-) {
-    val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
-
-    val list = listOf(
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openSubreddit())
-        }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openAuthorScreen())
-        }, post.author, R.drawable.ic_account_circle_24dp),
-    )
-    if (optionsDialog) OptionsDialog(
-        dismiss = { setOptionsDialogVisibility(false) },
-        options = list
-    )
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .combinedClickable(
-                onClick = { publishEvent(post.openComments()) },
-                onLongClick = { setOptionsDialogVisibility(true) })
-    ) {
-        val (media, title, metaData, voteCounter, gildings) = createRefs()
-        SubmissionTitle(
-            title = post.title,
-            isSticky = post.isSticky,
-            modifier = Modifier.constrainAs(title) {
-                start.linkTo(parent.start, margin = 8.dp)
-                top.linkTo(parent.top, margin = 8.dp)
-                end.linkTo(voteCounter.start, margin = 8.dp)
-                bottom.linkTo(media.top, margin = 8.dp)
-                height = Dimension.wrapContent
-                width = Dimension.fillToConstraints
-            })
-
-        LargePostMedia(
-            postMedia = post.postMedia,
+            style = MaterialTheme.typography.labelMedium,
+            text = "${post.subredditName} • ${getCompactCountAsString(post.replyCount.toLong())} Replies • ",
             modifier = Modifier
-                .constrainAs(media) {
-                    start.linkTo(parent.start)
-                    top.linkTo(title.bottom)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(metaData.top)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.wrapContent
-                }
-                .combinedClickable(
-                    onClick = { publishEvent(post.openPostMedia()) },
-                    onLongClick = { setOptionsDialogVisibility(true) }
-                )
         )
-
-        MetaData(post = post, modifier = Modifier.constrainAs(metaData) {
-            start.linkTo(media.start, margin = 8.dp)
-            top.linkTo(media.bottom, margin = 8.dp)
-            bottom.linkTo(parent.bottom, margin = 16.dp)
-            width = Dimension.fillToConstraints
-            height = Dimension.wrapContent
-        })
         VoteCounter(
             upVotes = post.upVotes,
             userHasUpVoted = post.userHasUpVoted,
-            modifier = Modifier.constrainAs(voteCounter) {
-                top.linkTo(title.top)
-                end.linkTo(parent.end, margin = 8.dp)
-                start.linkTo(title.end)
-                width = Dimension.wrapContent
-            }
+            modifier = Modifier
         )
-        AllGildings(gildings = post.gildings, modifier = Modifier.constrainAs(gildings) {
-            end.linkTo(parent.end, margin = 8.dp)
-            top.linkTo(metaData.top)
-            bottom.linkTo(metaData.bottom)
-        })
+        if (post.gildings.hasGilding()) {
+            Text(
+                style = MaterialTheme.typography.labelMedium,
+                text = " • ",
+                modifier = Modifier
+            )
+        }
     }
 }
 
@@ -286,7 +246,6 @@ fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
         error = painterResource(id = R.drawable.ic_image_error_24dp),
         contentDescription = stringResource(id = R.string.submission_image),
         modifier = modifier
-            .padding(8.dp)
             .fillMaxWidth()
             .aspectRatio(if (ratio < 1.0) 1f else ratio)
             .clip(RoundedCornerShape(8.dp)),
@@ -297,23 +256,20 @@ fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
 fun TextPostMedia(text: String, modifier: Modifier) {
     Box(
         modifier = modifier
-            .padding(8.dp)
             .clip(RoundedCornerShape(8.dp))
             .border(
                 0.5.dp,
-                MaterialTheme.colors.onBackground.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 RoundedCornerShape(8.dp)
             ),
     ) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.body2,
-                modifier = Modifier.padding(8.dp),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(8.dp),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

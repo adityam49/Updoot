@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.ducktapedapps.updoot.subreddit
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -8,11 +11,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ducktapedapps.navigation.Event
@@ -38,17 +45,20 @@ fun SubredditScreen(
     }
     val viewState = viewModel.viewState.collectAsState()
     val listState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SubredditTopBar(
                 modifier = Modifier.fillMaxWidth(),
-                subredditName = viewState.value.subredditName
+                subredditName = viewState.value.subredditName,
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier,
-                backgroundColor = MaterialTheme.colors.primary,
+                containerColor = MaterialTheme.colorScheme.primary,
                 onClick = {
                     publishEvent(
                         ScreenNavigationEvent(
@@ -70,18 +80,23 @@ fun SubredditScreen(
     }
 }
 
-
 @Composable
 private fun SubredditTopBar(
     modifier: Modifier = Modifier,
     subredditName: String,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    Surface(modifier = modifier, elevation = 8.dp) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) { Text(text = subredditName) }
-    }
+    TopAppBar(
+        modifier = modifier,
+        title = {
+            Text(
+                text = subredditName,
+                style = MaterialTheme.typography.titleLarge,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        scrollBehavior = scrollBehavior,
+    )
 }
 
 @Composable
@@ -93,16 +108,35 @@ private fun SubredditFeed(
     publishEvent: (Event) -> Unit,
     listState: LazyListState,
 ) {
-    LazyColumn(modifier = modifier, state = listState) {
-        itemsIndexed(feed.content) { index, post ->
+    LazyColumn(
+        modifier = modifier,
+        state = listState,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        itemsIndexed(
+            items = feed.content,
+            key = { _, item -> item.id }
+        ) { index, post ->
             LaunchedEffect(key1 = Unit) {
                 with(feed) {
                     if (index >= content.size - 10 && footer is UnLoadedPage) loadPage()
                 }
             }
             when (postViewType) {
-                COMPACT -> CompactPost(post = post, publishEvent = publishEvent)
-                LARGE -> LargePost(post = post, publishEvent = publishEvent)
+                COMPACT -> CompactPost(
+                    post = post,
+                    publishEvent = publishEvent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                )
+                LARGE -> LargePost(
+                    post = post,
+                    publishEvent = publishEvent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                )
             }
         }
         item {

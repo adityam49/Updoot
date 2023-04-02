@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 enableFeaturePreview("VERSION_CATALOGS")
 include("app")
 include("navigation")
@@ -33,11 +35,13 @@ dependencyResolutionManagement {
             library(
                 "compose-foundation-layout", "androidx.compose.foundation", "foundation-layout"
             ).withoutVersion()
-            library("compose-material", "androidx.compose.material", "material").withoutVersion()
+//            library("compose-material", "androidx.compose.material", "material").withoutVersion()
             library(
                 "compose-constraintlayout",
                 "androidx.constraintlayout:constraintlayout-compose:1.0.1"
             )
+            library("compose-Material3","androidx.compose.material3:material3:1.0.1")
+            library("compose-flowRow","com.google.accompanist","accompanist-flowlayout").version("0.30.0")
             bundle(
                 "compose", listOf(
                     "compose-runtime",
@@ -45,12 +49,12 @@ dependencyResolutionManagement {
                     "compose-ui-tooling",
                     "compose-foundation",
                     "compose-foundation-layout",
-                    "compose-material",
-                    "compose-constraintlayout"
+                    "compose-constraintlayout",
+                    "compose-Material3",
+                    "compose-flowRow"
                 )
             )
 
-            //todo remove when view based ui is removed
             library(
                 "lifecycle-compose",
                 "androidx.lifecycle",

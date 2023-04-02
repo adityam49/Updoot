@@ -5,18 +5,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.ducktapedapps.updoot.subreddit.Thumbnail
 
 @Composable
@@ -27,11 +25,10 @@ fun StaticLinkPreview(
 ) {
     Row(
         modifier = modifier
-            .padding(8.dp)
             .clip(RoundedCornerShape(8.dp))
             .border(
                 0.5.dp,
-                MaterialTheme.colors.onBackground.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 RoundedCornerShape(8.dp)
             ),
         verticalAlignment = Alignment.Top
@@ -39,7 +36,7 @@ fun StaticLinkPreview(
         when (thumbnail) {
             is Thumbnail.Remote ->
                 Icon(
-                    painter = rememberImagePainter(data = thumbnail.fallbackLocalThumbnail),
+                    painter = painterResource(thumbnail.fallbackLocalThumbnail),
                     contentDescription = "Link preview icon",
                     modifier = Modifier
                     .size(48.dp)
@@ -76,15 +73,13 @@ fun StaticLinkPreview(
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            Uri.parse(url).authority?.run { Text(text = this, style = MaterialTheme.typography.h6) }
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Uri.parse(url).authority?.run { Text(text = this, style = MaterialTheme.typography.headlineLarge) }
                 Text(
                     text = url,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.labelMedium
                 )
-            }
         }
     }
 }

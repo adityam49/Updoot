@@ -8,14 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,14 +112,12 @@ private fun AddAccountItem(addAccount: () -> Unit) {
             contentDescription = Icons.Default.AddCircle.name,
             modifier = Modifier.size(48.dp)
         )
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
-            Text(
-                text = stringResource(id = R.string.add_account),
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .weight(1f)
-            )
-        }
+        Text(
+            text = stringResource(id = R.string.add_account),
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f)
+        )
     }
 }
 
@@ -137,7 +137,7 @@ private fun AccountMenuItem(
             }
             .padding(8.dp)
             .background(
-                color = MaterialTheme.colors.primary.copy(alpha = if (accountModel.isCurrent) 0.2f else 0f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = if (accountModel.isCurrent) 0.2f else 0f),
                 shape = RoundedCornerShape(50)
             )
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
@@ -150,18 +150,18 @@ private fun AccountMenuItem(
             )
             is UserModel -> AsyncImage(
                 model = accountModel.userIcon,
-                error = painterResource(id =R.drawable.ic_account_circle_24dp),
+                error = painterResource(id = R.drawable.ic_account_circle_24dp),
                 contentDescription = Icons.Default.AccountCircle.name,
-                modifier = Modifier.clip(shape = CircleShape).size(48.dp)
+                modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .size(48.dp)
             )
         }
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
-            Text(
-                text = accountModel.name, modifier = Modifier
-                    .padding(start = 16.dp)
-                    .weight(1f)
-            )
-        }
+        Text(
+            text = accountModel.name, modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f)
+        )
 
         when (accountModel) {
             is UserModel -> {

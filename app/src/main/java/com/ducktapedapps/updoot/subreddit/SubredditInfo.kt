@@ -6,9 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,17 +116,15 @@ private fun SubredditInfoHeader(
                     .size(48.dp)
                     .clip(shape = CircleShape),
             )
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    modifier = Modifier.padding(start = 16.dp),
-                    text = (subscribers?.run { getCompactCountAsString(this) + " Subscribers " }
-                        ?: "") +
-                            (activeMembers?.run { " • " + getCompactCountAsString(this) + " active " }
-                                ?: "") +
-                            created.run { "\n" + getCompactAge(time) },
-                    style = MaterialTheme.typography.caption
-                )
-            }
+            Text(
+                modifier = Modifier.padding(start = 16.dp),
+                text = (subscribers?.run { getCompactCountAsString(this) + " Subscribers " }
+                    ?: "") +
+                        (activeMembers?.run { " • " + getCompactCountAsString(this) + " active " }
+                            ?: "") +
+                        created.run { "\n" + getCompactAge(time) },
+                style = MaterialTheme.typography.labelSmall
+            )
             Button(
                 onClick = { if (isSubscribed != null) toggleSubscription() },
                 enabled = isSubscribed != null
@@ -149,7 +146,7 @@ private fun SubmissionViewType(
 ) {
     DrawerCard(modifier = modifier) {
         Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = "View Type", style = MaterialTheme.typography.caption)
+            Text(text = "View Type", style = MaterialTheme.typography.labelMedium)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 8.dp)
@@ -179,7 +176,7 @@ fun SelectableViewType(
             .wrapContentSize()
             .border(
                 width = 2.dp,
-                color = contentColorFor(MaterialTheme.colors.BottomDrawerColor.copy(alpha = if (isSelected) 1f else 0.1f)),
+                color = MaterialTheme.colorScheme.BottomDrawerColor.copy(alpha = if (isSelected) 1f else 0.1f),
                 shape = RoundedCornerShape(4.dp)
             )
             .clickable { selectViewType() }
@@ -205,7 +202,7 @@ fun DrawerCard(
         modifier = modifier
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colors.SurfaceOnDrawer,
+        color = MaterialTheme.colorScheme.SurfaceOnDrawer,
         content = content
     )
 }
@@ -221,7 +218,7 @@ private fun Info(modifier: Modifier, description: String?) {
             item {
                 Text(
                     text = description ?: "",
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             item { Spacer(modifier = Modifier.padding(100.dp)) }

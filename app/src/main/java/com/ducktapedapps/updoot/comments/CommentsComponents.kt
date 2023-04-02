@@ -4,7 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -60,7 +60,7 @@ private val commentData = FullComment(
 private fun CommentBody(text: String, modifier: Modifier) {
     Text(
             text = text,
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -94,12 +94,12 @@ private fun CommentHeader(
 private fun UserName(username: String, isOp: Boolean) {
     ColoredTag(
             color =
-            if (isOp) MaterialTheme.colors.primary
-            else MaterialTheme.colors.surface
+            if (isOp) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surface
     ) {
         Text(
                 text = username,
-                style = MaterialTheme.typography.overline,
+                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp)
         )
     }
@@ -107,12 +107,12 @@ private fun UserName(username: String, isOp: Boolean) {
 
 @Composable
 private fun ReplyCounter(replyCount: Int) {
-    val background = MaterialTheme.colors.ScoreBackground
+    val background = MaterialTheme.colorScheme.ScoreBackground
     ColoredTag(color = background) {
         Text(
-                color = MaterialTheme.colors.ColorOnScoreBackground,
+                color = MaterialTheme.colorScheme.ColorOnScoreBackground,
                 text = "+ ${getCompactCountAsString(replyCount.toLong())}",
-                style = MaterialTheme.typography.overline,
+                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp)
         )
     }
@@ -122,10 +122,10 @@ private fun ReplyCounter(replyCount: Int) {
 @Composable
 private fun ColoredTag(
         color: Color,
-        content: @Composable () -> Unit,
+        content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-            backgroundColor = color,
+             colors = CardDefaults.cardColors() ,
             shape = RoundedCornerShape(20),
             modifier = Modifier.wrapContentSize(),
             content = content
@@ -136,7 +136,7 @@ private fun ColoredTag(
 @Preview
 private fun PreviewComment() {
     UpdootTheme {
-        Surface(color = MaterialTheme.colors.background) {
+        Surface(color = MaterialTheme.colorScheme.background) {
             FullComment(comment = commentData, onClickComment = {}, threadSpacingWidth = 6.dp, threadWidth = 2.dp, singleThreadMode = false)
         }
     }
@@ -146,7 +146,7 @@ private fun PreviewComment() {
 @Preview
 private fun PreviewDarkComment() {
     UpdootTheme(isDarkTheme = true) {
-        Surface(color = MaterialTheme.colors.background) {
+        Surface(color = MaterialTheme.colorScheme.background) {
             FullComment(comment = commentData, onClickComment = {}, threadSpacingWidth = 6.dp, threadWidth = 2.dp, singleThreadMode = false)
         }
     }
@@ -240,7 +240,7 @@ fun MoreComment(
         ) {
             Text(
                     text = "Load ${data.children.size} comments",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -257,7 +257,7 @@ private fun IndentationThread(
         spacingWidth: Dp,
 ) {
     if (indentLevel == 0) return
-    val isLight = MaterialTheme.colors.isLight
+    val isLight = MaterialTheme.isLightTheme()
     Canvas(modifier = modifier.width(((spacingWidth.value + threadWidth.value) * indentLevel).dp), onDraw = {
         if (singleThreadMode) drawLine(
                 color = if (isLight) LightThreadColors[indentLevel - 1] else DarkThreadColors[indentLevel - 1],

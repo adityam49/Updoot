@@ -1,10 +1,12 @@
 package com.ducktapedapps.updoot.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +45,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterialNavigationApi
 @Composable
 fun HomeScreen(
@@ -77,15 +80,15 @@ fun HomeScreen(
             }
     }
 
-    Surface(color = MaterialTheme.colors.background) {
+    Surface(color = MaterialTheme.colorScheme.background) {
         ModalBottomSheetLayout(bottomSheetNavigator) {
             Scaffold(
                 bottomBar = {
-                    BottomNavigation {
+                    NavigationBar {
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentDestination = navBackStackEntry?.destination
                         UpdootBottomNavigationItem.getItems().forEach { bottomNavItem ->
-                            BottomNavigationItem(
+                            NavigationBarItem(
                                 icon = { Icon(bottomNavItem.icon, bottomNavItem.icon.name) },
                                 selected = currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true,
                                 onClick = {
@@ -125,8 +128,6 @@ fun HomeScreen(
         }
     }
 }
-
-
 @ExperimentalMaterialNavigationApi
 private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {
     bottomSheet(

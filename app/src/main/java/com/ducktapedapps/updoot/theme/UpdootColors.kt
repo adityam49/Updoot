@@ -1,8 +1,8 @@
 package com.ducktapedapps.updoot.theme
 
-import androidx.compose.material.Colors
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
@@ -15,16 +15,13 @@ val saveColor = Color(0xFFFFB100)
 
 val darkGray = Color(0xFF171717)
 val lightBlue = Color(0xFF83b9ff)
-val lightBlueVariant = Color(0xFF3C62CB)
 val darkBlue = Color(0xFF2979FF)
-val darkBlueVariant = Color(0xFF2979FF)
 val lightGray = Color(0xFF363636)
 val darkRed = Color(0xFFF44336)
 val lightRed = Color(0xFFFF7961)
 
-val UpdootLightColors = lightColors(
+val UpdootLightColors = lightColorScheme(
         primary = darkBlue,
-        primaryVariant = darkBlueVariant,
         onPrimary = Color.White,
         onSurface = Color.Black,
         secondary = Color.White,
@@ -33,9 +30,8 @@ val UpdootLightColors = lightColors(
         onError = Color.White
 )
 
-val UpdootDarkColors = darkColors(
+val UpdootDarkColors = darkColorScheme(
         primary = lightBlue,
-        primaryVariant = lightBlueVariant,
         onPrimary = Color.Black,
         surface = lightGray,
         onSurface = Color.White,
@@ -47,24 +43,24 @@ val UpdootDarkColors = darkColors(
 )
 
 
-val @Composable Colors.BottomDrawerColor: Color
+val @Composable ColorScheme.BottomDrawerColor: Color
         get() = UpdootDarkColors.surface
 
 
-val @Composable Colors.SurfaceOnDrawer: Color
+val @Composable ColorScheme.SurfaceOnDrawer: Color
         get() = Color(0xFF4F4F4F)
 
 
-val @Composable Colors.ScoreBackground: Color
-        get() = if (isLight) Color(0xFFffd700) else Color(0xFFf9d276)
+val @Composable ColorScheme.ScoreBackground: Color
+        get() = Color(0xFFf9d276)
 
 
-val @Composable Colors.ColorOnScoreBackground: Color
+val @Composable ColorScheme.ColorOnScoreBackground: Color
         get() = Color.Black
 
 
-val @Composable Colors.StickyPostColor: Color
-        get() = if (isLight) Color(0xFF388E3C) else Color(0xFF69F0AE)
+val @Composable ColorScheme.StickyPostColor: Color
+        get() =  Color(0xFF69F0AE)
 
 val LightThreadColors = arrayOf(
         Color(0xFF7b1fa2),

@@ -2,13 +2,17 @@ package com.ducktapedapps.updoot.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.MenuItemModel
 import com.ducktapedapps.updoot.common.OptionsDialog
@@ -60,11 +64,9 @@ fun SettingsRow(
         .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
-            Text(text = title, style = MaterialTheme.typography.h5)
+            Text(text = title, style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.padding(8.dp))
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
-                Text(text = subTitle, style = MaterialTheme.typography.subtitle2)
-            }
+            Text(text = subTitle, style = MaterialTheme.typography.labelMedium)
         }
 
         controlUiElement()

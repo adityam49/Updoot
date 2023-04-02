@@ -5,11 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +53,7 @@ fun SubscriptionsScreen(
 
 @Composable
 fun SubscriptionsAppBar(syncSubscriptions: () -> Unit) {
-    Surface(modifier = Modifier.fillMaxWidth(), elevation = 8.dp) {
+    Surface(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,15 +87,11 @@ fun SubredditItem(subreddit: SubscriptionSubredditUiModel, openSubreddit: (Strin
                 .clip(shape = CircleShape),
         )
         Column {
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
-                Text(text = subreddit.subredditName, style = MaterialTheme.typography.body1)
-            }
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
-                Text(
-                    text = getCompactAge(subreddit.created.time),
-                    style = MaterialTheme.typography.caption
-                )
-            }
+            Text(text = subreddit.subredditName, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = getCompactAge(subreddit.created.time),
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     }
 }

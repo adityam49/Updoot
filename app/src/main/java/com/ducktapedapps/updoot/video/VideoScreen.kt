@@ -6,13 +6,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +23,6 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -37,12 +35,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ducktapedapps.navigation.Event
-import com.ducktapedapps.updoot.R
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 private const val TAG = "VideoScreen"
 
@@ -78,15 +76,15 @@ fun VideoScreen(publishEvent: (Event) -> Unit, videoUrl: String) {
     val eventListener = object : Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             when (playbackState) {
-                STATE_IDLE -> Log.d(TAG, "onPlaybackStateChanged: state idel")
-                STATE_BUFFERING -> Log.d(TAG, "onPlaybackStateChanged: state buffer")
+                STATE_IDLE -> Timber.d("onPlaybackStateChanged: state idel")
+                STATE_BUFFERING -> Timber.d("onPlaybackStateChanged: state buffer")
                 STATE_READY -> {
                     videoState.value = videoState.value.copy(
                         finalPosition = exoPlayer.duration,
                         currentPosition = exoPlayer.currentPosition,
                         isPaused = !exoPlayer.isPlaying
                     )
-                    Log.d(TAG, "onPlaybackStateChanged: state ready")
+                    Timber.d("onPlaybackStateChanged: state ready")
                 }
                 STATE_ENDED -> {
                     exoPlayer.seekToDefaultPosition()
@@ -308,7 +306,7 @@ private fun TimeStamp(
     BasicText(
         modifier = modifier,
         text = text,
-        style = TextStyle(color = MaterialTheme.colors.onSurface)
+        style = TextStyle(color = MaterialTheme.colorScheme.onSurface)
     )
 }
 
@@ -318,8 +316,8 @@ private fun SeekBar(
     progress: Float,
     finishedStrokeWidth: Dp = 5.dp,
     unfinishedStrokeWidth: Dp = 3.dp,
-    finishedColor: Color = MaterialTheme.colors.onSurface,
-    unfinishedColor: Color = MaterialTheme.colors.primary,
+    finishedColor: Color = MaterialTheme.colorScheme.onSurface,
+    unfinishedColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     val seekBarStrokeWidth: Float
     val thumbRadius: Float
