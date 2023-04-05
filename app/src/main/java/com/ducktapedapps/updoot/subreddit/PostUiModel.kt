@@ -1,14 +1,12 @@
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.annotation.DrawableRes
+import android.webkit.URLUtil
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.NavigationDirections
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.data.local.model.Gildings
 import com.ducktapedapps.updoot.data.local.model.Post
 import com.ducktapedapps.updoot.subreddit.PostMedia.*
-import com.ducktapedapps.updoot.subreddit.Thumbnail.LocalThumbnail
-import com.ducktapedapps.updoot.subreddit.Thumbnail.Remote
 import java.net.URI
 import java.util.*
 
@@ -19,7 +17,7 @@ data class PostUiModel(
     val title: String,
     val upVotes: Int?,
     val userHasUpVoted: Boolean?,
-    val thumbnail: Thumbnail,
+    val thumbnail: List<Any>,
     val postMedia: PostMedia,
     val replyCount: Int,
     val creationDate: Date,
@@ -27,11 +25,6 @@ data class PostUiModel(
     val isNsfw: Boolean,
     val isSticky: Boolean,
 )
-
-sealed class Thumbnail {
-    data class Remote(val url: String, @DrawableRes val fallbackLocalThumbnail: Int) : Thumbnail()
-    data class LocalThumbnail(@DrawableRes val imageResource: Int) : Thumbnail()
-}
 
 sealed class PostMedia {
     data class TextMedia(val text: String) : PostMedia()
@@ -41,8 +34,8 @@ sealed class PostMedia {
         val width: Int,
     ) : PostMedia()
 
-    data class LinkMedia(val url: String, val thumbnail: Thumbnail) : PostMedia()
-    data class VideoMedia(val url: String, val thumbnail: Thumbnail) : PostMedia()
+    data class LinkMedia(val url: String, val thumbnail: List<Any>) : PostMedia()
+    data class VideoMedia(val url: String, val thumbnail: List<Any>) : PostMedia()
     object NoMedia : PostMedia()
 
     fun open(): Event {
@@ -80,22 +73,21 @@ fun Post.toUiModel(): PostUiModel = PostUiModel(
 )
 
 
-private fun Post.getThumbnail() = if (!postThumbnail.isNullOrBlank())
-    Remote(
-        url = postThumbnail,
-        fallbackLocalThumbnail = localThumbnail().imageResource
-    )
-else localThumbnail()
-
-private fun Post.localThumbnail() = LocalThumbnail(
-    when {
-        !mediaText.isNullOrBlank() -> R.drawable.ic_selftext_24dp
-        !mediaImage?.lowResUrl.isNullOrBlank() -> R.drawable.ic_image_error_24dp
-        !mediaVideo?.dashUrl.isNullOrBlank() -> R.drawable.ic_image_error_24dp
-        else -> R.drawable.ic_link_24dp
+private fun Post.getThumbnail() = buildList<Any> {
+    if (isNsfw) {
+        add(R.drawable.ic_nsfw_24dp)
     }
-)
+    if (!postThumbnail.isNullOrBlank() && URLUtil.isValidUrl(postThumbnail)) {
+        add(postThumbnail)
+    }
+    when {
+        !mediaText.isNullOrBlank() -> add(R.drawable.ic_selftext_24dp)
+        !mediaImage?.lowResUrl.isNullOrBlank() -> mediaImage?.lowResUrl?.let { add(it) }
+        else -> add(R.drawable.ic_link_24dp)
 
+    }
+    add(R.drawable.ic_image_error_24dp)
+}
 
 fun Post.toMedia(): PostMedia = with(URI.create(postContentUrl)) {
     when {

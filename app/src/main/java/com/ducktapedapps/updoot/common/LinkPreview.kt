@@ -1,27 +1,26 @@
 package com.ducktapedapps.updoot.common
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ducktapedapps.updoot.subreddit.Thumbnail
+import coil.compose.AsyncImage
 
 @Composable
 fun StaticLinkPreview(
     modifier: Modifier = Modifier,
     url: String,
-    thumbnail: Thumbnail,
+    thumbnail: List<Any>,
 ) {
     Row(
         modifier = modifier
@@ -31,43 +30,18 @@ fun StaticLinkPreview(
                 MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 RoundedCornerShape(8.dp)
             ),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        when (thumbnail) {
-            is Thumbnail.Remote ->
-                Icon(
-                    painter = painterResource(thumbnail.fallbackLocalThumbnail),
-                    contentDescription = "Link preview icon",
-                    modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp)
-                )
+        AsyncImage(
+            model = thumbnail.first(),
+            contentDescription = "Link preview icon",
+            modifier=Modifier
+                .padding(8.dp)
+                .clip(CircleShape)
+                .size(48.dp),
+            contentScale = ContentScale.Crop
+        )
 
-//                CoilImage(
-//                data = thumbnail.url,
-//                requestBuilder = { transformations(CircleCropTransformation()) },
-//                modifier = Modifier
-//                    .size(48.dp)
-//                    .padding(8.dp)
-//            ) { imageLoadState: ImageLoadState ->
-//                when (imageLoadState) {
-//                    is Success -> Image(
-//                        painter = imageLoadState.painter,
-//                        contentDescription = "Link thumbnail"
-//                    )
-//                    is Error -> Image(
-//                        painter = painterResource(id = thumbnail.fallbackLocalThumbnail),
-//                        "Link preview icon"
-//                    )
-//
-//                    else -> Unit
-//                }
-//            }
-            is Thumbnail.LocalThumbnail -> Image(
-                painter = painterResource(id = thumbnail.imageResource),
-                "Link preview icon"
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()

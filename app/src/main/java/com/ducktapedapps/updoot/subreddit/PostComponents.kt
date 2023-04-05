@@ -1,6 +1,5 @@
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -72,7 +71,7 @@ fun LargePost(
         LargePostMedia(
             postMedia = post.postMedia,
             modifier = Modifier
-                .padding(horizontal = boundaryPadding,vertical = boundaryPadding / 2)
+                .padding(horizontal = boundaryPadding, vertical = boundaryPadding / 2)
                 .combinedClickable(
                     onClick = { publishEvent(post.openPostMedia()) },
                     onLongClick = { setOptionsDialogVisibility(true) }
@@ -127,7 +126,7 @@ fun CompactPost(
                 .padding(start = boundaryPadding)
                 .clip(CircleShape)
                 .size(48.dp)
-                .clickable(onClick = { publishEvent(post.openPostMedia()) })
+                .clickable(onClick = { publishEvent(post.openPostMedia()) }),
         )
         Column(
             Modifier
@@ -155,29 +154,12 @@ fun CompactPost(
 
 @Composable
 fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
-    if (post.isNsfw) Image(
+    AsyncImage(
+        model = post.thumbnail.first(),
+        contentDescription = "Link preview icon",
         modifier = modifier,
-        painter = painterResource(id = R.drawable.ic_nsfw_24dp),
-        contentDescription = "NSFW Content"
+        contentScale = ContentScale.Crop
     )
-    else {
-        when (post.thumbnail) {
-            is Thumbnail.Remote ->
-                AsyncImage(
-                    model = post.thumbnail.url,
-                    contentDescription = stringResource(R.string.post_thumbnail),
-                    modifier = modifier.clip(shape = CircleShape),
-                    error = painterResource(id = post.thumbnail.fallbackLocalThumbnail),
-                    contentScale = ContentScale.FillBounds,
-                )
-
-            is Thumbnail.LocalThumbnail -> Image(
-                painter = painterResource(id = post.thumbnail.imageResource),
-                contentDescription = "Error Icon",
-                modifier = modifier.clip(shape = CircleShape)
-            )
-        }
-    }
 }
 
 @Composable
