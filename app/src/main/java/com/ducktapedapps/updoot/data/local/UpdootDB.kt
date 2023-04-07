@@ -49,4 +49,10 @@ data class SubredditPrefs(
     @PrimaryKey val subredditName: String,
     val viewType: PostViewType,
     val subredditSorting: SubredditSorting,
-)
+) {
+    constructor() : this(
+        subredditName = "",
+        viewType = PostViewType.LARGE,
+        subredditSorting = SubredditSorting.Hot
+    )
+}

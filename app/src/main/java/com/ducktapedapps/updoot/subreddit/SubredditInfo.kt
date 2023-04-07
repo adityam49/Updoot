@@ -39,10 +39,7 @@ import java.util.*
  */
 @Composable
 fun SubredditInfo(subredditName: String, publishEvent: (Event) -> Unit) {
-    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>().apply {
-        setSubredditName(subredditName)
-    }
-
+    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>()
     val viewState = viewModel.viewState.collectAsState()
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {

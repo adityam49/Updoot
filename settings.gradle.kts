@@ -15,7 +15,7 @@ dependencyResolutionManagement {
             version("moshi-version", "1.14.0")
             version("hilt-version", "2.44")
             version("hilt-jetpack-version", "1.0.0")
-            version("coil-version", "2.2.2")
+            version("coil-version", "2.3.0")
             version("kotlinVersion", "1.8.10")
             version("chuckerVersion","3.5.2")
             version("accompanistVersion","0.30.0")

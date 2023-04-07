@@ -2,10 +2,8 @@
 
 package com.ducktapedapps.updoot.subreddit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -14,14 +12,12 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.NavigationDirections.SubredditOptionsNavigation
@@ -37,22 +33,18 @@ import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 
 @Composable
 fun SubredditScreen(
-    subredditName: String,
     publishEvent: (Event) -> Unit,
 ) {
-    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>().apply {
-        setSubredditName(subredditName)
-    }
-    val viewState = viewModel.viewState.collectAsState()
-    val listState = rememberLazyListState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val viewModel: SubredditVM = hiltViewModel<SubredditVMImpl>()
+    val viewState = viewModel.viewState.collectAsStateWithLifecycle()
+
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier,
         topBar = {
             SubredditTopBar(
                 modifier = Modifier.fillMaxWidth(),
-                subredditName = viewState.value.subredditName,
-                scrollBehavior = scrollBehavior,
+                subredditName = viewState.value.subredditPrefs.subredditName,
             )
         },
         floatingActionButton = {
@@ -62,7 +54,7 @@ fun SubredditScreen(
                 onClick = {
                     publishEvent(
                         ScreenNavigationEvent(
-                            SubredditOptionsNavigation.open(subredditName)
+                            SubredditOptionsNavigation.open(viewState.value.subredditPrefs.subredditName)
                         )
                     )
                 }) { Icon(Icons.Outlined.Menu, Icons.Outlined.Menu.name) }
@@ -74,9 +66,7 @@ fun SubredditScreen(
             postViewType = viewState.value.subredditPrefs.viewType,
             loadPage = viewModel::loadPage,
             publishEvent = publishEvent,
-            listState = listState,
-
-            )
+        )
     }
 }
 
@@ -84,7 +74,6 @@ fun SubredditScreen(
 private fun SubredditTopBar(
     modifier: Modifier = Modifier,
     subredditName: String,
-    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -95,7 +84,6 @@ private fun SubredditTopBar(
                 overflow = TextOverflow.Ellipsis,
             )
         },
-        scrollBehavior = scrollBehavior,
     )
 }
 
@@ -106,8 +94,8 @@ private fun SubredditFeed(
     postViewType: PostViewType,
     loadPage: () -> Unit,
     publishEvent: (Event) -> Unit,
-    listState: LazyListState,
 ) {
+    val listState = rememberLazyListState()
     LazyColumn(
         modifier = modifier,
         state = listState,

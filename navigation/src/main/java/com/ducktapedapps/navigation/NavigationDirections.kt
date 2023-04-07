@@ -53,7 +53,7 @@ sealed class NavigationDirections {
         val args = listOf(
             navArgument(SUBREDDIT_NAME_KEY) {
                 type = NavType.StringType
-                nullable = true
+                defaultValue = "#"
             }
         )
 
@@ -72,7 +72,7 @@ sealed class NavigationDirections {
         val args = listOf(
             navArgument(SUBREDDIT_NAME_KEY) {
                 type = NavType.StringType
-                nullable = true
+                defaultValue = "#"
             }
         )
 

@@ -197,8 +197,7 @@ private fun NavGraphBuilder.subredditScreenComposable(publishEvent: (Event) -> U
         route = SubredditScreenNavigation.destination,
         arguments = SubredditScreenNavigation.args
     ) {
-        val subreddit = it.arguments?.getString(SubredditScreenNavigation.SUBREDDIT_NAME_KEY) ?: "#"
-        SubredditScreen(publishEvent = publishEvent, subredditName = subreddit)
+        SubredditScreen(publishEvent = publishEvent)
     }
 
 }

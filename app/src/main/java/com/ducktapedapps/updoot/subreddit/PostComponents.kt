@@ -3,7 +3,16 @@ package com.ducktapedapps.updoot.subreddit
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,12 +32,19 @@ import coil.compose.AsyncImage
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.Event.ToastEvent
-import com.ducktapedapps.navigation.NavigationDirections.*
+import com.ducktapedapps.navigation.NavigationDirections.CommentScreenNavigation
+import com.ducktapedapps.navigation.NavigationDirections.ImageScreenNavigation
+import com.ducktapedapps.navigation.NavigationDirections.SubredditScreenNavigation
+import com.ducktapedapps.navigation.NavigationDirections.UserScreenNavigation
+import com.ducktapedapps.navigation.NavigationDirections.VideoScreenNavigation
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.common.*
+import com.ducktapedapps.updoot.common.AllGildings
+import com.ducktapedapps.updoot.common.MenuItemModel
+import com.ducktapedapps.updoot.common.OptionsDialog
+import com.ducktapedapps.updoot.common.StaticLinkPreview
+import com.ducktapedapps.updoot.common.VoteCounter
 import com.ducktapedapps.updoot.theme.StickyPostColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
-import kotlin.math.absoluteValue
 
 
 @Composable
@@ -37,19 +53,23 @@ fun LargePost(
     post: PostUiModel,
     publishEvent: (Event) -> Unit,
 ) {
-    val boundaryPadding = 16.dp
+    val boundaryPadding = remember {
+        16.dp
+    }
     val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
-    val list = listOf(
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openSubreddit())
-        }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openAuthorScreen())
-        }, post.author, R.drawable.ic_account_circle_24dp),
-    )
+    val list = remember {
+        listOf(
+            MenuItemModel({
+                setOptionsDialogVisibility(false)
+                publishEvent(post.openSubreddit())
+            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
+            MenuItemModel({
+                setOptionsDialogVisibility(false)
+                publishEvent(post.openAuthorScreen())
+            }, post.author, R.drawable.ic_account_circle_24dp),
+        )
+    }
     if (optionsDialog) OptionsDialog(
         dismiss = { setOptionsDialogVisibility(false) },
         options = list
@@ -95,19 +115,23 @@ fun CompactPost(
     post: PostUiModel,
     publishEvent: (Event) -> Unit
 ) {
-    val boundaryPadding = 16.dp
+    val boundaryPadding = remember {
+        16.dp
+    }
     val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
-    val list = listOf(
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openSubreddit())
-        }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
-        MenuItemModel({
-            setOptionsDialogVisibility(false)
-            publishEvent(post.openAuthorScreen())
-        }, post.author, R.drawable.ic_account_circle_24dp),
-    )
+    val list = remember {
+        listOf(
+            MenuItemModel({
+                setOptionsDialogVisibility(false)
+                publishEvent(post.openSubreddit())
+            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
+            MenuItemModel({
+                setOptionsDialogVisibility(false)
+                publishEvent(post.openAuthorScreen())
+            }, post.author, R.drawable.ic_account_circle_24dp),
+        )
+    }
     if (optionsDialog) OptionsDialog(
         options = list,
         dismiss = { setOptionsDialogVisibility(false) })
@@ -221,15 +245,14 @@ fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
 
 @Composable
 fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
-    val ratio =
-        (if (media.width == 0) 1f else media.width.toFloat() / if (media.height == 0) 1f else media.height.toFloat()).absoluteValue
+
     AsyncImage(
         model = media.url,
         error = painterResource(id = R.drawable.ic_image_error_24dp),
         contentDescription = stringResource(id = R.string.submission_image),
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(if (ratio < 1.0) 1f else ratio)
+            .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp)),
     )
 }
