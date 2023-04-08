@@ -21,13 +21,13 @@ dependencyResolutionManagement {
             version("accompanistVersion","0.30.0")
             //android core libs
             library("appcompat", "androidx.appcompat:appcompat:1.4.2")
-            library("core-ktx", "androidx.core:core-ktx:1.9.0")
-            library("activity-compose", "androidx.activity:activity-compose:1.5.0")
+            library("core-ktx", "androidx.core:core-ktx:1.10.0")
+            library("activity-compose", "androidx.activity:activity-compose:1.7.0")
             bundle(
                 "android-core", listOf("appcompat", "core-ktx", "activity-compose")
             )
 
-            library("compose-bom", "androidx.compose:compose-bom:2023.01.00")
+            library("compose-bom", "androidx.compose:compose-bom:2023.04.00")
             library("compose-runtime", "androidx.compose.runtime", "runtime").withoutVersion()
             library("compose-ui", "androidx.compose.ui", "ui").withoutVersion()
             library("compose-ui-tooling", "androidx.compose.ui", "ui-tooling").withoutVersion()

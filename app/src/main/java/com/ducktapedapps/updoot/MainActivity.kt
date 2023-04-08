@@ -7,23 +7,19 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatDelegate.*
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.WorkManager
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.home.HomeScreen
 import com.ducktapedapps.updoot.theme.UpdootTheme
+import com.ducktapedapps.updoot.utils.ThemeType
 import com.ducktapedapps.updoot.utils.ThemeType.DARK
 import com.ducktapedapps.updoot.utils.ThemeType.LIGHT
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -38,31 +34,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            UpdootTheme {
+
+            UpdootTheme(
+                isDarkTheme = when (viewModel.theme.collectAsStateWithLifecycle().value) {
+                    DARK -> true
+                    LIGHT -> false
+                    ThemeType.AUTO -> isSystemInDarkTheme()
+                }
+            ) {
                 HomeScreen(
                     activityViewModel = viewModel,
                     publishEvent = { viewModel.sendEvent(it) })
             }
         }
-        collectViewModelFlows()
-    }
 
-    private fun collectViewModelFlows() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.theme.collect {
-                        setDefaultNightMode(
-                            when (it) {
-                                DARK -> MODE_NIGHT_YES
-                                LIGHT -> MODE_NIGHT_NO
-                                else -> MODE_NIGHT_FOLLOW_SYSTEM
-                            }
-                        )
-                    }
-                }
-            }
-        }
     }
 
     private fun processEvents(event: Event) {
@@ -75,9 +60,11 @@ class MainActivity : ComponentActivity() {
                     startActivity(intent)
                 }
             }
+
             is Event.ToastEvent -> Toast.makeText(
                 this@MainActivity, event.content, Toast.LENGTH_SHORT
             ).show()
+
             else -> viewModel.sendEvent(event)
 
         }

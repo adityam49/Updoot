@@ -1,8 +1,15 @@
 package com.ducktapedapps.updoot.home
 
 import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.outlined.*
@@ -10,9 +17,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -88,25 +98,10 @@ fun HomeScreen(
         ModalBottomSheetLayout(bottomSheetNavigator) {
             Scaffold(
                 bottomBar = {
-                    NavigationBar {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
-                        UpdootBottomNavigationItem.getItems().forEach { bottomNavItem ->
-                            NavigationBarItem(
-                                icon = { Icon(bottomNavItem.icon, bottomNavItem.icon.name) },
-                                selected = currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true,
-                                onClick = {
-                                    navController.navigate(bottomNavItem.destination) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = false
-                                        restoreState = true
-                                    }
-                                }
-                            )
-                        }
-                    }
+                    BottomNavigationBar(
+                        navController = navController,
+                        navItem = UpdootBottomNavigationItem.getItems()
+                    )
                 }
             ) { innerPadding ->
                 Box(modifier = Modifier.padding(innerPadding)) {
@@ -131,6 +126,52 @@ fun HomeScreen(
         }
     }
 }
+
+@Composable
+private fun BottomNavigationBar(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    navItem: List<UpdootBottomNavigationItem>,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.surface)
+            .height(64.dp)
+            .navigationBarsPadding(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        navItem.forEach { bottomNavItem ->
+            IconButton(
+                onClick = {
+                    navController.navigate(bottomNavItem.destination) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = false
+                        restoreState = true
+                    }
+                }) {
+                Icon(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp),
+                    imageVector = bottomNavItem.icon,
+                    contentDescription = bottomNavItem.destination,
+                    tint = if (currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                )
+
+            }
+        }
+    }
+}
+
 
 @ExperimentalMaterialNavigationApi
 private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {

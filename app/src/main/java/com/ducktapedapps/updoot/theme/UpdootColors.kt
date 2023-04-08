@@ -23,6 +23,7 @@ val lightRed = Color(0xFFFF7961)
 val UpdootLightColors = lightColorScheme(
         primary = darkBlue,
         onPrimary = Color.White,
+        surface = Color.White,
         onSurface = Color.Black,
         secondary = Color.White,
         onSecondary = Color.Black,
