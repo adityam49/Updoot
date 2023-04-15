@@ -5,16 +5,19 @@ import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 interface SearchSubredditUseCase {
 
-    suspend fun getSubreddits(
-        query: String,
-        includeNsfw: Boolean = false
+    fun getSubreddits(
+        query: Flow<String>,
+        includeNsfw: Boolean = false,
+        coroutineScope: CoroutineScope,
     ): Flow<List<LocalSubreddit>>
-
 }
 
 class SearchSubredditUseCaseImpl @Inject constructor(
@@ -22,15 +25,20 @@ class SearchSubredditUseCaseImpl @Inject constructor(
     private val redditClient: RedditClient,
 ) : SearchSubredditUseCase {
 
-    override suspend fun getSubreddits(
-        query: String,
-        includeNsfw: Boolean
-    ): Flow<List<LocalSubreddit>> = combine(
-        getLocalSubreddits(query),
-        getRemoteSubreddits(query, includeNsfw)
-            .debounce(Constants.DEBOUNCE_TIME_OUT),
-    ) { localSubs, remoteSubs ->
-        localSubs + remoteSubs.filterNot { it.subredditName in localSubs.map { subs -> subs.subredditName } }
+    override fun getSubreddits(
+        query: Flow<String>,
+        includeNsfw: Boolean,
+        coroutineScope: CoroutineScope,
+    ): Flow<List<LocalSubreddit>> {
+        return query
+            .debounce(Constants.DEBOUNCE_TIME_OUT)
+            .distinctUntilChanged()
+            .flatMapLatest {
+                coroutineScope.launch {
+                    queryRemoteSubreddits(it, includeNsfw)
+                }
+                getLocalSubreddits(it)
+            }
     }
 
     private fun getLocalSubreddits(
@@ -38,19 +46,18 @@ class SearchSubredditUseCaseImpl @Inject constructor(
     ): Flow<List<LocalSubreddit>> =
         if (query.isNotBlank()) subredditDAO
             .observeSubredditWithKeyword(keyword = query.trim())
-            .map { it.take(2) }
             .distinctUntilChanged()
-        else emptyFlow()
+        else flowOf(emptyList())
 
-    private fun getRemoteSubreddits(
+    private suspend fun queryRemoteSubreddits(
         query: String,
         includeNsfw: Boolean
-    ): Flow<List<LocalSubreddit>> = flow {
-        emit(emptyList())
+    ) {
         if (query.isNotBlank()) try {
+            Timber.d("Making API call on query $query")
             val api = redditClient.api()
             val results = api.search(query = query, includeOver18 = includeNsfw)
-            emit(results.children.map { it.toLocalSubreddit() })
+            subredditDAO.insertSubreddits(results.children.map { it.toLocalSubreddit() })
         } catch (e: Exception) {
             e.printStackTrace()
         }

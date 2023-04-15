@@ -1,5 +1,6 @@
 package com.ducktapedapps.updoot.search
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,14 +9,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -39,19 +47,22 @@ fun SearchScreen(
     LazyColumn {
         stickyHeader {
             SearchBar(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 setQuery = viewModel::searchSubreddit,
                 query = viewState.value.searchQuery
             )
         }
         items(viewState.value.subredditSearchResults) { subredditItem ->
             SubredditItem(
+                modifier = Modifier.padding(horizontal = 16.dp),
                 subreddit = subredditItem,
                 openSubreddit = {
                     publishEvent(
                         ScreenNavigationEvent(
                             SubredditScreenNavigation.open(
-                                subredditItem.subredditName
+                                subredditItem.subredditName.toString()
                             )
                         )
                     )
@@ -62,48 +73,41 @@ fun SearchScreen(
 }
 
 @Composable
-@Preview(backgroundColor = 0xFFFFFF)
-fun SearchBarPreview() {
-    SearchBar(setQuery = { _ -> }, query = "")
-}
-
-@Composable
 private fun SearchBar(
     modifier: Modifier = Modifier,
     setQuery: (String) -> Unit,
     query: String,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(50)
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp),
-            value = query,
-            onValueChange = setQuery,
-            label = {
-                Text(text = "Search Subreddits")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Search,
-            ),
-        )
+    val focusRequester = remember { FocusRequester() }
+    OutlinedTextField(
+
+        textStyle = MaterialTheme.typography.titleMedium,
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .background(color = MaterialTheme.colorScheme.background),
+        shape = RoundedCornerShape(32.dp),
+        value = query,
+        onValueChange = setQuery,
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search,
+        ),
+    )
+    LaunchedEffect(key1 = Unit) {
+        focusRequester.requestFocus()
     }
 }
 
 @Composable
 private fun SubredditItem(
+    modifier: Modifier,
     subreddit: SearchedSubredditResultsUiModel,
     openSubreddit: (String) -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = { openSubreddit(subreddit.subredditName) })
+        modifier = modifier
+            .clickable(onClick = { openSubreddit(subreddit.subredditName.toString()) })
             .padding(top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -113,16 +117,16 @@ private fun SubredditItem(
             contentDescription = stringResource(R.string.subreddit_icon),
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                .size(32.dp)
+                .size(48.dp)
                 .clip(shape = CircleShape),
         )
         Column(
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(start = 16.dp)
+                .padding(start = 8.dp)
                 .align(Alignment.CenterVertically)
         ) {
-            Text(text = subreddit.subredditName)
+            Text(text = subreddit.subredditName, style = MaterialTheme.typography.titleMedium)
             Text(
                 text = "${subreddit.subscriberCount} ${" • " + subreddit.age}",
                 style = MaterialTheme.typography.labelMedium

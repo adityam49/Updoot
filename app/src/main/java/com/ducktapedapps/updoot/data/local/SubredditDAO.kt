@@ -18,7 +18,7 @@ interface SubredditDAO {
     @Query("SELECT * FROM LocalSubreddit WHERE subredditName IS :name")
     fun observeSubredditInfo(name: String): Flow<LocalSubreddit?>
 
-    @Query("SELECT * FROM LocalSubreddit WHERE subredditName LIKE  '%' || :keyword ||'%' LIMIT 30")
+    @Query("SELECT * FROM LocalSubreddit WHERE subredditName LIKE  '%' || :keyword ||'%'  ORDER BY subscribers DESC  LIMIT 30 ")
     fun observeSubredditWithKeyword(keyword: String): Flow<List<LocalSubreddit>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

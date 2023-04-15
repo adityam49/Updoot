@@ -98,7 +98,8 @@ private fun AddAccountItem(addAccount: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clickable { addAccount() }
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+
     ) {
         Icon(
             imageVector = Icons.Default.AddCircle,
@@ -128,17 +129,19 @@ private fun AccountMenuItem(
                 if (accountModel.isCurrent) openAccountInfo(accountModel.name)
                 else switch(accountModel.name)
             }
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .background(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = if (accountModel.isCurrent) 0.2f else 0f),
                 shape = RoundedCornerShape(50)
             )
-            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
     ) {
         when (accountModel) {
             is AnonymousAccount -> Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = Icons.Default.AccountCircle.name,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .size(48.dp)
             )
 
             is UserModel -> AsyncImage(
