@@ -7,19 +7,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 sealed class NavigationDirections {
-    object SubscriptionsNavigation : NavigationDirections() {
-        const val destination = "bottomSheet/subscriptions"
-
-        val args = emptyList<NamedNavArgument>()
-
-        fun open() = object : NavigationCommand {
-
-            override val arguments = args
-
-            override val route: String = destination
-        }
-    }
-
     object AccountSelectionNavigation : NavigationDirections() {
         const val destination = "bottomSheet/accounts"
 

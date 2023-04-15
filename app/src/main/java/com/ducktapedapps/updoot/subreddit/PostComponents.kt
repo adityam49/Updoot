@@ -3,6 +3,7 @@ package com.ducktapedapps.updoot.subreddit
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -18,11 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,8 +41,6 @@ import com.ducktapedapps.navigation.NavigationDirections.UserScreenNavigation
 import com.ducktapedapps.navigation.NavigationDirections.VideoScreenNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.AllGildings
-import com.ducktapedapps.updoot.common.MenuItemModel
-import com.ducktapedapps.updoot.common.OptionsDialog
 import com.ducktapedapps.updoot.common.StaticLinkPreview
 import com.ducktapedapps.updoot.common.VoteCounter
 import com.ducktapedapps.updoot.theme.StickyPostColor
@@ -52,32 +52,15 @@ fun LargePost(
     modifier: Modifier = Modifier,
     post: PostUiModel,
     publishEvent: (Event) -> Unit,
+    showPostOptions: (PostUiModel) -> Unit
 ) {
     val boundaryPadding = remember {
         16.dp
     }
-    val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
-
-    val list = remember {
-        listOf(
-            MenuItemModel({
-                setOptionsDialogVisibility(false)
-                publishEvent(post.openSubreddit())
-            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
-            MenuItemModel({
-                setOptionsDialogVisibility(false)
-                publishEvent(post.openAuthorScreen())
-            }, post.author, R.drawable.ic_account_circle_24dp),
-        )
-    }
-    if (optionsDialog) OptionsDialog(
-        dismiss = { setOptionsDialogVisibility(false) },
-        options = list
-    )
     Column(
         modifier.combinedClickable(
             onClick = { publishEvent(post.openComments()) },
-            onLongClick = { setOptionsDialogVisibility(true) })
+            onLongClick = { showPostOptions(post) })
     ) {
         SubmissionTitle(
             title = post.title,
@@ -94,7 +77,7 @@ fun LargePost(
                 .padding(horizontal = boundaryPadding, vertical = boundaryPadding / 2)
                 .combinedClickable(
                     onClick = { publishEvent(post.openPostMedia()) },
-                    onLongClick = { setOptionsDialogVisibility(true) }
+                    onLongClick = { showPostOptions(post) }
                 )
         )
 
@@ -113,35 +96,20 @@ fun LargePost(
 fun CompactPost(
     modifier: Modifier = Modifier,
     post: PostUiModel,
-    publishEvent: (Event) -> Unit
+    publishEvent: (Event) -> Unit,
+    showPostOptions: (PostUiModel) -> Unit
 ) {
     val boundaryPadding = remember {
         16.dp
     }
-    val (optionsDialog, setOptionsDialogVisibility) = remember { mutableStateOf(false) }
 
-    val list = remember {
-        listOf(
-            MenuItemModel({
-                setOptionsDialogVisibility(false)
-                publishEvent(post.openSubreddit())
-            }, post.subredditName, R.drawable.ic_subreddit_default_24dp),
-            MenuItemModel({
-                setOptionsDialogVisibility(false)
-                publishEvent(post.openAuthorScreen())
-            }, post.author, R.drawable.ic_account_circle_24dp),
-        )
-    }
-    if (optionsDialog) OptionsDialog(
-        options = list,
-        dismiss = { setOptionsDialogVisibility(false) })
     Row(
         modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .combinedClickable(
                 onClick = { publishEvent(post.openComments()) },
-                onLongClick = { setOptionsDialogVisibility(true) })
+                onLongClick = { showPostOptions(post) })
 
     ) {
         CompactMediaThumbnail(
@@ -178,12 +146,34 @@ fun CompactPost(
 
 @Composable
 fun CompactMediaThumbnail(post: PostUiModel, modifier: Modifier) {
-    AsyncImage(
-        model = post.thumbnail.first(),
-        contentDescription = "Link preview icon",
-        modifier = modifier,
-        contentScale = ContentScale.Crop
-    )
+    if (post.thumbnail.first() is String)
+        AsyncImage(
+            model = post.thumbnail.first(),
+            contentDescription = "Link preview icon",
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    else
+        Box(
+            modifier = modifier.border(
+                2.dp,
+                color = if (isSystemInDarkTheme())
+                    Color.White.copy(alpha = 0.5f)
+                else
+                    Color.Black.copy(alpha = 0.5f),
+                shape = CircleShape
+            )
+        ) {
+            AsyncImage(
+                model = post.thumbnail.first(),
+                contentDescription = "Link preview icon",
+                modifier = Modifier
+                    .size(32.dp)
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Crop
+            )
+        }
+
 }
 
 @Composable
@@ -264,7 +254,7 @@ fun TextPostMedia(text: String, modifier: Modifier) {
             .clip(RoundedCornerShape(8.dp))
             .border(
                 0.5.dp,
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.onBackground,
                 RoundedCornerShape(8.dp)
             ),
     ) {
@@ -292,12 +282,14 @@ private fun PostUiModel.openPostMedia(): Event =
         is PostMedia.ImageMedia -> {
             ScreenNavigationEvent(ImageScreenNavigation.open(this.postMedia.url))
         }
+
         is PostMedia.LinkMedia -> ScreenNavigationEvent(
             CommentScreenNavigation.open(
                 subredditName,
                 id
             )
         )
+
         PostMedia.NoMedia -> ToastEvent(toString())
         is PostMedia.TextMedia -> ScreenNavigationEvent(
             CommentScreenNavigation.open(
@@ -305,5 +297,6 @@ private fun PostUiModel.openPostMedia(): Event =
                 id
             )
         )
+
         is PostMedia.VideoMedia -> ScreenNavigationEvent(VideoScreenNavigation.open(postMedia.url))
     }

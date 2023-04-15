@@ -42,7 +42,7 @@ dependencyResolutionManagement {
                 "compose-constraintlayout",
                 "androidx.constraintlayout:constraintlayout-compose:1.0.1"
             )
-            library("compose-Material3","androidx.compose.material3:material3:1.0.1")
+            library("compose-Material3","androidx.compose.material3:material3:1.1.0-beta02")
             library("compose-flowRow","com.google.accompanist","accompanist-flowlayout").versionRef("accompanistVersion")
             bundle(
                 "compose", listOf(

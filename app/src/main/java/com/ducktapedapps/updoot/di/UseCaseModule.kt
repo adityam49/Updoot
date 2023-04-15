@@ -69,4 +69,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindGetUserMultiRedditsUseCase(useCase: GetUserMultiRedditsUseCaseImpl): GetUserMultiRedditsUseCase
+
+    @Binds
+    abstract fun bindEditSubredditPostsViewModeUseCase(useCase : EditSubredditPostsViewModeUseCaseImpl) : EditSubredditPostsViewModeUseCase
 }

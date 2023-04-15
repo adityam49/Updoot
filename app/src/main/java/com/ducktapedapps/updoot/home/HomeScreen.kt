@@ -44,7 +44,6 @@ import com.ducktapedapps.updoot.search.SearchScreen
 import com.ducktapedapps.updoot.settings.SettingsScreen
 import com.ducktapedapps.updoot.subreddit.SubredditScreen
 import com.ducktapedapps.updoot.subreddit.options.SubredditOptions
-import com.ducktapedapps.updoot.subscriptions.SubscriptionsScreen
 import com.ducktapedapps.updoot.user.UserInfoScreen
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.video.VideoScreen
@@ -110,7 +109,6 @@ fun HomeScreen(
                         startDestination = SubredditScreenNavigation.destination
                     ) {
                         accountsSwitcherBottomSheet(publishEvent)
-                        subscriptionsBottomSheet(publishEvent)
 
                         searchScreenComposable(publishEvent)
                         subredditOptions(publishEvent)
@@ -183,14 +181,6 @@ private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {
             it.arguments?.getString(SubredditScreenNavigation.SUBREDDIT_NAME_KEY) ?: FRONTPAGE
         SubredditOptions(subredditName = subredditName)
     }
-}
-
-@ExperimentalMaterialNavigationApi
-private fun NavGraphBuilder.subscriptionsBottomSheet(publishEvent: (Event) -> Unit) {
-    bottomSheet(
-        route = SubscriptionsNavigation.destination,
-        arguments = SubscriptionsNavigation.args
-    ) { SubscriptionsScreen(publishEvent = publishEvent) }
 }
 
 @ExperimentalMaterialNavigationApi
@@ -276,13 +266,11 @@ sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: 
         UpdootBottomNavigationItem(Outlined.AccountCircle, AccountSelectionNavigation.destination)
 
     object Search : UpdootBottomNavigationItem(Outlined.Search, SearchNavigation.destination)
-    object Subscriptions :
-        UpdootBottomNavigationItem(Outlined.Menu, SubscriptionsNavigation.destination)
 
     object Settings :
         UpdootBottomNavigationItem(Outlined.Settings, SettingsScreenNavigation.destination)
 
     companion object {
-        fun getItems() = listOf(Posts, Subscriptions, Search, Settings, Accounts)
+        fun getItems() = listOf(Posts, Search, Settings, Accounts)
     }
 }

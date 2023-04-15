@@ -1,52 +1,78 @@
 package com.ducktapedapps.updoot.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ducktapedapps.updoot.R
-import com.ducktapedapps.updoot.common.MenuItemModel
-import com.ducktapedapps.updoot.common.OptionsDialog
-import com.ducktapedapps.updoot.utils.ThemeType
-import com.ducktapedapps.updoot.utils.ThemeType.*
+import com.ducktapedapps.updoot.common.ModalBottomSheetForActions
+import com.ducktapedapps.updoot.settings.SettingScreenAction.ShowThemeMenu
+import com.ducktapedapps.updoot.settings.SettingScreenAction.ToggleCommentThreadColorMode
+import com.ducktapedapps.updoot.settings.SettingScreenAction.ToggleCommentThreadCount
 
 @Composable
 fun SettingsScreen(viewModel: SettingsVM = hiltViewModel<SettingsVMImpl>()) {
     val viewState = viewModel.viewState.collectAsState()
     SettingsScreen(
         viewState = viewState.value,
-        setTheme = viewModel::setTheme,
-        toggleSingleThreadColor = viewModel::toggleSingleThreadColor,
-        toggleSingleThreadIndicator = viewModel::toggleSingleThreadIndicator
+        doAction = viewModel::doAction
     )
 }
 
 @Composable
 private fun SettingsScreen(
     viewState: ViewState,
-    setTheme: (ThemeType) -> Unit,
-    toggleSingleThreadColor: () -> Unit,
-    toggleSingleThreadIndicator: () -> Unit
+    doAction: (SettingScreenAction) -> Unit,
 ) {
-    Column {
-        ThemePreferenceRow(themePrefs = viewState.themePref, setTheme)
-        CommentThreadColorMode(
-            isSingleColorMode = viewState.isSingleColorCommentThreadColorPref,
-            toggleMode = toggleSingleThreadColor
-        )
-        CommentThreadModeRow(
-            isSingleThreadMode = viewState.isSingleThreadComment,
-            toggleMode = toggleSingleThreadIndicator
-        )
+
+    var bottomSheetVisible by rememberSaveable { mutableStateOf(false) }
+
+    ModalBottomSheetForActions(
+        bottomSheetVisible = bottomSheetVisible,
+        publishEvent = {
+            bottomSheetVisible = false
+        },
+        options = viewState.bottomSheetMenuItems,
+        hideBottomSheet = { bottomSheetVisible = false }
+    )
+
+    LazyColumn {
+        item {
+            ThemePreferenceRow(themePrefs = viewState.themePref) {
+                doAction(ShowThemeMenu)
+                bottomSheetVisible = true
+            }
+        }
+        item {
+            CommentThreadColorMode(
+                isSingleColorMode = viewState.isSingleColorCommentThreadColorPref,
+                toggleMode = { doAction(ToggleCommentThreadColorMode) }
+            )
+        }
+        item {
+            CommentThreadModeRow(
+                isSingleThreadMode = viewState.isSingleThreadComment,
+                toggleMode = { doAction(ToggleCommentThreadCount) }
+            )
+        }
     }
 }
 
@@ -55,7 +81,7 @@ fun SettingsRow(
     onClick: () -> Unit,
     title: String,
     subTitle: String,
-    controlUiElement: @Composable () -> Unit,
+    controlUiElement: @Composable (() -> Unit)? = null,
 ) {
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -64,12 +90,11 @@ fun SettingsRow(
         .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
-            Text(text = title, style = MaterialTheme.typography.headlineMedium)
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = subTitle, style = MaterialTheme.typography.labelMedium)
         }
-
-        controlUiElement()
+        controlUiElement?.invoke()
     }
 }
 
@@ -104,41 +129,12 @@ fun CommentThreadModeRow(isSingleThreadMode: Boolean, toggleMode: () -> Unit) {
 
 @Composable
 fun ThemePreferenceRow(
-    themePrefs: Pair<ThemeType, List<ThemeType>>,
-    setTheme: (ThemeType) -> Unit
+    themePrefs: Pair<String, String>,
+    showThemeMenu: () -> Unit,
 ) {
-    val dialogVisible = remember { mutableStateOf(false) }
     SettingsRow(
-        onClick = { dialogVisible.value = true },
-        title = stringResource(id = R.string.theme),
-        subTitle = stringResource(
-            id = when (themePrefs.first) {
-                DARK -> R.string.dark_theme
-                LIGHT -> R.string.light_theme
-                AUTO -> R.string.follow_system
-            }
-        )
-    ) {}
-
-    if (dialogVisible.value) {
-        val listOfThemes = themePrefs
-            .second
-            .map {
-                MenuItemModel(
-                    onClick = {
-                        dialogVisible.value = false
-                        setTheme(it)
-                    },
-                    title = stringResource(
-                        id = when (it) {
-                            DARK -> R.string.dark_theme
-                            LIGHT -> R.string.light_theme
-                            AUTO -> R.string.follow_system
-                        }
-                    ),
-                    icon = R.drawable.ic_theme_icon_24dp,
-                )
-            }
-        OptionsDialog(dismiss = { dialogVisible.value = false }, options = listOfThemes)
-    }
+        onClick = showThemeMenu,
+        title = themePrefs.first,
+        subTitle = themePrefs.second,
+    )
 }
