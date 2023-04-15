@@ -1,16 +1,13 @@
 package com.ducktapedapps.updoot
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.WorkManager
-import com.ducktapedapps.navigation.Event
+import com.ducktapedapps.updoot.MainActivityActions.SendEvent
 import com.ducktapedapps.updoot.backgroundWork.enqueueCleanUpWork
 import com.ducktapedapps.updoot.backgroundWork.enqueueSubscriptionSyncWork
 import com.ducktapedapps.updoot.home.HomeScreen
@@ -26,7 +23,7 @@ import javax.inject.Inject
 @ExperimentalMaterialNavigationApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: ActivityVM by viewModels()
+    private val viewModel: ActivityVM by viewModels<ActivityVMImpl>()
 
     @Inject
     lateinit var workManager: WorkManager
@@ -35,8 +32,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
+
             UpdootTheme(
-                isDarkTheme = when (viewModel.theme.collectAsStateWithLifecycle().value) {
+                isDarkTheme = when (viewModel.viewState.collectAsStateWithLifecycle().value.theme) {
                     DARK -> true
                     LIGHT -> false
                     ThemeType.AUTO -> isSystemInDarkTheme()
@@ -44,30 +42,10 @@ class MainActivity : ComponentActivity() {
             ) {
                 HomeScreen(
                     activityViewModel = viewModel,
-                    publishEvent = { viewModel.sendEvent(it) })
+                    publishEvent = { viewModel.doAction(SendEvent(it)) })
             }
         }
 
-    }
-
-    private fun processEvents(event: Event) {
-        when (event) {
-            is Event.OpenWebLink -> {
-                val intent = Intent(
-                    Intent.ACTION_VIEW, Uri.parse(event.url)
-                )
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-            }
-
-            is Event.ToastEvent -> Toast.makeText(
-                this@MainActivity, event.content, Toast.LENGTH_SHORT
-            ).show()
-
-            else -> viewModel.sendEvent(event)
-
-        }
     }
 
     override fun onDestroy() {

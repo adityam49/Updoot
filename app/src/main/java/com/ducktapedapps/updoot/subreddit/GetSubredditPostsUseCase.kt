@@ -58,6 +58,9 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
         reload: Boolean,
         subredditSorting: SubredditSorting
     ) {
+        if (reload) {
+            _pagingModel.value = PagingModel(content = emptyList(), footer = UnLoadedPage(null))
+        }
         when (val data = _pagingModel.value.footer) {
             is UnLoadedPage -> {
                 _pagingModel.value = _pagingModel.value.copy(footer = Loading)
@@ -70,12 +73,14 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
                 when (result) {
                     is Result.Error -> _pagingModel.value =
                         _pagingModel.value.copy(footer = Error(result.exception, data.pageKey))
+
                     is Result.Success -> _pagingModel.value = _pagingModel.value.copy(
                         content = _pagingModel.value.content + result.data.ids,
                         footer = if (result.data.hasNextPage()) UnLoadedPage(result.data.nextPageKey) else End
                     )
                 }
             }
+
             is Error -> {
                 _pagingModel.value = _pagingModel.value.copy(footer = Loading)
                 val result = getSubredditPage(
@@ -86,12 +91,14 @@ class GetSubredditPostsUseCaseImpl @Inject constructor(
                 when (result) {
                     is Result.Error -> _pagingModel.value =
                         _pagingModel.value.copy(footer = Error(result.exception, data.pageKey))
+
                     is Result.Success -> _pagingModel.value = _pagingModel.value.copy(
                         content = _pagingModel.value.content + result.data.ids,
                         footer = if (result.data.hasNextPage()) UnLoadedPage(result.data.nextPageKey) else End
                     )
                 }
             }
+
             else -> Unit
         }
     }

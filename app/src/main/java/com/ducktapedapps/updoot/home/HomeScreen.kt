@@ -17,11 +17,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -36,7 +40,7 @@ import com.ducktapedapps.navigation.Event.AuthEvent.*
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.ActivityVM
-import com.ducktapedapps.updoot.accounts.AccountsMenu
+import com.ducktapedapps.updoot.accounts.AccountsBottomSheet
 import com.ducktapedapps.updoot.comments.CommentsScreen
 import com.ducktapedapps.updoot.imagePreview.ImagePreviewScreen
 import com.ducktapedapps.updoot.login.LoginActivity
@@ -48,7 +52,6 @@ import com.ducktapedapps.updoot.user.UserInfoScreen
 import com.ducktapedapps.updoot.utils.Constants.FRONTPAGE
 import com.ducktapedapps.updoot.video.VideoScreen
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -79,48 +82,67 @@ fun HomeScreen(
                         else
                             context.startActivity(Intent(context, LoginActivity::class.java))
                     }
+
                     AccountSwitched -> navController.popBackStack(
                         SubredditScreenNavigation.destination,
                         false
                     )
+
                     LoggedOut -> navController.popBackStack(
                         SubredditScreenNavigation.destination,
                         false
                     )
+
                     NewAccountAdded -> navController.popBackStack()
                     else -> publishEvent(event)
                 }
             }
     }
 
-    Surface(color = MaterialTheme.colorScheme.background) {
-        ModalBottomSheetLayout(bottomSheetNavigator) {
-            Scaffold(
-                bottomBar = {
-                    BottomNavigationBar(
-                        navController = navController,
-                        navItem = UpdootBottomNavigationItem.getItems()
-                    )
-                }
-            ) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = SubredditScreenNavigation.destination
-                    ) {
-                        accountsSwitcherBottomSheet(publishEvent)
+    var showAccountsBottomSheet by remember {
+        mutableStateOf(false)
+    }
 
-                        searchScreenComposable(publishEvent)
-                        subredditOptions(publishEvent)
-                        subredditScreenComposable(publishEvent)
-                        commentsScreenComposable(publishEvent)
-                        userScreenComposable(publishEvent)
-                        settingScreenComposable(publishEvent)
-                        videoScreenComposable(publishEvent)
-                        imageScreenComposable(publishEvent)
-                    }
+    AccountsBottomSheet(
+        accounts = activityViewModel.viewState.collectAsStateWithLifecycle().value.accounts,
+        hideBottomSheet = {
+            showAccountsBottomSheet = false
+        },
+        doAction = {
+            activityViewModel.doAction(it)
+            showAccountsBottomSheet = false
+        },
+        bottomSheetVisible = showAccountsBottomSheet
+    )
+    Surface(color = MaterialTheme.colorScheme.background) {
+//        ModalBottomSheetLayout(bottomSheetNavigator) {
+        Scaffold(
+            bottomBar = {
+                BottomNavigationBar(
+                    navController = navController,
+                    navItem = UpdootBottomNavigationItem.getItems(),
+                    showBottomSheet = { showAccountsBottomSheet = true },
+                )
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                NavHost(
+                    navController = navController,
+                    startDestination = SubredditScreenNavigation.destination
+                ) {
+//                        accountsSwitcherBottomSheet(publishEvent)
+
+                    searchScreenComposable(publishEvent)
+                    subredditOptions(publishEvent)
+                    subredditScreenComposable(publishEvent)
+                    commentsScreenComposable(publishEvent)
+                    userScreenComposable(publishEvent)
+                    settingScreenComposable(publishEvent)
+                    videoScreenComposable(publishEvent)
+                    imageScreenComposable(publishEvent)
                 }
             }
+//            }
         }
     }
 }
@@ -130,6 +152,7 @@ private fun BottomNavigationBar(
     modifier: Modifier = Modifier,
     navController: NavController,
     navItem: List<UpdootBottomNavigationItem>,
+    showBottomSheet: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -145,12 +168,16 @@ private fun BottomNavigationBar(
         navItem.forEach { bottomNavItem ->
             IconButton(
                 onClick = {
-                    navController.navigate(bottomNavItem.destination) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                    if (bottomNavItem.destination == AccountSelectionNavigation.destination) {
+                        showBottomSheet()
+                    } else {
+                        navController.navigate(bottomNavItem.destination) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = false
+                            restoreState = true
                         }
-                        launchSingleTop = false
-                        restoreState = true
                     }
                 }) {
                 Icon(
@@ -181,14 +208,6 @@ private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {
             it.arguments?.getString(SubredditScreenNavigation.SUBREDDIT_NAME_KEY) ?: FRONTPAGE
         SubredditOptions(subredditName = subredditName)
     }
-}
-
-@ExperimentalMaterialNavigationApi
-private fun NavGraphBuilder.accountsSwitcherBottomSheet(publishEvent: (Event) -> Unit) {
-    bottomSheet(
-        route = AccountSelectionNavigation.destination,
-        arguments = AccountSelectionNavigation.args
-    ) { AccountsMenu(publishEvent = publishEvent) }
 }
 
 private fun NavGraphBuilder.searchScreenComposable(publishEvent: (Event) -> Unit) {

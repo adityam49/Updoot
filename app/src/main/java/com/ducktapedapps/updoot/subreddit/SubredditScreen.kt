@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,7 +37,6 @@ import com.ducktapedapps.updoot.utils.PagingModel.Footer.*
 import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.PostViewType.COMPACT
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
-import kotlinx.coroutines.launch
 
 @Composable
 fun SubredditScreen(

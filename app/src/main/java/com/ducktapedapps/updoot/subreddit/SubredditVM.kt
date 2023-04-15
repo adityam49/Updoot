@@ -30,6 +30,7 @@ import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
 import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,8 +41,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -61,7 +64,8 @@ class SubredditVMImpl @Inject constructor(
     private val setSubredditViewTypeUseCase: SetSubredditPostViewTypeUseCase,
     private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
     private val toggleSubredditPostsViewUseCase: EditSubredditPostsViewModeUseCase,
-    getSubredditSubscriptionState: GetSubredditSubscriptionState,
+    private val getSubredditSubscriptionState: GetSubredditSubscriptionState,
+    private val accountsProvider: UpdootAccountsProvider,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel(), SubredditVM {
     private val subredditName: StateFlow<String> = savedStateHandle.getStateFlow(
@@ -95,13 +99,14 @@ class SubredditVMImpl @Inject constructor(
         combine(subredditName, subredditPrefs) { _, _ ->
             loadPage()
         }.launchIn(viewModelScope)
-        pagesOfPosts
-            .transform {
-                emit(it.content.isNotEmpty())
-            }.takeWhile { pageHasLoaded ->
-                pageHasLoaded
-            }.onCompletion {
-                loadSubredditInfo()
+        subredditName
+            .map { it == Constants.FRONTPAGE }
+            .takeWhile { isFrontPage -> isFrontPage }
+            .combine(accountsProvider.getCurrentAccount()) { isFrontPage, currentAccount ->
+                if (isFrontPage) {
+                    Timber.d("Reloading for account $currentAccount")
+                    reload()
+                }
             }.launchIn(viewModelScope)
     }
 
