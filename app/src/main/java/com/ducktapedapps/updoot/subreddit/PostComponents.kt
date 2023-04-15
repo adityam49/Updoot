@@ -235,14 +235,16 @@ fun LargePostMedia(postMedia: PostMedia, modifier: Modifier) {
 
 @Composable
 fun ImagePostMedia(modifier: Modifier, media: PostMedia.ImageMedia) {
-
+    val ratio = remember(media.url) {
+        media.width.toFloat() / if (media.height < 1f) 1f else media.height.toFloat()
+    }
     AsyncImage(
         model = media.url,
         error = painterResource(id = R.drawable.ic_image_error_24dp),
         contentDescription = stringResource(id = R.string.submission_image),
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
+            .aspectRatio(ratio)
             .clip(RoundedCornerShape(8.dp)),
     )
 }
