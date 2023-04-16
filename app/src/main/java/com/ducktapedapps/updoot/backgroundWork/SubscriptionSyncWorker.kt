@@ -1,11 +1,23 @@
 package com.ducktapedapps.updoot.backgroundWork
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.subscriptions.UpdateUserSubscriptionUseCase
 import com.ducktapedapps.updoot.utils.Constants
@@ -34,13 +46,9 @@ class SubscriptionSyncWorker @AssistedInject constructor(
             else
                 listOf(accountSyncRequestedFor)
         }
-        buildNotificationAndShow(
-            "Found ${accountsToSync.size} accounts",
-            "names are :$accountsToSync",
-            context
-        )
         accountsToSync.asReversed().forEach { user ->
-            updootAccountManager.setCurrentAccount(user)
+            if (user != updootAccountsProvider.getCurrentAccount().first().name)
+                updootAccountManager.setCurrentAccount(user)
             val notificationId = Random.nextInt()
             buildNotificationAndShow(
                 title = "Syncing $user's subreddits",
@@ -77,7 +85,15 @@ class SubscriptionSyncWorker @AssistedInject constructor(
             }
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-        NotificationManagerCompat.from(context).notify(id, builder.build())
+        if (ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        } else {
+            NotificationManagerCompat.from(context).notify(id, builder.build())
+        }
     }
 
     companion object {

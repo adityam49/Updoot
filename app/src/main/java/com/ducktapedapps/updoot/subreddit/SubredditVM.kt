@@ -3,10 +3,12 @@ package com.ducktapedapps.updoot.subreddit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.NavigationDirections.SubredditScreenNavigation
 import com.ducktapedapps.navigation.NavigationDirections.UserScreenNavigation
 import com.ducktapedapps.updoot.R
+import com.ducktapedapps.updoot.backgroundWork.enqueueOneOffSubscriptionsSyncFor
 import com.ducktapedapps.updoot.common.BottomSheetItemType
 import com.ducktapedapps.updoot.common.MenuItemModel
 import com.ducktapedapps.updoot.data.local.SubredditPrefs
@@ -30,8 +32,11 @@ import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
 import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
+import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.*
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,12 +44,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -65,18 +66,22 @@ class SubredditVMImpl @Inject constructor(
     private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
     private val toggleSubredditPostsViewUseCase: EditSubredditPostsViewModeUseCase,
     private val getSubredditSubscriptionState: GetSubredditSubscriptionState,
-    private val accountsProvider: UpdootAccountsProvider,
-    private val savedStateHandle: SavedStateHandle,
+    accountsProvider: UpdootAccountsProvider,
+    savedStateHandle: SavedStateHandle,
+    private val workManager: WorkManager,
 ) : ViewModel(), SubredditVM {
     private val subredditName: StateFlow<String> = savedStateHandle.getStateFlow(
         SubredditScreenNavigation.SUBREDDIT_NAME_KEY, ""
     )
 
-    private val subredditPrefs: StateFlow<SubredditPrefs> = subredditName.flatMapLatest { name ->
-        getSubredditPreferencesUseCase.getSubredditPrefsFlow(name)
-    }.stateIn(
-        scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = SubredditPrefs()
-    )
+    private val subredditPrefs: StateFlow<SubredditPrefs> = subredditName
+        .flatMapLatest { name ->
+            getSubredditPreferencesUseCase.getSubredditPrefsFlow(name)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = SubredditPrefs()
+        )
 
     private val pagesOfPosts: StateFlow<PagingModel<List<PostUiModel>>> =
         getSubredditPostsUseCase.pagingModel.map { model ->
@@ -88,10 +93,10 @@ class SubredditVMImpl @Inject constructor(
     private val subredditInfo: StateFlow<SubredditInfoState?> =
         getSubredditInfoUseCase.subredditInfo
 
-    private val subscriptionState: StateFlow<Boolean?> = subredditName.flatMapLatest { name ->
-        getSubredditSubscriptionState.getIsSubredditSubscribedState(name)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+    private val subscriptionState: StateFlow<Boolean?> = subredditName
+        .flatMapLatest { name ->
+            getSubredditSubscriptionState.getIsSubredditSubscribedState(name)
+        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val bottomSheetEventBus = MutableStateFlow<OptionsBottomSheetEvent>(Empty)
 
@@ -104,36 +109,47 @@ class SubredditVMImpl @Inject constructor(
             .takeWhile { isFrontPage -> isFrontPage }
             .combine(accountsProvider.getCurrentAccount()) { isFrontPage, currentAccount ->
                 if (isFrontPage) {
-                    Timber.d("Reloading for account $currentAccount")
-                    reload()
+                    reload(currentAccount)
                 }
             }.launchIn(viewModelScope)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override val viewState: StateFlow<ViewState> = combine(
         subredditPrefs,
         pagesOfPosts,
         subredditInfo,
         subscriptionState,
         bottomSheetEventBus,
-    ) { subredditPrefsValue,
-        feed,
-        subredditInfoValue,
-        subscriptionStateValue,
-        bottomSheetEvent ->
+        accountsProvider.getCurrentAccount()
+    ) { flowValues ->
+        val subredditPrefsValue = flowValues[0] as SubredditPrefs
+        val subscriptionState = flowValues[3] as Boolean?
         val subredditName = if (subredditPrefsValue.subredditName == Constants.FRONTPAGE) {
             "Frontpage"
         } else {
             subredditPrefsValue.subredditName
         }
+        Timber.d("Account logged in viewState ${flowValues[5]}")
         ViewState(
             subredditPrefs = subredditPrefsValue.copy(subredditName = subredditName),
-            feed = feed,
-            subredditInfo = subredditInfoValue,
-            subscriptionState = subscriptionStateValue,
-            screenBottomSheetOptions = when (bottomSheetEvent) {
-                is Post -> getPostOptions(bottomSheetEvent.post)
-                Subreddit -> getSubredditOptions(subredditPrefsValue)
+            feed = flowValues[1] as PagingModel<List<PostUiModel>>,
+            subredditInfo = flowValues[2] as SubredditInfoState?,
+            subscriptionState = subscriptionState,
+            screenBottomSheetOptions = when (val event = flowValues[4] as OptionsBottomSheetEvent) {
+                is Post -> getPostOptions(
+                    post = event.post,
+                    prefs = subredditPrefsValue,
+                    isLoggedIn = (flowValues[5] as AccountModel) !is AnonymousAccount,
+                    subscriptionState = subscriptionState
+                )
+
+                Subreddit -> getSubredditOptions(
+                    prefs = subredditPrefsValue,
+                    isLoggedIn = (flowValues[5] as AccountModel) !is AnonymousAccount,
+                    subscriptionState = subscriptionState,
+                )
+
                 Empty -> emptyList()
             }
         )
@@ -171,22 +187,18 @@ class SubredditVMImpl @Inject constructor(
         }
     }
 
-    private fun reload() {
+    private fun reload(currentAccount: AccountModel = AnonymousAccount(false)) {
         viewModelScope.launch {
             getSubredditPostsUseCase.loadNextPage(
                 reload = true,
                 subredditSorting = subredditPrefs.value.subredditSorting,
                 subreddit = subredditName.value
             )
+            if (currentAccount is UserModel) workManager.enqueueOneOffSubscriptionsSyncFor(
+                currentAccount.name
+            )
         }
     }
-
-    private fun setPostViewType(type: PostViewType) {
-        viewModelScope.launch {
-            setSubredditViewTypeUseCase.setPostViewType(subredditName.value, type)
-        }
-    }
-
     private fun toggleSubredditSubscription() {
         viewModelScope.launch {
             toggleSubscriptionUseCase.toggleSubscription(subredditName = subredditName.value)
@@ -215,50 +227,97 @@ class SubredditVMImpl @Inject constructor(
         bottomSheetEventBus.value = Post(post)
     }
 
-    private fun getSubredditOptions(prefs: SubredditPrefs): List<MenuItemModel> {
-        return listOf(
-            MenuItemModel(
-                onClick = {
-                    viewModelScope.launch {
-                        toggleSubredditPostsViewUseCase.toggleViewType(prefs.subredditName)
-                    }
-                    BottomSheetItemType.ViewTypeChange
-                },
-                title = if (prefs.viewType == LARGE) "Show Compact Posts" else "Show Large Posts",
-                icon = if (prefs.viewType == LARGE) R.drawable.ic_list_view_24dp else R.drawable.ic_card_view_24dp
+    private fun getSubredditOptions(
+        prefs: SubredditPrefs,
+        isLoggedIn: Boolean = false,
+        subscriptionState: Boolean?,
+    ): List<MenuItemModel> {
+        return buildList {
+            add(
+                MenuItemModel(
+                    onClick = {
+                        viewModelScope.launch {
+                            toggleSubredditPostsViewUseCase.toggleViewType(prefs.subredditName)
+                        }
+                        BottomSheetItemType.ViewTypeChange
+                    },
+                    title = if (prefs.viewType == LARGE) "Show Compact Posts" else "Show Large Posts",
+                    icon = if (prefs.viewType == LARGE) R.drawable.ic_list_view_24dp else R.drawable.ic_card_view_24dp
+                )
             )
-        )
+            if (isLoggedIn && prefs.subredditName != Constants.FRONTPAGE && subscriptionState != null) {
+                add(
+                    MenuItemModel(
+                        onClick = {
+                            viewModelScope.launch {
+                                toggleSubscriptionUseCase.toggleSubscription(prefs.subredditName)
+                            }
+                            BottomSheetItemType.Action
+                        },
+                        title = if (subscriptionState) "Unsubscribe from ${prefs.subredditName}" else "Subscribe to ${prefs.subredditName}",
+                        icon = R.drawable.ic_subreddit_default_24dp,
+                    )
+                )
+            }
+        }
     }
 
-    private fun getPostOptions(post: PostUiModel): List<MenuItemModel> {
-        return listOf(
-            MenuItemModel(
-                onClick = {
-                    BottomSheetItemType.ScreenNavigation(
-                        ScreenNavigationEvent(
-                            SubredditScreenNavigation.open(
-                                post.subredditName
+    private fun getPostOptions(
+        post: PostUiModel,
+        prefs: SubredditPrefs,
+        isLoggedIn: Boolean,
+        subscriptionState: Boolean?,
+    ): List<MenuItemModel> {
+        return buildList {
+            add(
+                MenuItemModel(
+                    onClick = {
+                        BottomSheetItemType.ScreenNavigation(
+                            ScreenNavigationEvent(
+                                SubredditScreenNavigation.open(
+                                    post.subredditName
+                                )
                             )
                         )
-                    )
-                },
-                title = post.subredditName,
-                icon = R.drawable.ic_subreddit_default_24dp
-            ),
-            MenuItemModel(
-                onClick = {
-                    BottomSheetItemType.ScreenNavigation(
-                        ScreenNavigationEvent(
-                            UserScreenNavigation.open(
-                                post.author
-                            )
-                        )
-                    )
-                },
-                title = post.author,
-                icon = R.drawable.ic_account_circle_24dp
+                    },
+                    title = post.subredditName,
+                    icon = R.drawable.ic_subreddit_default_24dp
+                )
             )
-        )
+            add(
+                MenuItemModel(
+                    onClick = {
+                        BottomSheetItemType.ScreenNavigation(
+                            ScreenNavigationEvent(
+                                UserScreenNavigation.open(
+                                    post.author
+                                )
+                            )
+                        )
+                    },
+                    title = post.author,
+                    icon = R.drawable.ic_account_circle_24dp
+                )
+            )
+            if (
+                prefs.subredditName != Constants.FRONTPAGE
+                && isLoggedIn
+                && subscriptionState != null
+            ) {
+                add(
+                    MenuItemModel(
+                        onClick = {
+                            viewModelScope.launch {
+                                toggleSubscriptionUseCase.toggleSubscription(prefs.subredditName)
+                            }
+                            BottomSheetItemType.Action
+                        },
+                        title = if (subscriptionState) "Unsubscribe from ${prefs.subredditName}" else "Subscribe to ${prefs.subredditName}",
+                        icon = R.drawable.ic_subreddit_default_24dp,
+                    )
+                )
+            }
+        }
     }
 }
 

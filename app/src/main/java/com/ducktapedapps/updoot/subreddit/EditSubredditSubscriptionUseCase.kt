@@ -2,11 +2,9 @@ package com.ducktapedapps.updoot.subreddit
 
 import com.ducktapedapps.updoot.data.local.SubredditDAO
 import com.ducktapedapps.updoot.data.local.SubredditSubscription
-import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface EditSubredditSubscriptionUseCase {
@@ -22,18 +20,15 @@ class EditSubredditSubscriptionUseCaseImpl @Inject constructor(
 ) : EditSubredditSubscriptionUseCase {
 
     override suspend fun toggleSubscription(subredditName: String) {
-        val currentUser = updootAccountsProvider
-            .allAccounts
-            .map { it.first { account -> account.isCurrent } }
-            .first()
-
-        if (currentUser is AccountModel.UserModel) {
+        val loggedInUser = updootAccountsProvider
+            .isLoggedInUser().first()
+        if (loggedInUser != null) {
             val subscription = subredditDAO.observeSubredditSubscription(
                 subredditName = subredditName,
-                currentUser.name
+                loggedInUser.name
             ).first()
 
-            editSubscriptionRemotely(subredditName, currentUser.name, subscription != null)
+            editSubscriptionRemotely(subredditName, loggedInUser.name, subscription != null)
         }
     }
 
@@ -47,7 +42,7 @@ class EditSubredditSubscriptionUseCaseImpl @Inject constructor(
             if (isAlreadySubscribed) {
                 val result = api.subscribe(action = "unsub", subredditName = subredditName)
                 if (result.isSuccessful)
-                    subredditDAO.deleteSubscription(subredditName, currentUserName)
+                    subredditDAO.deleteSubscription(subredditName,currentUserName)
             } else {
                 val result = api.subscribe(action = "sub", subredditName = subredditName)
                 if (result.isSuccessful) subredditDAO.insertSubscription(

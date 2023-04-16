@@ -62,6 +62,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf(
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"

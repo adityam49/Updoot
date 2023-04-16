@@ -17,4 +17,8 @@ interface UpdootAccountsProvider {
     fun getCurrentAccount(): Flow<AccountModel> = allAccounts.transform {
         if (it.any { account -> account.isCurrent }) emit(it.first { account -> account.isCurrent })
     }
+
+    fun isLoggedInUser(): Flow<UserModel?> = getCurrentAccount().map {
+        if (it is UserModel) it else null
+    }
 }
