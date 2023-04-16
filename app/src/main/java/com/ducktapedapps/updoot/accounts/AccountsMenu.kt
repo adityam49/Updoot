@@ -1,12 +1,12 @@
 package com.ducktapedapps.updoot.accounts
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -104,7 +105,7 @@ private fun AddAccountItem(addAccount: () -> Unit) {
         Icon(
             imageVector = Icons.Default.AddCircle,
             contentDescription = Icons.Default.AddCircle.name,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(52.dp)
         )
         Text(
             text = stringResource(id = R.string.add_account),
@@ -130,28 +131,72 @@ private fun AccountMenuItem(
                 else switch(accountModel.name)
             }
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .background(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = if (accountModel.isCurrent) 0.2f else 0f),
-                shape = RoundedCornerShape(50)
-            )
     ) {
-        when (accountModel) {
-            is AnonymousAccount -> Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = Icons.Default.AccountCircle.name,
-                modifier = Modifier
-                    .clip(shape = CircleShape)
-                    .size(48.dp)
-            )
 
-            is UserModel -> AsyncImage(
-                model = accountModel.userIcon,
-                error = painterResource(id = R.drawable.ic_account_circle_24dp),
-                contentDescription = Icons.Default.AccountCircle.name,
-                modifier = Modifier
-                    .clip(shape = CircleShape)
-                    .size(48.dp)
-            )
+        when (accountModel) {
+            is AnonymousAccount -> {
+                if (accountModel.isCurrent) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .border(
+                                2.dp, MaterialTheme.colorScheme.primary,
+                                CircleShape
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = Icons.Default.AccountCircle.name,
+                            modifier = Modifier
+                                .clip(shape = CircleShape)
+                                .size(44.dp)
+                                .align(Alignment.Center),
+                        )
+                    }
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = Icons.Default.AccountCircle.name,
+                        modifier = Modifier
+                            .clip(shape = CircleShape)
+                            .size(48.dp),
+                    )
+                }
+            }
+
+            is UserModel -> {
+                if (accountModel.isCurrent) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .border(
+                                2.dp, MaterialTheme.colorScheme.primary,
+                                CircleShape
+                            )
+                    ) {
+                        AsyncImage(
+                            model = accountModel.userIcon,
+                            error = painterResource(id = R.drawable.ic_account_circle_24dp),
+                            contentDescription = Icons.Default.AccountCircle.name,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(shape = CircleShape)
+                                .align(Alignment.Center),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                } else {
+                    AsyncImage(
+                        model = accountModel.userIcon,
+                        error = painterResource(id = R.drawable.ic_account_circle_24dp),
+                        contentDescription = Icons.Default.AccountCircle.name,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(shape = CircleShape),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
         }
         Text(
             text = accountModel.name, modifier = Modifier

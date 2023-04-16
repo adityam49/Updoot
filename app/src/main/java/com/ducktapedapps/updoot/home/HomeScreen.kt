@@ -1,6 +1,7 @@
 package com.ducktapedapps.updoot.home
 
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.outlined.*
@@ -22,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -35,11 +39,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.plusAssign
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.ducktapedapps.navigation.Event
 import com.ducktapedapps.navigation.Event.AuthEvent.*
 import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.NavigationDirections.*
 import com.ducktapedapps.updoot.ActivityVM
+import com.ducktapedapps.updoot.UpdootBottomNavigationItem
 import com.ducktapedapps.updoot.accounts.AccountsBottomSheet
 import com.ducktapedapps.updoot.comments.CommentsScreen
 import com.ducktapedapps.updoot.imagePreview.ImagePreviewScreen
@@ -62,8 +69,8 @@ import timber.log.Timber
 @ExperimentalMaterialNavigationApi
 @Composable
 fun HomeScreen(
-    activityViewModel: ActivityVM,
-    publishEvent: (Event) -> Unit
+        activityViewModel: ActivityVM,
+        publishEvent: (Event) -> Unit
 ) {
     val navController = rememberNavController()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
@@ -71,32 +78,32 @@ fun HomeScreen(
     val context = LocalContext.current
     LaunchedEffect(key1 = Unit) {
         activityViewModel
-            .eventChannel
-            .receiveAsFlow()
-            .collect { event ->
-                when (event) {
-                    is ScreenNavigationEvent -> {
-                        Timber.d("screen nav event collected -> ${event.data.route}")
-                        if (event.data.route != LoginScreenNavigation.destination)
-                            navController.navigate(route = event.data.route)
-                        else
-                            context.startActivity(Intent(context, LoginActivity::class.java))
+                .eventChannel
+                .receiveAsFlow()
+                .collect { event ->
+                    when (event) {
+                        is ScreenNavigationEvent -> {
+                            Timber.d("screen nav event collected -> ${event.data.route}")
+                            if (event.data.route != LoginScreenNavigation.destination)
+                                navController.navigate(route = event.data.route)
+                            else
+                                context.startActivity(Intent(context, LoginActivity::class.java))
+                        }
+
+                        AccountSwitched -> navController.popBackStack(
+                                SubredditScreenNavigation.destination,
+                                false
+                        )
+
+                        LoggedOut -> navController.popBackStack(
+                                SubredditScreenNavigation.destination,
+                                false
+                        )
+
+                        NewAccountAdded -> navController.popBackStack()
+                        else -> publishEvent(event)
                     }
-
-                    AccountSwitched -> navController.popBackStack(
-                        SubredditScreenNavigation.destination,
-                        false
-                    )
-
-                    LoggedOut -> navController.popBackStack(
-                        SubredditScreenNavigation.destination,
-                        false
-                    )
-
-                    NewAccountAdded -> navController.popBackStack()
-                    else -> publishEvent(event)
                 }
-            }
     }
 
     var showAccountsBottomSheet by remember {
@@ -104,34 +111,32 @@ fun HomeScreen(
     }
 
     AccountsBottomSheet(
-        accounts = activityViewModel.viewState.collectAsStateWithLifecycle().value.accounts,
-        hideBottomSheet = {
-            showAccountsBottomSheet = false
-        },
-        doAction = {
-            activityViewModel.doAction(it)
-            showAccountsBottomSheet = false
-        },
-        bottomSheetVisible = showAccountsBottomSheet
+            accounts = activityViewModel.viewState.collectAsStateWithLifecycle().value.accounts,
+            hideBottomSheet = {
+                showAccountsBottomSheet = false
+            },
+            doAction = {
+                activityViewModel.doAction(it)
+                showAccountsBottomSheet = false
+            },
+            bottomSheetVisible = showAccountsBottomSheet
     )
+
     Surface(color = MaterialTheme.colorScheme.background) {
-//        ModalBottomSheetLayout(bottomSheetNavigator) {
         Scaffold(
-            bottomBar = {
-                BottomNavigationBar(
-                    navController = navController,
-                    navItem = UpdootBottomNavigationItem.getItems(),
-                    showBottomSheet = { showAccountsBottomSheet = true },
-                )
-            }
+                bottomBar = {
+                    BottomNavigationBar(
+                            navController = navController,
+                            navItem = activityViewModel.viewState.collectAsStateWithLifecycle().value.bottomNavigationItems,
+                            showBottomSheet = { showAccountsBottomSheet = true },
+                    )
+                }
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 NavHost(
-                    navController = navController,
-                    startDestination = SubredditScreenNavigation.destination
+                        navController = navController,
+                        startDestination = SubredditScreenNavigation.destination
                 ) {
-//                        accountsSwitcherBottomSheet(publishEvent)
-
                     searchScreenComposable(publishEvent)
                     subredditOptions(publishEvent)
                     subredditScreenComposable(publishEvent)
@@ -142,55 +147,73 @@ fun HomeScreen(
                     imageScreenComposable(publishEvent)
                 }
             }
-//            }
         }
     }
 }
 
 @Composable
 private fun BottomNavigationBar(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    navItem: List<UpdootBottomNavigationItem>,
-    showBottomSheet: () -> Unit,
+        modifier: Modifier = Modifier,
+        navController: NavController,
+        navItem: List<UpdootBottomNavigationItem>,
+        showBottomSheet: () -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface)
-            .height(64.dp)
-            .navigationBarsPadding(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+            modifier = modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.surface)
+                    .height(64.dp)
+                    .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
         navItem.forEach { bottomNavItem ->
             IconButton(
-                onClick = {
-                    if (bottomNavItem.destination == AccountSelectionNavigation.destination) {
-                        showBottomSheet()
-                    } else {
-                        navController.navigate(bottomNavItem.destination) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                    onClick = {
+                        if (bottomNavItem.destination == AccountSelectionNavigation.destination) {
+                            showBottomSheet()
+                        } else {
+                            navController.navigate(bottomNavItem.destination) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = false
+                                restoreState = true
                             }
-                            launchSingleTop = false
-                            restoreState = true
                         }
-                    }
-                }) {
-                Icon(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp),
-                    imageVector = bottomNavItem.icon,
-                    contentDescription = bottomNavItem.destination,
-                    tint = if (currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface,
-                )
+                    }) {
+                if(bottomNavItem.icon is String){
+                    AsyncImage(
+                            modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(48.dp)
+                                    .clip(CircleShape),
+                            model = bottomNavItem.icon,
+                            contentDescription = bottomNavItem.destination,
+//                            colorFilter = ColorFilter.tint(
+//                                    if (currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true)
+//                                        MaterialTheme.colorScheme.primary
+//                                    else
+//                                        MaterialTheme.colorScheme.onSurface
+//                            ),
+                    )
+                }else{
+                    Image(
+                            modifier = Modifier
+                                    .size(48.dp)
+                                    .padding(8.dp),
+                            imageVector = bottomNavItem.icon as ImageVector,
+                            contentDescription = bottomNavItem.destination,
+                            colorFilter = ColorFilter.tint(
+                                    if (currentDestination?.hierarchy?.any { it.route == bottomNavItem.destination } == true)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                            ),
+                    )
+                }
 
             }
         }
@@ -201,26 +224,26 @@ private fun BottomNavigationBar(
 @ExperimentalMaterialNavigationApi
 private fun NavGraphBuilder.subredditOptions(publishEvent: (Event) -> Unit) {
     bottomSheet(
-        route = SubredditOptionsNavigation.destination,
-        arguments = SubredditOptionsNavigation.args
+            route = SubredditOptionsNavigation.destination,
+            arguments = SubredditOptionsNavigation.args
     ) {
         val subredditName =
-            it.arguments?.getString(SubredditScreenNavigation.SUBREDDIT_NAME_KEY) ?: FRONTPAGE
+                it.arguments?.getString(SubredditScreenNavigation.SUBREDDIT_NAME_KEY) ?: FRONTPAGE
         SubredditOptions(subredditName = subredditName)
     }
 }
 
 private fun NavGraphBuilder.searchScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = SearchNavigation.destination,
-        arguments = SearchNavigation.args
+            route = SearchNavigation.destination,
+            arguments = SearchNavigation.args
     ) { SearchScreen(publishEvent) }
 }
 
 private fun NavGraphBuilder.userScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = UserScreenNavigation.destination,
-        arguments = UserScreenNavigation.args
+            route = UserScreenNavigation.destination,
+            arguments = UserScreenNavigation.args
     ) {
         val userName = it.arguments?.getString(UserScreenNavigation.USERNAME_KEY)!!
         UserInfoScreen(userName = userName, publishEvent = publishEvent)
@@ -229,23 +252,23 @@ private fun NavGraphBuilder.userScreenComposable(publishEvent: (Event) -> Unit) 
 
 private fun NavGraphBuilder.commentsScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = CommentScreenNavigation.destination,
-        arguments = CommentScreenNavigation.args
+            route = CommentScreenNavigation.destination,
+            arguments = CommentScreenNavigation.args
     ) {
         val subredditId = it.arguments?.getString(CommentScreenNavigation.SUBREDDIT_ID_KEY)!!
         val postId = it.arguments?.getString(CommentScreenNavigation.POST_ID_KEY)!!
         CommentsScreen(
-            subredditId = subredditId,
-            postId = postId,
-            publishEvent = publishEvent
+                subredditId = subredditId,
+                postId = postId,
+                publishEvent = publishEvent
         )
     }
 }
 
 private fun NavGraphBuilder.subredditScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = SubredditScreenNavigation.destination,
-        arguments = SubredditScreenNavigation.args
+            route = SubredditScreenNavigation.destination,
+            arguments = SubredditScreenNavigation.args
     ) {
         SubredditScreen(publishEvent = publishEvent)
     }
@@ -254,15 +277,15 @@ private fun NavGraphBuilder.subredditScreenComposable(publishEvent: (Event) -> U
 
 private fun NavGraphBuilder.settingScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = SettingsScreenNavigation.destination,
-        arguments = SettingsScreenNavigation.args
+            route = SettingsScreenNavigation.destination,
+            arguments = SettingsScreenNavigation.args
     ) { SettingsScreen() }
 }
 
 private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = VideoScreenNavigation.destination,
-        arguments = VideoScreenNavigation.args
+            route = VideoScreenNavigation.destination,
+            arguments = VideoScreenNavigation.args
     ) {
         val url = it.arguments?.getString(VideoScreenNavigation.URL_KEY) ?: "#"
         VideoScreen(publishEvent = publishEvent, videoUrl = url)
@@ -271,25 +294,10 @@ private fun NavGraphBuilder.videoScreenComposable(publishEvent: (Event) -> Unit)
 
 private fun NavGraphBuilder.imageScreenComposable(publishEvent: (Event) -> Unit) {
     composable(
-        route = ImageScreenNavigation.destination,
-        arguments = ImageScreenNavigation.args
+            route = ImageScreenNavigation.destination,
+            arguments = ImageScreenNavigation.args
     ) {
         val url = it.arguments?.getString(ImageScreenNavigation.URL_KEY) ?: "#"
         ImagePreviewScreen(publishEvent = publishEvent, imageUrl = url)
-    }
-}
-
-sealed class UpdootBottomNavigationItem(val icon: ImageVector, val destination: String) {
-    object Posts : UpdootBottomNavigationItem(Outlined.Home, SubredditScreenNavigation.destination)
-    object Accounts :
-        UpdootBottomNavigationItem(Outlined.AccountCircle, AccountSelectionNavigation.destination)
-
-    object Search : UpdootBottomNavigationItem(Outlined.Search, SearchNavigation.destination)
-
-    object Settings :
-        UpdootBottomNavigationItem(Outlined.Settings, SettingsScreenNavigation.destination)
-
-    companion object {
-        fun getItems() = listOf(Posts, Search, Settings, Accounts)
     }
 }
