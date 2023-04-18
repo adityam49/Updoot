@@ -27,4 +27,8 @@ interface PostDAO {
 
     @Query("UPDATE Post SET userHasUpVoted = :vote WHERE id is :id")
     suspend fun setVote(id:String,vote:Boolean?)
+
+    @Query("UPDATE Post SET saved = :postSaved WHERE id is :id")
+    suspend fun setSavePost(id:String,postSaved:Boolean)
+
 }

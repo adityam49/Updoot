@@ -2,7 +2,6 @@ package com.ducktapedapps.updoot.subreddit
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,8 +38,6 @@ import com.ducktapedapps.navigation.Event.ScreenNavigationEvent
 import com.ducktapedapps.navigation.Event.ToastEvent
 import com.ducktapedapps.navigation.NavigationDirections.CommentScreenNavigation
 import com.ducktapedapps.navigation.NavigationDirections.ImageScreenNavigation
-import com.ducktapedapps.navigation.NavigationDirections.SubredditScreenNavigation
-import com.ducktapedapps.navigation.NavigationDirections.UserScreenNavigation
 import com.ducktapedapps.navigation.NavigationDirections.VideoScreenNavigation
 import com.ducktapedapps.updoot.R
 import com.ducktapedapps.updoot.common.AllGildings
@@ -56,19 +53,13 @@ import com.ducktapedapps.updoot.utils.getCompactCountAsString
 fun LargePost(
     modifier: Modifier = Modifier,
     post: PostUiModel,
-    publishEvent: (Event) -> Unit,
-    showPostOptions: (PostUiModel) -> Unit,
     isLoggedIn: Boolean,
     doAction: (ScreenAction) -> Unit,
 ) {
     val boundaryPadding = remember {
         16.dp
     }
-    Column(
-        modifier.combinedClickable(
-            onClick = { publishEvent(post.openComments()) },
-            onLongClick = { showPostOptions(post) })
-    ) {
+    Column(modifier = modifier) {
         SubmissionTitle(
             title = post.title,
             isSticky = post.isSticky,
@@ -83,10 +74,6 @@ fun LargePost(
             postMedia = post.postMedia,
             modifier = Modifier
                 .padding(horizontal = boundaryPadding, vertical = boundaryPadding / 2)
-                .combinedClickable(
-                    onClick = { publishEvent(post.openPostMedia()) },
-                    onLongClick = { showPostOptions(post) }
-                )
         )
         FlowRow(
             modifier = Modifier.padding(horizontal = boundaryPadding),
@@ -102,7 +89,7 @@ fun LargePost(
                     .fillMaxWidth()
                     .padding(
                         horizontal = boundaryPadding,
-                        vertical = boundaryPadding / 4
+                        vertical = 4.dp
                     ),
                 postId = post.id,
                 doAction = doAction,
@@ -120,18 +107,13 @@ fun CompactPost(
     isLoggedIn: Boolean,
     publishEvent: (Event) -> Unit,
     doAction: (ScreenAction) -> Unit,
-    showPostOptions: (PostUiModel) -> Unit,
 ) {
     val boundaryPadding = remember {
         16.dp
     }
 
     Row(
-        modifier
-            .combinedClickable(
-                onClick = { publishEvent(post.openComments()) },
-                onLongClick = { showPostOptions(post) }
-            )
+        modifier = modifier,
     ) {
         CompactMediaThumbnail(
             post = post,
@@ -168,7 +150,9 @@ fun CompactPost(
                 doAction = doAction,
                 currentVote = post.userHasUpVoted,
                 votes = post.upVotes,
-                modifier = Modifier.wrapContentWidth().padding(end = boundaryPadding)
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(end = boundaryPadding)
             )
     }
 }
@@ -203,7 +187,7 @@ fun HorizontalVotingOptions(
         VoteCounter(
             upVotes = votes,
             userHasUpVoted = currentVote,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.labelSmall,
             modifier = Modifier
         )
         IconButton(onClick = {
@@ -252,8 +236,8 @@ fun VerticalVotingOptions(
         VoteCounter(
             upVotes = votes,
             userHasUpVoted = currentVote,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Icon(
@@ -397,12 +381,6 @@ fun TextPostMedia(text: String, modifier: Modifier) {
 
 private fun PostUiModel.openComments(): Event =
     ScreenNavigationEvent(CommentScreenNavigation.open(subredditName, id))
-
-private fun PostUiModel.openAuthorScreen(): Event =
-    ScreenNavigationEvent(UserScreenNavigation.open(author))
-
-private fun PostUiModel.openSubreddit(): Event =
-    ScreenNavigationEvent(SubredditScreenNavigation.open(subredditName))
 
 private fun PostUiModel.openPostMedia(): Event =
     when (this.postMedia) {

@@ -61,10 +61,10 @@ class SubredditVMImpl @Inject constructor(
     getSubredditPreferencesUseCase: GetSubredditPreferencesUseCase,
     private val getSubredditInfoUseCase: GetSubredditInfoUseCase,
     private val getSubredditPostsUseCase: GetSubredditPostsUseCase,
-    private val setSubredditViewTypeUseCase: SetSubredditPostViewTypeUseCase,
     private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
     private val toggleSubredditPostsViewUseCase: EditSubredditPostsViewModeUseCase,
     private val getSubredditSubscriptionState: GetSubredditSubscriptionState,
+    private val togglePostSaveUseCase: EditPostSaveUseCase,
     private val editPostVoteUseCase: EditPostVoteUseCase,
     accountsProvider: UpdootAccountsProvider,
     savedStateHandle: SavedStateHandle,
@@ -101,15 +101,22 @@ class SubredditVMImpl @Inject constructor(
     private val bottomSheetEventBus = MutableStateFlow<OptionsBottomSheetEvent>(Empty)
 
     init {
-        combine(subredditName, subredditPrefs) { _, _ ->
-            loadPage()
-        }.launchIn(viewModelScope)
+        subredditName
+            .map { it != Constants.FRONTPAGE }
+            .takeWhile { isNotFrontPage -> isNotFrontPage }
+            .combine(subredditPrefs) { isNotFrontPage, _ ->
+                if (isNotFrontPage) loadPage()
+            }.launchIn(viewModelScope)
         subredditName
             .map { it == Constants.FRONTPAGE }
             .takeWhile { isFrontPage -> isFrontPage }
-            .combine(accountsProvider.getCurrentAccount()) { isFrontPage, currentAccount ->
+            .combine(
+                accountsProvider.getCurrentAccount(),
+            ) { isFrontPage, currentAccount ->
                 if (isFrontPage) {
                     reload(currentAccount)
+                } else {
+                    loadPage()
                 }
             }.launchIn(viewModelScope)
     }
@@ -136,7 +143,7 @@ class SubredditVMImpl @Inject constructor(
             feed = flowValues[1] as PagingModel<List<PostUiModel>>,
             subredditInfo = flowValues[2] as SubredditInfoState?,
             subscriptionState = subscriptionState,
-            isLoggedIn= isLoggedIn,
+            isLoggedIn = isLoggedIn,
             screenBottomSheetOptions = when (val event = flowValues[4] as OptionsBottomSheetEvent) {
                 is Post -> getPostOptions(
                     post = event.post,
@@ -167,7 +174,7 @@ class SubredditVMImpl @Inject constructor(
             ToggleSubredditSubscription -> toggleSubredditSubscription()
             is DownVote -> downVote(action.id, action.currentVote)
             is UpVote -> upVote(action.id, action.currentVote)
-            is SavePost,
+            is SavePost -> save(action.id, action.currentSaveState)
             is ChangeSorting -> Timber.e("Feature not yet supported")
 
             ShowSubredditOptions -> showSubredditOptions()
@@ -221,7 +228,14 @@ class SubredditVMImpl @Inject constructor(
         }
     }
 
-    private fun save(id: String) {}
+    private fun save(id: String, currentSaveState: Boolean) {
+        viewModelScope.launch {
+            togglePostSaveUseCase.toggleSavePost(
+                postId = id,
+                isPostCurrentlySaved = currentSaveState
+            )
+        }
+    }
 
     private fun toggleSubredditPostsViewMode() {
         viewModelScope.launch {
@@ -309,6 +323,19 @@ class SubredditVMImpl @Inject constructor(
                     icon = R.drawable.ic_account_circle_24dp
                 )
             )
+            if (isLoggedIn) {
+                add(
+                    MenuItemModel(
+                        onClick = {
+                            save(id = post.id, currentSaveState = post.isSaved)
+                            BottomSheetItemType.Action
+                        },
+                        title = if (post.isSaved) "Remove saved post" else "Save post",
+                        icon = R.drawable.ic_star_24dp
+                    )
+
+                )
+            }
             if (
                 prefs.subredditName != Constants.FRONTPAGE
                 && isLoggedIn
@@ -347,7 +374,7 @@ sealed class ScreenAction {
         val id: String
     ) : ScreenAction()
 
-    data class SavePost(val id: String) : ScreenAction()
+    data class SavePost(val id: String, val currentSaveState: Boolean) : ScreenAction()
     object ToggleSubredditPostsViewMode : ScreenAction()
     object ShowSubredditOptions : ScreenAction()
     data class ShowPostOptions(val post: PostUiModel) : ScreenAction()
@@ -367,7 +394,7 @@ data class ViewState(
         viewType = LARGE,
         subredditSorting = Hot
     ),
-    val isLoggedIn: Boolean=false,
+    val isLoggedIn: Boolean = false,
     val feed: PagingModel<List<PostUiModel>> = PagingModel(content = emptyList(), footer = Loading),
     val subredditInfo: SubredditInfoState? = SubredditInfoState.Loading,
     val subscriptionState: Boolean? = null,

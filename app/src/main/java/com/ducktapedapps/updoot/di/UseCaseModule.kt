@@ -75,4 +75,8 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindEditPostVoteUseCase(useCase:EditPostVoteUseCaseImpl) : EditPostVoteUseCase
+
+    @Binds
+    abstract fun bindEditPostSaveUseCase(useCase:EditPostSaveUseCaseImpl) : EditPostSaveUseCase
+
 }

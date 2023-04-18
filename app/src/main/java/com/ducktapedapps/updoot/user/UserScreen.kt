@@ -79,17 +79,7 @@ fun UserInfoScreen(
 
                 is UserPost -> LargePost(
                     post = item.data,
-                    publishEvent = {
-                        publishEvent(
-                            ScreenNavigationEvent(
-                                CommentScreenNavigation.open(
-                                    item.data.subredditName, item.data.id
-                                )
-                            )
-                        )
-                    },
-                    showPostOptions = {},
-                    doAction = {},
+                    doAction = { /*todo make action handler agnostic of viewmodel action interface*/},
                     isLoggedIn = false,
                 )
             }

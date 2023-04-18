@@ -2,6 +2,7 @@
 
 package com.ducktapedapps.updoot.subreddit
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -141,21 +142,44 @@ private fun SubredditFeed(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
+                        .combinedClickable(
+                            onClick = {
+                                publishEvent(
+                                    ScreenNavigationEvent(
+                                        CommentScreenNavigation.open(
+                                            post.subredditName,
+                                            post.id
+                                        )
+                                    )
+                                )
+                            },
+                            onLongClick = { doAction(ShowPostOptions(post)) }
+                        )
                         .padding(vertical = 8.dp),
                     isLoggedIn = isLoggedIn,
                     doAction = doAction,
-                    showPostOptions = { doAction(ShowPostOptions(it)) },
                 )
 
                 LARGE -> {
                     LargePost(
                         post = post,
-                        publishEvent = publishEvent,
                         modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentHeight()
+                            .combinedClickable(
+                                onClick = {
+                                    publishEvent(
+                                        ScreenNavigationEvent(
+                                            CommentScreenNavigation.open(
+                                                post.subredditName,
+                                                post.id
+                                            )
+                                        )
+                                    )
+                                },
+                                onLongClick = { doAction(ShowPostOptions(post)) }
+                            )
                             .padding(vertical = 8.dp),
-                        showPostOptions = { doAction(ShowPostOptions(it)) },
                         isLoggedIn = isLoggedIn,
                         doAction = doAction,
                     )

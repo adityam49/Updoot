@@ -24,6 +24,7 @@ data class PostUiModel(
     val gildings: Gildings,
     val isNsfw: Boolean,
     val isSticky: Boolean,
+    val isSaved:Boolean,
 )
 
 sealed class PostMedia {
@@ -70,6 +71,7 @@ fun Post.toUiModel(): PostUiModel = PostUiModel(
     creationDate = created,
     gildings = gildings,
     isSticky = stickied,
+    isSaved = saved
 )
 
 
