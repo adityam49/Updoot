@@ -72,4 +72,7 @@ abstract class UseCaseModule {
 
     @Binds
     abstract fun bindEditSubredditPostsViewModeUseCase(useCase : EditSubredditPostsViewModeUseCaseImpl) : EditSubredditPostsViewModeUseCase
+
+    @Binds
+    abstract fun bindEditPostVoteUseCase(useCase:EditPostVoteUseCaseImpl) : EditPostVoteUseCase
 }

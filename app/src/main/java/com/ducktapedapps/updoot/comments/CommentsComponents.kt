@@ -85,7 +85,11 @@ private fun CommentHeader(
             AllGildings(gildings = gildings)
             if (replies.isNotEmpty() && !repliesExpanded) ReplyCounter(replyCount = replies.size)
             Spacer(modifier = Modifier.width(2.dp))
-            VoteCounter(upVotes = upVotes, userHasUpVoted = userHasUpVoted)
+            VoteCounter(
+                upVotes = upVotes,
+                userHasUpVoted = userHasUpVoted,
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }

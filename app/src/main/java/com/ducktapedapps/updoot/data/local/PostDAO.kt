@@ -24,4 +24,7 @@ interface PostDAO {
 
     @Query("SELECT * FROM Post WHERE id is :id")
     fun observePost(id: String): Flow<Post>
+
+    @Query("UPDATE Post SET userHasUpVoted = :vote WHERE id is :id")
+    suspend fun setVote(id:String,vote:Boolean?)
 }

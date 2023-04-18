@@ -77,13 +77,14 @@ fun SubredditScreen(
             modifier = Modifier.padding(scaffoldPaddingValues),
             feed = viewState.feed,
             postViewType = viewState.subredditPrefs.viewType,
-            performAction = {
+            doAction = {
                 when (it) {
                     is ShowPostOptions, ShowSubredditOptions -> bottomSheetVisible = true
                     else -> Unit
                 }
                 viewModel.doAction(it)
             },
+            isLoggedIn = viewState.isLoggedIn,
             publishEvent = publishEvent,
         )
     }
@@ -113,14 +114,14 @@ private fun SubredditFeed(
     modifier: Modifier = Modifier,
     feed: PagingModel<List<PostUiModel>>,
     postViewType: PostViewType,
-    performAction: (ScreenAction) -> Unit,
+    doAction: (ScreenAction) -> Unit,
     publishEvent: (Event) -> Unit,
+    isLoggedIn: Boolean,
 ) {
     val listState = rememberLazyListState()
     LazyColumn(
         modifier = modifier,
         state = listState,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         itemsIndexed(
             items = feed.content,
@@ -128,7 +129,7 @@ private fun SubredditFeed(
         ) { index, post ->
             LaunchedEffect(key1 = Unit) {
                 with(feed) {
-                    if (index >= content.size - 10 && footer is UnLoadedPage) performAction(
+                    if (index >= content.size - 10 && footer is UnLoadedPage) doAction(
                         LoadPage
                     )
                 }
@@ -139,25 +140,40 @@ private fun SubredditFeed(
                     publishEvent = publishEvent,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
-                    showPostOptions = { performAction(ShowPostOptions(it)) }
+                        .wrapContentHeight()
+                        .padding(vertical = 8.dp),
+                    isLoggedIn = isLoggedIn,
+                    doAction = doAction,
+                    showPostOptions = { doAction(ShowPostOptions(it)) },
                 )
 
-                LARGE -> LargePost(
-                    post = post,
-                    publishEvent = publishEvent,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    showPostOptions = { performAction(ShowPostOptions(it)) }
-                )
+                LARGE -> {
+                    LargePost(
+                        post = post,
+                        publishEvent = publishEvent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(vertical = 8.dp),
+                        showPostOptions = { doAction(ShowPostOptions(it)) },
+                        isLoggedIn = isLoggedIn,
+                        doAction = doAction,
+                    )
+                    if (index != feed.content.lastIndex)
+                        Divider(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        )
+                }
             }
+
         }
         item {
             when (val footer = feed.footer) {
                 End -> PageEnd()
                 is Error -> PageLoadingFailed(
-                    performRetry = { performAction(LoadPage) },
+                    performRetry = { doAction(LoadPage) },
                     message = footer.exception.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 )

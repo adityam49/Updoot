@@ -76,6 +76,7 @@ fun UserInfoScreen(
                         publishEvent(Event.ToastEvent(item.data.body ?: ""))
                     }
                 )
+
                 is UserPost -> LargePost(
                     post = item.data,
                     publishEvent = {
@@ -87,7 +88,9 @@ fun UserInfoScreen(
                             )
                         )
                     },
-                    showPostOptions = {}
+                    showPostOptions = {},
+                    doAction = {},
+                    isLoggedIn = false,
                 )
             }
         }
@@ -99,6 +102,7 @@ fun UserInfoScreen(
                     message = footer.exception.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 )
+
                 Loading -> PageLoading()
                 is UnLoadedPage -> Unit
             }

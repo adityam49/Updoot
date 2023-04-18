@@ -30,13 +30,11 @@ import com.ducktapedapps.updoot.subreddit.SubredditSorting.Hot
 import com.ducktapedapps.updoot.utils.Constants
 import com.ducktapedapps.updoot.utils.PagingModel
 import com.ducktapedapps.updoot.utils.PagingModel.Footer.Loading
-import com.ducktapedapps.updoot.utils.PostViewType
 import com.ducktapedapps.updoot.utils.PostViewType.LARGE
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel
 import com.ducktapedapps.updoot.utils.accountManagement.AccountModel.*
 import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +53,7 @@ interface SubredditVM {
     val viewState: StateFlow<ViewState>
 
     fun doAction(action: ScreenAction)
+
 }
 
 @HiltViewModel
@@ -66,6 +65,7 @@ class SubredditVMImpl @Inject constructor(
     private val toggleSubscriptionUseCase: EditSubredditSubscriptionUseCase,
     private val toggleSubredditPostsViewUseCase: EditSubredditPostsViewModeUseCase,
     private val getSubredditSubscriptionState: GetSubredditSubscriptionState,
+    private val editPostVoteUseCase: EditPostVoteUseCase,
     accountsProvider: UpdootAccountsProvider,
     savedStateHandle: SavedStateHandle,
     private val workManager: WorkManager,
@@ -130,23 +130,24 @@ class SubredditVMImpl @Inject constructor(
         } else {
             subredditPrefsValue.subredditName
         }
-        Timber.d("Account logged in viewState ${flowValues[5]}")
+        val isLoggedIn = (flowValues[5] as AccountModel) !is AnonymousAccount
         ViewState(
             subredditPrefs = subredditPrefsValue.copy(subredditName = subredditName),
             feed = flowValues[1] as PagingModel<List<PostUiModel>>,
             subredditInfo = flowValues[2] as SubredditInfoState?,
             subscriptionState = subscriptionState,
+            isLoggedIn= isLoggedIn,
             screenBottomSheetOptions = when (val event = flowValues[4] as OptionsBottomSheetEvent) {
                 is Post -> getPostOptions(
                     post = event.post,
                     prefs = subredditPrefsValue,
-                    isLoggedIn = (flowValues[5] as AccountModel) !is AnonymousAccount,
+                    isLoggedIn = isLoggedIn,
                     subscriptionState = subscriptionState
                 )
 
                 Subreddit -> getSubredditOptions(
                     prefs = subredditPrefsValue,
-                    isLoggedIn = (flowValues[5] as AccountModel) !is AnonymousAccount,
+                    isLoggedIn = isLoggedIn,
                     subscriptionState = subscriptionState,
                 )
 
@@ -164,8 +165,8 @@ class SubredditVMImpl @Inject constructor(
             ReloadPage -> reload()
             ToggleSubredditPostsViewMode -> toggleSubredditPostsViewMode()
             ToggleSubredditSubscription -> toggleSubredditSubscription()
-            is DownVote,
-            is UpVote,
+            is DownVote -> downVote(action.id, action.currentVote)
+            is UpVote -> upVote(action.id, action.currentVote)
             is SavePost,
             is ChangeSorting -> Timber.e("Feature not yet supported")
 
@@ -199,6 +200,7 @@ class SubredditVMImpl @Inject constructor(
             )
         }
     }
+
     private fun toggleSubredditSubscription() {
         viewModelScope.launch {
             toggleSubscriptionUseCase.toggleSubscription(subredditName = subredditName.value)
@@ -207,9 +209,17 @@ class SubredditVMImpl @Inject constructor(
 
     private fun changeSorting(newSubredditSorting: SubredditSorting) {}
 
-    private fun upVote(id: String) {}
+    private fun upVote(id: String, currentVote: Boolean?) {
+        viewModelScope.launch {
+            editPostVoteUseCase.changeVote(id = id, currentVote = currentVote, intendedVote = true)
+        }
+    }
 
-    private fun downVote(id: String) {}
+    private fun downVote(id: String, currentVote: Boolean?) {
+        viewModelScope.launch {
+            editPostVoteUseCase.changeVote(id = id, currentVote = currentVote, intendedVote = false)
+        }
+    }
 
     private fun save(id: String) {}
 
@@ -327,8 +337,16 @@ sealed class ScreenAction {
     object LoadSubredditInfo : ScreenAction()
     object ToggleSubredditSubscription : ScreenAction()
     data class ChangeSorting(val newSubredditSorting: SubredditSorting) : ScreenAction()
-    data class UpVote(val id: String) : ScreenAction()
-    data class DownVote(val id: String) : ScreenAction()
+    data class UpVote(
+        val currentVote: Boolean?,
+        val id: String
+    ) : ScreenAction()
+
+    data class DownVote(
+        val currentVote: Boolean?,
+        val id: String
+    ) : ScreenAction()
+
     data class SavePost(val id: String) : ScreenAction()
     object ToggleSubredditPostsViewMode : ScreenAction()
     object ShowSubredditOptions : ScreenAction()
@@ -349,6 +367,7 @@ data class ViewState(
         viewType = LARGE,
         subredditSorting = Hot
     ),
+    val isLoggedIn: Boolean=false,
     val feed: PagingModel<List<PostUiModel>> = PagingModel(content = emptyList(), footer = Loading),
     val subredditInfo: SubredditInfoState? = SubredditInfoState.Loading,
     val subscriptionState: Boolean? = null,

@@ -20,10 +20,15 @@ import com.ducktapedapps.updoot.theme.upVoteColor
 import com.ducktapedapps.updoot.utils.getCompactCountAsString
 
 @Composable
-fun VoteCounter(upVotes: Int?, userHasUpVoted: Boolean?, modifier: Modifier = Modifier) {
+fun VoteCounter(
+    upVotes: Int?,
+    userHasUpVoted: Boolean?,
+    modifier: Modifier = Modifier,
+    style:androidx.compose.ui.text.TextStyle,
+) {
     Text(
         text = upVotes?.toLong()?.run { getCompactCountAsString(this) } ?: "?",
-        style = MaterialTheme.typography.labelMedium,
+        style = style,
         color = when (userHasUpVoted) {
             true -> upVoteColor
             false -> downVoteColor
