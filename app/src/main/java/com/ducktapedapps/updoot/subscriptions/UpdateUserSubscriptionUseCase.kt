@@ -6,7 +6,11 @@ import com.ducktapedapps.updoot.data.local.model.LocalSubreddit
 import com.ducktapedapps.updoot.data.mappers.toLocalSubreddit
 import com.ducktapedapps.updoot.data.remote.model.RemoteSubreddit
 import com.ducktapedapps.updoot.utils.accountManagement.RedditClient
-import java.util.*
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountManager
+import com.ducktapedapps.updoot.utils.accountManagement.UpdootAccountsProvider
+import kotlinx.coroutines.flow.first
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 interface UpdateUserSubscriptionUseCase {
@@ -18,18 +22,29 @@ interface UpdateUserSubscriptionUseCase {
 class UpdateUserSubscriptionUseCaseImpl @Inject constructor(
     private val redditClient: RedditClient,
     private val subredditDAO: SubredditDAO,
+    private val accountsProvider: UpdootAccountsProvider,
+    private val accountManager: UpdootAccountManager,
 ) : UpdateUserSubscriptionUseCase {
 
-    override suspend fun updateUserSubscription(userName: String): Boolean =
-        try {
+    override suspend fun updateUserSubscription(userName: String): Boolean {
+        return try {
+            val account = accountsProvider
+                .getLoggedInUsers()
+                .first()
+                .first { it.name == userName }
+            if (TimeUnit.MILLISECONDS.toMinutes(Date().time - account.lastSyncedAccountData.time ) < 5) {
+                return false
+            }
             val results = getUpdatedUserSubscription()
             val cachedSubs = results.cacheSubreddits()
             editLocalSubscriptions(userName, cachedSubs)
+            accountManager.setLastSyncedAt(timeStamp = Date(), username = account.name)
             true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
+    }
 
 
     private suspend fun getUpdatedUserSubscription(): List<RemoteSubreddit> {

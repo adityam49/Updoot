@@ -33,6 +33,7 @@ class GetUserSubscriptionsUseCaseImpl @Inject constructor(
                         .distinctUntilChanged()
                         .transform {
                             emit(it)
+                            //todo remove this
                             if (it.isStale()) updateUserSubscriptionUseCase.updateUserSubscription(
                                 currentAccount.name
                             )

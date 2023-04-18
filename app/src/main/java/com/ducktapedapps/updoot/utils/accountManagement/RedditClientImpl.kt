@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,7 +43,10 @@ class RedditClientImpl @Inject constructor(
                 else -> AccountModel.UserModel(
                     it.name,
                     it.name == currentAccountName,
-                    androidAccountManager.getUserData(it, Constants.USER_ICON_KEY)
+                    androidAccountManager.getUserData(it, USER_ICON_KEY),
+                    Date(androidAccountManager.getUserData(it, USER_DATA_LAST_SYNCED_AT).toLong()).also {
+                        Timber.d("Last updated account data at ${it}")
+                    }
                 )
             }
         }
@@ -80,8 +85,9 @@ class RedditClientImpl @Inject constructor(
                 android.accounts.Account(username, Constants.UPDOOT_ACCOUNT),
                 null,
                 Bundle().apply {
-                    putString(Constants.USER_TOKEN_REFRESH_KEY, token.refresh_token)
-                    putString(Constants.USER_ICON_KEY, icon)
+                    putString(USER_TOKEN_REFRESH_KEY, token.refresh_token)
+                    putString(USER_ICON_KEY, icon)
+                    putString(USER_DATA_LAST_SYNCED_AT, Date().time.toString())
                 })
         currentAccountNameManager.setCurrentAccountName(username)
     }
@@ -93,6 +99,17 @@ class RedditClientImpl @Inject constructor(
                 invalidateToken()
             } else
                 throw IllegalArgumentException("Account $name not found")
+        }
+    }
+
+    override suspend fun setLastSyncedAt(timeStamp: Date, username: String) {
+        val accountToUpdate = androidAccountManager.accounts.firstOrNull { it.name == username }
+        if (accountToUpdate != null) {
+            androidAccountManager.setUserData(
+                accountToUpdate,
+                USER_DATA_LAST_SYNCED_AT,
+                Date().time.toString()
+            )
         }
     }
 
@@ -109,7 +126,7 @@ class RedditClientImpl @Inject constructor(
                 val result = authAPI.logout(
                     refresh_token = androidAccountManager.getUserData(
                         accountToRemove,
-                        Constants.USER_TOKEN_REFRESH_KEY
+                        USER_TOKEN_REFRESH_KEY
                     )
                 )
                 if (result.code() in 200..299) {
@@ -170,10 +187,13 @@ class RedditClientImpl @Inject constructor(
 
     private fun getAccountRefreshToken(accountName: String): String =
         with(androidAccountManager) {
-            getUserData(accounts.first { it.name == accountName }, Constants.USER_TOKEN_REFRESH_KEY)
+            getUserData(accounts.first { it.name == accountName },USER_TOKEN_REFRESH_KEY)
         }
 
     companion object {
+        private const val USER_DATA_LAST_SYNCED_AT = "USER_DATA_LAST_SYNCED_AT"
+        private const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
+        private const val USER_ICON_KEY: String = "user_icon_key"
         private fun Token?.isExpiredOrInvalid() =
             this == null || this.absoluteExpiry < System.currentTimeMillis()
     }
@@ -194,5 +214,6 @@ sealed class AccountModel(
         private val _name: String,
         override val isCurrent: Boolean,
         val userIcon: String,
+        val lastSyncedAccountData: Date = Date(),
     ) : AccountModel(_name, isCurrent)
 }

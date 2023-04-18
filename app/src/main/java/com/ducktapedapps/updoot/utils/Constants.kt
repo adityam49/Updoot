@@ -3,11 +3,7 @@ package com.ducktapedapps.updoot.utils
 import com.ducktapedapps.updoot.BuildConfig
 
 object Constants {
-    const val USER_TOKEN_REFRESH_KEY = "userTokenRefreshKey"
-    const val USER_ICON_KEY: String = "user_icon_key"
 
-    const val CURRENT_ACCOUNT_NAME = "current_account_name"
-    const val CACHED_ACCOUNT_COUNT = "cached_account_count"
 
     const val DEVICE_ID_KEY = "deviceIdKey"
     var  client_id = BuildConfig.CLIENT_ID
